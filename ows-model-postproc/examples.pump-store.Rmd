@@ -16,6 +16,7 @@ fxn_locations <- substr(getwd(),1,nchar(getwd())-18)
 source(paste(fxn_locations,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/")) 
 source(paste(fxn_locations,"IHA/fn_iha.R", sep = "/"))
 save_directory <- paste((substr(getwd(),1,nchar(getwd())-30)),"plots",sep="")
+dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
 ```
 
 ```{r include=FALSE}

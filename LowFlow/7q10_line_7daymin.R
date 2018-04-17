@@ -11,6 +11,7 @@ library('ggplot2')
 
 #save_directory <- "/var/www/html/images/dh/dev"
 save_directory <- paste((substr(getwd(),1,nchar(getwd())-19)),"plots",sep="") #Plot output location for running locally
+dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
 function_files <- paste((substr(getwd(),1,nchar(getwd())-7)),sep="")
 
 #Load Gage Functions               
