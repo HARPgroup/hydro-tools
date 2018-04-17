@@ -1,0 +1,4 @@
+*.private
+tempfile
+*.log
+*.Rhistory

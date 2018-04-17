@@ -9,11 +9,12 @@ library('PearsonDS')
 library('plyr')
 library('ggplot2')
 
-#save_directory <- "/var/www/html/images/dh/dev"  #For running remotely 
-save_directory <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots" #For running locally
-usgs_gage_functions <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\usgs-gage\\"
+#save_directory <- "/var/www/html/images/dh/dev"
+save_directory <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots" #Plot output location for running locally
+function_files <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\" 
+
 #Load Gage Functions               
-source(paste(usgs_gage_functions,"usgs_gage_functions.R", sep = ""));
+source(paste(function_files,"USGS\\usgs_gage_functions.R", sep = ""));
 
 # Initialize variables
 x7q10 <- c()

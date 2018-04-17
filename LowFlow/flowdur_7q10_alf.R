@@ -8,11 +8,13 @@ library("stringr")
 rm(list = ls()) # clear variables
 
 #save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots" #For running locally
-usgs_gage_functions <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\usgs-gage\\" 
+save_directory <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots" #Plot output location for running locally
+function_files <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
 
-#Load Gage Functions               
-source(paste(usgs_gage_functions,"usgs_gage_functions.R", sep = ""));
+#Load Functions               
+source(paste(function_files,"USGS\\usgs_gage_functions.R", sep = ""));
+source(paste(function_files,"IHA\\fn_iha.R", sep = ""));
+
 
 ## Initialize ALF
 alf <- c()
@@ -90,14 +92,7 @@ for (i in 1:length(gage)) {
     dev.off()  #close plot
     next 
   }
-  
-  # Specify water year, and monthly minimum as the metric in "group1"
-  modat <- group1(not_missing,"water","min")
-  # Find the quantiles for August - the 50th percentile is the median of minimums or monthly low flow
-  august <- as.numeric(modat[,"August"])
-  qaug <- quantile(na.omit(august))
-  alf[i] <- as.numeric(qaug["50%"])
-  
+
   ## Create Flow Duration Curve
   #Sort/rank average daily discharges from largest to smallest value.
   sortflow <- sort(discharge, decreasing=TRUE)
@@ -111,34 +106,18 @@ for (i in 1:length(gage)) {
   #Calculate non-exceedence probability (NP) as: NP = 100 - P
   NP <- 100 - P
   
+  #-----------------------------------------------------------------------------------------
+  #Calculate August Low Flow
+  alf[i] <- fn_iha_mlf(f3,"August")
+  
   ## Find Location of Aug Low Flow on Flow Duration Curve
   location.alf <- which.min(abs(sortflow-as.numeric(alf[i])))
   curve.alf <- sortflow[location.alf]
   NP.alf[i] <- NP[location.alf]
-  
-  
+
   #-----------------------------------------------------------------------------------------
   #Calculate 7q10
-  library('zoo')
-  library('IHA')
-  library(PearsonDS)
-  zoots <- f3 
-  g2 <- group2(zoots) 
-  #print("Group 2, 7-day low flow results ")
-  #print(g2["7 Day Min"])
-  x <- as.vector(as.matrix(g2["7 Day Min"]))
-  # fudge 0 values
-  # correct for zeroes?? If so, use this loop:
-  # This is not an "approved" method - we need to see how the GS/other authorities handles this
-  for (k in 1:length(x)) {
-    if (x[k] <= 0) {
-      x[k] <- 0.00000001
-      print (paste("Found 0.0 average in year", g2["year"], sep = " "))
-    }
-  }
-  x <- log(x)
-  pars <- PearsonDS:::pearsonIIIfitML(x)
-  x7q10 <- exp(qpearsonIII(0.1, params = pars$par))
+  x7q10 <- fn_iha_7q10(f3)
   
   ## Find Location of 7Q10 on Flow Duration Curve
   location.7q10 <- which.min(abs(sortflow-as.numeric(x7q10)))
