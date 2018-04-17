@@ -9,13 +9,16 @@ library('PearsonDS')
 library('plyr')
 library('ggplot2')
 
-#save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- paste((substr(getwd(),1,nchar(getwd())-19)),"plots",sep="") #Plot output location for running locally
-dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
-function_files <- paste((substr(getwd(),1,nchar(getwd())-7)),sep="")
+#update to file location of config.local.private
+config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
 
-#Load Gage Functions               
-source(paste(function_files,"USGS\\usgs_gage_functions.R", sep = ""));
+#----------------------------------------------------------------------------------------
+#load functions
+source(paste(config_file,'config.local.private',sep='/'))
+#save_directory <- "/var/www/html/images/dh/dev"
+save_directory <- paste(repo_location,"plots",sep="")
+dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
+source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = ""))
 
 # Initialize variables
 x7q10 <- c()
