@@ -8,12 +8,12 @@ library("stringr")
 rm(list = ls()) # clear variables
 
 #save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots" #Plot output location for running locally
-function_files <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
+save_directory <- paste((substr(getwd(),1,nchar(getwd())-19)),"plots",sep="") #Plot output location for running locally
+function_files <- paste((substr(getwd(),1,nchar(getwd())-7)),sep="")
 
 #Load Functions               
 source(paste(function_files,"USGS\\usgs_gage_functions.R", sep = ""));
-source(paste(function_files,"IHA\\fn_iha.R", sep = ""));
+source(paste(getwd(),"\\fn_iha.R", sep = ""));
 
 
 ## Initialize ALF
