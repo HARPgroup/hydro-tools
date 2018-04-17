@@ -1,0 +1,7 @@
+#VAHydro-1.0 Authentication 
+username <- 'itsasecret'
+hash <- 'itsasecret'
+
+#VAHydro-2.0 REST Authentication 
+rest_uname <- 'restws_acct'
+rest_pw <- 'itsasecret'

@@ -1,0 +1,123 @@
+---
+title: "Model Post-processing - Pump Store Template"
+output:
+  html_document: default
+---
+
+```{r include=FALSE}
+#Load required packages and functions:
+library(pander);
+library(httr);
+library(hydroTSM);
+site <- "http://deq1.bse.vt.edu/d.dh"    #Specify the site of interest, either d.bet OR d.dh
+
+#Load functions, set save directory
+fxn_locations <- substr(getwd(),1,nchar(getwd())-18)
+source(paste(fxn_locations,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/")) 
+source(paste(fxn_locations,"IHA/fn_iha.R", sep = "/"))
+save_directory <- paste((substr(getwd(),1,nchar(getwd())-30)),"plots",sep="")
+```
+
+```{r include=FALSE}
+#Input model element ID ad run ID
+elid = 339865 # Frederick Co pump-store
+runid = 114
+
+# get all data from the run file, keyed by timestamp (at whatever timestep model is run)
+dat <- fn_get_runfile(elid, runid)
+dat$month <- as.numeric(dat$month)
+```
+
+```{r, echo=FALSE,fig.width=8, fig.show='hold'}
+#Impoundment Qout over time:
+plot(dat$impoundment_Qout,ylim=c(0,10),
+      xlab = "Year",
+      ylab = "Qout (cfs)")
+title(main = list("Qout Over Time", cex = 1.5, col = "blue", font = 3))
+```
+
+```{r include=FALSE}
+as.numeric(as.character( dat$Qreach ))
+# For some reason we need to convert these numeric fields to char, then to number
+# before sending to zoo since their retrieval is classifying them as factors instead of nums
+# now there may be away to get around that but...
+flows <- zoo(as.numeric(as.character( dat$Qintake )), order.by = dat$thisdate);
+#fn_iha_7q10(flows)
+fn_iha_mlf(flows,8)
+g2 <- group2(flows);
+# plot monthly 10% flows?
+oneyr <- window(dat, start = as.Date("1998-10-01"), end = as.Date("1999-09-30"))
+```
+
+```{r echo=FALSE,fig.width=8, fig.show='hold'}
+#Monthly Impoundment Qintake:
+plot(oneyr$Qintake,ylim=c(0,300),
+      xlab = "Month",
+      ylab = "Qintake (cfs)")
+title(main = list("Qintake by Month (1998-10-01 -> 1999-09-30)", cex = 1.5, col = "blue", font = 3))
+```
+
+```{r echo=FALSE,fig.width=8}
+#Qintake Flow Duraction Curve:
+fdc(oneyr$Qintake, main="Flow Duration", log='', xlab="Flow Exceedence", ylab="Q cfs")
+```
+
+```{r echo=FALSE,fig.width=8}
+# plot drawdown
+dat$impoundment_use_remain_acft <- 3.07 * as.numeric(as.character(dat$impoundment_use_remain_mg));
+dat$impfull_pct <- 100.0 * as.numeric(as.character(dat$impoundment_use_remain_acft)) / as.numeric(as.character(dat$impoundment_max_usable))
+par(las=2)
+plot(dat$impfull_pct, ylim = c(0.0, 100.0),
+      xlab = "Year",
+      ylab = "Impoundment Percent Full")
+title(main = list("Impoundment Percent Full by Date", cex = 1.5, col = "blue", font = 3))
+```
+
+```{r echo=FALSE,fig.width=8}
+impfull_pct <- zoo(as.numeric(as.character( dat$impfull_pct )), order.by = dat$thisdate);
+g2_imp <- group2(impfull_pct);
+imp_modat <- group1(impfull_pct,'calendar','min')  # IHA function that calculates minimum monthly statistics for our data by water year	 
+# Monthly median storage minimums
+##x <- quantile(imp_modat, 0.5, na.rm = TRUE);
+
+# Median % Full
+# z <- cbind(
+#   as.matrix(quantile(imp_modat[,"January"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"February"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"March"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"April"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"May"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"June"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"July"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"August"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"September"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"October"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"November"], probs = 0.5, na.rm = TRUE)), 
+#   as.matrix(quantile(imp_modat[,"December"], probs = 0.5, na.rm = TRUE)) 
+# )
+
+# 10th % Full
+z <- cbind(
+  as.matrix(quantile(imp_modat[,"January"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"February"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"March"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"April"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"May"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"June"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"July"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"August"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"September"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"October"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"November"], probs = 0.1, na.rm = TRUE)), 
+  as.matrix(quantile(imp_modat[,"December"], probs = 0.1, na.rm = TRUE)) 
+)
+#print(z)
+barplot(z, ylim = c(0.0, 100.0),
+      xlab = "Month",
+      ylab = "Impoundment Percent Full",
+      #names.arg=c("1","2","3","4","5","6","7","8","9","10","11","12")
+      names.arg=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),
+      main = list("Impoundment Percent Full by Month\n(10th % Full)", cex = 1.5, col = "blue", font = 3)
+      )
+```
+

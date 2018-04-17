@@ -1,4 +1,4 @@
-*.private
 tempfile
+*.private
 *.log
 *.Rhistory
