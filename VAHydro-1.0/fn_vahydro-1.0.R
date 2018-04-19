@@ -10,7 +10,11 @@ options(timeout=480); # set timeout to twice default level to avoid abort due to
 path <- substr(getwd(),1,nchar(getwd())-11)
 source(paste(path,"auth.private", sep = "")); 
 
-fn_get_rundata <- function(elementid = -1, runid = -1, varname = 'Qout', scenid = 37) {
+fn_get_rundata <- function(
+  elementid = -1, runid = -1, 
+  varname = 'Qout', scenid = 37,
+  site = "http://deq2.bse.vt.edu"
+  ) {
   if (elementid == -1 ) {
     return(FALSE);
   }
@@ -22,7 +26,7 @@ fn_get_rundata <- function(elementid = -1, runid = -1, varname = 'Qout', scenid 
 
   # Set up query for batch of model objects
   # Internal variable to construct the query
-  urlbase<-"http://deq1.bse.vt.edu/om/remote/get_modelData.php?elementid="
+  urlbase<- paste(site, "om/remote/get_modelData.php?elementid=", sep='/');
   print(paste("Getting data for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&variables=", varname, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   print(paste("From ", filename));
@@ -43,7 +47,10 @@ fn_get_rundata <- function(elementid = -1, runid = -1, varname = 'Qout', scenid 
   
 }
 
-fn_get_runfile <- function(elementid = -1, runid = -1, scenid = 37) {
+fn_get_runfile <- function(
+  elementid = -1, runid = -1, scenid = 37,
+  site = "http://deq2.bse.vt.edu"
+  ) {
   if (elementid == -1 ) {
     return(FALSE);
   }
@@ -54,7 +61,7 @@ fn_get_runfile <- function(elementid = -1, runid = -1, scenid = 37) {
   #setInternet2(TRUE)
 
   # just get the run file
-  urlbase<-"http://deq1.bse.vt.edu/om/remote/get_modelData.php?operation=11&elementid="
+  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&elementid=", sep='/');
   print(paste("Getting output file for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   print(paste("From ", filename))
@@ -87,9 +94,9 @@ fn_get_runfile <- function(elementid = -1, runid = -1, scenid = 37) {
   return(f3);
 }
 
-fn_storeprop_vahydro1 = function(){
+fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   # NOT FINISHED - JUST PASTED CODE
-  url <- "http://deq1.bse.vt.edu/om/remote/setModelData.php?hash="
+  url <- paste(site,"om/remote/setModelData.php?hash=", sep='/');
   print (paste("Setting 7Q10 for element ", id, " run id ", rid, " to ", x7q10 , sep = "") )
   # building the correct url
   ins_url <- paste(url, hash, "&username=", username, "&elementid=", id, "&runid=", rid, "&dataname=7q10&reporting_frequency=single&dataval=", x7q10, "&starttime=1984-10-01&endtime=2005-09-30&temporal_res=water_year", sep = "")  
