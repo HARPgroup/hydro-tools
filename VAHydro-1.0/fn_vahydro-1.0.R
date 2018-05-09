@@ -4,7 +4,7 @@ library('zoo')
 library('IHA')
 library(PearsonDS)
 options(timeout=480); # set timeout to twice default level to avoid abort due to high traffic
-#dirname(rstudioapi::getActiveDocumentContext()$path);
+dirname(rstudioapi::getActiveDocumentContext()$path);
 
 #Set auth file location dynamically, and load auth info 
 path <- substr(getwd(),1,nchar(getwd())-11)
