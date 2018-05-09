@@ -1,4 +1,6 @@
-tempfile
 *.private
+tempfile
 *.log
 *.Rhistory
+*.out
+*.docx
