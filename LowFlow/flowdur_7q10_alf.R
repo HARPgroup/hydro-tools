@@ -1,21 +1,21 @@
+### CREATE IMAGE FILES of AUGUST LOW FLOW - FLOW DURATION PLOT for ALL USGS GAGES
+rm(list = ls()) # clear variables
 ## Load necessary libraries
 library('zoo')
 library('IHA')
 library("stringr")
 
-### CREATE IMAGE FILES of AUGUST LOW FLOW - FLOW DURATION PLOT for ALL USGS GAGES
+#update to file location of config.local.private
+config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
 
-rm(list = ls()) # clear variables
-
+#----------------------------------------------------------------------------------------
+#load functions
+source(paste(config_file,'config.local.private',sep='/'))
 #save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- paste((substr(getwd(),1,nchar(getwd())-19)),"plots",sep="") #Plot output location for running locally
+save_directory <- paste(repo_location,"plots",sep="")
 dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
-function_files <- paste((substr(getwd(),1,nchar(getwd())-7)),sep="")
-
-#Load Functions               
-source(paste(function_files,"USGS\\usgs_gage_functions.R", sep = ""));
-source(paste(getwd(),"\\fn_iha.R", sep = ""));
-
+source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = ""))
+source(paste(repo_location,"hydro-tools\\LowFlow\\fn_iha.R", sep = ""));
 
 ## Initialize ALF
 alf <- c()
