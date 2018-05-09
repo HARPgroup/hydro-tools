@@ -299,8 +299,17 @@ getFeature <- function(inputs, token, base_url, feature){
   feature <- feature
 }
 
-vahydro_fe_data <- function (Watershed_Hydrocode,x_metric_code,y_metric_code,bundle,ws_ftype_code,sampres, data) {
-
+vahydro_fe_data <- function (
+  Watershed_Hydrocode,x_metric_code,
+  y_metric_code,bundle,ws_ftype_code,sampres, data, datasite = '') {
+  if (datasite == '') {
+    if (site == '' ) {
+      datasite = 'http://deq1.bse.vt.edu/d.dh'
+    } else {
+      datasite <- site
+    }
+    
+  }
   #note: add a 0 for the HUC6's or else the url doesn't work
   search_code <- Watershed_Hydrocode;
   if (ws_ftype_code == 'nhd_huc6') {
@@ -311,15 +320,22 @@ vahydro_fe_data <- function (Watershed_Hydrocode,x_metric_code,y_metric_code,bun
   }
   
   uri <- paste(
-    site,"elfgen_data_export",x_metric_code,y_metric_code,
+    datasite,"elfgen_data_export",x_metric_code,y_metric_code,
     bundle,ws_ftype_code,sampres,search_code,sep="/"
   )
   print(paste("Using ", uri, sep=''));
   data <- read.csv(uri, header = TRUE, sep = ",")
 }
 
-vahydro_prop_matrix <- function (featureid,varkey) {
-  
+vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
+  if (datasite == '') {
+    if (site == '' ) {
+      datasite = 'http://deq1.bse.vt.edu/d.dh'
+    } else {
+      datasite <- site
+    }
+    
+  }
   library(jsonlite) #required for transforming json data to dataframe format 
   library(dplyr) #required for renaming dataframe columns 
   
