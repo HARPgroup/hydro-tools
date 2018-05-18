@@ -268,6 +268,7 @@ getFeature <- function(inputs, token, base_url, feature){
     encode = "json"
   );
   feature_cont <- content(feature);
+  #print(feature_cont)
   
   if (length(feature_cont$list) != 0) {
     print(paste("Number of features found: ",length(feature_cont$list),sep=""))
@@ -281,7 +282,7 @@ getFeature <- function(inputs, token, base_url, feature){
       stringsAsFactors=FALSE
     ) 
     
-    i <- 1
+    #i <- 1
     for (i in 1:length(feature_cont$list)) {
       
       feature_i <- data.frame(
@@ -289,12 +290,13 @@ getFeature <- function(inputs, token, base_url, feature){
         name = feature_cont$list[[i]]$name,
         bundle = feature_cont$list[[i]]$bundle,
         hydrocode = feature_cont$list[[i]]$hydrocode,
-        ftype = feature_cont$list[[i]]$ftype
+        ftype = feature_cont$list[[i]]$ftype,
+        geom = feature_cont$list[[i]]$dh_geofield$geom
       )
       feature <- rbind(feature, feature_i)
     }
   } else {
-    print("This property does not exist")
+    print("This Feature does not exist")
   }
   feature <- feature
 }
