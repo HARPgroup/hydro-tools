@@ -278,6 +278,7 @@ getFeature <- function(inputs, token, base_url, feature){
       bundle=character(),
       hydrocode=character(), 
       ftype=character(),
+      geom=character(),
       stringsAsFactors=FALSE
     ) 
     
@@ -289,7 +290,8 @@ getFeature <- function(inputs, token, base_url, feature){
         name = feature_cont$list[[i]]$name,
         bundle = feature_cont$list[[i]]$bundle,
         hydrocode = feature_cont$list[[i]]$hydrocode,
-        ftype = feature_cont$list[[i]]$ftype
+        ftype = feature_cont$list[[i]]$ftype,
+        geom = feature_cont$list[[i]]$dh_geofield$geom
       )
       feature <- rbind(feature, feature_i)
     }

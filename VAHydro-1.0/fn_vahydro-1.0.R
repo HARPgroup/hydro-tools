@@ -8,7 +8,7 @@ dirname(rstudioapi::getActiveDocumentContext()$path);
 
 #Set auth file location dynamically, and load auth info 
 path <- substr(getwd(),1,nchar(getwd())-11)
-source(paste(path,"auth.private", sep = "")); 
+#source(paste(path,"auth.private", sep = "")); 
 
 fn_get_rundata <- function(
   elementid = -1, runid = -1, 
