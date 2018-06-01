@@ -2,3 +2,6 @@ git add -A : intermediate step for adding all changes (modified files) to an ind
 
 git commit -m "description of files" : commits changes locally, description in quotes
 
+git push origin master : pushes changes that were previously committed to the group folder
+
+git pull origin master : pulls changes
