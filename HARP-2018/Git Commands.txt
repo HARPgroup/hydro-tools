@@ -1,0 +1,4 @@
+git add -A : intermediate step for adding all changes (modified files) to an index
+
+git commit -m "description of files" : commits changes locally, description in quotes
+
