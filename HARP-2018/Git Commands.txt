@@ -5,3 +5,11 @@ git commit -m "description of files" : commits changes locally, description in q
 git push origin master : pushes changes that were previously committed to the group folder
 
 git pull origin master : pulls changes
+
+master branch: production-ready version of code, modified files should be done in a separate branch
+
+branch of master: copy of master to make changes to, merge afterwards
+
+git branch "" : creates a branch of name ""
+
+git checkout "" : switching to a branch
