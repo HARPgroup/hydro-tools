@@ -1,5 +1,5 @@
 #The following code is used to convert hourly data from the model to daily data and compare the daily data of the model with the daily USGS data
-#The majority of the code below was provided by Joey, Hailey made adjustmensts starting below the gg2plot command
+#The majority of the code below was provided by Joey, Hailey made adjustments starting below the gg2plot command
 #The only portions of the code that need to be changed to compare the model to USGS is the gageID, model segment, gageplot range and the ylim range
 
 library(lubridate)
@@ -18,8 +18,8 @@ source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = "")
 #----------------------------------------------------------------------------------------
 
 # SPECIFY GAGE AND MODEL SEGMENT OF INTEREST
-gageID <- '02079640'
-model_segment <- 'OR2_8450_8490_0111'
+gageID <- '02077500'
+model_segment <- 'OD2_8830_8710_0111'
 
 #RETRIEVE MODEL DATA
 URL_model_hourly <-paste("http://deq2.bse.vt.edu/p532c-sova/wdm/river/p532cal_062211/stream/",model_segment,".csv",sep="")
@@ -69,14 +69,17 @@ for (i in 1:length(gageplot$Date)){         #Run the loop for as many dates as t
       h=h+1                                 #Add 1 day to the date
       i=i+1                                 #Move the loop forward 1 count
 }
+names(modelplot)<-c('Purposely Blank', 'Date', 'DailyFlow(ac-ft/day)', 'DailyFlow(cfs)')
+
 
 #Plot To Compare USGS and Model Data
 par(mfrow=c(1,1))                                                                                                    #Both data sets on one graph
-plot(gageplot$Date, gageplot$Flow, type='l', col="red", xlab='Date', ylab='Flow (cfs)', main='Daily Discharge Data') #USGS gage data
-lines(modelplot$V2, modelplot$V4, col="blue", type='l')                                                              #Model data
-legend ("topright", legend=c("USGS Gage", "Model Output"), col=c('red','blue'), lty=1, lwd=1, cex=1)
+par(cex=1.1)
+plot(gageplot$Date, gageplot$Flow, type='l', col="red", xlab='Date', ylab='Flow (cfs)', main='Daily Discharge Data', lwd=1.5) #USGS gage data
+lines(modelplot$Date, modelplot$`DailyFlow(cfs)`, col="blue", type='l', lwd=1.5)                                                              #Model data
+legend ("topright", legend=c("USGS Gage", "Model Output"), col=c('red','blue'), lty=1, bty='n')
 
 
 par(mfrow=c(1,2))                                                                                                                              #Two seperate graphs side by side ylim will need to be adjusted accordingly but to better compare should be the same for both graphs
 plot(gageplot$Date, gageplot$Flow, type='l', col="red", ylim= c(0,5000), xlab='Date', ylab='Flow (cfs)', main='Daily Discharge of USGS Gage')  #USGS gage data
-plot(modelplot$V2, modelplot$V4, col="blue", type='l', ylim= c(0,5000), xlab='Date', ylab='Flow (cfs)', main='Daily Discharge of Model Data')  #Model data
+plot(modelplot$Date, modelplot$`DailyFlow(cfs)`, col="blue", type='l', ylim= c(0,5000), xlab='Date', ylab='Flow (cfs)', main='Daily Discharge of Model Data')  #Model data
