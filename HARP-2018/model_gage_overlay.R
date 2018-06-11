@@ -13,13 +13,14 @@ config_file <- "C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools"
 #load functions
 source(paste(config_file,'config.local.private',sep='/'))
 save_directory <- paste(repo_location,"plots",sep="")
+save_directory_model<-paste(repo_location,"daily flow", sep="")
 dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
 source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = ""))
 #----------------------------------------------------------------------------------------
 
 # SPECIFY GAGE AND MODEL SEGMENT OF INTEREST
-gageID <- '03531500'
-model_segment <- 'TU3_9230_9260_0111'
+gageID <- '02053800'
+model_segment <- 'TU2_8970_9280_0111'
 
 #RETRIEVE MODEL DATA
 URL_model_hourly <-paste("http://deq2.bse.vt.edu/p532c-sova/wdm/river/p532cal_062211/stream/",model_segment,".csv",sep="")
@@ -69,6 +70,8 @@ for (i in 1:length(gageplot$Date)){         #Run the loop for as many dates as t
 }
 names(modelplot)<-c('DailyFlow(ac-ft/day)', 'DailyFlow(cfs)','Date') #Rename columns of modelplot data
 
+filename <- paste(gageID,"__",model_segment,".csv")
+write.csv(modelplot, file=filename, quote = TRUE) #Saves daily output as csv to my documents
 
 #Plot To Compare USGS and Model Data
 gage_legend<- paste('Gage',gageID)                            #Creates legend title for gage

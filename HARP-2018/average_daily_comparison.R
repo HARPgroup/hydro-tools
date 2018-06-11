@@ -1,5 +1,6 @@
 #The purpose of this code is to calculate the average daily flow of model and gage outputs
 #Not only is this a useful metric but it allows us to make sure we have the correct river segments and gage associated
+#If multiple river segements area assoiated with one gage include all of them in the river_seg variable, separating the segments with a + (ie. OD5_8900_8770+OD5_8890_8770)
 
 #Load Libraries---------------------------------------------------------------------
 library(pander);
@@ -9,9 +10,9 @@ library(zoo);
 library(lubridate);
 
 #Info that needs to be changed, model URL, river segment, gage number--------------------------
-URL_model_daily <- 'https://docs.google.com/spreadsheets/d/1J8rkrDfcx5ta7WCjC8YDmNkgj4EVBdjDI_0rfRcpzPM/pub?output=csv'
-river_seg<-'OD4_9140_8990'
-siteNo <- "02071000"
+URL_model_daily <- 'https://docs.google.com/spreadsheets/d/11gh7lb8DqZR6frLeVgIXld4Y1rFErJrPXZUCOTfL5YY/pub?output=csv'
+river_seg<-'OD3_8630_8720'
+siteNo <- "02073000"
 
 # LOADS MODEL DATA ------------------------------------------------------------
 model_daily = read.csv(URL_model_daily, header = TRUE, sep = ",", stringsAsFactors = FALSE);
@@ -36,7 +37,7 @@ gage_data <- renameNWISColumns(gage_data)
 
 # AREA WEIGHTED CALCULATION ---------------------------------------------------
 #Pull in data on river segment areas
-URL_model_area <- 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY5BkQ0Ha269jchgbuZYaND5_rxaSTV1rBoW6dDtr7NnlrCIcMaODmST-WAfSzUwUWwOuv3ghVUwNH/pub?output=csv'
+URL_model_area <- 'https://docs.google.com/spreadsheets/d/1AV7jO5o-892hvO8mUVe-jS2UA8gSs-5aOhHLFKdvwEY/pub?output=csv'
 model_area_all = read.csv(URL_model_area, header = TRUE, sep = ",", stringsAsFactors = FALSE);
 
 
