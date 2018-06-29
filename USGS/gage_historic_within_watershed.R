@@ -12,7 +12,7 @@ ws_hydrocode <- '020802'			#020802, 2, atl_coastal_plain_usgs
 
 save_location <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots"
 
-gage_url <- paste("http://deq2.bse.vt.edu/d.bet/export-usgs-gages/",bundle,"/",ws_ftype,"/",ws_hydrocode,sep="")
+gage_url <- paste("http://deq2.bse.vt.edu/d.dh/export-usgs-gages/",bundle,"/",ws_ftype,"/",ws_hydrocode,sep="")
 gage_list <- read.csv(gage_url, header = TRUE, sep = ",")
 watershed_name <- gage_list$Watershed.Name[1]
 gages <- gage_list$USGS.Gage.ID
