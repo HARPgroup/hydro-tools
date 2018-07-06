@@ -40,7 +40,7 @@ if (data.source == "nhdplus_erom") {
   nov <- as.vector((nhdplus_list$nov)/(nhdplus_list$da_sqkm)) 
   dec <- as.vector((nhdplus_list$dec)/(nhdplus_list$da_sqkm)) 
   
-  REGION <- paste((as.character(nhdplus_list[1,4]))," (", as.character(nhdplus_list[1,3]),")",sep="")
+  REGION <- paste((as.character(nhdplus_list[1,4]))," (0", as.character(nhdplus_list[1,3]),")",sep="")
   print(paste(REGION,sep=""))
   plot_title <- paste("All ",length(nhdplus_list[,1])," NHDPlus Catchments Within ", REGION, "\nEROM Monthly Mean Flow per Unit Drainage Area",sep="")
   
@@ -65,7 +65,7 @@ if (data.source == "nhdplus_erom") {
   nov <- as.vector((nhdplus_list$nov)/(nhdplus_list$da_sqkm)) 
   dec <- as.vector((nhdplus_list$dec)/(nhdplus_list$da_sqkm)) 
   
-  REGION <- paste((as.character(nhdplus_list[1,4]))," (", as.character(nhdplus_list[1,3]),")",sep="")
+  REGION <- paste((as.character(nhdplus_list[1,4]))," (0", as.character(nhdplus_list[1,3]),")",sep="")
   print(paste(REGION,sep=""))
   plot_title <- paste("All ",length(nhdplus_list[,1])," EDAS Stations Catchments Within ", REGION, "\nEROM Monthly Mean Flow per Unit Drainage Area",sep="")
   
