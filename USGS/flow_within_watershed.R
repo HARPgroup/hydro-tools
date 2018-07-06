@@ -67,7 +67,7 @@ if (data.source == "nhdplus_erom") {
   
   REGION <- paste((as.character(nhdplus_list[1,4]))," (0", as.character(nhdplus_list[1,3]),")",sep="")
   print(paste(REGION,sep=""))
-  plot_title <- paste("All ",length(nhdplus_list[,1])," EDAS Stations Catchments Within ", REGION, "\nEROM Monthly Mean Flow per Unit Drainage Area",sep="")
+  plot_title <- paste("All ",length(nhdplus_list[,1])," EDAS Stations Within ", REGION, "\nEROM Monthly Mean Flow per Unit Drainage Area",sep="")
   
 } else if (data.source == "usgs_gage") {
 
