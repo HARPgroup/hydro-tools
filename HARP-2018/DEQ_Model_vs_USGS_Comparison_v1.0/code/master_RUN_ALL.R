@@ -15,7 +15,7 @@ library(rmarkdown)
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container.master <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+container.master <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison_v1.0"
 
 # USGS Gage number
 # If "all" is inputted as siteNo.master, analysis will be run for ALL gages
@@ -23,7 +23,7 @@ container.master <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Compa
 siteNo.master <- "all"
 
 # Should new or original data be used?
-new.or.original.master <- "new"
+new.or.original.master <- "original"
 
 # LINKING MODEL SEGMENT ---------------------------------------------------
 
@@ -75,6 +75,10 @@ if (siteNo.master == "all") {
   rm(list=setdiff(ls(), c("container.master", "container.master.cont", "siteNo.master", "new.or.original.master", "RivSeg.master", "i", "gage.to.segment", "gage.list", "no.gages", "gage.to.segmentsub")))
   source(paste0(container.master,"\\code\\spatial_analysis.R"))
 } else {
+  gage.to.segment <- read.csv(file.path(container.master, "data", "Gage_To_Segment.csv"),
+                              header = TRUE, sep = ',', stringsAsFactors = FALSE)
+  gage.to.segment <- subset(gage.to.segment, gage.to.segment$gage_number == as.numeric(siteNo.master))
+  RivSeg.master <- gage.to.segment$river_segment
   if (new.or.original.master == "new") {
     rm(list=setdiff(ls(), c("container.master", "container.master.cont", "siteNo.master", "new.or.original.master", "RivSeg.master", "i", "gage.to.segment", "gage.list", "no.gages", "gage.to.segmentsub")))
     source(paste0(container.master,"\\code\\data_downloader.R"))
