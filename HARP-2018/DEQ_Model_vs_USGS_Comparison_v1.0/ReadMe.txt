@@ -1,5 +1,5 @@
 DEQ_Model_vs_USGS_Comparison
-v1.0
+v1.2
 
 Daniel Hildebrand
 Kelsey Reitz
@@ -21,6 +21,10 @@ Updating "Gage_To_Segment.csv" within the "data" folder to include a row contain
 Manually creating a site description and storing it in the "gage_descriptions" directory
 Manually creating a map of the river segment and gage location and storing it in the "gage_locations" directory
 
+
+Updates: 
+v1.1: Fixed issue resulting from single gage being run through master script.
+v1.2: Fixed Sept. 10% calculation -- prior to this version, Model: Sep.10% was actually Gage: Sep.10% and vice versa.
 
 
 Session Info from which HARP analysts' results were generated:
