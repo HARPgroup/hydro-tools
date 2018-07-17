@@ -205,7 +205,11 @@ write.csv(LoneSeg, paste0(file_path,"\\Lone_Segs.csv"))
 
 # SETTING UP FOR LOOP TO ASSOCIATE RIVER SEGMENTS ----------
 Groupings<- read.csv(paste0(file_path,"\\All_Segs.csv"))#Pull the (location of desired data table)
-
+Groupings<-data.frame(t(Groupings))
+Groupings$X100<- -1
+Groupings<-data.frame(t(Groupings))
+Groupings$GROUP<-as.numeric(Groupings$GROUP)
+Groupings<- Groupings[order(as.numeric(as.character(Groupings$GROUP))), ]
 i<-1
 x<-1
 y<-ncol(Groupings)
@@ -260,12 +264,13 @@ for (i in 1:nrow(Coordinate)){
   i<-i+1
   p<-p+1
 }
-Groupingsnum<-nrow(Groupings)-1
+Groupingsnum<-nrow(Groupings)-2
+Groupoingsnumstart<-Groupings$GROUP[2]
 GroupingsnumFirst<-round(Groupingsnum/2, digits=0)
 GroupingsnumSecond<-GroupingsnumFirst+1
 colors<-data.frame(distinctColorPalette(k=nrow(Groupings),altCol = FALSE, runTsne = FALSE))
 colors<-na.omit(colors)
-colorsall<-as.character(colors[1:13,1])
+colorsall<-as.character(colors[1:12,1])
 colorsall<-data.frame(colorsall)
 colorsall[]<-lapply(colorsall, as.character)
 color1<-as.character(colors[1:GroupingsnumFirst,1])
@@ -274,16 +279,11 @@ color1[]<-lapply(color1, as.character)
 color2<-as.character(colors[GroupingsnumSecond:nrow(Groupings),1])
 color2<-data.frame(color2)
 color2[]<-lapply(color2, as.character)
-Groupings<-data.frame(t(Groupings))
-Groupings$X13<-13
-Groupings$x0<-0
-Groupings<-data.frame(t(Groupings))
-Groupings<- order(Groupings$GROUP, decreasing = TRUE)
 # GRAPHING -----
 title<-(' Southern Virgina Watershed Basins')
 
-dir.create(paste0(file_path, "\\SpatialOutput"), showWarnings = FALSE);
-png(filename=paste0(file_path, "\\SpatialOutput"), "RiverBasins.png"), 
+dir.create(paste0(file_path), showWarnings = FALSE);
+png(filename=paste0(file_path, "\\RiverBasins.png"), 
     width=1400, height=950, units="px")
 
 RiverSeg@data$color<- cut(RiverSeg@data$Group, Groupings$GROUP , labels=colorsall$colorsall)
@@ -292,8 +292,9 @@ plot(SouthernRivers, col=paste0(SouthernRivers@data$color))
 plot(States, add=TRUE, col='gray')
 lines(States, col='white')
 plot(SouthernRivers, col=paste0(SouthernRivers@data$color), add=T)
-legend("bottom", legend=c(paste0(Groupings$LastSeg[1:GroupingsnumFirst])), col=c('cyan', 'darkorchid2', 'red', 'orange', 'forestgreen', 'yellow', 'deeppink2', 'lawngreen', 'navy', 'aquamarine', 'chocolate4'), lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
-legend("bottomright", legend=c(paste0(Groupings$LastSeg[GroupingsnumSecond:Groupingsnum]), 'Incomplete Data'), col=c('cyan', 'darkorchid2', 'red', 'orange', 'forestgreen', 'yellow', 'deeppink2', 'lawngreen', 'navy', 'aquamarine', 'chocolate4'), lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
+legend("bottomleft", legend = c('Outlet Segment'), col='black', lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
+legend("bottom", legend=c(paste0(Groupings$LastSeg[Groupoingsnumstart:GroupingsnumFirst])), col=color1$color1, lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
+legend("bottomright", legend=c(paste0(Groupings$LastSeg[GroupingsnumSecond:Groupingsnum]), 'Incomplete Data'), col=color2$color2, lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
 legend("topleft", legend=c(title), lty=0, pt.cex=3, bty='n', y.intersp=0.75, x.intersp=0.3, cex=5, lwd=2)
 
 dev.off()
