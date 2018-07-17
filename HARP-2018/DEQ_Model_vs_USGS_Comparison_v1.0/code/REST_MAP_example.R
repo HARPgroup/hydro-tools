@@ -2,10 +2,13 @@ rm(list = ls())  #clear variables
 library(rgeos) #used for geospatial processing 
 library(ggmap) #required for foritfy()
 library(ggsn) #used for adding scale bar and north arrow to map
-
+library(sp) #required for SpatialPolygonsDataFrame()
+  
 #----------------------------------------------
-site <- "http://deq1.bse.vt.edu/d.dh"    #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
 hydro_tools <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+save_directory <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots\\' #Location to output images
+
 #----------------------------------------------
 
 #Generate REST token              
@@ -26,28 +29,32 @@ token <- rest_token(site, token, rest_uname, rest_pw)
   )
 
   dataframe <- getFeature(inputs, token, site)
-  print(dataframe)
+  #print(dataframe)
 
   geom <- dataframe$geom
+#--------------------------------------------------------------------------------------------
+# Retrieve USGS Gage Feature From VAHydro 
 #-------------------------------------------------------------------------------------------- 
+  gage.inputs <- list (
+    bundle = 'usgsgage',
+    hydrocode = 'usgs_02044500'
+  )
+  
+gage.df <- getFeature(gage.inputs, token, site)
 #-------------------------------------------------------------------------------------------- 
+#--------------------------------------------------------------------------------------------
+  
+#specify spatial extent for map  
+extent <- data.frame(x = c(-84, -75), 
+                     y = c(35, 41))  
+  
 
-
-
-
-# SPECIFY BOUNDING BOX: *should really calculate bb from the VADF shape, but for now hard code
-bb=readWKT("POLYGON((-85 35, -74 35,  -74 41, -85 41, -85 35))")
+bb=readWKT(paste0("POLYGON((",extent$x[1]," ",extent$y[1],",",extent$x[2]," ",extent$y[1],",",extent$x[2]," ",extent$y[2],",",extent$x[1]," ",extent$y[2],",",extent$x[1]," ",extent$y[1],"))",sep=""))
 bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
 bbProjected@data$id <- rownames(bbProjected@data)
 bbPoints <- fortify(bbProjected, region = "id")
 bbDF <- merge(bbPoints, bbProjected@data, by = "id")
 
-# Geoprocess edas stations 
-# STATIONS_data <- full_dataset
-# split_1 <- read.table(text = as.character(STATIONS_data$geom), sep = "(", colClasses = "character")
-# split_2 <- read.table(text = split_1$V2, sep = ")", colClasses = "character")
-# split_3 <- read.table(text = split_2$V1, sep = " ", colClasses = "character")
-# STATIONSDF <- data.frame(x=as.numeric(split_3$V1),y=as.numeric(split_3$V2),X.id.="id",id="1")
 #--------------------------------------------------------------------------------------------
 
 # CLIP WATERSHED GEOMETRY TO BOUNDING BOX
@@ -60,6 +67,14 @@ wsdataProjected <- SpatialPolygonsDataFrame(watershed_geom_clip,data.frame("id")
 wsdataProjected@data$id <- rownames(wsdataProjected@data)
 watershedPoints <- fortify(wsdataProjected, region = "id")
 watershedDF <- merge(watershedPoints, wsdataProjected@data, by = "id")
+
+#--------------------------------------------------------------------------------------------
+# Geoprocess gage geometry
+#--------------------------------------------------------------------------------------------
+split_1 <- read.table(text = as.character(gage.df$geom), sep = "(", colClasses = "character")
+split_2 <- read.table(text = split_1$V2, sep = ")", colClasses = "character")
+split_3 <- read.table(text = split_2$V1, sep = " ", colClasses = "character")
+GAGEDF <- data.frame(x=as.numeric(split_3$V1),y=as.numeric(split_3$V2),X.id.="id",id="1")
 
 #--------------------------------------------------------------------------------------------
 #LOAD STATE GEOMETRY
@@ -146,83 +161,47 @@ OHDF <- merge(OHPoints,  OHProjected@data, by = "id")
 #--------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------
 
-
-bbDF
-bbox <- make_bbox(lon = sisquoc$lon, lat = sisquoc$lat, f = .1)
-
-goog.bbox <- make_bbox(lon = bbDF$long, lat = bbDF$lat, f = .1)
-#goog.map <- get_map(location = goog.bbox, maptype = "satellite", source = "google", zoom = 6)
-goog.map <- get_map(location = c(-86.1,   34.4,  -72.9,   41.), maptype = "terrain", source = "google", zoom = 6)
-#--------------------------------------------------------------------------------------------
-# Plot data
-#--------------------------------------------------------------------------------------------
-colnames(bbDF)[colnames(bbDF)=="long"] <- "lon"
-colnames(VADF)[colnames(VADF)=="long"] <- "lon"
-colnames(watershedDF)[colnames( watershedDF)=="long"] <- "lon"
-colnames(TNDF)[colnames(TNDF)=="long"] <- "lon"
-colnames(NCDF)[colnames(NCDF)=="long"] <- "lon"
-colnames(KYDF)[colnames(KYDF)=="long"] <- "lon"
-colnames(WVDF)[colnames(WVDF)=="long"] <- "lon"
-colnames(MDDF)[colnames(MDDF)=="long"] <- "lon"
-colnames(DEDF)[colnames(DEDF)=="long"] <- "lon"
-colnames(PADF)[colnames(PADF)=="long"] <- "lon"
-colnames(NJDF)[colnames(NJDF)=="long"] <- "lon"
-colnames(OHDF)[colnames(OHDF)=="long"] <- "lon"
-
-sat <- ggmap(goog.map)+ 
-            geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-            geom_polygon(data = VADF, color="gray46", fill = NA)+
-            geom_polygon(data = watershedDF, color="khaki4", fill = "yellow",alpha = 0.25,lwd=0.5)+
-            geom_polygon(data = TNDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = NCDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = KYDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = WVDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = MDDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = DEDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
-            geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)
-#--------------------------------------------------------------------------------------------
-
-
 map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
-                    geom_polygon(data = VADF, color="gray46", fill = "gray")+
-                    geom_polygon(data = TNDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = NCDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = KYDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = WVDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = MDDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = DEDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
-                    geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = VADF, color="gray46", fill = "gray")+
+  geom_polygon(data = TNDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = NCDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = KYDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = WVDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = MDDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = DEDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
+  geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)+
 
-                    geom_polygon(data = watershedDF, color="khaki4", fill = "yellow",alpha = 0.25,lwd=0.5)+
-                    #geom_point(aes(x = x, y = y, group = id), data = STATIONSDF, color="gray66", size = 0.025)+
-                    #geom_point(aes(x = x, y = y, group = id), data = BLUSTATIONSDF, color="blue", size = 0.025)+
-                    #geom_point(aes(x = x, y = y, group = id), data = GRNSTATIONSDF, color="forestgreen", size = 0.025)+
-                    
-                    geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-                    
-                    #ADD NORTH ARROW AND SCALE BAR
-                    north(bbDF, location = 'topleft', symbol = 12, scale=0.2)+
-                    scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE,st.size=4,st.dist=0.02)+ #text too small to read 
-                    #scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=TRUE,st.size=1.5,st.dist=0.04)+
-                    #scalebar(map, dist = 5, dd2km = TRUE, model = 'WGS84')+
+  geom_polygon(data = watershedDF, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
+  geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
   
-                    scale_x_continuous(limits = c(-85, -74))+
-                    scale_y_continuous(limits = c(35, 41))+
-                    
-                    theme(axis.title.x=element_blank(),
-                          axis.text.x=element_blank(),
-                          axis.ticks.x=element_blank(),
-                          axis.title.y=element_blank(),
-                          axis.text.y=element_blank(),
-                          axis.ticks.y=element_blank(),
-                          panel.grid.major = element_blank(), 
-                          panel.grid.minor = element_blank(),
-                          panel.background = element_blank(),
-                          panel.border = element_blank())
+  geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 3, shape=24)+
+  
+  #ADD NORTH ARROW AND SCALE BAR
+  north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
+  scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE)+
+  
+  scale_x_continuous(limits = c(extent$x))+
+  scale_y_continuous(limits = c(extent$y))+
+  
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_blank())
 
+filename <- paste(inputs$hydrocode,".png", sep="")
+ggsave(file=filename, path = save_directory, width=12, height=9.5)
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------
