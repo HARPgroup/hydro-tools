@@ -9,7 +9,8 @@ library(raster)
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+#container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+container <-'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\HARP-2018\\DEQ_Model_vs_USGS_Comparison_v1.0';
 
 # Should new or original data be used?
 new.or.original <- "new"
@@ -49,7 +50,8 @@ RivSeg<- spTransform(RivSeg, CRS=Projection)                                    
 
 #Importing desired data
 #The desired data for this code is the metrics that have been run for the river segments located outside of the Cheasapeake Bay Watershed
-Metrics<- read.csv(paste0(container, container.cont, "all.segments.pct.error.csv"))    #Pull the (location of desired data table)
+#Metrics<- read.csv(paste0(container,'\\results\\all.segments.pct.error.csv'))    #Pull the (location of desired data table)
+Metrics <- read.csv(file=paste(container,'\\spatial_analysis\\results\\all.segments.pct.error.csv',sep=""), header=TRUE, sep=",")    #Pull the (location of desired data table)
 
 #Determining number of metrics
 num.metrics <- length(Metrics) - 1
