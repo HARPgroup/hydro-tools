@@ -35,7 +35,7 @@ States<- spTransform(States, CRS=Projection)                                    
 
 # Importing desired focus area
 RiverSeg<-readOGR ('E:\\SouthernRivers\\BaseMap', 'AlteredRiverSegs')             #Pull the (location of GIS shapefile, desired shapefile)
-RiverSeg<-spTransform(RiverSeg, CRS=Projection)                                     #Put shapefile in correct projection/coordinated system
+RiverSeg<-spTransform(RiverSeg, CRS=Projection)                                   #Put shapefile in correct projection/coordinated system
 
 
 # PREP DATA FOR CODE ----------
@@ -286,7 +286,7 @@ colnames(RivSegGroups)<- c('RiverSeg', 'Group')
 RiverSeg@data$RiverSeg<-as.character(RiverSeg@data$RiverSeg)
 RiverSeg@data$Group<-NA
 
-# LOOP TO ASSOCIATE RIVER SEGMENT AND DATA ----------
+# LOOP TO DETERIME WHICH RIVER SEGMENTS HAVE DATA ----------
 #The loop will run and add the desired metrics column to any segment that has a matching river segment ID with that metric
 for (i in 1:length(RiverSeg@data$RiverSeg)){
   if (RiverSeg@data$RiverSeg[i]%in%RivSegGroups$RiverSeg){ #if the river segment ID is in the metrics file make it true, if not make it false
@@ -294,6 +294,7 @@ for (i in 1:length(RiverSeg@data$RiverSeg)){
   }
 }
 
+# ADDING GROUPINGS COLUMN TO SHAPEFILE ----------
 LogicGrouping<-data.frame(is.na(Groupings[,2:(ncol(Groupings)-1)]))
 LogicGrouping$AllTrue<-(rep(TRUE, nrow(LogicGrouping)))
 h<-1
@@ -316,11 +317,13 @@ for (i in 1:nrow(Coordinate)){
   i<-i+1
   p<-p+1
 }
+
+# SETTING UP FOR LEGEND ----------
 Groupingsnum<-nrow(Groupings)-1
 GroupingsnumFirst<-round(Groupingsnum/2, digits=0)
 GroupingsnumSecond<-GroupingsnumFirst+1
 
-# GRAPHING -----
+# GRAPHING ----------
 title<-(' Southern Virgina Watershed Basins')
 
 dir.create(paste0(file_path), showWarnings = FALSE);

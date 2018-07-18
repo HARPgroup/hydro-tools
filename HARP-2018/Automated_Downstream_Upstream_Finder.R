@@ -234,7 +234,7 @@ RiverSeg@data$RiverSeg<-as.character(RiverSeg@data$RiverSeg)
 RiverSeg@data$Group<-NA
 
 i<-1
-# LOOP TO ASSOCIATE RIVER SEGMENT AND DATA ----------
+# LOOP TO DETERMINE WHICH RIVER SEGMENTS HAVE DATA ----------
 #The loop will run and add the desired metrics column to any segment that has a matching river segment ID with that metric
 for (i in 1:length(RiverSeg@data$RiverSeg)){
   if (RiverSeg@data$RiverSeg[i]%in%RivSegGroups$RiverSeg){ #if the river segment ID is in the metrics file make it true, if not make it false
@@ -264,6 +264,8 @@ for (i in 1:nrow(Coordinate)){
   i<-i+1
   p<-p+1
 }
+
+# SETTING UP FOR LEGEND ----------
 Groupingsnum<-nrow(Groupings)-2
 Groupoingsnumstart<-Groupings$GROUP[2]
 GroupingsnumFirst<-round(Groupingsnum/2, digits=0)
@@ -279,6 +281,7 @@ color1[]<-lapply(color1, as.character)
 color2<-as.character(colors[GroupingsnumSecond:nrow(Groupings),1])
 color2<-data.frame(color2)
 color2[]<-lapply(color2, as.character)
+
 # GRAPHING -----
 title<-(' Southern Virgina Watershed Basins')
 
