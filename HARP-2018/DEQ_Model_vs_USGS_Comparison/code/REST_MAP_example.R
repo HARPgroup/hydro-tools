@@ -6,8 +6,8 @@ library(sp) #required for SpatialPolygonsDataFrame()
   
 #----------------------------------------------
 site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
-hydro_tools <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\' #location of hydro-tools repo
-save_directory <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots\\' #Location to output images
+hydro_tools <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+save_directory <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\plots\\' #Location to output images
 
 #----------------------------------------------
 
@@ -30,7 +30,21 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
   dataframe <- getFeature(inputs, token, site)
   #print(dataframe)
-
+  hydroid <- dataframe$hydroid
+  inputs <- list(
+    varkey = "wshed_drainage_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_properties"
+  )
+  prop <- getProperty(inputs, site, prop)
+  inputs <- list(
+    varkey = "wshed_local_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_feature"
+  )
+  local_da_prop <- getProperty(inputs, site, prop)
+  postProperty(inputs = local_da_prop)
+  
   geom <- dataframe$geom
 #--------------------------------------------------------------------------------------------
 # Retrieve USGS Gage Feature From VAHydro 
