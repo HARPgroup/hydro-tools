@@ -38,6 +38,9 @@ States<- spTransform(States, CRS=Projection)                                    
 RiverSeg<-readOGR ('E:\\SouthernRivers\\BaseMap', 'AlteredRiverSegs')             #Pull the (location of GIS shapefile, desired shapefile)
 RiverSeg<-spTransform(RiverSeg, CRS=Projection)                                     #Put shapefile in correct projection/coordinated system
 
+# Importing HUC 6 data
+HUC6<- readOGR('E:\\SouthernRivers\\BaseMap', 'HUC6')
+HUC6<-spTransform(HUC6, CRS=Projection) 
 
 # PREP DATA FOR CODE ----------
 # Pull only Southern VA
@@ -293,8 +296,10 @@ RiverSeg@data$color<- cut(RiverSeg@data$Group, Groupings$GROUP , labels=colorsal
 SouthernRivers<- RiverSeg[!is.na (RiverSeg@data$color),]
 plot(SouthernRivers, col=paste0(SouthernRivers@data$color))
 plot(States, add=TRUE, col='gray')
-lines(States, col='white')
+lines(States, col='black')
 plot(SouthernRivers, col=paste0(SouthernRivers@data$color), add=T)
+plot(HUC6, add=TRUE,  col=adjustcolor( "lightblue", alpha.f = 0.2))
+lines(HUC6, col='white', lwd= 4)
 legend("bottomleft", legend = c('Outlet Segment'), col='black', lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
 legend("bottom", legend=c(paste0(Groupings$LastSeg[Groupoingsnumstart:GroupingsnumFirst])), col=color1$color1, lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)
 legend("bottomright", legend=c(paste0(Groupings$LastSeg[GroupingsnumSecond:Groupingsnum]), 'Incomplete Data'), col=color2$color2, lty=0, pch=15, pt.cex=7, bty='n', y.intersp=0.8, x.intersp=0.3, cex=3.5, lwd=2)

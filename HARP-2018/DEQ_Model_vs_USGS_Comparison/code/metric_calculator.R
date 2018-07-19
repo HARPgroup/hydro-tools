@@ -350,8 +350,8 @@ met42_Model_99NonEx <- signif(model_prob_exceedance[["99%"]], digits=3);
 met42_PctError <- -(signif(((met42_Model_99NonEx - met42_Gage_99NonEx) / met42_Gage_99NonEx)*100, digits=3));
 
 # Sept. 10% Flow
-met43_Gage_Sep10 <- signif(sept_quant_model[["10%"]], digits=3);
-met43_Model_Sep10 <- signif(sept_quant_USGS[["10%"]], digits=3);
+met43_Gage_Sep10 <- signif(sept_quant_USGS[["10%"]], digits=3);
+met43_Model_Sep10 <- signif(sept_quant_model[["10%"]], digits=3);
 met43_PctError <- -(signif(((met43_Model_Sep10 - met43_Gage_Sep10) / met43_Gage_Sep10)*100, digits=3));
 
 # Baseflow (Average)

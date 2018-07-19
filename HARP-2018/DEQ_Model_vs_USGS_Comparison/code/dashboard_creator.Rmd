@@ -8,13 +8,13 @@ output:
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison_v1.0"
+container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
 
 # USGS Gage number
 siteNo <- "03164000"
 
 # Should new or original data be used?
-new.or.original <- "original"
+new.or.original <- "new"
 ```
 ```{r error, include=FALSE}
 # DOCUMENTATION -----------------------------------------------------------
