@@ -65,6 +65,9 @@ getProperty <- function(inputs, base_url, prop){
     varid = varid,
     entity_type = inputs$entity_type
   );
+  if (!is.null(inputs$propcode)) {
+    pbody$propcode = inputs$propcode
+  }
   
   prop <- GET(
     paste(base_url,"/dh_properties.json",sep=""), 
@@ -280,6 +283,7 @@ getFeature <- function(inputs, token, base_url, feature){
       bundle=character(),
       hydrocode=character(), 
       ftype=character(),
+      geom=character(),
       stringsAsFactors=FALSE
     ) 
     
@@ -300,6 +304,36 @@ getFeature <- function(inputs, token, base_url, feature){
     print("This Feature does not exist")
   }
   feature <- feature
+}
+
+vahydro_fe_multi_data <- function (
+  bundle = 'watershed', 
+  ftype = 'nhd_huc8',
+  metric = 'aqbio_nt_total',
+  selected = 'all',
+  datasite = ''
+) {
+  if (datasite == '') {
+    if (site == '' ) {
+      datasite = 'http://deq1.bse.vt.edu/d.dh'
+    } else {
+      datasite <- site
+    }
+    
+  }
+  # load data for select ecoregion
+  # subvfiew can be max or allmax - allmax does not filter
+  if ( (selected == 'all') | (selected == '')) {
+    subview = 'allmax'
+  } else {
+    subview = 'max'
+  }
+  uri <- paste(datasite, "multivariate", subview, metric, bundle, ftype, selected, sep='/') 
+  print(paste('uri: ', uri, sep = '')) 
+  data <- read.csv(uri, header = TRUE, sep = ",")
+  #makes sure all metric values are numeric and not factorial (fixes error with ni, total)
+  data$metric_value <- as.numeric(data$metric_value)
+  return(data )
 }
 
 vahydro_fe_data <- function (
