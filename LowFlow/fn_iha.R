@@ -19,13 +19,9 @@ fn_iha_7q10 <- function(zoots) {
     }
   }
   x <- log(x)
-  if (length(x) <= 1) {
-    return(x[1])
-  } else {
-    pars <- PearsonDS:::pearsonIIIfitML(x)
-    x7q10 <- exp(qpearsonIII(0.1, params = pars$par))
-    return(x7q10);
-  }
+  pars <- PearsonDS:::pearsonIIIfitML(x)
+  x7q10 <- exp(qpearsonIII(0.1, params = pars$par))
+  return(x7q10);
 }
 
 fn_iha_mlf <- function(zoots, targetmo) {
