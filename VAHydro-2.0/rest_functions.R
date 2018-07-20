@@ -54,17 +54,33 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
 getProperty <- function(inputs, base_url, prop){
   
   #Convert varkey to varid - needed for REST operations 
-  propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
-  propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
-  varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
-  #print(paste("varid: ",varid,sep=""))
+  if (!is.null(inputs$varkey)) {
+    # this would use REST 
+    # getVarDef(list(varkey = inputs$varkey), token, base_url)
+    # but it is broken for vardef for now metadatawrapper fatal error
+    # EntityMetadataWrapperException: Invalid data value given. Be sure it matches the required data type and format. 
+    # in EntityDrupalWrapper->set() 
+    # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
+    
+    propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
+    varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
+    print(paste("varid: ",varid,sep=""))
+    if (is.null(varid)) {
+      # we sent a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+
   
   pbody = list(
     bundle = 'dh_properties',
     featureid = inputs$featureid,
-    varid = varid,
     entity_type = inputs$entity_type
   );
+  if (!is.null(varid)) {
+    pbody$varid = varid
+  }
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
   }
@@ -133,10 +149,31 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
   dataframe <- getProperty(inputs, base_url, prop)
   pid <- as.character(dataframe$pid)
   
-  #Convert varkey to varid - needed for REST operations 
-  propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
-  propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
-  varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
+  if (!is.null(inputs$varkey)) {
+    # this would use REST 
+    # getVarDef(list(varkey = inputs$varkey), token, base_url)
+    # but it is broken for vardef for now metadatawrapper fatal error
+    # EntityMetadataWrapperException: Invalid data value given. Be sure it matches the required data type and format. 
+    # in EntityDrupalWrapper->set() 
+    # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
+    
+    propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
+    varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
+    print(paste("varid: ",varid,sep=""))
+    if (is.null(varid)) {
+      # we sent a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+  if (!is.null(inputs$varid)) {
+    varid = inputs$varid
+  }
+  
+  if (is.null(varid)) {
+    print("Variable IS is null - returning.")
+    return(FALSE)
+  }
   
   pbody = list(
     bundle = 'dh_properties',
@@ -240,8 +277,10 @@ getVarDef <- function(inputs, token, base_url, vardef){
     }
   } else {
     print("This variable does not exist")
+    return(FALSE)
   }
   vardef <- vardef
+  return(vardef)
 }
 
 
