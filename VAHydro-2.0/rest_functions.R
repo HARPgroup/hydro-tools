@@ -1,5 +1,6 @@
 library(httr);
 library(stringr);
+library(RCurl); #required for limiting connection timeout in vahydro_fe_data_icthy()
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
@@ -64,9 +65,6 @@ getProperty <- function(inputs, base_url, prop){
     varid = varid,
     entity_type = inputs$entity_type
   );
-  if (!is.null(inputs$propcode)) {
-    pbody$propcode = inputs$propcode
-  }
   
   prop <- GET(
     paste(base_url,"/dh_properties.json",sep=""), 
@@ -245,7 +243,7 @@ getVarDef <- function(inputs, token, base_url, vardef){
 
 
 getFeature <- function(inputs, token, base_url, feature){
-  print(inputs)
+  
   pbody = list(
   );
   if (!is.null(inputs$bundle)) {
@@ -282,7 +280,6 @@ getFeature <- function(inputs, token, base_url, feature){
       bundle=character(),
       hydrocode=character(), 
       ftype=character(),
-      geom=character(),
       stringsAsFactors=FALSE
     ) 
     
@@ -303,37 +300,6 @@ getFeature <- function(inputs, token, base_url, feature){
     print("This Feature does not exist")
   }
   feature <- feature
-}
-
-
-vahydro_fe_multi_data <- function (
-    bundle = 'watershed', 
-    ftype = 'nhd_huc8',
-    metric = 'aqbio_nt_total',
-    selected = 'all',
-    datasite = ''
-  ) {
-  if (datasite == '') {
-    if (site == '' ) {
-      datasite = 'http://deq1.bse.vt.edu/d.dh'
-    } else {
-      datasite <- site
-    }
-    
-  }
-  # load data for select ecoregion
-  # subvfiew can be max or allmax - allmax does not filter
-  if ( (selected == 'all') | (selected == '')) {
-    subview = 'allmax'
-  } else {
-    subview = 'max'
-  }
-  uri <- paste(datasite, "multivariate", subview, metric, bundle, ftype, selected, sep='/') 
-  print(paste('uri: ', uri, sep = '')) 
-  data <- read.csv(uri, header = TRUE, sep = ",")
-  #makes sure all metric values are numeric and not factorial (fixes error with ni, total)
-  data$metric_value <- as.numeric(data$metric_value)
-  return(data )
 }
 
 vahydro_fe_data <- function (
@@ -362,6 +328,35 @@ vahydro_fe_data <- function (
   )
   print(paste("Using ", uri, sep=''));
   data <- read.csv(uri, header = TRUE, sep = ",")
+}
+
+vahydro_fe_data_icthy <- function (Watershed_Hydrocode,x_metric_code,y_metric_code,bundle,ws_ftype_code,sampres, data, datasite = '') {
+  if (datasite == '') {
+    if (site == '' ) {
+      datasite = 'http://deq1.bse.vt.edu/d.dh'
+    } else {
+      datasite <- site
+    }
+    
+  }
+  #note: add a 0 for the HUC6's or else the url doesn't work
+  search_code <- Watershed_Hydrocode;
+  if (ws_ftype_code == 'nhd_huc6') {
+    search_code <- str_pad(Watershed_Hydrocode, 6, "left", pad = "0");
+  }
+  if (ws_ftype_code == 'nhd_huc10') {
+    search_code <- str_pad(Watershed_Hydrocode, 10, "left", pad = "0");
+  }
+  
+  uri <- paste(
+    datasite,"elfgen_data_export_sample_event",x_metric_code,"aqbio_nt_total",
+    bundle,ws_ftype_code,"species",search_code,sep="/"
+  )
+  print(paste("Using ", uri, sep=''));
+  myOpts <- curlOptions(connecttimeout = 200)
+  data <- getURL(uri, .opts = myOpts)
+  data <- read.csv(textConnection(data))
+ 
 }
 
 vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {

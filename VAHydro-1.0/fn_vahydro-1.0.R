@@ -4,11 +4,11 @@ library('zoo')
 library('IHA')
 library(PearsonDS)
 options(timeout=480); # set timeout to twice default level to avoid abort due to high traffic
-#dirname(rstudioapi::getActiveDocumentContext()$path);
+dirname(rstudioapi::getActiveDocumentContext()$path);
 
 #Set auth file location dynamically, and load auth info 
-#path <- substr(getwd(),1,nchar(getwd())-11)
-#source(paste(path,"auth.private", sep = "")); 
+path <- substr(getwd(),1,nchar(getwd())-11)
+source(paste(path,"auth.private", sep = "")); 
 
 fn_get_rundata <- function(
   elementid = -1, runid = -1, 
@@ -47,38 +47,9 @@ fn_get_rundata <- function(
   
 }
 
-fn_get_runfile_info <- function(
-  elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu"
-) {
-  if (elementid == -1 ) {
-    return(FALSE);
-  }
-  if (runid == -1 ) {
-    return(FALSE);
-  }
-  # may be obsolete
-  #setInternet2(TRUE)
-  
-  # just get the run file
-  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&elementid=", sep='/');
-  print(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
-  filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
-  print(paste("From ", filename))
-  finfo = try(read.csv(filename, header = TRUE, sep = ",")) ;
-  if (class(finfo)=='try-error') { 
-    # what to do if file empty 
-    print(paste("Error: retrieving ", filename))
-    return (FALSE);
-  }
-  print("Returning file Info")
-  return(finfo);
-  
-}
-
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu", cached = TRUE
+  site = "http://deq2.bse.vt.edu"
   ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -90,35 +61,23 @@ fn_get_runfile <- function(
   #setInternet2(TRUE)
 
   # just get the run file
-  finfo = fn_get_runfile_info(elementid, runid, scenid, site)
-  if (!is.list(finfo)) {
-    return(FALSE);
+  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&elementid=", sep='/');
+  print(paste("Getting output file for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
+  filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
+  print(paste("From ", filename))
+  finfo = try(read.csv(filename, header = TRUE, sep = ",")) ;
+  if (class(finfo)=='try-error') { 
+    # what to do if file empty 
+    print(paste("Error: empty file ", filename))
+    return (FALSE);
   }
   filename = as.character(finfo$remote_url);
-  localname = basename(as.character(finfo$output_file));
-  if (cached & file.exists(localname)) {
-    linfo = file.info(localname)
-    if (as.Date(finfo$run_date) > as.Date(linfo$mtime)) {
-      # re-download if the remote is newer than the local
-      if (finfo$compressed == 1) {
-        print(paste("Downloading Compressed Run File ", filename));
-        download.file(filename,'tempfile',mode="wb", method = "libcurl");
-        filename <-  unzip ('tempfile');
-      } else {
-        print(paste("Downloading Un-compressed Run File ", filename));
-      }
-    } else {
-      # not new, so just use the local copy
-      print(paste("Remote file date ", as.Date(finfo$run_date), " <= run date ", as.Date(linfo$mtime), "Using cached copy "));
-      filename = localname
-    }
+  if (finfo$compressed == 1) {
+    print(paste("Downloading Compressed Run File ", filename));
+    download.file(filename,'tempfile',mode="wb", method = "libcurl");
+    filename <-  unzip ('tempfile');
   } else {
-    # does not exist locally
-    if (finfo$compressed == 1) {
-      print(paste("Downloading Compressed Run File ", filename));
-      download.file(filename,'tempfile',mode="wb", method = "libcurl");
-      filename <-  unzip ('tempfile');
-    }
+    print(paste("Downloading Un-compressed Run File ", filename));
   }
   dat = try(read.table( filename, header = TRUE, sep = ",")) ;
   if (class(dat)=='try-error') { 
