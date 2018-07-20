@@ -138,6 +138,7 @@ getProperty <- function(inputs, base_url, prop){
     }
   } else {
     print("This property does not exist")
+    return(FALSE)
   }
   prop <- prop
 }
@@ -147,8 +148,11 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
   
   #Search for existing property matching supplied varkey, featureid, entity_type 
   dataframe <- getProperty(inputs, base_url, prop)
-  pid <- as.character(dataframe$pid)
-  
+  if (is.data.frame(dataframe)) {
+    pid <- as.character(dataframe$pid)
+  } else {
+    pid = NULL
+  }
   if (!is.null(inputs$varkey)) {
     # this would use REST 
     # getVarDef(list(varkey = inputs$varkey), token, base_url)
@@ -184,10 +188,11 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
     propvalue = inputs$propvalue,
     propcode = inputs$propcode,
     startdate = inputs$startdate,
+    propname = inputs$propname,
     enddate = inputs$enddate
   );
   
-  if (length(dataframe$pid) == 0){
+  if (is.null(pid)){
     print("Creating Property...")
     prop <- POST(paste(base_url,"/dh_properties/",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
