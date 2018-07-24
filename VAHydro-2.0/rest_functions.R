@@ -5,7 +5,7 @@ library(RCurl); #required for limiting connection timeout in vahydro_fe_data_ict
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
   csrf_url <- paste(base_url,"restws/session/token/",sep="/");
-
+  
   #IF THE OBJECTS 'rest_uname' or 'rest_pw' DONT EXIST, USER INPUT REQUIRED
   if (!is.character(rest_uname) | !(is.character(rest_pw))){
     
@@ -26,30 +26,185 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
         token <- content(csrf);
         #print(token)
         
-          if (length(token)==2){
-            print("Sorry, unrecognized username or password")
-            }
-      login_attempts <- login_attempts + 1
+        if (length(token)==2){
+          print("Sorry, unrecognized username or password")
+        }
+        login_attempts <- login_attempts + 1
       }
       if (login_attempts > 5){print(paste("ALLOWABLE NUMBER OF LOGIN ATTEMPTS EXCEEDED"))}
     }
     
-   } else {
+  } else {
     print(paste("REST AUTH INFO HAS BEEN SUPPLIED",sep=""))
     print(paste("RETRIEVING REST TOKEN",sep=""))
     csrf <- GET(url=csrf_url,authenticate(rest_uname,rest_pw));
     token <- content(csrf);
   }
   
-   if (length(token)==1){
-     print("Login attempt successful")
-     print(paste("token = ",token,sep=""))
-   } else {
-     print("Login attempt unsuccessful")
-   }
+  if (length(token)==1){
+    print("Login attempt successful")
+    print(paste("token = ",token,sep=""))
+  } else {
+    print("Login attempt unsuccessful")
+  }
   token <- token
 } #close function
 
+
+getTimeseries <- function(inputs, base_url, ts){
+
+  #Convert varkey to varid - needed for REST operations 
+  if (!is.null(inputs$varkey)) {
+    # this would use REST 
+    # getVarDef(list(varkey = inputs$varkey), token, base_url)
+    # but it is broken for vardef for now metadatawrapper fatal error
+    # EntityMetadataWrapperException: Invalid data value given. Be sure it matches the required data type and format. 
+    # in EntityDrupalWrapper->set() 
+    # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
+    
+    tsdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
+    varid <- tsdef_table[1][which(tsdef_table$varkey == inputs$varkey),]
+    print(paste("varid: ",varid,sep=""))
+    if (is.null(varid)) {
+      # we sent a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+  
+  
+  pbody = list(
+    featureid = inputs$featureid,
+    entity_type = inputs$entity_type
+  );
+  if (!is.null(varid)) {
+    pbody$varid = varid
+  }
+  if (!is.null(inputs$tscode)) {
+    pbody$tscode = inputs$tscode
+  }
+  if (!is.null(inputs$tstime)) {
+    pbody$tstime = inputs$tstime
+  }
+  
+  ts <- GET(
+    paste(base_url,"/dh_timeseries.json",sep=""), 
+    add_headers(HTTP_X_CSRF_TOKEN = token),
+    query = pbody, 
+    encode = "json"
+  );
+  ts_cont <- content(ts);
+  
+  if (length(ts_cont$list) != 0) {
+    print(paste("Number of timeseries found: ",length(ts_cont$list),sep=""))
+    
+    ts <- data.frame(
+                       tid=character(),
+                       tsvalue=character(),
+                       tscode=character(),
+                       tstime=character(),
+                       tsendtime=character(),
+                       featureid=character(),
+                       modified=character(),
+                       entity_type=character(),
+                       varid=character(),
+                       uid=character(),
+                       status=character(),
+                       stringsAsFactors=FALSE) 
+    
+    i <- 1
+    for (i in 1:length(ts_cont$list)) {
+      
+      ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
+                           "tsvalue" = if (is.null(ts_cont$list[[i]]$tsvalue)){""} else {ts_cont$list[[i]]$tsvalue},
+                           "tscode" = if (is.null(ts_cont$list[[i]]$tscode)){""} else {ts_cont$list[[i]]$tscode},
+                           "tstime" = if (is.null(ts_cont$list[[i]]$tstime)){""} else {ts_cont$list[[i]]$tstime},
+                           "tsendtime" = if (is.null(ts_cont$list[[i]]$tsendtime)){""} else {ts_cont$list[[i]]$tsendtime},
+                           "featureid" = if (is.null(ts_cont$list[[i]]$featureid)){""} else {ts_cont$list[[i]]$featureid},
+                           "modified" = if (is.null(ts_cont$list[[i]]$modified)){""} else {ts_cont$list[[i]]$modified},
+                           "entity_type" = if (is.null(ts_cont$list[[i]]$entity_type)){""} else {ts_cont$list[[i]]$entity_type},
+                           "varid" = if (is.null(ts_cont$list[[i]]$varid)){""} else {ts_cont$list[[i]]$varid},
+                           "uid" = if (is.null(ts_cont$list[[i]]$uid)){""} else {ts_cont$list[[i]]$uid},
+                           "status" = if (is.null(ts_cont$list[[i]]$status)){""} else {ts_cont$list[[i]]$status}
+      )
+      ts  <- rbind(ts, ts_i)
+    }
+  } else {
+    print("This timeseries does not exist")
+    return(FALSE)
+  }
+  ts <- ts
+}
+
+postTimeseries <- function(inputs, base_url, ts){
+  
+  #Search for existing tserty matching supplied varkey, featureid, entity_type 
+  dataframe <- getTimeseries(inputs, base_url, ts)
+  if (is.data.frame(dataframe)) {
+    tid <- as.character(dataframe$tid)
+  } else {
+    tid = NULL
+  }
+  if (!is.null(inputs$varkey)) {
+    # this would use REST 
+    # getVarDef(list(varkey = inputs$varkey), token, base_url)
+    # but it is broken for vardef for now metadatawrapper fatal error
+    # EntityMetadataWrapperException: Invalid data value given. Be sure it matches the required data type and format. 
+    # in EntityDrupalWrapper->set() 
+    # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
+    
+    tsdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
+    varid <- tsdef_table[1][which(tsdef_table$varkey == inputs$varkey),]
+    print(paste("varid: ",varid,sep=""))
+    if (is.null(varid)) {
+      # we sent a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+  if (!is.null(inputs$varid)) {
+    varid = inputs$varid
+  }
+  
+  if (is.null(varid)) {
+    print("Variable IS is null - returning.")
+    return(FALSE)
+  }
+  
+  pbody = list(
+    featureid = inputs$featureid,
+    varid = varid,
+    entity_type = inputs$entity_type,
+    tsvalue = inputs$tsvalue,
+    tscode = inputs$tscode,
+    tstime = inputs$tstime,
+    tsendtime = inputs$tsendtime
+  );
+  
+  if (is.null(tid)){
+    print("Creating timeseries...")
+    ts <- POST(paste(base_url,"/dh_timeseries/",sep=""), 
+                 add_headers(HTTP_X_CSRF_TOKEN = token),
+                 body = pbody,
+                 encode = "json"
+    );
+    if (ts$status == 201){ts <- paste("Status ",ts$status,", timeseries Created Successfully",sep="")
+    } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$tid) == 1){
+    print("Single timeseries Exists, Updating...")
+    ts <- PUT(paste(base_url,"/dh_timeseries/",tid,sep=""), 
+                add_headers(HTTP_X_CSRF_TOKEN = token),
+                body = pbody,
+                encode = "json"
+    );
+    if (ts$status == 200){ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
+    } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")}
+  } else {
+    ts <- print("Multiple timeseries Exist, Execution Halted")
+  }
+  
+}
 
 getProperty <- function(inputs, base_url, prop){
   
@@ -71,7 +226,7 @@ getProperty <- function(inputs, base_url, prop){
       return(FALSE)
     }
   }
-
+  
   
   pbody = list(
     bundle = 'dh_properties',
@@ -434,7 +589,7 @@ vahydro_fe_data_icthy <- function (Watershed_Hydrocode,x_metric_code,y_metric_co
   myOpts <- curlOptions(connecttimeout = 200)
   data <- getURL(uri, .opts = myOpts)
   data <- read.csv(textConnection(data))
- 
+  
 }
 
 vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
@@ -475,4 +630,3 @@ vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
   
   matrix_dataframe <- matrix_dataframe #return dataframe object
 }
-
