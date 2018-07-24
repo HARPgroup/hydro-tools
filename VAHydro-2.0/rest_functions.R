@@ -52,7 +52,7 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
 
 
 getProperty <- function(inputs, base_url, prop){
-  
+  print(inputs)
   #Convert varkey to varid - needed for REST operations 
   if (!is.null(inputs$varkey)) {
     # this would use REST 
@@ -63,6 +63,7 @@ getProperty <- function(inputs, base_url, prop){
     # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
     
     propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    print(paste("Trying", propdef_url))
     propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
     varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
     print(paste("varid: ",varid,sep=""))
@@ -70,17 +71,21 @@ getProperty <- function(inputs, base_url, prop){
       # we sent a bad variable id so we should return FALSE
       return(FALSE)
     }
+    inputs$varid = varid
   }
-
+  # now, verify that we have a proper varid
+  if (is.null(inputs$varid)) {
+    # we were sent a bad variable id so we should return FALSE
+    return(FALSE)
+  }
   
   pbody = list(
     bundle = 'dh_properties',
     featureid = inputs$featureid,
-    entity_type = inputs$entity_type
+    entity_type = inputs$entity_type,
+    varid = inputs$varid
   );
-  if (!is.null(varid)) {
-    pbody$varid = varid
-  }
+  
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
   }
