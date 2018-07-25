@@ -1,16 +1,16 @@
 library(httr);
-save_directory <- "/var/www/html/files/fe/plots"
+save_directory <- "C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools"
 #----------------------------------------------
-site <- "http://deq2.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq2.bse.vt.edu/d.dh"    #Specify the site of interest, either d.bet OR d.dh
 #----------------------------------------------
 # Load Libraries
-basepath='/var/www/R';
+basepath='C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools';
 source(paste(basepath,'config.local.private',sep='/'));
-source(paste(hydro_tools,"VAHydro-2.0/rest_functions.R", sep = "/")); 
-source(paste(hydro_tools,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/"));  
-source(paste(hydro_tools,"LowFlow/fn_iha.R", sep = "/"));  
+source(paste(basepath,"VAHydro-2.0/rest_functions.R", sep = "/")); 
+source(paste(basepath,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/"));  
+source(paste(basepath,"LowFlow/fn_iha.R", sep = "/"));  
 #retrieve rest token
-source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and password, contained in auth.private file
+source(paste(basepath,"auth.private", sep = "/"));#load rest username and password, contained in auth.private file
 token <- rest_token(site, token, rest_uname, rest_pw);
 options(timeout=120); # set timeout to twice default level to avoid abort due to high traffic
 
@@ -55,4 +55,3 @@ alfprop$propvalue = 155
 alfinfo$startdate = format(as.POSIXlt('1984-01-01'),"%s") 
 alfinfo$enddate = format(as.POSIXlt('2005-12-31'),"%s") 
 postProperty(alfprop,fxn_locations,base_url = site,alfprop) ;
-

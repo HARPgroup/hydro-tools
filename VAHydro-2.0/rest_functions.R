@@ -5,7 +5,7 @@ library(RCurl); #required for limiting connection timeout in vahydro_fe_data_ict
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
   csrf_url <- paste(base_url,"restws/session/token/",sep="/");
-
+  
   #IF THE OBJECTS 'rest_uname' or 'rest_pw' DONT EXIST, USER INPUT REQUIRED
   if (!is.character(rest_uname) | !(is.character(rest_pw))){
     
@@ -26,33 +26,33 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
         token <- content(csrf);
         #print(token)
         
-          if (length(token)==2){
-            print("Sorry, unrecognized username or password")
-            }
-      login_attempts <- login_attempts + 1
+        if (length(token)==2){
+          print("Sorry, unrecognized username or password")
+        }
+        login_attempts <- login_attempts + 1
       }
       if (login_attempts > 5){print(paste("ALLOWABLE NUMBER OF LOGIN ATTEMPTS EXCEEDED"))}
     }
     
-   } else {
+  } else {
     print(paste("REST AUTH INFO HAS BEEN SUPPLIED",sep=""))
     print(paste("RETRIEVING REST TOKEN",sep=""))
     csrf <- GET(url=csrf_url,authenticate(rest_uname,rest_pw));
     token <- content(csrf);
   }
   
-   if (length(token)==1){
-     print("Login attempt successful")
-     print(paste("token = ",token,sep=""))
-   } else {
-     print("Login attempt unsuccessful")
-   }
+  if (length(token)==1){
+    print("Login attempt successful")
+    print(paste("token = ",token,sep=""))
+  } else {
+    print("Login attempt unsuccessful")
+  }
   token <- token
 } #close function
 
 
 getProperty <- function(inputs, base_url, prop){
-  
+  print(inputs)
   #Convert varkey to varid - needed for REST operations 
   if (!is.null(inputs$varkey)) {
     # this would use REST 
@@ -63,6 +63,7 @@ getProperty <- function(inputs, base_url, prop){
     # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
     
     propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    print(paste("Trying", propdef_url))
     propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
     varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
     print(paste("varid: ",varid,sep=""))
@@ -70,17 +71,21 @@ getProperty <- function(inputs, base_url, prop){
       # we sent a bad variable id so we should return FALSE
       return(FALSE)
     }
+    inputs$varid = varid
   }
-
+  # now, verify that we have a proper varid
+  if (is.null(inputs$varid)) {
+    # we were sent a bad variable id so we should return FALSE
+    return(FALSE)
+  }
   
   pbody = list(
     bundle = 'dh_properties',
     featureid = inputs$featureid,
-    entity_type = inputs$entity_type
+    entity_type = inputs$entity_type,
+    varid = inputs$varid
   );
-  if (!is.null(varid)) {
-    pbody$varid = varid
-  }
+  
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
   }
@@ -434,7 +439,7 @@ vahydro_fe_data_icthy <- function (Watershed_Hydrocode,x_metric_code,y_metric_co
   myOpts <- curlOptions(connecttimeout = 200)
   data <- getURL(uri, .opts = myOpts)
   data <- read.csv(textConnection(data))
- 
+  
 }
 
 vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
@@ -475,4 +480,3 @@ vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
   
   matrix_dataframe <- matrix_dataframe #return dataframe object
 }
-
