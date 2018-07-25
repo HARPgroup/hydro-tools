@@ -89,6 +89,9 @@ getProperty <- function(inputs, base_url, prop){
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
   }
+  if (!is.null(inputs$propname)) {
+    pbody$propname = inputs$propname
+  }
   
   prop <- GET(
     paste(base_url,"/dh_properties.json",sep=""), 
