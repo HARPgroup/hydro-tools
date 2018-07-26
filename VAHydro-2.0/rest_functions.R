@@ -247,6 +247,14 @@ getProperty <- function(inputs, base_url, prop){
   if (!is.null(inputs$propname)) {
     pbody$propname = inputs$propname
   }
+  if (!is.null(inputs$pid)) {
+    if (inputs$pid > 0) {
+      # forget about other attributes, just use pid
+      pbody = list(
+        pid = inputs$pid
+      )
+    }
+  }
   
   prop <- GET(
     paste(base_url,"/dh_properties.json",sep=""), 
