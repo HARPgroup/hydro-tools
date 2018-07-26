@@ -86,6 +86,14 @@ getTimeseries <- function(inputs, base_url, ts){
   if (!is.null(inputs$tstime)) {
     pbody$tstime = inputs$tstime
   }
+  if (!is.null(inputs$tid)) {
+    if (inputs$pid > 0) {
+      # forget about other attributes, just use pid
+      pbody = list(
+        pid = inputs$tid
+      )
+    }
+  }
   
   ts <- GET(
     paste(base_url,"/dh_timeseries.json",sep=""), 
