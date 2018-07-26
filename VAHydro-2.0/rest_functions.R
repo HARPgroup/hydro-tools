@@ -88,7 +88,7 @@ getTimeseries <- function(inputs, base_url, ts){
   }
   if (!is.null(inputs$tid)) {
     if (inputs$tid > 0) {
-      # forget about other attributes, just use pid
+      # forget about other attributes, just use tid
       pbody = list(
         tid = inputs$tid
       )
