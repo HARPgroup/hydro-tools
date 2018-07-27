@@ -4,7 +4,7 @@ save_directory <- "/var/www/html/files/fe/plots"
 site <- "http://deq2.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
 #----------------------------------------------
 # Load Libraries
-basepath='/var/www/R';
+basepath='C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools';
 source(paste(basepath,'config.local.private',sep='/'));
 source(paste(hydro_tools,"VAHydro-2.0/rest_functions.R", sep = "/")); 
 source(paste(hydro_tools,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/"));  
@@ -51,8 +51,7 @@ if (identical(alfprop, FALSE)) {
   alfprop = alfinfo
 }
 alfprop$propname = "August Low Flow"
-alfprop$propvalue = 155
+alfprop$propvalue = 159
 alfinfo$startdate = format(as.POSIXlt('1984-01-01'),"%s") 
 alfinfo$enddate = format(as.POSIXlt('2005-12-31'),"%s") 
 postProperty(alfprop,fxn_locations,base_url = site,alfprop) ;
-
