@@ -1,0 +1,7 @@
+#VAHydro-1.0 Authentication 
+username <- "TRICKY_USERNAME"
+hash <- "TRICKY_PASSWORD"
+
+#VAHydro-2.0 Admin REST Authentication 
+rest_uname <- 'TRICKY_USERNAME'
+rest_pw <- 'TRICKY_PASSWORD'
