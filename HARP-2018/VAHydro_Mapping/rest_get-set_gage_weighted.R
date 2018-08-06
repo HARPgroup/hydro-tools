@@ -19,7 +19,7 @@ model_segs = read.csv(model_reader, header = TRUE, sep = ",", stringsAsFactors =
 model_segs$X <- as.character(model_segs$X)
 
 # in the line below, change the model_segs$...Metric of interest (the second one)
-metric <- data.frame(model_segs$X, model_segs$FeatureID, signif(model_segs$Jan..Low.Flow, digits=3)) 
+metric <- data.frame(model_segs$X, model_segs$FeatureID, signif(model_segs$Overall.Mean.Flow, digits=3)) 
 colnames(metric) <- c('Segment', 'FeatureID','Metric')
 i <- 1
 
@@ -51,8 +51,8 @@ for (i in 1:nrow(metric)){
   
   # now, retrieve august low flow property if set
   alfinfo <- list(
-    varkey = "monthly_low_flow",      # chane this line
-    propcode = 'ml1',                 # change this line 
+    varkey = "overall_mean",      # chane this line
+    #propcode = 'mh9',                 # change this line 
     featureid = as.integer(as.character(metric$FeatureID[i])),
     entity_type = "dh_properties"
   )
@@ -62,8 +62,8 @@ for (i in 1:nrow(metric)){
     # create
     alfprop = alfinfo
   }
-  alfprop$propname = "January Low Flow" #change this line 
-  alfprop$propcode = 'ml1'                #change this line 
+  alfprop$propname = "Overall Mean Flow" #change this line 
+  #alfprop$propcode = 'mh9'                #change this line 
   alfprop$propvalue = signif(metric$Metric[i], digits=3)
   alfinfo$startdate = format(as.POSIXlt('1984-01-01'),"%s") 
   alfinfo$enddate = format(as.POSIXlt('2005-12-31'),"%s")
