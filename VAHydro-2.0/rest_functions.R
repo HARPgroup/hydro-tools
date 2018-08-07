@@ -325,6 +325,8 @@ getProperty <- function(inputs, base_url, prop){
 
 postProperty <- function(inputs,fxn_locations,base_url,prop){
   
+  #inputs <-prop_inputs
+  #base_url <- site
   #Search for existing property matching supplied varkey, featureid, entity_type 
   dataframe <- getProperty(inputs, base_url, prop)
   if (is.data.frame(dataframe)) {
@@ -378,6 +380,7 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
                  body = pbody,
                  encode = "json"
     );
+    #content(prop)
     if (prop$status == 201){prop <- paste("Status ",prop$status,", Property Created Successfully",sep="")
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Created Successfully",sep="")}
     
@@ -388,6 +391,7 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
                 body = pbody,
                 encode = "json"
     );
+    #content(prop)
     if (prop$status == 200){prop <- paste("Status ",prop$status,", Property Updated Successfully",sep="")
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Updated Successfully",sep="")}
   } else {
@@ -468,7 +472,8 @@ getVarDef <- function(inputs, token, base_url, vardef){
 }
 
 getFeature <- function(inputs, base_url, feature){
-  #inputs <-   feature_inputs
+  #inputs <-    conveyance_inputs 
+  #base_url <- site
   #print(inputs)
   pbody = list(
     hydroid = inputs$hydroid,
@@ -546,8 +551,8 @@ getFeature <- function(inputs, base_url, feature){
                               "dh_nextdown_id" = if (is.null(feature_cont$list[[i]]$dh_nextdown_id[[1]]$id)){""} else {feature_cont$list[[i]]$dh_nextdown_id[[1]]$id},
                               "dh_areasqkm" = if (is.null(feature_cont$list[[i]]$dh_areasqkm)){""} else {feature_cont$list[[i]]$dh_areasqkm},
                               "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
-                              "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity[[1]]$id},
-                              "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity[[1]]$id},
+                              "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity$id},
+                              "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity$id},
                               "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
       
