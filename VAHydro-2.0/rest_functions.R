@@ -518,6 +518,8 @@ getFeature <- function(inputs, base_url, feature){
                        dh_nextdown_id = character(),
                        dh_areasqkm = character(),
                        dh_link_admin_location = character(),
+                       field_dh_from_entity = character(),
+                       field_dh_to_entity = character(),
                        dh_geofield = character(),
                        stringsAsFactors=FALSE) 
     
@@ -540,10 +542,12 @@ getFeature <- function(inputs, base_url, feature){
                               "status" = if (is.null(feature_cont$list[[i]]$status)){""} else {feature_cont$list[[i]]$status},
                               "module" = if (is.null(feature_cont$list[[i]]$module)){""} else {feature_cont$list[[i]]$module},
                               "feed_nid" = if (is.null(feature_cont$list[[i]]$feed_nid)){""} else {feature_cont$list[[i]]$feed_nid},
-                              "dh_link_facility_mps" = if (is.null(feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id)){""} else {feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id},
+                              "dh_link_facility_mps" = if (!length(feature_cont$list[[i]]$dh_link_facility_mps)){""} else {feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id},
                               "dh_nextdown_id" = if (is.null(feature_cont$list[[i]]$dh_nextdown_id[[1]]$id)){""} else {feature_cont$list[[i]]$dh_nextdown_id[[1]]$id},
                               "dh_areasqkm" = if (is.null(feature_cont$list[[i]]$dh_areasqkm)){""} else {feature_cont$list[[i]]$dh_areasqkm},
                               "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
+                              "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity[[1]]$id},
+                              "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity[[1]]$id},
                               "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
       
@@ -561,7 +565,7 @@ getFeature <- function(inputs, base_url, feature){
 
 postFeature <- function(inputs,base_url,feature){
 
-  #inputs <- feature_inputs
+  #inputs <- conveyance_inputs
   #base_url <- site
   
   #Search for existing feature matching supplied bundle, ftype, hydrocode
@@ -583,13 +587,15 @@ postFeature <- function(inputs,base_url,feature){
                state = inputs$state,
                postal_code = inputs$postal_code,
                description = inputs$description,
-               dh_link_facility_mps = inputs$dh_link_facility_mps,
+               dh_link_facility_mps = if (is.null(inputs$dh_link_facility_mps)){NULL} else {list(list(id = inputs$dh_link_facility_mps))},
                dh_nextdown_id = inputs$dh_nextdown_id,
                dh_areasqkm = inputs$dh_areasqkm,
-               dh_link_admin_location = inputs$dh_link_admin_location,
+               dh_link_admin_location = if (is.null(inputs$dh_link_admin_location)){NULL} else {list(list(id = inputs$dh_link_admin_location))},
+               field_dh_from_entity = if (is.null(inputs$field_dh_from_entity)){NULL} else {list(id = inputs$field_dh_from_entity)},
+               field_dh_to_entity = if (is.null(inputs$field_dh_to_entity)){NULL} else {list(id = inputs$field_dh_to_entity)},
                dh_geofield = list(geom = inputs$dh_geofield)
   ); 
-  
+ 
   if (is.null(hydroid)){
     print("Creating Feature...")
     feature <- POST(paste(base_url,"/dh_feature/",sep=""), 
@@ -692,7 +698,7 @@ getAdminregFeature <- function(inputs, base_url, adminreg_feature){
                            "dh_link_admin_dha_usafips" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips[[1]]$id},
                            "dh_link_admin_record_mgr_id" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id[[1]]$id},
                            "dh_link_admin_timeseries" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries[[1]]$id},
-                           "dh_link_admin_reg_issuer" = if (is.null(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id}
+                           "dh_link_admin_reg_issuer" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id}
 
       )
  
@@ -704,6 +710,72 @@ getAdminregFeature <- function(inputs, base_url, adminreg_feature){
   }
   adminreg_feature <- adminreg_feat
 }
+
+postAdminregFeature <- function(inputs,base_url,adminreg_feature){
+  
+  #inputs <- adminreg_feature_inputs
+  #base_url <- site
+  
+  #Search for existing feature matching supplied bundle, ftype, hydrocode
+  dataframe <- getAdminregFeature(inputs, base_url, adminreg_feature)
+  if (is.data.frame(dataframe)) {
+    adminid <- as.character(dataframe$adminid)
+  } else {
+    adminid = NULL
+  }
+  
+  pbody = list(bundle = inputs$bundle,
+               ftype = inputs$ftype,
+               admincode = inputs$admincode,
+               name = inputs$name,
+               fstatus = inputs$fstatus,
+               description = inputs$description,
+               startdate = inputs$startdate,
+               enddate = inputs$enddate,
+               modified = inputs$modified,
+               permit_id = inputs$permit_id,
+               uid = inputs$uid,
+               status = inputs$status,
+               module = inputs$module,
+               feed_nid = inputs$feed_nid,
+               dh_link_admin_reg_holder = if (is.null(inputs$dh_link_admin_reg_holder)){NULL} else {list(list(id = inputs$dh_link_admin_reg_holder))},
+               dh_link_admin_reg_issuer = if (is.null(inputs$dh_link_admin_reg_issuer)){NULL} else {list(list(id = inputs$dh_link_admin_reg_issuer))},
+               dh_link_admin_dha_usafips = if (is.null(inputs$dh_link_admin_dha_usafips)){NULL} else {list(list(id = inputs$dh_link_admin_dha_usafips))},
+               dh_link_admin_record_mgr_id = if (is.null(inputs$dh_link_admin_record_mgr_id)){NULL} else {list(list(id = inputs$dh_link_admin_record_mgr_id))},
+               dh_link_admin_timeseries = if (is.null(inputs$dh_link_admin_timeseries)){NULL} else {list(list(id = inputs$dh_link_admin_timeseries))}
+  ); 
+  #dh_geofield = list(geom = inputs$dh_geofield)
+  #list(id = inputs$dh_link_admin_reg_issuer)
+  #"proptext" = if (is.null(prop_cont$list[[i]]$proptext)){""} else {prop_cont$list[[i]]$proptext},
+  
+  
+  if (is.null(adminid)){
+    print("Creating Adminreg Feature...")
+    adminreg_feature <- POST(paste(base_url,"/dh_adminreg_feature/",sep=""), 
+                    add_headers(HTTP_X_CSRF_TOKEN = token),
+                    body = pbody,
+                    encode = "json"
+    );
+    #content(adminreg_feature)
+    if (adminreg_feature$status == 201){adminreg_feature <- paste("Status ",adminreg_feature$status,", Adminreg Feature Created Successfully",sep="")
+    } else {adminreg_feature <- paste("Status ",adminreg_feature$status,", Error: Adminreg Feature Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$adminid) == 1){
+    print("Single Adminreg Feature Exists, Updating...")
+    adminreg_feature <- PUT(paste(base_url,"/dh_adminreg_feature/",adminid,sep=""), 
+                   add_headers(HTTP_X_CSRF_TOKEN = token),
+                   body = pbody,
+                   encode = "json"
+    );
+    #content(feature)
+    if (adminreg_feature$status == 200){adminreg_feature <- paste("Status ",adminreg_feature$status,", Adminreg Feature Updated Successfully",sep="")
+    } else {adminreg_feature <- paste("Status ",adminreg_feature$status,", Error: Adminreg Feature Not Updated Successfully",sep="")}
+  } else {
+    adminreg_feature <- print("Multiple Adminreg Features Exist, Execution Halted")
+  }
+
+}
+
 
 
 vahydro_fe_multi_data <- function (
