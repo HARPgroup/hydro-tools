@@ -468,6 +468,7 @@ getVarDef <- function(inputs, token, base_url, vardef){
 }
 
 getFeature <- function(inputs, base_url, feature){
+  #inputs <-   feature_inputs
   #print(inputs)
   pbody = list(
     hydroid = inputs$hydroid,
@@ -542,9 +543,13 @@ getFeature <- function(inputs, base_url, feature){
                               "dh_link_facility_mps" = if (is.null(feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id)){""} else {feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id},
                               "dh_nextdown_id" = if (is.null(feature_cont$list[[i]]$dh_nextdown_id[[1]]$id)){""} else {feature_cont$list[[i]]$dh_nextdown_id[[1]]$id},
                               "dh_areasqkm" = if (is.null(feature_cont$list[[i]]$dh_areasqkm)){""} else {feature_cont$list[[i]]$dh_areasqkm},
-                              "dh_link_admin_location" = if (is.null(feature_cont$list[[i]]$dh_link_admin_location[[1]]$id)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
+                              "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
                               "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
+      
+     # "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
+      
+      
       feat  <- rbind(feat, feat_i)
     }
   } else {
@@ -552,6 +557,63 @@ getFeature <- function(inputs, base_url, feature){
     return(FALSE)
   }
   feature <- feat
+}
+
+postFeature <- function(inputs,base_url,feature){
+
+  #inputs <- feature_inputs
+  #base_url <- site
+  
+  #Search for existing feature matching supplied bundle, ftype, hydrocode
+  dataframe <- getFeature(inputs, base_url, feature)
+  if (is.data.frame(dataframe)) {
+    hydroid <- as.character(dataframe$hydroid)
+  } else {
+    hydroid = NULL
+  }
+  
+  pbody = list(bundle = inputs$bundle,
+               ftype = inputs$ftype,
+               hydrocode = inputs$hydrocode,
+               name = inputs$name,
+               fstatus = inputs$fstatus,
+               address1 = inputs$address1,
+               address2 = inputs$address2,
+               city = inputs$city,
+               state = inputs$state,
+               postal_code = inputs$postal_code,
+               description = inputs$description,
+               dh_link_facility_mps = inputs$dh_link_facility_mps,
+               dh_nextdown_id = inputs$dh_nextdown_id,
+               dh_areasqkm = inputs$dh_areasqkm,
+               dh_link_admin_location = inputs$dh_link_admin_location,
+               dh_geofield = list(geom = inputs$dh_geofield)
+  ); 
+  
+  if (is.null(hydroid)){
+    print("Creating Feature...")
+    feature <- POST(paste(base_url,"/dh_feature/",sep=""), 
+                 add_headers(HTTP_X_CSRF_TOKEN = token),
+                 body = pbody,
+                 encode = "json"
+    );
+    if (feature$status == 201){feature <- paste("Status ",feature$status,", Feature Created Successfully",sep="")
+    } else {feature <- paste("Status ",feature$status,", Error: Feature Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$hydroid) == 1){
+    print("Single Feature Exists, Updating...")
+    feature <- PUT(paste(base_url,"/dh_feature/",hydroid,sep=""), 
+                add_headers(HTTP_X_CSRF_TOKEN = token),
+                body = pbody,
+                encode = "json"
+    );
+    #content(feature)
+    if (feature$status == 200){feature <- paste("Status ",feature$status,", Feature Updated Successfully",sep="")
+    } else {feature <- paste("Status ",feature$status,", Error: Feature Not Updated Successfully",sep="")}
+  } else {
+    feature <- print("Multiple Features Exist, Execution Halted")
+  }
+  
 }
 
 
