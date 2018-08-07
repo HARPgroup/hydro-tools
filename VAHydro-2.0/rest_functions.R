@@ -616,6 +616,95 @@ postFeature <- function(inputs,base_url,feature){
   
 }
 
+getAdminregFeature <- function(inputs, base_url, adminreg_feature){
+  #inputs <-   adminreg_feature_inputs
+  #base_url <-site
+  #print(inputs)
+  pbody = list(
+    adminid = inputs$adminid,
+    bundle = inputs$bundle,
+    ftype = inputs$ftype,
+    admincode = inputs$admincode
+  );
+  
+  
+  if (!is.null(inputs$adminid)) {
+    if (inputs$adminid > 0) {
+      # forget about other attributes, just use adminid if provided 
+      pbody = list(
+        adminid = inputs$adminid
+      )
+    }
+  }
+  
+  adminreg_feature <- GET(
+    paste(base_url,"/dh_adminreg_feature.json",sep=""), 
+    add_headers(HTTP_X_CSRF_TOKEN = token),
+    query = pbody, 
+    encode = "json"
+  );
+  adminreg_feature_cont <- content(adminreg_feature);
+  
+  if (length(adminreg_feature_cont$list) != 0) {
+    print(paste("Number of adminreg features found: ",length(adminreg_feature_cont$list),sep=""))
+    
+    adminreg_feat <- data.frame(adminid = character(),
+                       bundle = character(),
+                       ftype = character(),
+                       admincode = character(),
+                       name = character(),
+                       fstatus = character(),
+                       description = character(),
+                       startdate = character(),
+                       enddate = character(),
+                       modified = character(),
+                       permit_id = character(),
+                       uid = character(),
+                       status = character(),
+                       module = character(),
+                       feed_nid = character(),
+                       dh_link_admin_reg_holder = character(),
+                       dh_link_admin_reg_issuer = character(),
+                       dh_link_admin_dha_usafips = character(),
+                       dh_link_admin_record_mgr_id = character(),
+                       dh_link_admin_timeseries = character(),
+                       stringsAsFactors=FALSE) 
+    
+    #i <- 1
+    for (i in 1:length(adminreg_feature_cont$list)) {
+      
+      adminreg_feat_i <- data.frame("adminid" = if (is.null(adminreg_feature_cont$list[[i]]$adminid)){""} else {adminreg_feature_cont$list[[i]]$adminid},
+                           "bundle" = if (is.null(adminreg_feature_cont$list[[i]]$bundle)){""} else {adminreg_feature_cont$list[[i]]$bundle},
+                           "ftype" = if (is.null(adminreg_feature_cont$list[[i]]$ftype)){""} else {adminreg_feature_cont$list[[i]]$ftype},
+                           "admincode" = if (is.null(adminreg_feature_cont$list[[i]]$admincode)){""} else {adminreg_feature_cont$list[[i]]$admincode},
+                           "name" = if (is.null(adminreg_feature_cont$list[[i]]$name)){""} else {adminreg_feature_cont$list[[i]]$name},
+                           "fstatus" = if (is.null(adminreg_feature_cont$list[[i]]$fstatus)){""} else {adminreg_feature_cont$list[[i]]$fstatus},
+                           "description" = if (is.null(adminreg_feature_cont$list[[i]]$description)){""} else {adminreg_feature_cont$list[[i]]$description},
+                           "startdate" = if (is.null(adminreg_feature_cont$list[[i]]$startdate)){""} else {adminreg_feature_cont$list[[i]]$startdate},
+                           "enddate" = if (is.null(adminreg_feature_cont$list[[i]]$enddate)){""} else {adminreg_feature_cont$list[[i]]$enddate},
+                           "modified" = if (is.null(adminreg_feature_cont$list[[i]]$modified)){""} else {adminreg_feature_cont$list[[i]]$modified},
+                           "permit_id" = if (is.null(adminreg_feature_cont$list[[i]]$permit_id)){""} else {adminreg_feature_cont$list[[i]]$permit_id},
+                           "uid" = if (is.null(adminreg_feature_cont$list[[i]]$uid)){""} else {adminreg_feature_cont$list[[i]]$uid},
+                           "status" = if (is.null(adminreg_feature_cont$list[[i]]$status)){""} else {adminreg_feature_cont$list[[i]]$status},
+                           "module" = if (is.null(adminreg_feature_cont$list[[i]]$module)){""} else {adminreg_feature_cont$list[[i]]$module},
+                           "feed_nid" = if (is.null(adminreg_feature_cont$list[[i]]$feed_nid)){""} else {adminreg_feature_cont$list[[i]]$feed_nid},
+                           "dh_link_admin_reg_holder" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_holder)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_holder[[1]]$id},
+                           "dh_link_admin_dha_usafips" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips[[1]]$id},
+                           "dh_link_admin_record_mgr_id" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id[[1]]$id},
+                           "dh_link_admin_timeseries" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries[[1]]$id},
+                           "dh_link_admin_reg_issuer" = if (is.null(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id}
+
+      )
+ 
+      adminreg_feat  <- rbind(adminreg_feat, adminreg_feat_i)
+    }
+  } else {
+    print("This Adminreg Feature does not exist")
+    return(FALSE)
+  }
+  adminreg_feature <- adminreg_feat
+}
+
 
 vahydro_fe_multi_data <- function (
   bundle = 'watershed', 
