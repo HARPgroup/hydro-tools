@@ -236,8 +236,8 @@ getProperty <- function(inputs, base_url, prop){
     }
     inputs$varid = varid
   }
-  # now, verify that we have a proper varid
-  if (is.null(inputs$varid)) {
+  # now, verify that we have either a proper varid OR a propname
+  if (is.null(inputs$varid) & is.null(inputs$propname)) {
     # we were sent a bad variable id so we should return FALSE
     return(FALSE)
   }
@@ -245,10 +245,11 @@ getProperty <- function(inputs, base_url, prop){
   pbody = list(
     bundle = 'dh_properties',
     featureid = inputs$featureid,
-    entity_type = inputs$entity_type,
-    varid = inputs$varid
+    entity_type = inputs$entity_type
   );
-  
+  if (!is.null(inputs$varid)) {
+    pbody$varid = inputs$varid
+  }  
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
   }
