@@ -471,7 +471,7 @@ getVarDef <- function(inputs, token, base_url, vardef){
   return(vardef)
 }
 
-getFeature <- function(inputs, base_url, feature){
+getFeature <- function(inputs, token, base_url, feature){
   #inputs <-    conveyance_inputs 
   #base_url <- site
   #print(inputs)
@@ -526,6 +526,7 @@ getFeature <- function(inputs, base_url, feature){
                        field_dh_from_entity = character(),
                        field_dh_to_entity = character(),
                        dh_geofield = character(),
+                       geom = character(),
                        stringsAsFactors=FALSE) 
     
     #i <- 1
@@ -553,7 +554,8 @@ getFeature <- function(inputs, base_url, feature){
                               "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
                               "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity$id},
                               "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity$id},
-                              "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
+                              "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom},
+                              "geom" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
       
      # "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
@@ -598,7 +600,8 @@ postFeature <- function(inputs,base_url,feature){
                dh_link_admin_location = if (is.null(inputs$dh_link_admin_location)){NULL} else {list(list(id = inputs$dh_link_admin_location))},
                field_dh_from_entity = if (is.null(inputs$field_dh_from_entity)){NULL} else {list(id = inputs$field_dh_from_entity)},
                field_dh_to_entity = if (is.null(inputs$field_dh_to_entity)){NULL} else {list(id = inputs$field_dh_to_entity)},
-               dh_geofield = list(geom = inputs$dh_geofield)
+               dh_geofield = list(geom = inputs$dh_geofield),
+               geom = list(geom = inputs$dh_geofield)
   ); 
  
   if (is.null(hydroid)){
