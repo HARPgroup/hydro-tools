@@ -328,6 +328,8 @@ getProperty <- function(inputs, base_url, prop){
 
 postProperty <- function(inputs,fxn_locations,base_url,prop){
   
+  #inputs <-prop_inputs
+  #base_url <- site
   #Search for existing property matching supplied varkey, featureid, entity_type 
   dataframe <- getProperty(inputs, base_url, prop)
   if (is.data.frame(dataframe)) {
@@ -381,6 +383,7 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
                  body = pbody,
                  encode = "json"
     );
+    #content(prop)
     if (prop$status == 201){prop <- paste("Status ",prop$status,", Property Created Successfully",sep="")
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Created Successfully",sep="")}
     
@@ -394,6 +397,7 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
                 body = pbody,
                 encode = "json"
     );
+    #content(prop)
     if (prop$status == 200){prop <- paste("Status ",prop$status,", Property Updated Successfully",sep="")
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Updated Successfully",sep="")}
   } else {
@@ -473,27 +477,27 @@ getVarDef <- function(inputs, token, base_url, vardef){
   return(vardef)
 }
 
-
 getFeature <- function(inputs, token, base_url, feature){
-  
+  #inputs <-    conveyance_inputs 
+  #base_url <- site
+  #print(inputs)
   pbody = list(
+    hydroid = inputs$hydroid,
+    bundle = inputs$bundle,
+    ftype = inputs$ftype,
+    hydrocode = inputs$hydrocode
   );
-  if (!is.null(inputs$bundle)) {
-    pbody$bundle = inputs$bundle;
-  }
-  if (!is.null(inputs$hydrocode)) {
-    pbody$hydrocode = inputs$hydrocode;
-  }
-  if (!is.null(inputs$ftype)) {
-    pbody$ftype = inputs$ftype;
-  }
-  if (!is.null(inputs$hydroid)) {
-    pbody$hydroid = inputs$hydroid;
-  }
-  if (!is.null(inputs$name)) {
-    pbody$name = inputs$name;
-  }
   
+
+  if (!is.null(inputs$hydroid)) {
+    if (inputs$hydroid > 0) {
+      # forget about other attributes, just use hydroid if provided 
+      pbody = list(
+        hydroid = inputs$hydroid
+      )
+    }
+  }
+
   feature <- GET(
     paste(base_url,"/dh_feature.json",sep=""), 
     add_headers(HTTP_X_CSRF_TOKEN = token),
@@ -501,39 +505,292 @@ getFeature <- function(inputs, token, base_url, feature){
     encode = "json"
   );
   feature_cont <- content(feature);
-  #print(feature_cont)
   
   if (length(feature_cont$list) != 0) {
     print(paste("Number of features found: ",length(feature_cont$list),sep=""))
     
-    feature <- data.frame(
-      hydroid=character(),
-      name=character(),
-      bundle=character(),
-      hydrocode=character(), 
-      ftype=character(),
-      geom=character(),
-      stringsAsFactors=FALSE
-    ) 
+    feat <- data.frame(hydroid = character(),
+                       bundle = character(),
+                       ftype = character(),
+                       hydrocode = character(),
+                       name = character(),
+                       fstatus = character(),
+                       address1 = character(),
+                       address2 = character(),
+                       city = character(),
+                       state = character(),
+                       postal_code = character(),
+                       description = character(),
+                       uid = character(),
+                       status = character(),
+                       module = character(),
+                       feed_nid = character(),
+                       dh_link_facility_mps = character(),
+                       dh_nextdown_id = character(),
+                       dh_areasqkm = character(),
+                       dh_link_admin_location = character(),
+                       field_dh_from_entity = character(),
+                       field_dh_to_entity = character(),
+                       dh_geofield = character(),
+                       geom = character(),
+                       stringsAsFactors=FALSE) 
     
     #i <- 1
     for (i in 1:length(feature_cont$list)) {
       
-      feature_i <- data.frame(
-        hydroid = feature_cont$list[[i]]$hydroid,
-        name = feature_cont$list[[i]]$name,
-        bundle = feature_cont$list[[i]]$bundle,
-        hydrocode = feature_cont$list[[i]]$hydrocode,
-        ftype = feature_cont$list[[i]]$ftype,
-        geom = feature_cont$list[[i]]$dh_geofield$geom
+      feat_i <- data.frame("hydroid" = if (is.null(feature_cont$list[[i]]$hydroid)){""} else {feature_cont$list[[i]]$hydroid},
+                              "bundle" = if (is.null(feature_cont$list[[i]]$bundle)){""} else {feature_cont$list[[i]]$bundle},
+                              "ftype" = if (is.null(feature_cont$list[[i]]$ftype)){""} else {feature_cont$list[[i]]$ftype},
+                              "hydrocode" = if (is.null(feature_cont$list[[i]]$hydrocode)){""} else {feature_cont$list[[i]]$hydrocode},
+                              "name" = if (is.null(feature_cont$list[[i]]$name)){""} else {feature_cont$list[[i]]$name},
+                              "fstatus" = if (is.null(feature_cont$list[[i]]$fstatus)){""} else {feature_cont$list[[i]]$fstatus},
+                              "address1" = if (is.null(feature_cont$list[[i]]$address1)){""} else {feature_cont$list[[i]]$address1},
+                              "address2" = if (is.null(feature_cont$list[[i]]$address2)){""} else {feature_cont$list[[i]]$address2},
+                              "city" = if (is.null(feature_cont$list[[i]]$city)){""} else {feature_cont$list[[i]]$city},
+                              "state" = if (is.null(feature_cont$list[[i]]$state)){""} else {feature_cont$list[[i]]$state},
+                              "postal_code" = if (is.null(feature_cont$list[[i]]$postal_code)){""} else {feature_cont$list[[i]]$postal_code},
+                              "description" = if (is.null(feature_cont$list[[i]]$description)){""} else {feature_cont$list[[i]]$description},
+                              "uid" = if (is.null(feature_cont$list[[i]]$uid)){""} else {feature_cont$list[[i]]$uid},
+                              "status" = if (is.null(feature_cont$list[[i]]$status)){""} else {feature_cont$list[[i]]$status},
+                              "module" = if (is.null(feature_cont$list[[i]]$module)){""} else {feature_cont$list[[i]]$module},
+                              "feed_nid" = if (is.null(feature_cont$list[[i]]$feed_nid)){""} else {feature_cont$list[[i]]$feed_nid},
+                              "dh_link_facility_mps" = if (!length(feature_cont$list[[i]]$dh_link_facility_mps)){""} else {feature_cont$list[[i]]$dh_link_facility_mps[[1]]$id},
+                              "dh_nextdown_id" = if (!length(feature_cont$list[[i]]$dh_nextdown_id)){""} else {feature_cont$list[[i]]$dh_nextdown_id[[1]]$id},
+                              "dh_areasqkm" = if (is.null(feature_cont$list[[i]]$dh_areasqkm)){""} else {feature_cont$list[[i]]$dh_areasqkm},
+                              "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
+                              "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity$id},
+                              "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity$id},
+                              "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom},
+                              "geom" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
-      feature <- rbind(feature, feature_i)
+      
+     # "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
+      
+      
+      feat  <- rbind(feat, feat_i)
     }
   } else {
     print("This Feature does not exist")
+    return(FALSE)
   }
-  feature <- feature
+  feature <- feat
 }
+
+postFeature <- function(inputs,base_url,feature){
+
+  #inputs <- conveyance_inputs
+  #base_url <- site
+  
+  #Search for existing feature matching supplied bundle, ftype, hydrocode
+  dataframe <- getFeature(inputs, base_url, feature)
+  if (is.data.frame(dataframe)) {
+    hydroid <- as.character(dataframe$hydroid)
+  } else {
+    hydroid = NULL
+  }
+  
+  pbody = list(bundle = inputs$bundle,
+               ftype = inputs$ftype,
+               hydrocode = inputs$hydrocode,
+               name = inputs$name,
+               fstatus = inputs$fstatus,
+               address1 = inputs$address1,
+               address2 = inputs$address2,
+               city = inputs$city,
+               state = inputs$state,
+               postal_code = inputs$postal_code,
+               description = inputs$description,
+               dh_link_facility_mps = if (is.null(inputs$dh_link_facility_mps)){NULL} else {list(list(id = inputs$dh_link_facility_mps))},
+               dh_nextdown_id = inputs$dh_nextdown_id,
+               dh_areasqkm = inputs$dh_areasqkm,
+               dh_link_admin_location = if (is.null(inputs$dh_link_admin_location)){NULL} else {list(list(id = inputs$dh_link_admin_location))},
+               field_dh_from_entity = if (is.null(inputs$field_dh_from_entity)){NULL} else {list(id = inputs$field_dh_from_entity)},
+               field_dh_to_entity = if (is.null(inputs$field_dh_to_entity)){NULL} else {list(id = inputs$field_dh_to_entity)},
+               dh_geofield = list(geom = inputs$dh_geofield),
+               geom = list(geom = inputs$dh_geofield)
+  ); 
+ 
+  if (is.null(hydroid)){
+    print("Creating Feature...")
+    feature <- POST(paste(base_url,"/dh_feature/",sep=""), 
+                 add_headers(HTTP_X_CSRF_TOKEN = token),
+                 body = pbody,
+                 encode = "json"
+    );
+    if (feature$status == 201){feature <- paste("Status ",feature$status,", Feature Created Successfully",sep="")
+    } else {feature <- paste("Status ",feature$status,", Error: Feature Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$hydroid) == 1){
+    print("Single Feature Exists, Updating...")
+    feature <- PUT(paste(base_url,"/dh_feature/",hydroid,sep=""), 
+                add_headers(HTTP_X_CSRF_TOKEN = token),
+                body = pbody,
+                encode = "json"
+    );
+    #content(feature)
+    if (feature$status == 200){feature <- paste("Status ",feature$status,", Feature Updated Successfully",sep="")
+    } else {feature <- paste("Status ",feature$status,", Error: Feature Not Updated Successfully",sep="")}
+  } else {
+    feature <- print("Multiple Features Exist, Execution Halted")
+  }
+  
+}
+
+getAdminregFeature <- function(inputs, base_url, adminreg_feature){
+  #inputs <-   adminreg_feature_inputs
+  #base_url <-site
+  #print(inputs)
+  pbody = list(
+    adminid = inputs$adminid,
+    bundle = inputs$bundle,
+    ftype = inputs$ftype,
+    admincode = inputs$admincode
+  );
+  
+  
+  if (!is.null(inputs$adminid)) {
+    if (inputs$adminid > 0) {
+      # forget about other attributes, just use adminid if provided 
+      pbody = list(
+        adminid = inputs$adminid
+      )
+    }
+  }
+  
+  adminreg_feature <- GET(
+    paste(base_url,"/dh_adminreg_feature.json",sep=""), 
+    add_headers(HTTP_X_CSRF_TOKEN = token),
+    query = pbody, 
+    encode = "json"
+  );
+  adminreg_feature_cont <- content(adminreg_feature);
+  
+  if (length(adminreg_feature_cont$list) != 0) {
+    print(paste("Number of adminreg features found: ",length(adminreg_feature_cont$list),sep=""))
+    
+    adminreg_feat <- data.frame(adminid = character(),
+                       bundle = character(),
+                       ftype = character(),
+                       admincode = character(),
+                       name = character(),
+                       fstatus = character(),
+                       description = character(),
+                       startdate = character(),
+                       enddate = character(),
+                       modified = character(),
+                       permit_id = character(),
+                       uid = character(),
+                       status = character(),
+                       module = character(),
+                       feed_nid = character(),
+                       dh_link_admin_reg_holder = character(),
+                       dh_link_admin_reg_issuer = character(),
+                       dh_link_admin_dha_usafips = character(),
+                       dh_link_admin_record_mgr_id = character(),
+                       dh_link_admin_timeseries = character(),
+                       stringsAsFactors=FALSE) 
+    
+    #i <- 1
+    for (i in 1:length(adminreg_feature_cont$list)) {
+      
+      adminreg_feat_i <- data.frame("adminid" = if (is.null(adminreg_feature_cont$list[[i]]$adminid)){""} else {adminreg_feature_cont$list[[i]]$adminid},
+                           "bundle" = if (is.null(adminreg_feature_cont$list[[i]]$bundle)){""} else {adminreg_feature_cont$list[[i]]$bundle},
+                           "ftype" = if (is.null(adminreg_feature_cont$list[[i]]$ftype)){""} else {adminreg_feature_cont$list[[i]]$ftype},
+                           "admincode" = if (is.null(adminreg_feature_cont$list[[i]]$admincode)){""} else {adminreg_feature_cont$list[[i]]$admincode},
+                           "name" = if (is.null(adminreg_feature_cont$list[[i]]$name)){""} else {adminreg_feature_cont$list[[i]]$name},
+                           "fstatus" = if (is.null(adminreg_feature_cont$list[[i]]$fstatus)){""} else {adminreg_feature_cont$list[[i]]$fstatus},
+                           "description" = if (is.null(adminreg_feature_cont$list[[i]]$description)){""} else {adminreg_feature_cont$list[[i]]$description},
+                           "startdate" = if (is.null(adminreg_feature_cont$list[[i]]$startdate)){""} else {adminreg_feature_cont$list[[i]]$startdate},
+                           "enddate" = if (is.null(adminreg_feature_cont$list[[i]]$enddate)){""} else {adminreg_feature_cont$list[[i]]$enddate},
+                           "modified" = if (is.null(adminreg_feature_cont$list[[i]]$modified)){""} else {adminreg_feature_cont$list[[i]]$modified},
+                           "permit_id" = if (is.null(adminreg_feature_cont$list[[i]]$permit_id)){""} else {adminreg_feature_cont$list[[i]]$permit_id},
+                           "uid" = if (is.null(adminreg_feature_cont$list[[i]]$uid)){""} else {adminreg_feature_cont$list[[i]]$uid},
+                           "status" = if (is.null(adminreg_feature_cont$list[[i]]$status)){""} else {adminreg_feature_cont$list[[i]]$status},
+                           "module" = if (is.null(adminreg_feature_cont$list[[i]]$module)){""} else {adminreg_feature_cont$list[[i]]$module},
+                           "feed_nid" = if (is.null(adminreg_feature_cont$list[[i]]$feed_nid)){""} else {adminreg_feature_cont$list[[i]]$feed_nid},
+                           "dh_link_admin_reg_holder" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_holder)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_holder[[1]]$id},
+                           "dh_link_admin_dha_usafips" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_dha_usafips[[1]]$id},
+                           "dh_link_admin_record_mgr_id" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_record_mgr_id[[1]]$id},
+                           "dh_link_admin_timeseries" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_timeseries[[1]]$id},
+                           "dh_link_admin_reg_issuer" = if (!length(adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer)){""} else {adminreg_feature_cont$list[[i]]$dh_link_admin_reg_issuer[[1]]$id}
+
+      )
+ 
+      adminreg_feat  <- rbind(adminreg_feat, adminreg_feat_i)
+    }
+  } else {
+    print("This Adminreg Feature does not exist")
+    return(FALSE)
+  }
+  adminreg_feature <- adminreg_feat
+}
+
+postAdminregFeature <- function(inputs,base_url,adminreg_feature){
+  
+  #inputs <- adminreg_feature_inputs
+  #base_url <- site
+  
+  #Search for existing feature matching supplied bundle, ftype, hydrocode
+  dataframe <- getAdminregFeature(inputs, base_url, adminreg_feature)
+  if (is.data.frame(dataframe)) {
+    adminid <- as.character(dataframe$adminid)
+  } else {
+    adminid = NULL
+  }
+  
+  pbody = list(bundle = inputs$bundle,
+               ftype = inputs$ftype,
+               admincode = inputs$admincode,
+               name = inputs$name,
+               fstatus = inputs$fstatus,
+               description = inputs$description,
+               startdate = inputs$startdate,
+               enddate = inputs$enddate,
+               modified = inputs$modified,
+               permit_id = inputs$permit_id,
+               uid = inputs$uid,
+               status = inputs$status,
+               module = inputs$module,
+               feed_nid = inputs$feed_nid,
+               dh_link_admin_reg_holder = if (is.null(inputs$dh_link_admin_reg_holder)){NULL} else {list(list(id = inputs$dh_link_admin_reg_holder))},
+               dh_link_admin_reg_issuer = if (is.null(inputs$dh_link_admin_reg_issuer)){NULL} else {list(list(id = inputs$dh_link_admin_reg_issuer))},
+               dh_link_admin_dha_usafips = if (is.null(inputs$dh_link_admin_dha_usafips)){NULL} else {list(list(id = inputs$dh_link_admin_dha_usafips))},
+               dh_link_admin_record_mgr_id = if (is.null(inputs$dh_link_admin_record_mgr_id)){NULL} else {list(list(id = inputs$dh_link_admin_record_mgr_id))},
+               dh_link_admin_timeseries = if (is.null(inputs$dh_link_admin_timeseries)){NULL} else {list(list(id = inputs$dh_link_admin_timeseries))}
+  ); 
+  #dh_geofield = list(geom = inputs$dh_geofield)
+  #list(id = inputs$dh_link_admin_reg_issuer)
+  #"proptext" = if (is.null(prop_cont$list[[i]]$proptext)){""} else {prop_cont$list[[i]]$proptext},
+  
+  
+  if (is.null(adminid)){
+    print("Creating Adminreg Feature...")
+    adminreg_feature <- POST(paste(base_url,"/dh_adminreg_feature/",sep=""), 
+                    add_headers(HTTP_X_CSRF_TOKEN = token),
+                    body = pbody,
+                    encode = "json"
+    );
+    #content(adminreg_feature)
+    if (adminreg_feature$status == 201){adminreg_feature <- paste("Status ",adminreg_feature$status,", Adminreg Feature Created Successfully",sep="")
+    } else {adminreg_feature <- paste("Status ",adminreg_feature$status,", Error: Adminreg Feature Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$adminid) == 1){
+    print("Single Adminreg Feature Exists, Updating...")
+    adminreg_feature <- PUT(paste(base_url,"/dh_adminreg_feature/",adminid,sep=""), 
+                   add_headers(HTTP_X_CSRF_TOKEN = token),
+                   body = pbody,
+                   encode = "json"
+    );
+    #content(feature)
+    if (adminreg_feature$status == 200){adminreg_feature <- paste("Status ",adminreg_feature$status,", Adminreg Feature Updated Successfully",sep="")
+    } else {adminreg_feature <- paste("Status ",adminreg_feature$status,", Error: Adminreg Feature Not Updated Successfully",sep="")}
+  } else {
+    adminreg_feature <- print("Multiple Adminreg Features Exist, Execution Halted")
+  }
+
+}
+
+
 
 vahydro_fe_multi_data <- function (
   bundle = 'watershed', 
