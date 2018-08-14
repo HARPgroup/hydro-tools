@@ -2,7 +2,7 @@ rm(list = ls())  #clear variables
 
 # set up RivSeg of interest : ------------------------------------
 
-RivSeg <- "NR3_8690_8500"
+RivSeg <- "OD1_9270_9110"
 
 
 #Libraries---------
@@ -205,8 +205,8 @@ gagetrue <- getProperty(gagetrue, site, gagetrue)
 
 
 
-# if false, analyze with gages, check for linked segments. 
-if (is.null(gagetrue)==FALSE){
+# if gagetrue is not logical, analyze with gages, check for linked segments. 
+if (is.logical(gagetrue)==FALSE){
   
 
 # Retrieve USGS Gage Feature From VAHydro  --------------------------------
@@ -253,8 +253,9 @@ linkinfo <- list(
 )
 linkprop <- getProperty(linkinfo, site, linkprop)
 
-#if linked segments do exist: 
-if (is.null(linkprop)== FALSE){ 
+
+#if linked segments do exist: (if linkprop is not logical)
+if (is.logical(linkprop)==FALSE){ 
 
   
 #get and group all linked segments for one plot: how many are there?-------------
@@ -340,7 +341,7 @@ map <- statemap +
 } #end condition for linked segments
 
 #if linked segments do not exist: 
-else if (linkprop == FALSE){
+else if (is.logical(linkprop)==TRUE){
   inputs <- list (
     bundle = 'watershed',
     ftype = 'vahydro',
@@ -369,7 +370,7 @@ else if (linkprop == FALSE){
 } #end condition for unlinked segments
   
  
-} else if (gagetrue==FALSE){
+} else if (is.logical(gagetrue)==TRUE){
   #then only the riversegment will be displayed. 
   inputs <- list (
     bundle = 'watershed',
