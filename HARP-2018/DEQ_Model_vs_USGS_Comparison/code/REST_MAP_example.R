@@ -6,8 +6,8 @@ library(sp) #required for SpatialPolygonsDataFrame()
   
 #----------------------------------------------
 site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
-hydro_tools <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\' #location of hydro-tools repo
-save_directory <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\plots\\' #Location to output images
+hydro_tools <- 'C:\\Users\\Kelsey\\Desktop\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+save_directory <- 'C:\\Users\\Kelsey\\Desktop\\GitHub\\plots\\' #Location to output images
 
 #----------------------------------------------
 
@@ -25,7 +25,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
   inputs <- list (
     bundle = 'watershed',
     ftype = 'vahydro',
-    hydrocode = 'vahydrosw_wshed_MN3_7770_7930'
+    hydrocode = 'vahydrosw_wshed_NR3_8690_8500'
   )
 
   dataframe <- getFeature(inputs, token, site)
@@ -43,7 +43,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
     entity_type = "dh_feature"
   )
   local_da_prop <- getProperty(inputs, site, prop)
-  postProperty(inputs = local_da_prop)
+  postProperty(inputs = local_da_prop, base_url = site, prop = prop)
   
   geom <- dataframe$geom
 #--------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 #-------------------------------------------------------------------------------------------- 
   gage.inputs <- list (
     bundle = 'usgsgage',
-    hydrocode = 'usgs_02044500'
+    hydrocode = 'usgs_03168000'
   )
   
 gage.df <- getFeature(gage.inputs, token, site)
