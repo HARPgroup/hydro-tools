@@ -19,7 +19,8 @@ basepath='C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools';
 source(paste(basepath,'config.local.private',sep='/'));
 source(paste(hydro_tools,"VAHydro-2.0/rest_functions.R", sep = "/")); 
 source(paste(hydro_tools,"VAHydro-1.0/fn_vahydro-1.0.R", sep = "/"));  
-source(paste(hydro_tools,"LowFlow/fn_iha.R", sep = "/"));  
+source(paste(hydro_tools,"LowFlow/fn_iha.R", sep = "/"));
+source(paste(hydro_tools, "HARP-2018/fn_gage+seg_mapper.R", sep = "/"));
 #retrieve rest token
 source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and password, contained in auth.private file
 token <- rest_token(site, token, rest_uname, rest_pw);
@@ -35,9 +36,7 @@ library(readr)
 description <- read_file(paste0(file.path(hydro_tools, "HARP-2018", "DEQ_Model_vs_USGS_Comparison", "gage_descriptions", siteNo), ".txt"))
 
 # Loading previously generated gage location maps
-library(magick)
-gis_img <- image_read(paste0(file.path(hydro_tools, "HARP-2018", "DEQ_Model_vs_USGS_Comparison", "gage_locations", siteNo), ".jpg"))
-gis_img <- image_resize(gis_img, geometry_size_percent(60))
+gis_img <- fn_gage_and_seg_mapper(RivSeg, site, hydro_tools, token)
 ```
 
 
@@ -2353,8 +2352,6 @@ scaleFUN <- function(x) sprintf("%.0f", x)
 
 ---
 title: "`r paste(siteNo, "vs.", RivSeg)`"
-author: "Daniel Hildebrand, Hailey Alspaugh, and Kelsey Reitz"
-date: "July 11, 2018"
 output:
   pdf_document: default
   word_document: default
