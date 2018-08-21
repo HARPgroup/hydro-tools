@@ -4,9 +4,9 @@ library(RCurl); #required for limiting connection timeout in vahydro_fe_data_ict
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   
-  base_url <- 'http://deq1.bse.vt.edu/d.bet'
-  rest_uname <- 'restws_echo'
-  rest_pw <- 'USG$Restech0'
+  #base_url <- 'http://deq1.bse.vt.edu/d.bet'
+  #rest_uname <- 'test'
+  #rest_pw <- 'test'
   
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
   csrf_url <- paste(base_url,"restws/session/token/",sep="/");
