@@ -3,6 +3,11 @@ library(stringr);
 library(RCurl); #required for limiting connection timeout in vahydro_fe_data_icthy()
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
+  
+  base_url <- 'http://deq1.bse.vt.edu/d.bet'
+  rest_uname <- 'restws_echo'
+  rest_pw <- 'USG$Restech0'
+  
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
   csrf_url <- paste(base_url,"restws/session/token/",sep="/");
   
@@ -578,11 +583,11 @@ getFeature <- function(inputs, token, base_url, feature){
 
 postFeature <- function(inputs,base_url,feature){
 
-  #inputs <- conveyance_inputs
+  #inputs <- facility_inputs  
   #base_url <- site
   
   #Search for existing feature matching supplied bundle, ftype, hydrocode
-  dataframe <- getFeature(inputs, base_url, feature)
+  dataframe <- getFeature(inputs, token, base_url, feature)
   if (is.data.frame(dataframe)) {
     hydroid <- as.character(dataframe$hydroid)
   } else {
@@ -606,8 +611,8 @@ postFeature <- function(inputs,base_url,feature){
                dh_link_admin_location = if (is.null(inputs$dh_link_admin_location)){NULL} else {list(list(id = inputs$dh_link_admin_location))},
                field_dh_from_entity = if (is.null(inputs$field_dh_from_entity)){NULL} else {list(id = inputs$field_dh_from_entity)},
                field_dh_to_entity = if (is.null(inputs$field_dh_to_entity)){NULL} else {list(id = inputs$field_dh_to_entity)},
-               dh_geofield = list(geom = inputs$dh_geofield),
-               geom = list(geom = inputs$dh_geofield)
+               dh_geofield = list(geom = inputs$dh_geofield)#,
+               #geom = list(geom = inputs$dh_geofield)
   ); 
  
   if (is.null(hydroid)){
@@ -637,7 +642,7 @@ postFeature <- function(inputs,base_url,feature){
 }
 
 getAdminregFeature <- function(inputs, base_url, adminreg_feature){
-  #inputs <-   adminreg_feature_inputs
+  #inputs <-   agency_inputs
   #base_url <-site
   #print(inputs)
   pbody = list(
@@ -727,7 +732,7 @@ getAdminregFeature <- function(inputs, base_url, adminreg_feature){
 
 postAdminregFeature <- function(inputs,base_url,adminreg_feature){
   
-  #inputs <- adminreg_feature_inputs
+  #inputs <-  permit_inputs
   #base_url <- site
   
   #Search for existing feature matching supplied bundle, ftype, hydrocode
