@@ -7,21 +7,77 @@ library(ggsn) #used for adding scale bar and north arrow to map
 library(sp) #required for SpatialPolygonsDataFrame()
 library(rlist) #use for grouping map images from ggplot
   
+source(paste(hydro_tools, "HARP-2018/DEQ_Model_ONLY_v1.0/code/fn_ALL.upstream.R", sep = "/"));
+source(paste(hydro_tools, "HARP-2018/DEQ_Model_ONLY_v1.0/code/fn_upstream.R", sep = "/"));
+  
 #----------Define function for watershedDF-----------------------
-getWatershedDF <- function(geom){
-  
-  watershed_geom <- readWKT(geom)
-  watershed_geom_clip <- gIntersection(bb, watershed_geom)
-  if (is.null(watershed_geom_clip)) {
-    watershed_geom_clip = watershed_geom
+  getWatershedDF <- function(geom){
+    
+    watershed_geom <- readWKT(geom)
+    watershed_geom_clip <- gIntersection(bb, watershed_geom)
+    if (is.null(watershed_geom_clip)) {
+      watershed_geom_clip = watershed_geom
+    }
+    wsdataProjected <- SpatialPolygonsDataFrame(watershed_geom_clip,data.frame("id"), match.ID = FALSE)
+    wsdataProjected@data$id <- rownames(wsdataProjected@data)
+    watershedPoints <- fortify(wsdataProjected, region = "id")
+    watershedDF <- merge(watershedPoints, wsdataProjected@data, by = "id")
+    
+    return(watershedDF)
   }
-  wsdataProjected <- SpatialPolygonsDataFrame(watershed_geom_clip,data.frame("id"), match.ID = FALSE)
-  wsdataProjected@data$id <- rownames(wsdataProjected@data)
-  watershedPoints <- fortify(wsdataProjected, region = "id")
-  watershedDF <- merge(watershedPoints, wsdataProjected@data, by = "id")
   
-  return(watershedDF)
+AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_7890',
+                  'OR2_8130_7900', 'OR5_8200_8370', 'OR4_8271_8120', 'TU3_8480_8680',
+                  'TU1_8570_8680', 'TU3_8650_8800', 'TU4_8680_8810', 'TU2_8790_9070',
+                  'TU4_8800_9290', 'TU4_8810_9000', 'BS4_8540_8441', 'BS3_8580_8440',
+                  'BS2_8590_8440', 'BS1_8730_8540', 'MN2_8250_8190', 'MN4_8260_8400',
+                  'MN0_8300_0001', 'MN4_8400_8380', 'MN4_8510_8380', 'MN2_8530_8510',
+                  'NR6_7820_7960', 'NR1_7880_8050', 'BS3_8350_8330', 'BS4_8440_8441',
+                  'MN3_7540_7680', 'MN1_7590_7860', 'MN1_7620_7710', 'MN3_7680_7860',
+                  'MN4_7710_8161', 'MN2_7720_7830', 'MN1_7730_8160', 'MN3_7770_7930',
+                  'MN4_7810_8080', 'MN2_7830_7950', 'MN3_7860_8080', 'MN3_7930_8010',
+                  'MN4_7950_7710', 'MN1_7990_8100', 'MN3_8010_7950', 'MN4_8080_8110',
+                  'MN2_8100_8190', 'MN5_8161_8160', 'MN3_8190_8260', 'MN5_8230_8161',
+                  'NR6_7960_8050', 'NR1_8030_8051', 'NR6_8050_8051', 'NR6_8051_8000',
+                  'NR6_8170_7960', 'NR6_8180_8051', 'NR2_8210_8180', 'NR3_8290_8170',
+                  'NR3_8420_8430', 'NR3_8430_7820', 'NR6_8640_8500', 'NR3_8690_8500',
+                  'NR5_8700_8640', 'NR3_8740_8500', 'NR5_8760_8640', 'NR1_8820_8760',
+                  'NR5_8870_8760', 'NR1_8960_8870', 'NR1_9030_9080', 'NR5_9050_8870',
+                  'NR5_9080_9050', 'NR4_9130_9080', 'NR1_9150_9050', 'NR3_9170_9130',
+                  'NR3_9190_9170', 'NR3_9240_9130', 'NR2_9250_9170', 'NR3_9310_9240',
+                  'OD3_8340_8520', 'OD3_8520_8621', 'OD2_8560_8630', 'OD6_8621_8470',
+                  'OD3_8630_8720', 'OD6_8660_8621', 'OD2_8670_8890', 'OD3_8710_8470',
+                  'OD3_8720_8900', 'OD5_8770_8780', 'OD5_8780_8660', 'OD2_8830_8710',
+                  'OD2_8840_9020', 'OD3_8850_8931', 'OD5_8890_8770', 'OD5_8900_8770',
+                  'OD1_8910_8930', 'OD2_8920_8830', 'OD3_8930_8931', 'OD3_8931_9140',
+                  'OD5_8940_8780', 'OD4_8990_8900', 'OD3_9020_9110', 'OD4_9110_9140',
+                  'OD4_9140_8990', 'OD1_9270_9110', 'OR2_7610_7780', 'OR2_7650_8070',
+                  'OR2_7670_7840', 'OR1_7700_7980', 'OR3_7740_8271', 'OR2_7780_7890',
+                  'OR2_7840_7970', 'OR5_7890_7970', 'OR2_7900_7740', 'OR5_7910_8410',
+                  'OR5_7970_8200', 'OR1_8280_8020', 'OR1_8320_8271', 'OR5_8370_8410',
+                  'OR5_8410_8470', 'OR2_8450_8490', 'OR2_8460_8271', 'OR7_8470_8490',
+                  'TU2_8860_9000', 'TU3_8880_9230', 'TU2_8950_9040', 'TU2_8970_9280',
+                  'TU5_9000_9280', 'TU1_9010_9290', 'TU3_9040_9180', 'TU3_9060_9230',
+                  'TU2_9070_9090', 'TU2_9100_9200', 'TU3_9180_9090', 'TU2_9200_9180',
+                  'TU1_9220_9200', 'TU3_9230_9260', 'NR2_8600_8700', 'NR6_8500_7820')
+
+# Splitting the River Segment string into each segment name
+RivSegStr <- strsplit(RivSeg, "\\+")
+RivSegStr <- RivSegStr[[1]]
+num.segs <- length(RivSegStr)
+
+# Getting all upstream segments for each of the linked segs, combining
+# to form a vector of all upstream segments.
+AllUpstreamSegs <- vector()
+for (i in 1:num.segs) {
+  RivSeg <- RivSegStr[i]
+  UpstreamSegs <- fn_ALL.upstream(RivSeg, AllSegList)
+  AllUpstreamSegs <- c(AllUpstreamSegs, UpstreamSegs)
 }
+eliminate <- which(AllUpstreamSegs=="NA")
+AllUpstreamSegs <- AllUpstreamSegs[-eliminate]
+AllUpstreamSegs <- unique(AllUpstreamSegs)
+num.upstream <- length(AllUpstreamSegs)
 
 STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
 
@@ -129,36 +185,77 @@ statemap <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
   geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
   geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
   geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)
+if (num.upstream > 0) {
+for (i in 1:num.upstream) {  
+  RivSeg <- AllUpstreamSegs[i]
+  namer <- paste0("upstream.watershedDF", i)
+  
+  # Retrieve Riversegment Feature From VAHydro  -----------------------------
+  
+  inputs <- list (
+    bundle = 'watershed',
+    ftype = 'vahydro',
+    hydrocode = paste0('vahydrosw_wshed_', RivSeg)
+  )
+  
+  dataframe <- getFeature(inputs, token, site)
+  #print(dataframe)
+  hydroid <- dataframe$hydroid
+  inputs <- list(
+    varkey = "wshed_drainage_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_properties"
+  )
+  prop <- getProperty(inputs, site, prop)
+  
+  inputs <- list(
+    varkey = "wshed_local_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_feature"
+  )
+  local_da_prop <- getProperty(inputs, site, prop)
+  #postProperty(inputs = local_da_prop, base_url = site, prop = prop)
+  
+  geom <- dataframe$geom
+  watershedDF <- getWatershedDF(geom)
+  assign(namer, watershedDF)
+}
+}
 
-# Retrieve Riversegment Feature From VAHydro  -----------------------------
-
-inputs <- list (
-  bundle = 'watershed',
-  ftype = 'vahydro',
-  hydrocode = paste0('vahydrosw_wshed_', RivSeg)
-)
-
-dataframe <- getFeature(inputs, token, site)
-#print(dataframe)
-hydroid <- dataframe$hydroid
-inputs <- list(
-  varkey = "wshed_drainage_area_sqmi",
-  featureid = hydroid,
-  entity_type = "dh_properties"
-)
-prop <- getProperty(inputs, site, prop)
-
-inputs <- list(
-  varkey = "wshed_local_area_sqmi",
-  featureid = hydroid,
-  entity_type = "dh_feature"
-)
-local_da_prop <- getProperty(inputs, site, prop)
-#postProperty(inputs = local_da_prop, base_url = site, prop = prop)
-
-geom <- dataframe$geom
-
-
+for (i in 1:num.segs) {  
+  RivSeg <- RivSegStr[i]
+  namer <- paste0("seg.watershedDF", i)
+  
+  # Retrieve Riversegment Feature From VAHydro  -----------------------------
+  
+  inputs <- list (
+    bundle = 'watershed',
+    ftype = 'vahydro',
+    hydrocode = paste0('vahydrosw_wshed_', RivSeg)
+  )
+  
+  dataframe <- getFeature(inputs, token, site)
+  #print(dataframe)
+  hydroid <- dataframe$hydroid
+  inputs <- list(
+    varkey = "wshed_drainage_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_properties"
+  )
+  prop <- getProperty(inputs, site, prop)
+  
+  inputs <- list(
+    varkey = "wshed_local_area_sqmi",
+    featureid = hydroid,
+    entity_type = "dh_feature"
+  )
+  local_da_prop <- getProperty(inputs, site, prop)
+  #postProperty(inputs = local_da_prop, base_url = site, prop = prop)
+  
+  geom <- dataframe$geom
+  watershedDF <- getWatershedDF(geom)
+  assign(namer, watershedDF)
+}
 
 # Determine if Gage Exists for Segment (gage_linked?) ---------------------
 
@@ -179,7 +276,6 @@ gagetrue <- getProperty(gagetrue, site, gagetrue)
 # if gagetrue is not logical, analyze with gages, check for linked segments. 
 if (is.logical(gagetrue)==FALSE){
   
-  
   # Retrieve USGS Gage Feature From VAHydro  --------------------------------
   Gage <- as.character(gagetrue$propcode)
   gage.inputs <- list (
@@ -196,179 +292,29 @@ if (is.logical(gagetrue)==FALSE){
   split_2 <- read.table(text = split_1$V2, sep = ")", colClasses = "character")
   split_3 <- read.table(text = split_2$V1, sep = " ", colClasses = "character")
   GAGEDF <- data.frame(x=as.numeric(split_3$V1),y=as.numeric(split_3$V2),X.id.="id",id="1")
-  
-  
-  # Do linked_segments for specified riv seg exist? -----------------------------
-  
-  #get gage weighted data for particular gage
-  gageinfo <- list(
-    varkey = "gage_weighted",
-    propcode = Gage,
-    entity_type = "dh_properties" #"dh_properties
-  )
-  prop <- getProperty(gageinfo, site, prop)
-  
-  #determine which gage_weighted property in prop matches that for our hydroid. 
-  #find row in prop that matches pid from the findgage variable
-  pidmatch <- findgage$pid
-  getrow <- which(prop$featureid==pidmatch) 
-  
-  #for the row "getrow", use this as feature id in linked segments. 
-  featid <- prop$pid[getrow]
-  
-  #pull linked segments with the aforementioned featid. Does this exist?
-  linkinfo <- list(
-    varkey = "linked_segments",     
-    featureid = featid,
-    entity_type = "dh_properties"
-  )
-  linkprop <- getProperty(linkinfo, site, linkprop)
-  
-  
-  #if linked segments do exist: (if linkprop is not logical)
-  if (is.logical(linkprop)==FALSE){ 
-    
-    
-    #get and group all linked segments for one plot: how many are there?-------------
-    m <- 1 
-    storeseg <- data.frame()
-    for (m in 1:(nrow(linkprop)+1)){
-      if (m == 1){
-        storeseg[m,1] <- RivSeg
-      }else
-        storeseg[m,1] <- linkprop$propcode[m-1]
-      m <- m+1
-    }
-    
-    
-    #for nrow storeseg, get geometry for each segment:------------
-    
-    i <- 1
-    for (i in 1:nrow(storeseg)){
-      GoodSeg <- as.character(storeseg[i,1]) #pull segment from storeseg
-      inputs <- list (
-        bundle = 'watershed',
-        ftype = 'vahydro',
-        hydrocode = paste0('vahydrosw_wshed_', GoodSeg)
-      )
-      
-      segframe <- getFeature(inputs, token, site)
-      hydroid <- segframe$hydroid
-      
-      inputs <- list(
-        varkey = "wshed_local_area_sqmi",
-        featureid = hydroid,
-        entity_type = "dh_feature"
-      )
-      
-      #pull spatial geometry used as input for WatershedDF function
-      geom<- segframe$geom
-      
-      #make clips accordingly for segments:--------------------------------
-      
-      # CLIP WATERSHED GEOMETRY TO BOUNDING BOX
-      if (i ==1){
-        watershedDF1 <- getWatershedDF(geom)
-      } else if (i ==2){
-        watershedDF2 <- getWatershedDF(geom)
-      } else if (i ==3){
-        watershedDF3 <- getWatershedDF(geom)
-      }
-      i <- i + 1
-    }
-    
-    
-    #--------------------------------------------------------------------------------------------
-    #--------------------------------------------------------------------------------------------
-    
-    
-    #set plot data based on number of segments: ---------------
-    
-    if (nrow(storeseg)==1){
-      map <- statemap + 
-        geom_polygon(aes(color=paste0(RivSeg)), data = watershedDF1, color="khaki2", fill = "green",alpha = 0.25,lwd=0.5)+
-        
-        geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-        geom_point(aes(x = x, y = y, group = id, color="Gage"), data = GAGEDF, fill="red", color="black", size = 3, shape=24) 
-      
-    }else if (nrow(storeseg)==2){
-      map <- statemap +
-        geom_polygon(aes(color=paste0(RivSeg)), data = watershedDF1, color="khaki2", fill = "green",alpha = 0.25,lwd=0.5)+
-        geom_polygon(aes(color=paste0(storeseg[2])), data = watershedDF2, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
-        
-        geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-        geom_point(aes(x = x, y = y, group = id, color="Gage"), data = GAGEDF, fill="red", color="black", size = 3, shape=24)
-      
-    }else if (nrow(storeseg)==3){
-      map <- statemap + 
-        geom_polygon(aes(color=paste0(RivSeg)), data = watershedDF1, color="khaki2", fill = "green",alpha = 0.25,lwd=0.5)+
-        geom_polygon(aes(color=paste0(storeseg[2])), data = watershedDF2, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
-        geom_polygon(aes(color=paste0(storeseg[3])), data = watershedDF3, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
-        
-        geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-        geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 2.75, shape=24)
-      
-    } #end store seg options
-  } #end condition for linked segments
-  
-  #if linked segments do not exist: 
-  else if (is.logical(linkprop)==TRUE){
-    inputs <- list (
-      bundle = 'watershed',
-      ftype = 'vahydro',
-      hydrocode = paste0('vahydrosw_wshed_', RivSeg)
-    )
-    
-    segframe <- getFeature(inputs, token, site)
-    hydroid <- segframe$hydroid
-    
-    inputs <- list(
-      varkey = "wshed_local_area_sqmi",
-      featureid = hydroid,
-      entity_type = "dh_feature"
-    )
-    
-    #pull spatial geometry used as input for WatershedDF function
-    geom<- segframe$geom
-    
-    #use watershed DF function for single segment case: 
-    watershedDF <- getWatershedDF(geom)
-    map <- statemap + 
-      geom_polygon(aes(color=paste0(RivSeg)), data = watershedDF, color="khaki2", fill = "green",alpha = 0.25,lwd=0.5)+
-      geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
-      geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 2.75, shape=24)
-    
-  } #end condition for unlinked segments
-  
-  
-} else if (is.logical(gagetrue)==TRUE){
-  #then only the riversegment will be displayed. 
-  inputs <- list (
-    bundle = 'watershed',
-    ftype = 'vahydro',
-    hydrocode = paste0('vahydrosw_wshed_', RivSeg)
-  )
-  
-  segframe <- getFeature(inputs, token, site)
-  hydroid <- segframe$hydroid
-  
-  inputs <- list(
-    varkey = "wshed_local_area_sqmi",
-    featureid = hydroid,
-    entity_type = "dh_feature"
-  )
-  
-  #pull spatial geometry used as input for WatershedDF function
-  geom <- segframe$geom
-  
-  #use watershed DF function for single segment case: 
-  watershedDF <- getWatershedDF(geom)
-  
-  map <- statemap + 
-    geom_polygon(aes(color=paste0(RivSeg)), data = watershedDF, color="khaki2", fill = "green",alpha = 0.25,lwd=0.5)+
-    geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)
-  
 }
+    
+    #--------------------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------------------------
+    
+    
+
+map <- statemap
+if (num.upstream > 0) {
+for (i in 1:num.upstream) {
+  namer <- paste0("upstream.watershedDF", i)
+  map <- map +
+    geom_polygon(data = eval(parse(text = namer)), color="gray35", fill = "lightgreen",alpha = 0.25,lwd=0.5)
+}      
+}
+for (i in 1:num.segs) {
+      namer <- paste0("seg.watershedDF", i)
+      map <- map +
+      geom_polygon(data = eval(parse(text = namer)), color="black", fill = "green3",alpha = 0.25,lwd=0.5)
+}
+      map <- map + geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
+      geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 2.75, shape=24)
+
 
 #additions to map -------------
 map + 

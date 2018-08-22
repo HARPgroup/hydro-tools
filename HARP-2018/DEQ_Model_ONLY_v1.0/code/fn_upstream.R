@@ -2,9 +2,9 @@ fn_upstream <- function(RivSeg, AllSegList) {
   library(stringr)
   library(rapportools)
   # Create dataframe for upstream and downstream segments based on code in string
-  ModelSegments <- data.frame(matrix(nrow = nrow(AllSegList), ncol = 5))
+  ModelSegments <- data.frame(matrix(nrow = length(AllSegList), ncol = 5))
   colnames(ModelSegments)<- c('RiverSeg', 'Middle', 'Last', 'Downstream', 'Upstream')
-  ModelSegments$RiverSeg <- AllSegList$River.Segment
+  ModelSegments$RiverSeg <- AllSegList
   
   # Pull out 4 digit codes in middle and end for upstream/downstream segments
   i <- 1
