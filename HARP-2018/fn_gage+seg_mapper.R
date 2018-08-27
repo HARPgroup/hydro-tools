@@ -317,7 +317,7 @@ for (i in 1:num.segs) {
 
 
 #additions to map -------------
-map + 
+map <- map + 
   #ADD NORTH ARROW AND SCALE BAR
   north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
   scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE)+
