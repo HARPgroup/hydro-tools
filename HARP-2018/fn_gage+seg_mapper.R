@@ -75,7 +75,9 @@ for (i in 1:num.segs) {
   AllUpstreamSegs <- c(AllUpstreamSegs, UpstreamSegs)
 }
 eliminate <- which(AllUpstreamSegs=="NA")
-AllUpstreamSegs <- AllUpstreamSegs[-eliminate]
+if (is.empty(eliminate) == FALSE) {
+  AllUpstreamSegs <- AllUpstreamSegs[-eliminate]
+}
 AllUpstreamSegs <- unique(AllUpstreamSegs)
 num.upstream <- length(AllUpstreamSegs)
 
