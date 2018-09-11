@@ -802,10 +802,6 @@ for (i in 1:num.segs) {
   all.metrics[1,66] <- alfprop$propvalue
   
   all.errors.all.segments[all.errors.line.no,] <- all.metrics[1,1:num.metrics]
-  #Normalizing data: dividing all metrics by the contributing drainage area of the river segment
-  all.errors.all.segments[all.errors.line.no,-num.metrics] <- all.errors.all.segments[all.errors.line.no,-num.metrics]/all.errors.all.segments[all.errors.line.no,num.metrics]
-  #Converting from feet/sec to mm/year
-  all.errors.all.segments[all.errors.line.no, -num.metrics] <- all.errors.all.segments[all.errors.line.no,-num.metrics]*60*60*24*365*12*25.4
   all.errors.line.no <- all.errors.line.no + 1
 }
 
@@ -935,8 +931,8 @@ for (i in 1:num.segs) {
   assign(namer, watershedDF)
 }
 
-dir.create(paste0(output_location,"\\SouthernRivers_p532_SpatialAnalysis-normalized"), showWarnings = FALSE);
-new.output_location <- paste0(output_location, "\\SouthernRivers_p532_SpatialAnalysis-normalized")
+dir.create(paste0(output_location,"\\SouthernRivers_p532_SpatialAnalysis-unnormalized"), showWarnings = FALSE);
+new.output_location <- paste0(output_location, "\\SouthernRivers_p532_SpatialAnalysis-unnormalized")
 
 # Initiating counter
 ctr <- 1
@@ -993,7 +989,7 @@ for (ctr in 1:num.metrics) {
   }
 #Add legend, add title, ggsave
   map <- map + ggtitle(DesiredMetric)
-  map <- map + scale_fill_manual(breaks = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), limits=c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), labels=c("Less than 5", "5 to 10", "10 to 25", "25 to 50", "50 to 100", "100 to 250", "250 to 500", "500 to 1000", "1000 to 2500", "2500 to 5000", "Greater than 5000"), values=cols, name = "Flow (mm/year)")
+  map <- map + scale_fill_manual(breaks = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), limits=c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), labels=c("Less than 5", "5 to 10", "10 to 25", "25 to 50", "50 to 100", "100 to 250", "250 to 500", "500 to 1000", "1000 to 2500", "2500 to 5000", "Greater than 5000"), values=cols, name = "Flow (cfs)")
   #ADD NORTH ARROW AND SCALE BAR
   map <- map + north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
     scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE, st.size = 3.8)
