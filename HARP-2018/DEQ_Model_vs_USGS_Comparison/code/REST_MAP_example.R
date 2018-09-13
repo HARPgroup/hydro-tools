@@ -6,8 +6,8 @@ library(sp) #required for SpatialPolygonsDataFrame()
   
 #----------------------------------------------
 site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
-hydro_tools <- 'C:\\Users\\Kelsey\\Desktop\\GitHub\\hydro-tools\\' #location of hydro-tools repo
-save_directory <- 'C:\\Users\\Kelsey\\Desktop\\GitHub\\plots\\' #Location to output images
+hydro_tools <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+save_directory <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\plots\\' #Location to output images
 
 #----------------------------------------------
 
@@ -210,7 +210,7 @@ map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
         panel.background = element_blank(),
         panel.border = element_blank())
 
-filename <- paste(inputs$hydrocode,".png", sep="")
+filename <- paste("Test.png", sep="")
 ggsave(file=filename, path = save_directory, width=12, height=9.5)
 
 #--------------------------------------------------------------------------------------------
