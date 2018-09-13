@@ -15,12 +15,12 @@ source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and pas
 token <- rest_token(site, token, rest_uname, rest_pw);
 options(timeout=120); # set timeout to twice default level to avoid abort due to high traffic
 
-model_reader <- 'https://docs.google.com/spreadsheets/d/1LBsXCYcE5nJz8DiQBAmig_2pokjjaVKiQemWL1tdpzU/pub?output=csv'
+model_reader <- 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY5BkQ0Ha269jchgbuZYaND5_rxaSTV1rBoW6dDtr7NnlrCIcMaODmST-WAfSzUwUWwOuv3ghVUwNH/pub?output=csv'
 model_segs = read.csv(model_reader, header = TRUE, sep = ",", stringsAsFactors = FALSE);
-model_segs$Gage <- as.character(model_segs$Gage)
+model_segs$Gage <- as.character(model_segs$GageID)
 
 # in the line below, change the model_segs$...Metric of interest (the second one)
-metric <- data.frame(model_segs$Gage, model_segs$FeatureID, signif(model_segs$Overall.Mean.Flow, digits=3)) 
+metric <- data.frame(model_segs$Gage, model_segs$FeatureID,model_segs$USGSArea) 
 colnames(metric) <- c('Gage', 'FeatureID','Metric')
 i <- 1
 
@@ -51,10 +51,10 @@ for (i in 1:nrow(metric)){
   
   # now, retrieve august low flow property if set
   alfinfo <- list(
-    varkey = "om_model_element",      # chane this line
-    propcode = 'p532cal_062211',                 # change this line 
-    featureid =  hydroid, #as.integer(as.character(metric$FeatureID[i])),
-    entity_type = "dh_feature" #"dh_properties"
+    varkey = "wshed_drainage_area_sqmi",      # chane this line
+    #propcode = 'p532cal_062211',                 # change this line 
+    featureid =  as.integer(as.character(metric$FeatureID[i])),
+    entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
   # this just sets our property to the 
@@ -62,9 +62,9 @@ for (i in 1:nrow(metric)){
     # create
     alfprop = alfinfo
   }
-  alfprop$propname = paste0(model_segs$Propname[i]) #change this line 
-  alfprop$propcode = 'p532cal_062211'                #change this line 
-  alfprop$propvalue = 0 #signif(metric$Metric[i], digits=3)
+  alfprop$propname = 'Drainage Area' #change this line 
+  #alfprop$propcode = 'p532cal_062211'                #change this line 
+  alfprop$propvalue =metric$Metric[i]
   alfinfo$startdate = format(as.POSIXlt('1984-01-01'),"%s") 
   alfinfo$enddate = format(as.POSIXlt('2005-12-31'),"%s")
   alfprop$pid = NULL
