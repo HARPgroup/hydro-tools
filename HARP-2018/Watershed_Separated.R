@@ -1,4 +1,4 @@
-# 8/29/18 
+#9/17/18 
 # Script will be transformed into a function that calculates the next
 # upstream or downstream segment and maps them. 
 
@@ -20,13 +20,21 @@ library(sp) #required for SpatialPolygonsDataFrame()
 # Clear workspace
 rm(list = ls())
 
-# USER INPUTS ----------
+# USER INPUTS #####################################################################################################
+###################################################################################################################
+site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
+#hydro_tools <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+hydro_tools <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\' #location of hydro-tools repo
+#save_directory <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\plots\\' #Location to output images
+save_directory <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\plots\\' #Location to output images
+
+###################################################################################################################
 # Location of "Linking Segments" csv:
-folder_location = "C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\HARP-2018";
+folder_location <- paste0(hydro_tools,"HARP-2018",sep="")
 
 # Location of output destination
 dir.create(paste0(folder_location, "\\GIS_Seg"), showWarnings = FALSE);
-file_path <-"C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\HARP-2018\\GIS_Seg" 
+file_path <- paste0(folder_location,"\\GIS_Seg",sep="") 
 
 # Import Data of interest 
 ImportTab <- read.csv(paste0(folder_location,"\\AllRiverSegments.csv"), 
@@ -35,12 +43,10 @@ ImportTab <- data.frame(ImportTab)
 
 GAGEImport<-'https://docs.google.com/spreadsheets/d/18m1ua87Bd0Lc3kDlhvHuBkqdRmm8LhxUA3dBmPlAbLQ/pub?output=csv'
 gagedata<- read.csv(GAGEImport, header=TRUE, sep=',')
-#----------------------------------------------
-site <- "http://deq1.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
-hydro_tools <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools\\' #location of hydro-tools repo
-save_directory <- 'C:\\Users\\HaileyMae\\Documents\\GitHub\\plots\\' #Location to output images
 
-#----------------------------------------------
+###################################################################################################################
+
+
 
 #Generate REST token              
 rest_uname = FALSE
@@ -175,7 +181,7 @@ ModelSegments$RiverSeg <- ImportTab$RiverSeg
 # Pull out 4 digit codes in middle and end for upstream/downstream segments
 i <- 1
 for (i in 1:nrow(ModelSegments)){
-  
+  print(paste("Extracting Code for ",i," of ",nrow(ModelSegments),sep=""))
   ModelSegments[i,2]<- str_sub(ModelSegments[i,1], start=5L, end=8L)
   ModelSegments[i,3]<- str_sub(ModelSegments[i,1], start=10L, end=-1L)
   i <- i + 1
@@ -184,6 +190,7 @@ for (i in 1:nrow(ModelSegments)){
 # Determine Upstream Segment ----------
 j <- 1
 for (j in 1:nrow(ModelSegments)){
+  print(paste("Determining Upstream Segment for ",j," of ",nrow(ModelSegments),sep=""))
   Upstream <- which(ModelSegments$Middle==ModelSegments$Last[j])
   
   if (length(Upstream)==0){
@@ -200,6 +207,7 @@ for (j in 1:nrow(ModelSegments)){
 # Determine Downstream Segment ----------
 k<-1
 for (k in 1:nrow(ModelSegments)){
+  print(paste("Determining Downstream Segment for ",k," of ",nrow(ModelSegments),sep=""))
   Downstream <- which(ModelSegments$Downstream==ModelSegments$RiverSeg[k])
   NumUp <- ModelSegments$RiverSeg[Downstream]
   ModelSegments[k,5]<- paste(NumUp, collapse = '+')
@@ -226,7 +234,7 @@ alldata<- data.frame(matrix(ncol=2, nrow=nrow(UpStart)))
 
 
 for (i in 1:nrow(UpStart)){
-  
+  print(paste("Finding Downstream Segment for ",i," of ",nrow(UpStart),sep=""))
   #initialize variables for while loop  
   FirstSeg <- UpStart$RiverSeg[i]
   FirstSegRow<- which(ModelSegments$RiverSeg==FirstSeg)
@@ -256,6 +264,7 @@ i <- 1
 max<-1
 
 for (i in 1:nrow(alldata)){
+  print(paste("Finding Max Number of River Segments Downstream for ",i," of ",nrow(alldata),sep=""))
   DownSegs <- strsplit(alldata[i,2], "\\+")
   DownSegs <- t(as.data.frame(DownSegs[[1]]))
   maxnew <- length(DownSegs)
@@ -273,6 +282,7 @@ sepsegs <- data.frame(matrix(nrow=nrow(alldata), ncol=(max+2)))
 colnames(sepsegs)<- 1:ncol(sepsegs)
 
 for (j in 1:nrow(alldata)){
+  print(paste("Generating matrix of downstream segments: row ",j," of ",nrow(alldata),sep=""))
   DownSegs <- strsplit(alldata[j,2], "\\+")
   DownSegs <- data.frame(t(as.data.frame(DownSegs[[1]])))
   DownSegs[] <- lapply(DownSegs, as.character)
@@ -310,6 +320,7 @@ colnames(SegmentList)<- 1:ncol(SegmentList)
 # Create a csv for every tail with no outlet (that segment is the final outlet)----------
 k <- 1
 for (k in 1:nrow(NoDownStream)){
+  print(paste("Generating csv for each tail with no outlet: row ",k," of ",nrow(NoDownStream),sep=""))
   RivSeg <- NoDownStream$RiverSeg[k]
   logic_SegList <- (SegmentList==RivSeg)
   logic_Rows<- which(apply(logic_SegList, 1, any))
@@ -338,6 +349,7 @@ x<-1
 y<-ncol(Groupings)
 RivSegGroups<-data.frame(matrix(nrow=1,ncol=1))
 for (i in 1:nrow(Groupings)){
+  print(paste("Groupings ",i," of ",nrow(Groupings),sep=""))
   store<-data.frame(matrix(nrow=1,ncol=2))
   j<-1
   for (j in 1:ncol(Groupings)){
@@ -377,6 +389,7 @@ q<-1
 RivSegMap<-data.frame(matrix(nrow=1, ncol=9))
 nrowold<-0
 for (i in 1:nrow(ImportTab)) {  
+  print(paste("ImportTab ",i," of ",nrow(ImportTab),sep=""))
   RivSeg <- ImportTab$RiverSeg[i]
   namer <- paste0(RivSeg)
   
@@ -428,6 +441,7 @@ i<-1
 # LOOP TO DETERMINE WHICH RIVER SEGMENTS HAVE DATA ----------
 #The loop will run and add the desired metrics column to any segment that has a matching river segment ID with that metric
 for (i in 1:nrow(RivSegMap)){
+  print(paste("DETERMINE WHICH RIVER SEGMENTS HAVE DATA ",i," of ",nrow(RivSegMap),sep=""))
   if (RivSegMap$X9[i]%in%RivSegGroups$RiverSeg){ #if the river segment ID is in the metrics file make it true, if not make it false
     RivSegMap$Group[i]<- RivSegGroups$Group[RivSegGroups$RiverSeg==RivSegMap$X9[i]]
   }
@@ -451,6 +465,7 @@ for (h in 1:nrow(LogicGrouping)){
 i<-1
 p<-1
 for (i in 1:nrow(Coordinate)){
+  print(paste("Coordinate ",i," of ",nrow(Coordinate),sep=""))
   Groupings$LastSeg[i]<-as.character(Groupings[Coordinate[p,1],Coordinate[p,2]])
   i<-i+1
   p<-p+1
@@ -468,7 +483,9 @@ SouthernRivers<- RivSegMap[!is.na (RivSegMap$Group),]
 # Pull out 2 digit codes at beginning of upstream/downstream segments
 i <- 1
 for (i in 1:nrow(SouthernRivers)){
+  print(paste("Pull out 2 digit codes ",i," of ",nrow(SouthernRivers),sep=""))
   SouthernRivers[i,11]<-substr(SouthernRivers$X9[i], start=1L, stop=2L)
+  print(paste("On SouthernRivers ",i," of ",nrow(SouthernRivers),sep=""))
   i <- i + 1
 }
 names(SouthernRivers)<-c(paste0(names(PADF)),'RivSeg','num', 'RivID')
@@ -493,6 +510,7 @@ i<-1
 Segs<-data.frame(matrix(nrow=159,ncol=2))
 Segs<-(unique(SouthernRivers$RivSeg))
 for (i in 1:length(Segs)){
+  print(paste("Segs ",i," of ",length(Segs),sep=""))
   namer<-paste0(Segs[i])
   currentseg<-subset(SouthernRivers,SouthernRivers$RivSeg==Segs[i])
   currentseg$RivID<-as.character(currentseg$RivID)
@@ -552,35 +570,43 @@ finalmap<-finalmap+north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
   scale_x_continuous(limits = c(extent$x))+
   scale_y_continuous(limits = c(extent$y))+
   
-  scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1])),
-                      values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')+
+  scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
+                    limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
+                    labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1])),
+                    values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')+
   
+   
         theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         panel.background = element_blank(),
         panel.border = element_blank(),
+        #axis.text =element_text(size=rel(2)),    #Uncomment to display lat/long on plot
+        #axis.title = element_text(size=rel(2)),  #Uncomment to display lat/long on plot
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
         legend.text = element_text(size=rel(2)),
-        axis.text =element_text(size=rel(2)),
-        axis.title = element_text(size=rel(2)),
         legend.title = element_text(size= rel(2)))
 
-filename <- paste("Watersheds.png", sep="")
-ggsave(file=filename, path = save_directory, width=16, height=9.5)
-
+#Uncomment to plot without gage locations
+#filename <- paste("Watersheds.png", sep="")
+#ggsave(file=filename, path = save_directory, width=16, height=9.5)
 
 i<-1
 for(i in 1:nrow(gagedata)){
   siteinfo<-readNWISsite(paste0('0',gagedata$Gage_number[i]))
   gagedf<-data.frame(x=as.numeric(siteinfo$dec_long_va), y=as.numeric(siteinfo$dec_lat_va),X.id='id', id='1')
-  segadd<-finalmap+geom_point(aes(x=x, y=y, group=id), data=gagedf, color='black', fill = 'black', size=1.5, shape=24)
+  segadd<-finalmap+geom_point(aes(x=x, y=y, group=id, shape = 'tri'), data=gagedf, color='black', fill = 'black', size=1.5)
   finalmap<-segadd
   i<-1+i
 }
 
-gagemap<- finalmap+scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l','m'), limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l','m'), labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1], 'USGS Gage')),
-                                      values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2],'black')), name='Southern Virginia Watersheds')
-  
+gagemap<- finalmap+scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1])),
+                                     values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')
+gagemap <- gagemap+scale_shape_manual(breaks=c('tri'), limits=c('tri'), labels=c('USGS Gage'), values = c(24), name = 'Points of Interest')
+
 
 filename <- paste("WatershedswithGages.png", sep="")
 ggsave(file=filename, path = save_directory, width=16, height=9.5)
+
 
