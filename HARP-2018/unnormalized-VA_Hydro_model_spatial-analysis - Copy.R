@@ -7,13 +7,12 @@
 # LIBRARIES -----
 library(rgdal)
 library(raster)
+library(rgeos)
+library(ggmap)
+library(ggsn)
+library(sp)
 
 # INPUTS ------------------------------------------------------------------
-
-# Address of "DEQ_Model_vs_USGS_Comparison" folder
-# Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_ONLY_v1.0"
-
 output_location <- "C:\\Users\\Daniel\\Downloads"
 
 site <- "http://deq2.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
@@ -87,7 +86,7 @@ metrics.names <- c('Overall Mean Flow', 'Jan. Low Flow', 'Feb. Low Flow',
                    'Min. 3-Day Low Flow', 'Med. 3-Day Low Flow', 'Min. 7-Day Low Flow',
                    'Med. 7-Day Low Flow', 'Min. 30-Day Low Flow', 'Med. 30-Day Low Flow',
                    'Min. 90-Day Low Flow', 'Med. 90-Day Low Flow', '7q10',
-                   'Year of 90-Day Low Flow', '1pct Non-Exceedance', '5pct Non-Exceedance',
+                   '1pct Non-Exceedance', '5pct Non-Exceedance',
                    '50pct Non-Exceedance', '95pct Non-Exceedance', '99pct Non-Exceedance',
                    'Sep. 10pct Non-Exceedance', 'Mean Baseflow', 'Jan. High Flow',
                    'Feb. High Flow', 'Mar. High Flow', 'Apr. High Flow',
@@ -97,7 +96,7 @@ metrics.names <- c('Overall Mean Flow', 'Jan. Low Flow', 'Feb. Low Flow',
                    'Med. 1-Day High Flow', 'Max. 3-Day High Flow', 'Med. 3-Day High Flow',
                    'Max. 7-Day High Flow', 'Med. 7-Day High Flow', 'Max. 30-Day High Flow',
                    'Med. 30-Day High Flow', 'Max. 90-Day High Flow', 'Med. 90-Day High Flow',
-                   "Drought Year Mean")
+                   "Drought Year Mean", "Contrib. Drainage Area")
 num.metrics <- length(metrics.names)
 
 # CREATES EMPTY DATA FRAME WITH DIMENSIONS OF ALL METRICS BY NUM.SEGS ------------
@@ -134,6 +133,15 @@ for (i in 1:num.segs) {
   )
   model <- getProperty(inputs, site, model)
   all.metrics <- data.frame(matrix(NA, nrow = 1, ncol = num.metrics))
+  # Getting the contributing drainage area feature
+  areainfo <- list(
+    varkey = "wshed_drainage_area_sqmi",
+    featureid = as.integer(as.character(hydroid)),
+    entity_type = "dh_feature"
+  )
+  contrib.drain.area <- getProperty(areainfo, site, contrib.drain.area)
+  all.metrics[1,num.metrics] <- contrib.drain.area$propvalue
+  all.metrics[1,num.metrics] <- all.metrics[1,num.metrics]*5280*5280 #Converting from sq. miles to sq.feet
   
   # GETTING MODEL METRICS FROM VA HYDRO
   
@@ -495,15 +503,6 @@ for (i in 1:num.segs) {
   alfprop <- getProperty(alfinfo, site, alfprop)
   all.metrics[1,36] <- alfprop$propvalue
   
-  # 37: Drought of Record Year
-  alfinfo <- list(
-    varkey = "dor_year",
-    featureid = as.integer(as.character(model$pid)),
-    entity_type = "dh_properties"
-  )
-  alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,37] <- alfprop$propvalue
-  
   # 38: 1% Non-Exceedance
   alfinfo <- list(
     varkey = "non-exceedance",
@@ -512,7 +511,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,38] <- alfprop$propvalue
+  all.metrics[1,37] <- alfprop$propvalue
   
   # 39: 5% Non-Exceedance
   alfinfo <- list(
@@ -522,7 +521,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,39] <- alfprop$propvalue
+  all.metrics[1,38] <- alfprop$propvalue
   
   # 40: 50% Non-Exceedance
   alfinfo <- list(
@@ -532,7 +531,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,40] <- alfprop$propvalue
+  all.metrics[1,39] <- alfprop$propvalue
   
   # 41: 95% Non-Exceedance
   alfinfo <- list(
@@ -542,7 +541,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,41] <- alfprop$propvalue
+  all.metrics[1,40] <- alfprop$propvalue
   
   # 42: 99% Non-Exceedance
   alfinfo <- list(
@@ -552,7 +551,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,42] <- alfprop$propvalue
+  all.metrics[1,41] <- alfprop$propvalue
   
   # 43: September 10%
   alfinfo <- list(
@@ -562,7 +561,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,43] <- alfprop$propvalue
+  all.metrics[1,42] <- alfprop$propvalue
   
   # 44: Mean Baseflow
   alfinfo <- list(
@@ -571,7 +570,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,44] <- alfprop$propvalue
+  all.metrics[1,43] <- alfprop$propvalue
   
   # 45: January High Flow
   alfinfo <- list(
@@ -581,7 +580,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,45] <- alfprop$propvalue
+  all.metrics[1,44] <- alfprop$propvalue
   
   # 46: February High Flow
   alfinfo <- list(
@@ -591,7 +590,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,46] <- alfprop$propvalue
+  all.metrics[1,45] <- alfprop$propvalue
   
   # 47: March High Flow
   alfinfo <- list(
@@ -601,7 +600,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,47] <- alfprop$propvalue
+  all.metrics[1,46] <- alfprop$propvalue
   
   # 48: April High Flow
   alfinfo <- list(
@@ -611,8 +610,8 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,48] <- alfprop$propvalue
-  
+  all.metrics[1,47] <- alfprop$propvalue
+
   # 49: May High Flow
   alfinfo <- list(
     varkey = "monthly_high_flow",
@@ -621,7 +620,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,49] <- alfprop$propvalue
+  all.metrics[1,48] <- alfprop$propvalue
   
   # 50: June High Flow
   alfinfo <- list(
@@ -631,7 +630,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,50] <- alfprop$propvalue
+  all.metrics[1,49] <- alfprop$propvalue
   
   # 51: July High Flow
   alfinfo <- list(
@@ -641,7 +640,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,51] <- alfprop$propvalue
+  all.metrics[1,50] <- alfprop$propvalue
   
   # 52: August High Flow
   alfinfo <- list(
@@ -651,7 +650,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,52] <- alfprop$propvalue
+  all.metrics[1,51] <- alfprop$propvalue
   
   # 53: September High Flow
   alfinfo <- list(
@@ -661,7 +660,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,53] <- alfprop$propvalue
+  all.metrics[1,52] <- alfprop$propvalue
   
   # 54: October High Flow
   alfinfo <- list(
@@ -671,7 +670,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,54] <- alfprop$propvalue
+  all.metrics[1,53] <- alfprop$propvalue
   
   # 55: November High Flow
   alfinfo <- list(
@@ -681,7 +680,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,55] <- alfprop$propvalue
+  all.metrics[1,54] <- alfprop$propvalue
   
   # 56: December High Flow
   alfinfo <- list(
@@ -691,7 +690,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,56] <- alfprop$propvalue
+  all.metrics[1,55] <- alfprop$propvalue
   
   # 57: 1 Day Maximum High Flow
   alfinfo <- list(
@@ -701,7 +700,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,57] <- alfprop$propvalue
+  all.metrics[1,56] <- alfprop$propvalue
   
   # 58: 1 Day Median High Flow
   alfinfo <- list(
@@ -711,7 +710,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,58] <- alfprop$propvalue
+  all.metrics[1,57] <- alfprop$propvalue
   
   # 59: 3 Day Maximum High Flow
   alfinfo <- list(
@@ -721,7 +720,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,59] <- alfprop$propvalue
+  all.metrics[1,58] <- alfprop$propvalue
   
   # 60: 3 Day Median High Flow
   alfinfo <- list(
@@ -731,7 +730,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,60] <- alfprop$propvalue
+  all.metrics[1,59] <- alfprop$propvalue
   
   # 61: 7 Day Maximum High Flow
   alfinfo <- list(
@@ -741,7 +740,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,61] <- alfprop$propvalue
+  all.metrics[1,60] <- alfprop$propvalue
   
   # 62: 7 Day Median High Flow
   alfinfo <- list(
@@ -751,7 +750,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,62] <- alfprop$propvalue
+  all.metrics[1,61] <- alfprop$propvalue
   
   # 63: 30 Day Maximum High Flow
   alfinfo <- list(
@@ -761,7 +760,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,63] <- alfprop$propvalue
+  all.metrics[1,62] <- alfprop$propvalue
   
   # 64: 30 Day Maximum High Flow
   alfinfo <- list(
@@ -771,7 +770,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,64] <- alfprop$propvalue
+  all.metrics[1,63] <- alfprop$propvalue
   
   # 65: 90 Day Maximum High Flow
   alfinfo <- list(
@@ -781,7 +780,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,65] <- alfprop$propvalue
+  all.metrics[1,64] <- alfprop$propvalue
   
   # 66: 90 Day Median High Flow
   alfinfo <- list(
@@ -791,7 +790,7 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,66] <- alfprop$propvalue
+  all.metrics[1,65] <- alfprop$propvalue
   
   # 67: Mean Flow in Year of Drought of Record
   alfinfo <- list(
@@ -800,76 +799,201 @@ for (i in 1:num.segs) {
     entity_type = "dh_properties"
   )
   alfprop <- getProperty(alfinfo, site, alfprop)
-  all.metrics[1,67] <- alfprop$propvalue
+  all.metrics[1,66] <- alfprop$propvalue
   
   all.errors.all.segments[all.errors.line.no,] <- all.metrics[1,1:num.metrics]
   all.errors.line.no <- all.errors.line.no + 1
 }
 
-Metrics <- all.errors.all.segments
+Metrics <- all.errors.all.segments[,-num.metrics]
 
-# IMPORT DATA -----
-#The projection that you want the map to be output in requires a Proj4 code. 
-#Search the projection you want (in this case WGS 1984 was used becuase it is compatible with VA Hydro) and choose the link for 'spatialreference.org'
-#Once on the website click on the Proj4 link and copy and paste the provided line in quotes after its associated variable name 
-Projection<- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' 
+#--------------------------------------------------------------------------------------------
+#LOAD STATE GEOMETRY
+#--------------------------------------------------------------------------------------------
+STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
 
-#Importing base map
-#The base map for this code is the outline of the states in the US
-States<- readOGR(paste0(container, '\\spatial_analysis\\gis_layers\\cb_2017_us_state_5m'),'cb_2017_us_state_5m' )  #Pull the (location of GIS shapefile, desired shapefile)
-States<- spTransform(States, CRS=Projection)                                        #Put shapefile in correct projection/coordinated system
+#specify spatial extent for map  
+extent <- data.frame(x = c(-84, -75), 
+                     y = c(35, 41))  
 
-#Importing desired area
-#The desired area for this code are the river segements associated with the P532 Chesapeake Bay Model
-RivSeg<- readOGR(paste0(container, '\\spatial_analysis\\gis_layers\\BaseMap'), 'AlteredRiverSegs')             #Pull the (location of GIS shapefile, desired shapefile)
-RivSeg<- spTransform(RivSeg, CRS=Projection)                                     #Put shapefile in correct projection/coordinated system
 
-dir.create(paste0(output_location,"\\SouthernRivers_p532_SpatialAnalysis"), showWarnings = FALSE);
+bb=readWKT(paste0("POLYGON((",extent$x[1]," ",extent$y[1],",",extent$x[2]," ",extent$y[1],",",extent$x[2]," ",extent$y[2],",",extent$x[1]," ",extent$y[2],",",extent$x[1]," ",extent$y[1],"))",sep=""))
+bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
+bbProjected@data$id <- rownames(bbProjected@data)
+bbPoints <- fortify(bbProjected, region = "id")
+bbDF <- merge(bbPoints, bbProjected@data, by = "id")
+
+VA <- STATES[which(STATES$state == "VA"),]
+VA_geom <- readWKT(VA$geom)
+VA_geom_clip <- gIntersection(bb, VA_geom)
+VAProjected <- SpatialPolygonsDataFrame(VA_geom_clip,data.frame("id"), match.ID = TRUE)
+VAProjected@data$id <- rownames(VAProjected@data)
+VAPoints <- fortify( VAProjected, region = "id")
+VADF <- merge(VAPoints,  VAProjected@data, by = "id")
+
+TN <- STATES[which(STATES$state == "TN"),]
+TN_geom <- readWKT(TN$geom)
+TN_geom_clip <- gIntersection(bb, TN_geom)
+TNProjected <- SpatialPolygonsDataFrame(TN_geom_clip,data.frame("id"), match.ID = TRUE)
+TNProjected@data$id <- rownames(TNProjected@data)
+TNPoints <- fortify( TNProjected, region = "id")
+TNDF <- merge(TNPoints,  TNProjected@data, by = "id")
+
+NC <- STATES[which(STATES$state == "NC"),]
+NC_geom <- readWKT(NC$geom)
+NC_geom_clip <- gIntersection(bb, NC_geom)
+NCProjected <- SpatialPolygonsDataFrame(NC_geom_clip,data.frame("id"), match.ID = TRUE)
+NCProjected@data$id <- rownames(NCProjected@data)
+NCPoints <- fortify( NCProjected, region = "id")
+NCDF <- merge(NCPoints,  NCProjected@data, by = "id")
+
+KY <- STATES[which(STATES$state == "KY"),]
+KY_geom <- readWKT(KY$geom)
+KY_geom_clip <- gIntersection(bb, KY_geom)
+KYProjected <- SpatialPolygonsDataFrame(KY_geom_clip,data.frame("id"), match.ID = TRUE)
+KYProjected@data$id <- rownames(KYProjected@data)
+KYPoints <- fortify( KYProjected, region = "id")
+KYDF <- merge(KYPoints,  KYProjected@data, by = "id")
+
+WV <- STATES[which(STATES$state == "WV"),]
+WV_geom <- readWKT(WV$geom)
+WV_geom_clip <- gIntersection(bb, WV_geom)
+WVProjected <- SpatialPolygonsDataFrame(WV_geom_clip,data.frame("id"), match.ID = TRUE)
+WVProjected@data$id <- rownames(WVProjected@data)
+WVPoints <- fortify( WVProjected, region = "id")
+WVDF <- merge(WVPoints,  WVProjected@data, by = "id")
+
+MD <- STATES[which(STATES$state == "MD"),]
+MD_geom <- readWKT(MD$geom)
+MD_geom_clip <- gIntersection(bb, MD_geom)
+MDProjected <- SpatialPolygonsDataFrame(MD_geom_clip,data.frame("id"), match.ID = TRUE)
+MDProjected@data$id <- rownames(MDProjected@data)
+MDPoints <- fortify( MDProjected, region = "id")
+MDDF <- merge(MDPoints,  MDProjected@data, by = "id")
+
+DE <- STATES[which(STATES$state == "DE"),]
+DE_geom <- readWKT(DE$geom)
+DE_geom_clip <- gIntersection(bb, DE_geom)
+DEProjected <- SpatialPolygonsDataFrame(DE_geom_clip,data.frame("id"), match.ID = TRUE)
+DEProjected@data$id <- rownames(DEProjected@data)
+DEPoints <- fortify( DEProjected, region = "id")
+DEDF <- merge(DEPoints,  DEProjected@data, by = "id")
+
+PA <- STATES[which(STATES$state == "PA"),]
+PA_geom <- readWKT(PA$geom)
+PA_geom_clip <- gIntersection(bb, PA_geom)
+PAProjected <- SpatialPolygonsDataFrame(PA_geom_clip,data.frame("id"), match.ID = TRUE)
+PAProjected@data$id <- rownames(PAProjected@data)
+PAPoints <- fortify( PAProjected, region = "id")
+PADF <- merge(PAPoints,  PAProjected@data, by = "id")
+
+NJ <- STATES[which(STATES$state == "NJ"),]
+NJ_geom <- readWKT(NJ$geom)
+NJ_geom_clip <- gIntersection(bb, NJ_geom)
+NJProjected <- SpatialPolygonsDataFrame(NJ_geom_clip,data.frame("id"), match.ID = TRUE)
+NJProjected@data$id <- rownames(NJProjected@data)
+NJPoints <- fortify( NJProjected, region = "id")
+NJDF <- merge(NJPoints,  NJProjected@data, by = "id")
+
+OH <- STATES[which(STATES$state == "OH"),]
+OH_geom <- readWKT(OH$geom)
+OH_geom_clip <- gIntersection(bb, OH_geom)
+OHProjected <- SpatialPolygonsDataFrame(OH_geom_clip,data.frame("id"), match.ID = TRUE)
+OHProjected@data$id <- rownames(OHProjected@data)
+OHPoints <- fortify( OHProjected, region = "id")
+OHDF <- merge(OHPoints,  OHProjected@data, by = "id")
+
+for (i in 1:num.segs) {
+  RivSeg <- all.riv.segs[i]
+  namer <- paste0("watershedDF", i)
+  
+  # GETTING MODEL DATA FROM VA HYDRO
+  hydrocode = paste("vahydrosw_wshed_",RivSeg,sep="");
+  ftype = 'vahydro'; # nhd_huc8, nhd_huc10, vahydro
+  inputs <- list (
+    hydrocode = hydrocode,
+    bundle = 'watershed',
+    ftype = 'vahydro'
+  )
+  odata <- getFeature(inputs, token, site, feature);
+  geom <- odata$geom
+  
+  # CLIP WATERSHED GEOMETRY TO BOUNDING BOX
+  watershed_geom <- readWKT(geom)
+  watershed_geom_clip <- gIntersection(bb, watershed_geom)
+  if (is.null(watershed_geom_clip)) {
+    watershed_geom_clip = watershed_geom
+  }
+  wsdataProjected <- SpatialPolygonsDataFrame(watershed_geom_clip,data.frame("id"), match.ID = FALSE)
+  wsdataProjected@data$id <- rownames(wsdataProjected@data)
+  watershedPoints <- fortify(wsdataProjected, region = "id")
+  watershedDF <- merge(watershedPoints, wsdataProjected@data, by = "id")
+  assign(namer, watershedDF)
+}
+
+dir.create(paste0(output_location,"\\SouthernRivers_p532_SpatialAnalysis-unnormalized"), showWarnings = FALSE);
+new.output_location <- paste0(output_location, "\\SouthernRivers_p532_SpatialAnalysis-unnormalized")
 
 # Initiating counter
 ctr <- 1
 
 # Determining metric column names
 metric.names <- metrics.names
+num.metrics <- length(metrics.names)-1
+cols <- rainbow(11)
 
 for (ctr in 1:num.metrics) {
   
   DesiredMetric<- metric.names[ctr]
   
-  # SETTING UP FOR LOOP -----
-  #Create an empty column for the desired data you would like to be applied to your river segments
-  #The metrics will be added to the shapefile for the river segments as seprate columns and the desired metric will be given its own column
-  RivSeg@data$RiverSeg<-as.character(RivSeg@data$RiverSeg)
-  RivSeg@data$Metric<-NA
-  
   Metrics[,paste0("DesiredMetric")] <- Metrics[DesiredMetric]
   
-  # LOOP TO ASSOCIATE RIVER SEGMENT AND DATA -----
-  #The loop will run and add the desired metrics column to any segment that has a matching river segment ID with that metric
-  for (i in 1:length(RivSeg@data$RiverSeg)){
-    if (RivSeg@data$RiverSeg[i]%in%row.names(Metrics)){ #if the river segment ID is in the metrics file make it true, if not make it false
-      RivSeg@data$Metric[i]<- Metrics$DesiredMetric[row.names(Metrics)==RivSeg@data$RiverSeg[i]]
-    }
-  }
-  
   # GRAPHING -----
-  title<-paste0((DesiredMetric),' (cfs)')
-  
-  colfunc <- colorRampPalette(c("red", "orange", "yellow","springgreen","blue", "blue4"))
-  png(filename=paste0(output_location,"\\SouthernRivers_p532_SpatialAnalysis\\", DesiredMetric ,"- Error.png"), 
-      width=1400, height=950, units="px")
-  
-  RivSeg@data$color<- cut(RivSeg@data$Metric,c(-Inf,5,10,25,50,100,250,500,1000,5000,10000,50000,Inf), labels=(colfunc(12)))
-  SouthernRivers<- RivSeg[!is.na (RivSeg@data$color),]
-  plot(SouthernRivers, col=paste0(SouthernRivers@data$color))
-  plot(States, add=TRUE, col='gray')
-  lines(States, col='white')
-  plot(SouthernRivers, col=paste0(SouthernRivers@data$color), add=T)
-  legend("bottom", legend=c('<5', '5 to 10', '10 to 25', '25 to 50', '50 to 100', '100 to 250', '250 to 500', '500 to 1000', '1000 to 5000', '5000 to 10000', '10000 to 50000', '>50000'), col=(colfunc(12)), lty=0, pch=15, pt.cex=7, ncol = 3, bty='n', y.intersp=0.75, x.intersp=0.3, cex=3.5, lwd=2)
-  legend("top", legend=c(title), lty=0, pt.cex=3, bty='n', y.intersp=0.75, x.intersp=0.3, cex=5, lwd=2)
-  
-  dev.off()
-  
+
+  map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
+    geom_polygon(data = VADF, color="gray46", fill = "gray")+
+    geom_polygon(data = TNDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = NCDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = KYDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = WVDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = MDDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = DEDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
+    geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)
+  for (i in 1:num.segs) {
+      namer <- paste0('watershedDF', i)
+      if (Metrics$DesiredMetric[i] < 5) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='a'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 10) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='b'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 25) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='c'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 50) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='d'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 100) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='e'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 250) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='f'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 500) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='g'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 1000) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='h'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 2500) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='i'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 5000) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='j'), lwd = 0.1)
+      } else {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='k'), lwd = 0.1)
+      }
+  }
+#Add legend, add title, ggsave
+  map <- map + ggtitle(DesiredMetric)
+  map <- map + scale_fill_manual(breaks = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), limits=c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), labels=c("Less than 5", "5 to 10", "10 to 25", "25 to 50", "50 to 100", "100 to 250", "250 to 500", "500 to 1000", "1000 to 2500", "2500 to 5000", "Greater than 5000"), values=cols, name = "Flow (cfs)")
+  #ADD NORTH ARROW AND SCALE BAR
+  map <- map + north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
+    scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE, st.size = 3.8)
   # Incrementing counter
   ctr <- ctr + 1
+  ggsave(filename = paste0(DesiredMetric, ".jpeg"), device = "jpeg", path = new.output_location, width = 7, height = 4.5)
 }
