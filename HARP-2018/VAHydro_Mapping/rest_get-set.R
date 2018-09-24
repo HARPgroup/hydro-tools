@@ -1,7 +1,7 @@
 library(httr);
 save_directory <- "/var/www/html/files/fe/plots"
 #----------------------------------------------
-site <- "http://deq2.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq2.bse.vt.edu/d.dh"    #Specify the site of interest, either d.bet OR d.dh
 #----------------------------------------------
 # Load Libraries
 basepath='C:\\Users\\HaileyMae\\Documents\\GitHub\\hydro-tools';
@@ -14,12 +14,12 @@ source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and pas
 token <- rest_token(site, token, rest_uname, rest_pw);
 options(timeout=120); # set timeout to twice default level to avoid abort due to high traffic
 
-model_reader <- 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRoUnounQHFPHRkUhoDax3b9W4HFHr2IZFObifFAuH0DOknc4e-I2kdOT541Vfa9MX4HuupOU7-axtI/pub?output=csv'
+model_reader <- 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR3ZbZekLOtxYZZkiBmNSOFtPh3aGIg9pZzAvQU0Dy1udkMSTuZtNZGeU3gPirtp4d1V1-2cyIxgD3R/pub?output=csv'
 model_segs = read.csv(model_reader, header = TRUE, sep = ",", stringsAsFactors = FALSE);
 model_segs$X <- as.character(model_segs$X)
 
 # in the line below, change the model_segs$...Metric of interest (the second one)
-metric <- data.frame(model_segs$X, signif(model_segs$Dec..Mean.Flow, digits=3)) 
+metric <- data.frame(model_segs$X, signif(model_segs$Drought.Year.Mean, digits=3)) 
 colnames(metric) <- c('Segment', 'Metric')
 i <- 1
 
@@ -50,8 +50,8 @@ for (i in 1:nrow(metric)){
   
   # now, retrieve august low flow property if set
   alfinfo <- list(
-    varkey = "monthly_mean_flow",      # chane this line
-    propcode = "mm12",                 # change this line 
+    varkey = "dor_mean",      # chane this line
+    #propcode = "max90",                 # change this line 
     featureid = as.integer(as.character(model$pid)),
     entity_type = "dh_properties"
   )
@@ -61,8 +61,8 @@ for (i in 1:nrow(metric)){
     # create
     alfprop = alfinfo
   }
-  alfprop$propname = "December Mean Flow" #change this line 
-  alfprop$propcode = "mm12"                #change this line 
+  alfprop$propname = "Drought of Record Year Mean Flow" #change this line 
+  #alfprop$propcode = "max90"                #change this line 
   alfprop$propvalue = signif(metric$Metric[i], digits=3)
   alfinfo$startdate = format(as.POSIXlt('1984-01-01'),"%s") 
   alfinfo$enddate = format(as.POSIXlt('2005-12-31'),"%s")
