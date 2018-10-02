@@ -504,7 +504,21 @@ finalmap <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
   geom_polygon(data = PADF, color="gray46", fill = "gray", lwd=0.5)+
   geom_polygon(data = NJDF, color="gray46", fill = "gray", lwd=0.5)+
   geom_polygon(data = OHDF, color="gray46", fill = "gray", lwd=0.5)+
-  geom_polygon(data = DCDF, color="gray46", fill = "gray", lwd=0.5)
+  geom_polygon(data = DCDF, color="gray46", fill = "gray", lwd=0.5)+
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          panel.border = element_blank(),
+          #axis.text =element_text(size=rel(2)),    #Uncomment to display lat/long on plot
+          #axis.title = element_text(size=rel(2)),  #Uncomment to display lat/long on plot
+          axis.ticks.y=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text = element_blank(),
+          axis.title = element_blank(),
+          legend.text = element_text(size=rel(2)),
+          legend.title = element_text(size= rel(2))
+    )
+   # 
 
 i<-1
 Segs<-data.frame(matrix(nrow=159,ncol=2))
@@ -573,20 +587,9 @@ finalmap<-finalmap+north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
   scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
                     limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
                     labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1])),
-                    values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')+
+                    values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')
   
    
-        theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        panel.border = element_blank(),
-        #axis.text =element_text(size=rel(2)),    #Uncomment to display lat/long on plot
-        #axis.title = element_text(size=rel(2)),  #Uncomment to display lat/long on plot
-        axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        axis.title = element_blank(),
-        legend.text = element_text(size=rel(2)),
-        legend.title = element_text(size= rel(2)))
 
 #Uncomment to plot without gage locations
 #filename <- paste("Watersheds.png", sep="")
