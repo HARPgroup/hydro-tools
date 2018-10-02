@@ -16,8 +16,11 @@ rest_uname = FALSE
 rest_pw = FALSE
 source(paste(hydro_tools,"auth.private", sep = "\\")); #load rest username and password, contained in auth.private file
 source(paste(hydro_tools,"VAHydro-2.0","rest_functions.R", sep = "\\")) #load REST functions
-STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
 token <- rest_token(site, token, rest_uname, rest_pw)
+
+#LOAD STATE AND River GEOMETRY
+STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
+RIVDF <- read.table(file=paste(hydro_tools,"GIS_LAYERS","RIVDF.csv",sep="/"), header=TRUE, sep=",") #Load state geometries
 
 #--------------------------------------------------------------------------------------------
 # Retrieve Riversegment Feature From VAHydro 
@@ -188,6 +191,14 @@ DCProjected <- SpatialPolygonsDataFrame(DC_geom_clip,data.frame("id"), match.ID 
 DCProjected@data$id <- rownames(DCProjected@data)
 DCPoints <- fortify( DCProjected, region = "id")
 DCDF <- merge(DCPoints,  DCProjected@data, by = "id")
+
+# IN <- STATES[which(STATES$state == "IN"),]
+# IN_geom <- readWKT(IN$geom)
+# IN_geom_clip <- gIntersection(bb, IN_geom)
+# INProjected <- SpatialPolygonsDataFrame(IN_geom_clip,data.frame("id"), match.ID = TRUE)
+# INProjected@data$id <- rownames(INProjected@data)
+# INPoints <- fortify( INProjected, region = "id")
+# INDF <- merge(INPoints,  INProjected@data, by = "id")
 #--------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------
 
@@ -208,7 +219,14 @@ map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
   
   geom_polygon(data = watershedDF, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
   
+  # ADD RIVERS ####################################################################
+  geom_point(data = RIVDF, aes(x = long, y = lat), color="steelblue1", size=0.09)+
+  #################################################################################
+  
   geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 3, shape=24)+
+  
+  # ADD BORDER ####################################################################
+  geom_polygon(data = bbDF, color="black", fill = NA,lwd=0.5)+
   
   #ADD NORTH ARROW AND SCALE BAR
   north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
