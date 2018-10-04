@@ -54,6 +54,9 @@ rest_pw = FALSE
 source(paste(hydro_tools,"auth.private", sep = "\\")); #load rest username and password, contained in auth.private file
 source(paste(hydro_tools,"VAHydro-2.0","rest_functions.R", sep = "\\")) #load REST functions
 STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
+RIVDF <- read.table(file=paste(hydro_tools,"GIS_LAYERS","RIVDF.csv",sep="/"), header=TRUE, sep=",") #Load river geometries
+WBDF <- read.table(file=paste(hydro_tools,"GIS_LAYERS","WBDF.csv",sep="/"), header=TRUE, sep=",") #Load waterbody geometries
+
 token <- rest_token(site, token, rest_uname, rest_pw)
 
 # Map projection 
@@ -505,6 +508,8 @@ finalmap <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
   geom_polygon(data = NJDF, color="gray46", fill = "gray", lwd=0.5)+
   geom_polygon(data = OHDF, color="gray46", fill = "gray", lwd=0.5)+
   geom_polygon(data = DCDF, color="gray46", fill = "gray", lwd=0.5)+
+  
+  
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
           panel.background = element_blank(),
@@ -587,9 +592,16 @@ finalmap<-finalmap+north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
   scale_fill_manual(breaks=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
                     limits=c('a', 'b', 'c', 'd', 'e', 'g', 'h', 'i', 'j', 'k', 'l'), 
                     labels = paste0(c(BigSandy[1],Blackwater[1],Dan[1],Holston[1], Meherrin[1], NewRiver[1], Nottoway[1], Roanoke[1], Tennessee[1], LackingGage[1], IncompleteData[1])),
-                    values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')
+                    values = paste0(c(BigSandy[2],Blackwater[2],Dan[2],Holston[2], Meherrin[2], NewRiver[2], Nottoway[2], Roanoke[2], Tennessee[2], LackingGage[2], IncompleteData[2])), name='Southern Virginia Watersheds')+
   
-   
+
+  # ADD RIVERS ####################################################################
+  geom_point(data = RIVDF, aes(x = long, y = lat), color="steelblue1", size=0.09)+
+  #################################################################################
+  # ADD WATERBODIES ###############################################################
+  geom_point(data = WBDF, aes(x = long, y = lat), color="steelblue1", size=0.09)
+  #################################################################################
+
 
 #Uncomment to plot without gage locations
 #filename <- paste("Watersheds.png", sep="")
