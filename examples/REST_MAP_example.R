@@ -21,6 +21,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 #LOAD STATE AND River GEOMETRY
 STATES <- read.table(file=paste(hydro_tools,"GIS_LAYERS","STATES.tsv",sep="\\"), header=TRUE, sep="\t") #Load state geometries
 RIVDF <- read.table(file=paste(hydro_tools,"GIS_LAYERS","RIVDF.csv",sep="/"), header=TRUE, sep=",") #Load state geometries
+WBDF <- read.table(file=paste(hydro_tools,"GIS_LAYERS","WBDF.csv",sep="/"), header=TRUE, sep=",") #Load state geometries
 
 #--------------------------------------------------------------------------------------------
 # Retrieve Riversegment Feature From VAHydro 
@@ -217,12 +218,18 @@ map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
   geom_polygon(data = OHDF, color="gray46", fill = "gray", lwd=0.5)+
   geom_polygon(data = DCDF, color="gray46", fill = "gray", lwd=0.5)+
   
+  
   geom_polygon(data = watershedDF, color="khaki4", fill = "green",alpha = 0.25,lwd=0.5)+
   
   # ADD RIVERS ####################################################################
   geom_point(data = RIVDF, aes(x = long, y = lat), color="steelblue1", size=0.09)+
   #################################################################################
+
+  # ADD WATERBODIES ###############################################################
+  geom_point(data = WBDF, aes(x = long, y = lat), color="steelblue1", size=0.09)+
+  #################################################################################
   
+
   geom_point(aes(x = x, y = y, group = id), data = GAGEDF, fill="red", color="black", size = 3, shape=24)+
   
   # ADD BORDER ####################################################################
