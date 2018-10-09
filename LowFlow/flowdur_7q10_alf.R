@@ -37,6 +37,7 @@ x <- str_extract_all(gage_info, pattern)
 
 # set the gage numbers as a vector
 gage <- as.character(x)
+#gage <- "01668000"
 
 #i <- 10
 ## Calculations & Plot for Each Gage 
