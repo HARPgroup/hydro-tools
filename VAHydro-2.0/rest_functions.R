@@ -1,5 +1,7 @@
 library(httr);
 library(stringr);
+library(dplyr);
+library(bindrcpp);
 library(RCurl); #required for limiting connection timeout in vahydro_fe_data_icthy()
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
@@ -252,6 +254,9 @@ getProperty <- function(inputs, base_url, prop){
     featureid = inputs$featureid,
     entity_type = inputs$entity_type 
   );
+  if (!is.null(inputs$bundle)) {
+    pbody$bundle = inputs$bundle
+  }
   if (!is.null(inputs$varid)) {
     pbody$varid = inputs$varid
   }
