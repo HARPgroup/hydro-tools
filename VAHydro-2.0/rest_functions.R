@@ -898,7 +898,7 @@ vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
   
   #featureid <- '397299'
   #varkey <- 'ifim_habitat_table'
-  matrix_url <- paste(site,"dh-properties-json/dh_feature",featureid,varkey, sep="/")
+  matrix_url <- paste(datasite,"dh-properties-json/dh_feature",featureid,varkey, sep="/")
   
   print(paste("Using ", matrix_url, sep=''));
   
