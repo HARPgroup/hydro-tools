@@ -13,13 +13,13 @@ library(RCurl)
 setwd("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis")
 
 
-# Observation of current data listed within the folder --------------
-divr07 <- read.csv("ps_sep_div_ams_p532cal_062211_3007.csv")
-diva08 <- read.csv("ps_sep_div_ams_p532cal_062211_3008.csv")
-
-divr_segs <- divr07[which(divr07$rivsegs=="OR2_8130_7900" | divr07$rivsegs=="OR2_8020_8130"),]
-diva_segs <- diva08[which(diva08$rivsegs=="OR2_8130_7900" | diva08$rivsegs=="OR2_8020_8130"),]
-
+# # Observation of current data listed within the folder --------------
+# divr07 <- read.csv("ps_sep_div_ams_p532cal_062211_3007.csv")
+# diva08 <- read.csv("ps_sep_div_ams_p532cal_062211_3008.csv")
+# 
+# divr_segs <- divr07[which(divr07$rivsegs=="OR2_8130_7900" | divr07$rivsegs=="OR2_8020_8130"),]
+# diva_segs <- diva08[which(diva08$rivsegs=="OR2_8130_7900" | diva08$rivsegs=="OR2_8020_8130"),]
+# 
 
 #Re-analysis using just the two OR Segments -------------
 
