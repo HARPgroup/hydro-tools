@@ -5,6 +5,11 @@
 
 #this script only looks at the two OR segments in question, rather than the entire dataset.  
 
+## load libraries
+library(lubridate)
+library(dplyr)
+library(RCurl)
+
 setwd("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis")
 
 
@@ -44,52 +49,60 @@ goodtogo <- url.exists(paste0(deq, study_seg)) # check to make sure csv exists
 if (i==1){
   seg_8130_7900 <- data.frame(importdata)
 } else if (i==2){
-  seg_8020_7900 <- data.frame(importdata)
+  seg_8020_8130 <- data.frame(importdata)
 }
 
 }
 
+## Format data into one consolidated data frame
+seg_8020_8130$rownum <- 1:nrow(seg_8020_8130)
+seg_8130_7900$rownum <- 1:nrow(seg_8130_7900)
+
+mergesegs <- merge(seg_8020_8130, seg_8130_7900, by.x = "rownum", by.y = "rownum", all = TRUE)
+mergesegs <- select(mergesegs, rownum, year.x, month.x, day.x, hour.x, ps.x, ps.y)
+colnames(mergesegs) <- c("rownum", "year", "month", "day", "hour", "8020_8130", "8130_7900")
 
 
 
 ## Begin actual consolidation from days >>> year  --------------------
 # code does not work beyond this currently
 
-iszero <- sum(importdata$ps)==0 #True or False? 
+means <- data.frame() #create an empty storage dataframe
+years<- data.frame(unique(mergesegs$year))
+ 
+## Search for whether data exists in each of these years (get number of unique wdraw values) -----------
+# the data frame uniquecheck will return a value of NA if there are no point source withdrawals for that year 
+uniquecheck <- data.frame()
+k <- 1 # case study 1996 
 
-if (iszero == TRUE){ #then fill with value of 0 for all years for that seg
-  pointsource[i,2:ncol(pointsource)] <- rep(0, length(years))
-  
-}else if (iszero==FALSE){ #then calculate mean of all hourly values for that year
-  means <- data.frame() #create an empty storage dataframe
-  
-  k <- 1
-  for (k in 1:length(years)){ #loop the mean calculation for every year of analysis
-    datayear <- subset(importdata, year==years[k])
-    datayear <- datayear[1:nrow(datayear)-1,] #remove the 24th hour of dec 31
-    meanval <- summarize(datayear, mean(ps))
-    means[1,k] <- meanval
-    k <- k + 1
+for (k in 1:nrow(years)){
+datayear <- subset(mergesegs, year==years[k,1])
+
+# unique(datayear$`8020_8130`)
+# unique(datayear$`8130_7900`)
+uniquecheck[k,1]<- years[k,1]
+uniquecheck[k,2]<- length(unique(datayear$`8020_8130`))
+uniquecheck[k,3]<- length(unique(datayear$`8130_7900`))
+
+if (uniquecheck[k,2]==1){
+  uniquecheck[k,2]<- (unique(datayear$`8020_8130`))
+  if (uniquecheck[k,3]==1){
+    uniquecheck[k,3]<- (unique(datayear$`8130_7900`))
   }
-  colnames(means) <- as.character(years)
-  pointsource[i,2:ncol(pointsource)] <- means
+  
+} else if (uniquecheck[k,3]==1){
+  uniquecheck[k,3]<- (unique(datayear$`8130_7900`))
 }
-
-}else if (goodtogo == FALSE){
-  pointsource[i,2:ncol(pointsource)] <- rep("N.Data", length(years))
 }
-i <- i + 1
+colnames(uniquecheck) <- c("year", "8020_8130", "8130_7900")
+uniquecheck[uniquecheck == 0] <- NA
 
-}
-
-
-
+print(uniquecheck)
 
 
 
 
-
-unique(OR2_8130_7900$ps)
-unique(OR2_8020_8130$ps)
+# unique(OR2_8130_7900$ps)
+# unique(OR2_8020_8130$ps)
   
   
