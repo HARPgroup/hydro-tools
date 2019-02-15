@@ -96,18 +96,20 @@ colnames(model_daily) <- c("date","mod.flow")
 #write.csv(model_daily, file = paste0(container, "/data/new_(updated)_data/raw_data/model_data/daily_data/",RivSeg," - Daily Raw Data.csv"))
   
 # convert from ac-ft/day to cfs
-model_daily$mod.flow <- model_daily$mod.flow * 0.504167
+model_daily$mod.flow_converted <- model_daily$mod.flow * 0.504167
 model_daily <- subset(model_daily, year(model_daily$date)==2002)
 
 # different ways that monthly flow may be interpreted by the model
 
 # mean of monthly flows
-model_monthly_bymean <- aggregate(model_daily$mod.flow, list(month(model_daily$date)), FUN = mean)
-colnames(model_monthly_bymean) <- c("month","mod.flow")
+model_monthly_bymean <- aggregate(model_daily, list(month(model_daily$date)), FUN = mean)
+model_monthly_bymean <- data.frame(select(model_monthly_bymean, Group.1, mod.flow, mod.flow_converted))
+colnames(model_monthly_bymean) <- c("month","mod.flow_raw","mod.flow_converted")
+
 
 # day one of the month
 model_monthly_byday1 <- data.frame(subset(model_daily, day(model_daily$date)==1))
-colnames(model_monthly_byday1) <- c("month","mod.flow")
+colnames(model_monthly_byday1) <- c("month","mod.flow", "mod.flow_converted")
 
 
 
@@ -115,34 +117,36 @@ colnames(model_monthly_byday1) <- c("month","mod.flow")
 mon_wayside <- read.csv("wayside_mon.csv", stringsAsFactors = FALSE)
 mon_spholla <- read.csv("springhol_mon.csv", stringsAsFactors = FALSE) 
 
+day_wayside <- read.csv("wayside_mgd.csv", stringsAsFactors = FALSE)
+day_spholla <- read.csv("springhol_mgd.csv", stringsAsFactors = FALSE)
+
 mon_wayside$Date <- as.Date(mon_wayside$Date)
 mon_spholla$Date <- as.Date(mon_spholla$Date)
+day_wayside$Date <- as.Date(day_wayside$Date)
+day_spholla$Date <- as.Date(day_spholla$Date)
+
 mon_wayside$Value <- as.numeric(gsub(",", "",mon_wayside$Value))
 mon_spholla$Value <- as.numeric(gsub(",", "",mon_spholla$Value))
-
-
+day_wayside$Value <- as.numeric(gsub(",", "",day_wayside$Value))
+day_spholla$Value <- as.numeric(gsub(",", "",day_spholla$Value))
+                                
 mon_wayside <- subset(mon_wayside, varkey=="wd_mgm" & year(mon_wayside$Date)==2002)
 mon_spholla <- subset(mon_spholla, varkey=="wd_mgm" & year(mon_spholla$Date)==2002)
+day_wayside <- subset(day_wayside, varkey=="wl_mgd" & year(day_wayside$Date)==2002)
+day_spholla <- subset(day_spholla, varkey=="wl_mgd" & year(day_spholla$Date)==2002)
 
-vahydro <- data.frame(mon_wayside$Date, mon_wayside$Value, mon_spholla$Value)
+vahydro <- data.frame(mon_wayside$Date, mon_wayside$Value, mon_spholla$Value, day_wayside$Value ,day_spholla$Value)
 vahydro <- vahydro[order(vahydro$mon_wayside.Date), ]
-
+colnames(vahydro) <- c("Date", "Wayside_mgm", "Sphol_mgm", "Wayside_mgd","Sphol_mgd")
 
 
 
 ## compare wayside, spring hollow, and MEAN monthly model data -------------
-comparison <- data.frame(vahydro[,1:3], model_monthly_bymean$mod.flow)
-colnames(comparison)<- c("date", "wayside", "sphol", "model")
-
-comparison$summed <- comparison$wayside + comparison$sphol
-comparison$error <- 100*(comparison$model - comparison$summed) / (comparison$model)
+comparison <- data.frame(vahydro[], model_monthly_bymean[])
 write.csv(comparison, "segs_vs_meanmonthly.csv")
 
 
 ## compare wayside, spring hollow, and day1 monthly model data -------------
-comparisonday <- data.frame(vahydro[,1:3], model_monthly_byday1$mod.flow)
-colnames(comparisonday)<- c("date", "wayside", "sphol", "model")
-
-comparisonday$summed <- comparisonday$wayside + comparisonday$sphol
-comparisonday$error <- 100*(comparisonday$model - comparisonday$summed) / (comparisonday$model)
+comparisonday <- data.frame(vahydro[], model_monthly_byday1[])
 write.csv(comparisonday,"segs_vs_day1monthly.csv")
+
