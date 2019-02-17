@@ -59,7 +59,7 @@ seg_8020_8130$rownum <- 1:nrow(seg_8020_8130)
 seg_8130_7900$rownum <- 1:nrow(seg_8130_7900)
 
 mergesegs <- merge(seg_8020_8130, seg_8130_7900, by.x = "rownum", by.y = "rownum", all = TRUE)
-mergesegs <- select(mergesegs, rownum, year.x, month.x, day.x, hour.x, ps.x, ps.y)
+mergesegs <- data.frame(mergesegs$rownum, mergesegs$year.x, mergesegs$month.x, mergesegs$day.x, mergesegs$hour.x, mergesegs$ps.x, mergesegs$ps.y)
 colnames(mergesegs) <- c("rownum", "year", "month", "day", "hour", "8020_8130", "8130_7900")
 
 
