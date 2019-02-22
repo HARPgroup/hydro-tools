@@ -72,7 +72,6 @@ colnames(common) <- c("segment", "flow", "modelbas", "river", "modelDA", "end_se
 dacomp <- data.frame(common$segment, common$modelDA, common$gageID, common$gageDA)
 colnames(dacomp) <- c("modelseg", "modelda", "gageID", "gageDA")
 
-write.csv(dacomp, "GageSeg_CPBsegs.csv")
 
 # Upstream/Downstream Analysis -----------------------------------
 #pull upstream segments for segments
