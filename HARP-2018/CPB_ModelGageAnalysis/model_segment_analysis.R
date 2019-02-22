@@ -47,7 +47,7 @@ yokriv <- nodups[which(nodups$basin==basins[7,1]),]
 
 # check to make sure all segs have been kept: 
 nrow(nodups) == (nrow(eshore) + nrow(potriv) + nrow(jamriv) + nrow(wshore) + nrow(rapriv) + nrow(paxriv) + nrow(yokriv))
-
+write.csv(nodups, "ModelSegs.csv")
 
 
 # Pull gages from GIS file (p53 calibstats shapefile) ------------------------------
