@@ -10,6 +10,7 @@ library(lubridate)
 library(dplyr)
 library(RCurl)
 library(ggplot2)
+library(dataRetrieval)
 
 # set workspace
 setwd("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis")
@@ -42,6 +43,7 @@ if (goodtogo ==TRUE){
 
 #units are in cfs
 modeldata <- subset(modeldata, modeldata$year==yoi)
+modeldata$date <- as.Date(paste0(modeldata$year,"-",modeldata$month,"-",modeldata$day))
 
 # pull VAHydro data for wayside and spring hollow (downloaded from VAHydro in stored csv files) ------
 
@@ -126,7 +128,18 @@ resid_plot
 
 
 
+# what does this look like compared to actual flow values? 
+gage <- readNWISdv('02054530', parameterCd='00060', startDate = "2002-01-01", 
+                   endDate = "2002-12-31", statCd = "00003")
 
+
+hydro_view <- ggplot(gage, aes(Date)) + 
+  geom_line(aes(y=X_00060_00003, colour="gage"), size=0.5) + 
+  geom_line(data=modeldata, aes(x=date, y=`w.d [cfs]`, colour="model"), size=0.7) + 
+  scale_colour_manual(values=c("blue", "black")) + 
+  labs(x="Date", y="Flow and withdrawals [cfs]", colour="Legend") + 
+  coord_cartesian(ylim=c(0,300))
+ggsave(file="withdrawal_v_gageflow_zoomed.png", width=9, height=5, units="in")
 
 
 
