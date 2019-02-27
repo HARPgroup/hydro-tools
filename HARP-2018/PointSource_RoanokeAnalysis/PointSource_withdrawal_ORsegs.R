@@ -110,38 +110,39 @@ colnames(model_monthly_bymean) <- c("month","mod.flow_raw","mod.flow_converted",
 
 
 # pull in withdrawal data from wayside and spring hollow --------------------
-mon_wayside <- read.csv("wayside_mon.csv", stringsAsFactors = FALSE)
-mon_spholla <- read.csv("springhol_mon.csv", stringsAsFactors = FALSE) 
+# mon_wayside <- read.csv("wayside_mon.csv", stringsAsFactors = FALSE)
+# mon_spholla <- read.csv("springhol_mon.csv", stringsAsFactors = FALSE) 
 
 #ignore daily values -- its just monthly divided by num days in the month
-# day_wayside <- read.csv("wayside_mgd.csv", stringsAsFactors = FALSE)
-# day_spholla <- read.csv("springhol_mgd.csv", stringsAsFactors = FALSE)
+mon_wayside <- read.csv("wayside_mgd.csv", stringsAsFactors = FALSE)
+mon_spholla <- read.csv("springhol_mgd.csv", stringsAsFactors = FALSE)
 
+# mon_wayside$Date <- as.Date(mon_wayside$Date)
+# mon_spholla$Date <- as.Date(mon_spholla$Date)
 mon_wayside$Date <- as.Date(mon_wayside$Date)
 mon_spholla$Date <- as.Date(mon_spholla$Date)
-# day_wayside$Date <- as.Date(day_wayside$Date)
-# day_spholla$Date <- as.Date(day_spholla$Date)
 
+# mon_wayside$Value <- as.numeric(gsub(",", "",mon_wayside$Value))
+# mon_spholla$Value <- as.numeric(gsub(",", "",mon_spholla$Value))
 mon_wayside$Value <- as.numeric(gsub(",", "",mon_wayside$Value))
 mon_spholla$Value <- as.numeric(gsub(",", "",mon_spholla$Value))
-# day_wayside$Value <- as.numeric(gsub(",", "",day_wayside$Value))
-# day_spholla$Value <- as.numeric(gsub(",", "",day_spholla$Value))
                                 
-mon_wayside <- subset(mon_wayside, varkey=="wd_mgm" & year(mon_wayside$Date)==2002)
-mon_spholla <- subset(mon_spholla, varkey=="wd_mgm" & year(mon_spholla$Date)==2002)
-# day_wayside <- subset(day_wayside, varkey=="wl_mgd" & year(day_wayside$Date)==2002)
-# day_spholla <- subset(day_spholla, varkey=="wl_mgd" & year(day_spholla$Date)==2002)
+# mon_wayside <- subset(mon_wayside, varkey=="wd_mgm" & year(mon_wayside$Date)==2002)
+# mon_spholla <- subset(mon_spholla, varkey=="wd_mgm" & year(mon_spholla$Date)==2002)
+mon_wayside <- subset(mon_wayside, varkey=="wl_mgd" & year(mon_wayside$Date)==2002)
+mon_spholla <- subset(mon_spholla, varkey=="wl_mgd" & year(mon_spholla$Date)==2002)
 
 vahydro <- data.frame(mon_wayside$Date, mon_wayside$Value, mon_spholla$Value)  #day_wayside$Value ,day_spholla$Value)
 vahydro <- vahydro[order(vahydro$mon_wayside.Date), ]
-colnames(vahydro) <- c("Date", "Wayside_mgm", "Sphol_mgm")  #,"Wayside_mgd","Sphol_mgd")
-
+colnames(vahydro) <- c("Date", "Wayside_mgd", "Sphol_mgd")  #,"Wayside_mgd","Sphol_mgd")
+vahydro$Wayside_cfs <- vahydro$Wayside_mgd * (1/7.4052) * (10^6) * (1/24) * (1/3600)
+vahydro$Sphol_cfs <- vahydro$Sphol_mgd * (1/7.4052) * (10^6) * (1/24) * (1/3600)
 
 
 ## compare wayside, spring hollow, and MEAN monthly model data -------------
 comparison <- data.frame(vahydro[], model_monthly_bymean[])
-comparison$perdif <- 100*(comparison$Wayside_mgm - comparison$mod.flow_convertedinch) / comparison$Wayside_mgm
-comparison$twoperdif <- 100*((comparison$Wayside_mgm+comparison$Sphol_mgm) - comparison$mod.flow_convertedinch) / (comparison$Wayside_mgm+comparison$Sphol_mgm)
+comparison$perdif <- 100*(comparison$Wayside_cfs- comparison$mod.flow_convertedinch) / comparison$Wayside_cfs
+comparison$twoperdif <- 100*((comparison$Wayside_cfs+comparison$Sphol_cfs) - comparison$mod.flow_convertedinch) / (comparison$Wayside_cfs+comparison$Sphol_cfs)
 write.csv(comparison, "segs_vs_meanmonthlyinches.csv")
 
 # remove NA, infinite, or 0
@@ -152,18 +153,51 @@ mean(comparison$perdif, na.rm = TRUE); mean(comparison$twoperdif, na.rm = TRUE)
 alldata <- ggplot(comparison, aes(Date)) + 
   geom_line(aes(y = mod.flow_converted, colour = "Converted"), size=1) + 
   geom_line(aes(y = mod.flow_raw, colour = "Raw"), size=1) + 
-  geom_line(aes(y = (Wayside_mgm+Sphol_mgm), colour = "Total"), size=1) + 
-  geom_line(aes(y = Wayside_mgm, colour = "Wayside"), size=1) + 
-  geom_line(aes(y = Sphol_mgm, colour = "Spring Hollow"), size=1) + 
+  geom_line(aes(y = (Wayside_cfs+Sphol_cfs), colour = "Total"), size=1) + 
+  geom_line(aes(y = Wayside_cfs, colour = "Wayside"), size=1) + 
+  geom_line(aes(y = Sphol_cfs, colour = "Spring Hollow"), size=1) + 
   scale_colour_manual(values=c("black", "grey", "blue", "green", "red")) + 
   labs(x = "Date", y = "Withdrawal (cfs)", colour = "Source")
 
 data <- ggplot(comparison, aes(Date)) + 
   geom_line(aes(y = mod.flow_converted, colour = "Converted Model"), size=.5) + 
   #geom_line(aes(y = mod.flow_convertedinch, colour = "Converted Model inches"), size=.5, linetype = "longdash") +
-  geom_line(aes(y = (Wayside_mgm+Sphol_mgm), colour = "Wayside + Sp. Hol."), size=.5) + 
-  geom_line(aes(y = Wayside_mgm, colour = "Wayside"), size=.5) + 
-  geom_line(aes(y = Sphol_mgm, colour = "Spring Hollow"), size=.5) + 
+  geom_line(aes(y = (Wayside_cfs+Sphol_cfs), colour = "Wayside + Sp. Hol."), size=.5) + 
+  geom_line(aes(y = Wayside_cfs, colour = "Wayside"), size=.5) + 
+  geom_line(aes(y = Sphol_cfs, colour = "Spring Hollow"), size=.5) + 
   scale_colour_manual(values=c("black","green", "blue", "red")) + 
   labs(x = "Date", y = "Withdrawal (cfs)", colour = "Source")
-ggsave(file="Converted_data.png", width=9, height=5, units="in")
+#ggsave(file="Converted_data.png", width=9, height=5, units="in")
+
+data <- ggplot(comparison, aes(Date)) + 
+  geom_line(aes(y = mod.flow_converted, colour = "Converted Model"), size=.5) + 
+  geom_line(aes(y = mod.flow_convertedinch, colour = "Converted Model inches"), size=.5, linetype = "longdash") +
+  geom_line(aes(y = (Wayside_cfs+Sphol_cfs), colour = "Wayside + Sp. Hol."), size=.5) + 
+  geom_line(aes(y = Wayside_cfs, colour = "Wayside"), size=.5) + 
+  geom_line(aes(y = Sphol_cfs, colour = "Spring Hollow"), size=.5) + 
+  scale_colour_manual(values=c("black", "grey","green", "blue", "red")) + 
+  labs(x = "Date", y = "Withdrawal (cfs)", colour = "Source") + 
+  coord_cartesian(ylim=c(0,250))
+#ggsave(file="Converted_data_cfs.png", width=9, height=5, units="in")
+
+
+
+
+
+
+
+yearofi <- subset(model_hourly, model_hourly$year==2002)
+#model_daily <- aggregate(model_hourly$ovol, list(model_hourly$date), FUN = sum)
+
+
+
+data <- ggplot(model_hourly, aes(Date)) + 
+  geom_line(aes(y = mod.flow_converted, colour = "Converted Model"), size=.5) + 
+  geom_line(aes(y = mod.flow_convertedinch, colour = "Converted Model inches"), size=.5, linetype = "longdash") +
+  geom_line(aes(y = (Wayside_cfs+Sphol_cfs), colour = "Wayside + Sp. Hol."), size=.5) + 
+  geom_line(aes(y = Wayside_cfs, colour = "Wayside"), size=.5) + 
+  geom_line(aes(y = Sphol_cfs, colour = "Spring Hollow"), size=.5) + 
+  scale_colour_manual(values=c("black", "grey","green", "blue", "red")) + 
+  labs(x = "Date", y = "Withdrawal (cfs)", colour = "Source") + 
+  coord_cartesian(ylim=c(0,250))
+#ggsave(file="Converted_data_cfs.png", width=9, height=5, units="in")
