@@ -93,50 +93,34 @@ write.csv(badmatchrnd2, "higherror_segs_adjustpt2.csv")
 
 
 
+# REITERATE FOR THE SECOND GENERATION OF BAD GAGES: -------------
+# CORRECTED BAD SEGMENTS FROM THE DRIVE: 
 
+#run this section of the code once the segments are put in the last column
+badmatch3 <- read.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1Td3gWsz4M_z8HJ7J3K1VbaQTOU9XesaKFvvg38Vu6AvUBpAqepm2PLbp4Xo20sFu2JU2X5jRfSAS/pub?output=csv', stringsAsFactors = FALSE)
 
-
-
-# OLD CODE BEGINS HERE DO NOT DO NOT DO NOT RUN THIS -- it is ineffective. 
-badmatch3 <- badmatchrnd2[,1:4]
-rownames(badmatch3) <- 1:nrow(badmatch3)
-
-i <- 1
-for (i in 1:nrow(badmatchrnd2)){
-readseg <- badmatchrnd2$adjustedsegs[i]
-
-segda <- as.character(readseg)
-find<- which(upstreamlist[,]== segda, arr.ind=TRUE)
-if (sum(find)==0){
-  newDA <- NA
+j <- 1
+for (j in 1:nrow(badmatch3)){
+  rivseg <- badmatch3$Contained.segments.w_in.drainagearea[j]
   
-  }else if (sum(find)!=0){
-    row<- find[1] #identify the row of upstream that its in
-    col<- find[2]
-    addareas <- upstreamlist[row,2:col]
-    addareas <- data.frame(t(addareas))
-    j <- 1
-    for (j in 1:nrow(addareas)){
-      newarea <- all_segs$DAsqmi[which(all_segs$rivseg==addareas[j,1])]
-      addareas$area[j] <- newarea
+  RivSegStr <- strsplit(rivseg, "\\+")
+  RivSegStr <- RivSegStr[[1]]
+  num.segs <- length(RivSegStr)
+  
+  if (num.segs == 1) {
+    DA<- all_segs$DAsqmi[which(all_segs$rivseg==as.character(RivSegStr))]
+  }
+  else if (num.segs !=1){
+    k <- 1
+    DA<- 0
+    for (k in 1:num.segs){
+      segnum <- RivSegStr[k]
+      newDA <- all_segs$DAsqmi[which(all_segs$rivseg==as.character(segnum))]
+      DA <- DA + newDA
     }
-    newDA <- sum(addareas$area)
+  }
+  
+  
 }
-badmatch3$newDA[i] <- newDA
-}
-
-badmatch3$newerror <- 100*(badmatch3$gageDA - badmatch3$newDA) / badmatch3$gageDA
-better <- badmatch3[which(abs(badmatch3$newerror) < 20),]
-
-
-
-
-
-
-
-
-
-
-
 
 
