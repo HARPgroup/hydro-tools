@@ -248,12 +248,15 @@ getProperty <- function(inputs, base_url, prop){
   }
   
   pbody = list(
-    bundle = 'dh_properties',
+    #bundle = 'dh_properties',
     featureid = inputs$featureid,
     entity_type = inputs$entity_type 
   );
   if (!is.null(inputs$varid)) {
     pbody$varid = inputs$varid
+  }
+  if (!is.null(inputs$bundle)) {
+    pbody$bundle = inputs$bundle
   }
   if (!is.null(inputs$propcode)) {
     pbody$propcode = inputs$propcode
@@ -297,6 +300,7 @@ getProperty <- function(inputs, base_url, prop){
                        vid=character(),
                        status=character(),
                        module=character(),
+                       field_dh_matrix=character(),
                        stringsAsFactors=FALSE) 
     
     i <- 1
@@ -317,10 +321,17 @@ getProperty <- function(inputs, base_url, prop){
         "varid" = if (is.null(prop_cont$list[[i]]$varid)){""} else {prop_cont$list[[i]]$varid},
         "uid" = if (is.null(prop_cont$list[[i]]$uid)){""} else {prop_cont$list[[i]]$uid},
         "vid" = if (is.null(prop_cont$list[[i]]$vid)){""} else {prop_cont$list[[i]]$vid},
+        "field_dh_matrix" = "",
         "status" = if (is.null(prop_cont$list[[i]]$status)){""} else {prop_cont$list[[i]]$status},
         "module" = if (is.null(prop_cont$list[[i]]$module)){""} else {prop_cont$list[[i]]$module},
         stringsAsFactors=FALSE
       )
+      # handle data_matrix
+      if (!is.null(prop_cont$list[[i]]$field_dh_matrix$value)) {
+        dfl = prop_cont$list[[i]]$field_dh_matrix$value
+        df <- data.frame(matrix(unlist(dfl), nrow=length(dfl), byrow=T))
+        prop_i$field_dh_matrix <- jsonlite::serializeJSON(df);
+      }
       prop  <- rbind(prop, prop_i)
     }
   } else {
@@ -884,7 +895,7 @@ vahydro_fe_data_icthy <- function (Watershed_Hydrocode,x_metric_code,y_metric_co
   
 }
 
-vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
+vahydro_prop_matrix <- function (featureid, entity_type='dh_feature',varkey, datasite = '') {
   if (datasite == '') {
     if (site == '' ) {
       datasite = 'http://deq1.bse.vt.edu/d.dh'
@@ -898,7 +909,7 @@ vahydro_prop_matrix <- function (featureid,varkey, datasite = '') {
   
   #featureid <- '397299'
   #varkey <- 'ifim_habitat_table'
-  matrix_url <- paste(datasite,"dh-properties-json/dh_feature",featureid,varkey, sep="/")
+  matrix_url <- paste(datasite,"dh-properties-json",entity_type,featureid,varkey, sep="/")
   
   print(paste("Using ", matrix_url, sep=''));
   
