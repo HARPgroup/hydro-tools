@@ -362,7 +362,8 @@ Projection<- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
 RiverSeg<-readOGR ('C:/Users/Kelsey/Desktop/HARP/GIS/ApprovedSouthernRivers',"Study_CPB_Rsegs")
 RiverSeg<-spTransform(RiverSeg, CRS=Projection)   #Put shapefile in correct projection/coordinated system
 
-States<-readOGR('C:/Users/Kelsey/Downloads/cb_2017_us_state_20m', "cb_2017_us_state_20m")
+States <- unzip('C:\\Users\\Kelsey\\Downloads\\cb_2017_us_state_20m.zip', files="cb_2017_us_state_20m.shp")
+States<-readOGR(States, "cb_2017_us_state_20m")
 States<- spTransform(States, CRS=Projection)  
 
 RiverSeg@data$RiverSeg<-as.character(RiverSeg@data$RiverSeg)
