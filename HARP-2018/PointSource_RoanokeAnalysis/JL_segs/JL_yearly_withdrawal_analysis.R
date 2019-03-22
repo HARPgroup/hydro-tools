@@ -1,9 +1,7 @@
 # Kelsey Reitz
-#3/8/2019
-# Evaluation of withdrawal data: Wayside vs model for all simulated years
+#3/20/2019
+# Evaluation of withdrawal data: North Fork vs model for all simulated years
 # proper unit notation
-
-#this script only looks at the wayside OR segment in question, rather than the entire dataset.  
 
 ## load libraries
 library(lubridate)
@@ -13,24 +11,16 @@ library(ggplot2)
 library(dataRetrieval)
 
 # set workspace
-setwd("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis")
-
-# SPECIFY UNITS OF ALL DATA AND DOCUMENTATION OF UNITS ----------------------------------------------
-
-# for VAHydro: listed within the csv / right on the site: 
-# for model:
-#     HSPF user manual: https://drive.google.com/drive/u/1/folders/0B5TT3KOg-7FUMzVENm84NmNsM0U
-#     pg 698: "outdgt ft3/s"
-#     BUT: uci for seg has ac-ft, but I think this is for some other calculation (not withdrawal stuff)
-
+dir.create("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis/JL_segs", showWarnings = F)
+filepath <- "C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis/JL_segs"
+setwd(filepath)
 
 # pull model data from deq ---------------------------------------------------------------------------
 deq <- "http://deq2.bse.vt.edu/p532c-sova/wdm/river/p532cal_062211/eos/"
 
 #MUST CHANGE WHAT CODE YOU'RE DOING.-- changed by: 
 code <- 3007
-rivseg <- "OR2_8130_7900"
-#yoi <- 2002
+rivseg <- "JL2_6240_6520"
 
 study_seg <- paste0("ps_sep_div_ams_p532cal_062211_",rivseg,"_",code,".csv")
 #check to make sure that the file exists on the site. 
@@ -45,46 +35,35 @@ if (goodtogo ==TRUE){
 #modeldata <- subset(modeldata, modeldata$year==yoi)
 modeldata$date <- as.Date(paste0(modeldata$year,"-",modeldata$month,"-",modeldata$day))
 
-# pull VAHydro data for wayside and spring hollow (downloaded from VAHydro in stored csv files) ------
+# pull VAHydro data for north fork (downloaded from VAHydro in stored csv files) ------
 
 #read the csvs
-#wayside <- read.csv("wayside_mgd.csv", stringsAsFactors = FALSE)
-wayside <- read.csv("wayside_updated.csv", stringsAsFactors = F)
-#spholla <- read.csv("springhol_mgd.csv", stringsAsFactors = FALSE)
+northfork <- read.csv("Northfork.csv", stringsAsFactors = F)
 
 #fix format of data
-wayside$Date <- as.Date(wayside$Date) 
+northfork$Date <- as.Date(northfork$Date) 
 #spholla$Date <- as.Date(spholla$Date)
-wayside$Value <- as.numeric(gsub(",", "",wayside$Value)) 
+northfork$Value <- as.numeric(gsub(",", "",northfork$Value)) 
 #spholla$Value <- as.numeric(gsub(",", "",spholla$Value))
 
 #pull the data of interest out (mgm monthly withdrawal)
-wayside <- subset(wayside, varkey=="wd_mgm")
+northfork <- subset(northfork, varkey=="wd_mgm")
 
 
 # units are in mgd
-vahydro <- data.frame(wayside$Date, wayside$Value) #, spholla$Value, spholla$varkey)
-colnames(vahydro) <- c("Date", "way_val_mgm") # "sph_val", "varkey")
+vahydro <- data.frame(northfork$Date, northfork$Value) #, spholla$Value, spholla$varkey)
+colnames(vahydro) <- c("Date", "val_mgm") # "sph_val", "varkey")
 vahydro <- vahydro[order(vahydro$Date),]
 rownames(vahydro) <- 1:nrow(vahydro)
 
 vahydro$monthdays <- days_in_month(vahydro$Date)
-vahydro$mgd <- vahydro$way_val_mgm / vahydro$monthdays
+vahydro$mgd <- vahydro$val_mgm / vahydro$monthdays
 
 #convert mgd to cfs for vahydro 
 #    MGD  <-  gal/Mgal *  ft3/gal    *   day/hr *  hr/sec
 unit_conv <-  (10^6)   * (1/7.480519) *  (1/24)  * (1/3600)
 
-vahydro$way_cfs <- vahydro$mgd * unit_conv
-
-#vahydro$sph_cfs <- vahydro$sph_val * unit_conv
-
-
-# Begin analysis of data ----------------------------------
-
-#given: model data has units of cfs in hourly timesteps
-#      VAHydro data is in mgd
-
+vahydro$cfs <- vahydro$mgd * unit_conv
 
 #step 1: look at the model data -- is it the same for every month?
 # for every month, determine how many unique values exist. if only one, show that value
@@ -108,18 +87,18 @@ for (k in 1:length(unique(modeldata$year))){
     
     if (uniqueval[i,1]==1){
       uniqueval[i,2] <- unique(mon$`w.d [cfs]`)
-      }else if (uniqueval[i,1]!=1){
-        uniqueval[i,2] <- NA
-      }
+    }else if (uniqueval[i,1]!=1){
+      uniqueval[i,2] <- NA
+    }
   }
-
- uniqueval2[l:m,1] <- uniqueval[1:12,1]
- uniqueval2[l:m,2] <- uniqueval[1:12,2]
- uniqueval2[l:m,3] <- 1:12
- uniqueval2[l:m,4] <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
- uniqueval2[l:m,5] <- studyear
- l <- l+12
- m <- m+12
+  
+  uniqueval2[l:m,1] <- uniqueval[1:12,1]
+  uniqueval2[l:m,2] <- uniqueval[1:12,2]
+  uniqueval2[l:m,3] <- 1:12
+  uniqueval2[l:m,4] <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+  uniqueval2[l:m,5] <- studyear
+  l <- l+12
+  m <- m+12
 }
 uniqueval2$date <- as.Date(paste0(uniqueval2$year,"-",uniqueval2$month,"-01"))
 #issue: feb. of 2000 has two dates (row 194 w/ NA)
@@ -130,10 +109,6 @@ plot <- ggplot(uniqueval2, aes(date)) +
   geom_col(aes(y=`unique.value[cfs]`))
 plot
 
-plotzoom <- ggplot(uniqueval2, aes(date)) + 
-  geom_col(aes(y=`unique.value[cfs]`)) + 
-  coord_cartesian(xlim=c(as.Date("1998-01-01"),as.Date("2005-01-01")))
-plotzoom
 
 colorbar <- ggplot(uniqueval2, aes(x=month, y=`unique.value[cfs]`, colour=as.factor(year))) + 
   geom_line() + 
@@ -143,18 +118,24 @@ colorbar
 
 
 
-cols <- c("grey", "grey", "grey", "grey", "grey", "grey", 
-          "grey", "grey", "grey", "grey", "grey",
-          "grey", "grey", "grey", "grey", "black",
-          "red", "brown", "gold", "mediumseagreen", "blue", 
+cols <- c("pink", "orange", "darkblue", "darkorange", "magenta", 
+          "black", "green", "tomato4", "salmon2", "firebrick4", "grey", "ivory2",
+          "lemonchiffon1",  "black",
+          "red", "brown", "gold", "mediumseagreen", 
+          "slategray3", "blue", "royalblue", 
           "mediumpurple3", "darkred")
 
 uniqueval2$monthname <- reorder(uniqueval2$monthname, uniqueval2$month)
 
-ggplot(uniqueval2, aes(x=monthname, y=`unique.value[cfs]`,fill=as.factor(year))) +
-  geom_col(position = "dodge", width=2) + 
-  scale_fill_manual(values=cols)+
-  theme(axis.text.x = element_text(angle=90))
+allyrs<- ggplot(uniqueval2, aes(x=monthname, y=`unique.value[cfs]`,fill=as.factor(year))) +
+  geom_col(position = "dodge", width=1) + 
+  scale_fill_manual(values=cols, name="Year")+
+  theme(axis.text.x = element_text(angle=90)) + 
+  labs(x="Month", y="Withdrawal [cfs]", title="Withdrawals by Month and Year") 
+
+allyrs
+ggsave(file="Withdrawals by Month and Year_allyears.png", width=9, height=5, units="in")
+
 
 
 #clip the data to remove 1984-1998 --------------------
@@ -175,4 +156,16 @@ ggsave(file="Withdrawals by Month and Year.png", width=9, height=5, units="in")
 
 #issue: feb. of 2000 has two dates (row 194 w/ NA)
 
+
+
+ninetysix <- uniqueval2[which(uniqueval2$date==as.Date("1996-01-01")):nrow(uniqueval2),]
+
+cols<-c("olivedrab", "royalblue", "pink" , "black","red", "brown", "gold", "mediumseagreen", "blue", "mediumpurple3", "darkred")
+
+sevyears <- ggplot(ninetysix, aes(x=monthname, y=`unique.value[cfs]`,fill=as.factor(year))) +
+  geom_col(position = "dodge", width=.7) + 
+  scale_fill_manual(values=cols, name="Year") + 
+  labs(x="Month", y="Withdrawal [cfs]", title="Withdrawals by Month and Year") 
+sevyears
+ggsave(file="Withdrawals by Month and Year_1996.png", width=9, height=5, units="in")
 
