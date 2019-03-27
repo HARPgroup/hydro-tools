@@ -260,3 +260,27 @@ ggplot(realvals, aes(x=Date)) +
   labs(x="Date", y="Flow [cfs]", title="Gage Flows and Withdrawals")
 ggsave(file="GAGE_2002_Flowdif_vs_withdrawal.png", width=9, height=5, units="in")
 
+
+
+# look at model withdrawal and VAHydro withdrawal ------------- 
+#are they off by a factor of something? (is there a decimal point error?)
+
+#pull in model withdrawal and vahydro withdrawal: 
+model_withdrawal <- data.frame(modelcfs$unique.model.Date., modelcfs$wd)
+colnames(model_withdrawal) <- c("Date", "Mwd")
+VAhydro_withdrawal <- data.frame(realvals$Date, realvals$VAHydro_wd)
+colnames(VAhydro_withdrawal) <- c("Date", "Vwd")
+
+withdrawal<-merge(model_withdrawal, VAhydro_withdrawal)
+withdrawal$div <- withdrawal$Mwd/withdrawal$Vwd
+
+
+ggplot(withdrawal, aes(x=Date)) + 
+  geom_line(aes(y=div, col="Division"), cex=.8) +
+  #geom_line(aes(y=VAHydro_wd, col="Withdrawal"), cex=.8) + 
+  scale_color_manual(values=c("black"), name="Method")+
+  coord_cartesian(xlim=c(as.Date("2002-01-01"),as.Date("2002-12-31")),
+                  ylim=c(3.75,4.25)) + 
+  labs(x="Date", y="Model/VAHydro wd", title="Withdrawal Differences")
+ggsave(file="2002_withdrawal_differences.png", width=9, height=5, units="in")
+
