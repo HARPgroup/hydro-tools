@@ -35,17 +35,17 @@ nodups <- wshed[-c(which(duplicated(wshed$rivseg)==TRUE)),]
 basins <- data.frame(unique(nodups$basin))
 basins$rownum <- 1:nrow(basins)
 
-eshore <- nodups[which(nodups$basin==basins[1,1]),]
-potriv <- nodups[which(nodups$basin==basins[2,1]),]
-jamriv <- nodups[which(nodups$basin==basins[3,1]),]
-wshore <- nodups[which(nodups$basin==basins[4,1]),]
-rapriv <- nodups[which(nodups$basin==basins[5,1]),]
-paxriv <- nodups[which(nodups$basin==basins[6,1]),]
-yokriv <- nodups[which(nodups$basin==basins[7,1]),]
+# eshore <- nodups[which(nodups$basin==basins[1,1]),]
+# potriv <- nodups[which(nodups$basin==basins[2,1]),]
+# jamriv <- nodups[which(nodups$basin==basins[3,1]),]
+# wshore <- nodups[which(nodups$basin==basins[4,1]),]
+# rapriv <- nodups[which(nodups$basin==basins[5,1]),]
+# paxriv <- nodups[which(nodups$basin==basins[6,1]),]
+# yokriv <- nodups[which(nodups$basin==basins[7,1]),]
 
 
 # check to make sure all segs have been kept: 
-nrow(nodups) == (nrow(eshore) + nrow(potriv) + nrow(jamriv) + nrow(wshore) + nrow(rapriv) + nrow(paxriv) + nrow(yokriv))
+# nrow(nodups) == (nrow(eshore) + nrow(potriv) + nrow(jamriv) + nrow(wshore) + nrow(rapriv) + nrow(paxriv) + nrow(yokriv))
 
 
 # Upstream/Downstream Analysis -----------------------------------
@@ -252,7 +252,7 @@ for (l in 1:nrow(NoDownStream)){
 
 
 
-
+# DO NOT ADD LONE WOLF DATA -- IT WILL THROW THE MAP OFF
 # #add lone wolf data to StoreASUS
 # 
 # LoneSeg<- data.frame(LoneWolves$rivseg)
@@ -278,149 +278,3 @@ StoreASUS$GROUP <- 1:nrow(StoreASUS)
 
 #StoreASUS<- t(StoreASUS)
 write.csv(StoreASUS, paste0(file_path,"\\All_Segs.csv"))
-
-
-
-
-
-# SETTING UP FOR LOOP TO ASSOCIATE RIVER SEGMENTS ----------
-rm(list = ls())
-
-# Pull gages from GIS file (updated GIS_seg from v3_dA_compare) ------------------------------
-modelgage <- read.csv("updated_gage_seg_link.csv", stringsAsFactors = F)
-folder_location = 'C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/CPB_ModelGageAnalysis'
-file_path <-"C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/CPB_ModelGageAnalysis\\GIS_Seg2"
-
-
-Groupings<- read.csv(paste0(file_path,"\\All_Segs.csv"), stringsAsFactors = F)#Pull the (location of desired data table)
-Groupings<- Groupings[,-1]
-#pull upstream segments for each gage association
-#if upstream list does not exist, it is a lone wolf
-
-i <- 1
-for (i in 1:nrow(modelgage)){
-  segofi <- modelgage$segment[i]
-  logic_seglist <- (Groupings==segofi)
-  upstream_row <- which(apply(logic_seglist,1,any))
-  if (is.empty(upstream_row)==TRUE){
-    modelgage$upsegs[i] <- segofi
-  }else if (is.empty(upstream_row)==FALSE){
-  upstreams <- Groupings[upstream_row,]
-  upstreams <- upstreams[1,1:which(upstreams==segofi)]
-  modelgage$upsegs[i] <- paste(upstreams, collapse = '+')
-  }
-  i <- i + 1
-}
-
-write.csv(modelgage, paste0(file_path,"\\ModelGage_UpstreamSegs.csv"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-i<-1
-x<-1
-y<-ncol(Groupings)
-RivSegGroups<-data.frame(matrix(nrow=1,ncol=1))
-for (i in 1:nrow(Groupings)){
-  store<-data.frame(matrix(nrow=1,ncol=2))
-  j<-1
-  for (j in 1:ncol(Groupings)){
-    store[j,1]<- as.character(Groupings[i,j])
-    store[j,2]<-i
-    j<-j+1
-  }
-  RivSegGroups[x:y,1]<-store[,1]
-  RivSegGroups[x:y,2]<-store[,2]
-  x<-x+nrow(store)
-  y<-y+nrow(store)
-  i<- i+1
-}  
-
-RivSegGroups<-na.omit(RivSegGroups)
-colnames(RivSegGroups)<- c('RiverSeg', 'Group')
-
-
-
-
-# Start GIS Stuff ---------------
-
-# Map projection 
-Projection<- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' 
-
-# Importing desired focus area
-RiverSeg<-readOGR ('C:/Users/Kelsey/Desktop/HARP/GIS/ApprovedSouthernRivers',"Study_CPB_Rsegs")
-RiverSeg<-spTransform(RiverSeg, CRS=Projection)   #Put shapefile in correct projection/coordinated system
-
-States <- unzip('C:\\Users\\Kelsey\\Downloads\\cb_2017_us_state_20m.zip', files="cb_2017_us_state_20m.shp")
-States<-readOGR(States, "cb_2017_us_state_20m")
-States<- spTransform(States, CRS=Projection)  
-
-RiverSeg@data$RiverSeg<-as.character(RiverSeg@data$RiverSeg)
-RiverSeg@data$Group<-NA
-
-
-# LOOP TO DETERIME WHICH RIVER SEGMENTS HAVE DATA ----------
-#The loop will run and add the desired metrics column to any segment that has a matching river segment ID with that metric
-for (i in 1:length(RiverSeg@data$RiverSeg)){
-  if (RiverSeg@data$RiverSeg[i]%in%RivSegGroups$RiverSeg){ #if the river segment ID is in the metrics file make it true, if not make it false
-    RiverSeg@data$Group[i]<- RivSegGroups$Group[RivSegGroups$RiverSeg==RiverSeg@data$RiverSeg[i]]
-  }
-}
-
-# ADDING GROUPINGS COLUMN TO SHAPEFILE ----------
-LogicGrouping<-data.frame(is.na(Groupings[,2:(ncol(Groupings)-1)]))
-LogicGrouping$AllTrue<-(rep(TRUE, nrow(LogicGrouping)))
-h<-1
-Coordinate<- data.frame(matrix(nrow=1, ncol=1))
-for (h in 1:nrow(LogicGrouping)){
-  z<-1
-  while (LogicGrouping[h,z]!=TRUE){
-    down<- z
-    z<-z+1
-  }
-  Coordinate[h,1]<-h
-  Coordinate[h,2]<-z
-  h<-h+1
-}
-i<-1
-p<-1
-for (i in 1:nrow(Coordinate)){
-  Groupings$LastSeg[i]<-as.character(Groupings[Coordinate[p,1],Coordinate[p,2]])
-  i<-i+1
-  p<-p+1
-}
-
-# SETTING UP FOR LEGEND ----------
-Groupingsnum<-nrow(Groupings)-1
-GroupingsnumFirst<-round(Groupingsnum/2, digits=0)
-GroupingsnumSecond<-GroupingsnumFirst+1
-
-# GRAPHING ----------
-title<-(' CPB Watershed Basins')
-
-dir.create(paste0(file_path), showWarnings = FALSE);
-png(filename=paste0(file_path, "\\RiverBasins.png"), 
-    width=1400, height=950, units="px")
-
-
-RiverSeg@data$color<- cut(RiverSeg@data$Group,c(0.5,1.5,2.5,3.5,4.5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5, 13.5, 14.5, 15.5, 16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 24.5, 25.5, 26.5), labels=c('blue', 'blueviolet', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse', 'chocolate', 'maroon', 'orange', 'forestgreen', 'yellow', 'gold', 'darkorchid', 'darksalmon', 'deeppink2', 'lawngreen', 'navy', 'aquamarine', 'lightseagreen', 'mediumspringgreen', 'magenta', 'turquoise4', 'chocolate4', 'gray57', 'black'))
-SouthernRivers<- RiverSeg[!is.na (RiverSeg@data$color),]
-plot(SouthernRivers, col=paste0(SouthernRivers@data$color))
-plot(States, add=TRUE, col='gray')
-lines(States, col='white')
-plot(SouthernRivers, col=paste0(SouthernRivers@data$color), add=T)
-legend("bottomleft", legend=c('River Outlet', paste0(Groupings$LastSeg[1:25]), 'Incomplete Data'), col=c('blue', 'blueviolet', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse', 'chocolate', 'maroon', 'orange', 'forestgreen', 'yellow', 'gold', 'darkorchid', 'darksalmon', 'deeppink2', 'lawngreen', 'navy', 'aquamarine', 'lightseagreen', 'mediumspringgreen', 'magenta', 'turquoise4', 'chocolate4', 'gray57', 'black'), lty=0, pch=15, pt.cex=2, bty='n', y.intersp=0.8, x.intersp=0.3, cex=2, lwd=2, ncol=1)
-legend("topleft", legend=c(title), lty=0, pt.cex=3, bty='n', y.intersp=0.75, x.intersp=0.3, cex=5, lwd=2)
-
-dev.off()
