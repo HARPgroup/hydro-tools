@@ -1,0 +1,24 @@
+---
+title: "Maps_Stamen"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Options for baselayer mapping
+
+```{r}
+library(ggmap)
+map <- get_stamenmap(bbox=c(left = -80.75, bottom =37, right =-80.25, top = 37.5), zoom=10,maptype = "watercolor", color = c("color"))
+ggmap(map)
+
+map <- get_stamenmap(bbox=c(left = -80.75, bottom =37, right =-80.25, top = 37.5), zoom=10,maptype = "terrain", color = c("color"))
+ggmap(map)
+
+map <- get_stamenmap(bbox=c(left = -80.75, bottom =37, right =-80.25, top = 37.5), zoom=10,maptype = "toner", color = c("color"))
+ggmap(map)
+
+# options for different map types exists. 
+```
