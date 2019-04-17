@@ -2,7 +2,7 @@ library(httr);
 
 #----------------------------------------------
 #site <- "http://deq2.bse.vt.edu/d.dh"    #WORKS
-site <- "http://deq2.bse.vt.edu/d.bet"
+site <- "http://deq1.bse.vt.edu/d.dh"
 #----------------------------------------------
 # Load Libraries
 basepath="C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools";
