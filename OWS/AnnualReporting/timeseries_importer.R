@@ -1,4 +1,5 @@
-library(httr)
+library(httr) #required for REST
+library(lubridate) #required for leap.year
 
 #----------------------------------------------
 site <- "http://deq2.bse.vt.edu/d.alpha"
@@ -18,13 +19,15 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 #data <-read.csv("C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/OWS/AnnualReporting/AquaVA2018.csv",sep=",",header=TRUE)
 data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE)
 
-reporting_year <- "2018"
+reporting_year <- 2018
 
 #---Summary variables
 run_started <- Sys.time()
+print (paste("Run Started: ",run_started, sep=""))
 num_recs <- length(data[,1])
 
 #i <- 1
+#i <- 241
 
 #---Begin MP Feature Loop
 for (i in 1:num_recs){
@@ -51,6 +54,7 @@ for (i in 1:num_recs){
   # NOV_mgd <- paste(data[i,]$nov_mgd)
   # DEC_mgd <- paste(data[i,]$dec_mgd)
   
+  #Monthly data MGD
   JAN_mgd <- data[i,]$jan_mgd
   FEB_mgd <- data[i,]$feb_mgd
   MAR_mgd <- data[i,]$mar_mgd
@@ -64,8 +68,13 @@ for (i in 1:num_recs){
   NOV_mgd <- data[i,]$nov_mgd
   DEC_mgd <- data[i,]$dec_mgd
   
+  #Monthly data MGM
   JAN_mgm <- JAN_mgd * 31
-  FEB_mgm <- FEB_mgd * 28
+    if (leap_year(reporting_year) == TRUE) {
+      FEB_mgm <- FEB_mgd * 29
+    } else {
+      FEB_mgm <- FEB_mgd * 28
+    }
   MAR_mgm <- MAR_mgd * 31
   APR_mgm <- APR_mgd * 30
   MAY_mgm <- MAY_mgd * 31
@@ -89,7 +98,7 @@ for (i in 1:num_recs){
                          OCT_mgm,
                          NOV_mgm,
                          DEC_mgm)
-  dates <- c(paste(reporting_year,"-01-01",sep=""),
+  dates <- c(paste(2018,"-01-01",sep=""),
              paste(reporting_year,"-02-01",sep=""),
              paste(reporting_year,"-03-01",sep=""),
              paste(reporting_year,"-04-01",sep=""),
@@ -116,7 +125,7 @@ for (i in 1:num_recs){
     tsvalue <-  as.character(timeseries_values$timeseries_values[j])
 
     #Print messages
-    print (paste("--Formatting Timeseries ",j," of ",num_timeseries_values,sep=""))
+    print (paste("-- Formatting Timeseries ",j," of ",num_timeseries_values,sep=""))
     print (paste("----- ",dates[j]," -> ",as.numeric(as.character(timeseries_values$timeseries_values[j])),sep=""))
 
     #Convert date to UNIX timestamp
@@ -140,3 +149,8 @@ for (i in 1:num_recs){
   } #---END MP Timeseries Loop
   
 } #---END MP Feature For Loop
+
+run_ended <- Sys.time()
+print (paste("Run Ended: ",run_ended, sep=""))
+print (run_ended-run_started)
+
