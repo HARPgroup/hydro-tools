@@ -109,7 +109,7 @@ getTimeseries <- function(inputs, base_url, ts){
   ts_cont <- content(ts);
   
   if (length(ts_cont$list) != 0) {
-    print(paste("Number of timeseries found: ",length(ts_cont$list),sep=""))
+    print(paste("----- Number of timeseries found: ",length(ts_cont$list),sep=""))
     
     ts <- data.frame(
                        tid=character(),
@@ -143,7 +143,7 @@ getTimeseries <- function(inputs, base_url, ts){
       ts  <- rbind(ts, ts_i)
     }
   } else {
-    print("This timeseries does not exist")
+    print("----- This timeseries does not exist")
     return(FALSE)
   }
   ts <- ts
@@ -195,7 +195,7 @@ postTimeseries <- function(inputs, base_url, ts){
   );
   
   if (is.null(tid)){
-    print("Creating timeseries...")
+    print("----- Creating timeseries...")
     ts <- POST(paste(base_url,"/dh_timeseries/",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
                  body = pbody,
@@ -205,7 +205,7 @@ postTimeseries <- function(inputs, base_url, ts){
     } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Created Successfully",sep="")}
     
   } else if (length(dataframe$tid) == 1){
-    print("Single timeseries Exists, Updating...")
+    print("----- Single timeseries Exists, Updating...")
     ts <- PUT(paste(base_url,"/dh_timeseries/",tid,sep=""), 
                 add_headers(HTTP_X_CSRF_TOKEN = token),
                 body = pbody,
@@ -214,7 +214,7 @@ postTimeseries <- function(inputs, base_url, ts){
     if (ts$status == 200){ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
     } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")}
   } else {
-    ts <- print("Multiple timeseries Exist, Execution Halted")
+    ts <- print("----- Multiple timeseries Exist, Execution Halted")
   }
   
 }
