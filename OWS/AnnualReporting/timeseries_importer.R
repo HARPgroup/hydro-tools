@@ -16,8 +16,8 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
 #####################
 #Load import file
-#data <-read.csv("C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/OWS/AnnualReporting/AquaVA2018.csv",sep=",",header=TRUE)
-data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE)
+data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #AQUAVA
+#data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #SYDNOR
 
 reporting_year <- 2018
 
@@ -27,10 +27,11 @@ print (paste("Run Started: ",run_started, sep=""))
 num_recs <- length(data[,1])
 
 #i <- 1
-#i <- 241
+#i <- 304
 
 #---Begin MP Feature Loop
-for (i in 1:num_recs){
+#for (i in 1:num_recs){
+for (i in 304:num_recs){
 
   featureid <- paste(data[i,]$deq.mp.hydroid)
   #IF STATEMENT TO ONLY IMPORT DATA FOR EXISTING VAHYDRO WELLS
@@ -41,50 +42,20 @@ for (i in 1:num_recs){
   
   print (paste("Processing MP Feature ",i," of ",num_recs,sep=""))
   
-  # JAN_mgd <- paste(data[i,]$jan_mgd)
-  # FEB_mgd <- paste(data[i,]$feb_mgd)
-  # MAR_mgd <- paste(data[i,]$mar_mgd)
-  # APR_mgd <- paste(data[i,]$apr_mgd)
-  # MAY_mgd <- paste(data[i,]$may_mgd)
-  # JUN_mgd <- paste(data[i,]$jun_mgd)
-  # JUL_mgd <- paste(data[i,]$jul_mgd)
-  # AUG_mgd <- paste(data[i,]$aug_mgd)
-  # SEP_mgd <- paste(data[i,]$sep_mgd)
-  # OCT_mgd <- paste(data[i,]$oct_mgd)
-  # NOV_mgd <- paste(data[i,]$nov_mgd)
-  # DEC_mgd <- paste(data[i,]$dec_mgd)
-  
-  #Monthly data MGD
-  JAN_mgd <- data[i,]$jan_mgd
-  FEB_mgd <- data[i,]$feb_mgd
-  MAR_mgd <- data[i,]$mar_mgd
-  APR_mgd <- data[i,]$apr_mgd
-  MAY_mgd <- data[i,]$may_mgd
-  JUN_mgd <- data[i,]$jun_mgd
-  JUL_mgd <- data[i,]$jul_mgd
-  AUG_mgd <- data[i,]$aug_mgd
-  SEP_mgd <- data[i,]$sep_mgd
-  OCT_mgd <- data[i,]$oct_mgd
-  NOV_mgd <- data[i,]$nov_mgd
-  DEC_mgd <- data[i,]$dec_mgd
-  
   #Monthly data MGM
-  JAN_mgm <- JAN_mgd * 31
-    if (leap_year(reporting_year) == TRUE) {
-      FEB_mgm <- FEB_mgd * 29
-    } else {
-      FEB_mgm <- FEB_mgd * 28
-    }
-  MAR_mgm <- MAR_mgd * 31
-  APR_mgm <- APR_mgd * 30
-  MAY_mgm <- MAY_mgd * 31
-  JUN_mgm <- JUN_mgd * 30
-  JUL_mgm <- JUL_mgd * 31
-  AUG_mgm <- AUG_mgd * 31
-  SEP_mgm <- SEP_mgd * 30
-  OCT_mgm <- OCT_mgd * 31
-  NOV_mgm <- NOV_mgd * 30
-  DEC_mgm <- DEC_mgd * 31
+  JAN_mgm <- data[i,]$jan_mgm
+  FEB_mgm <- data[i,]$feb_mgm
+  MAR_mgm <- data[i,]$mar_mgm
+  APR_mgm <- data[i,]$apr_mgm
+  MAY_mgm <- data[i,]$may_mgm
+  JUN_mgm <- data[i,]$jun_mgm
+  JUL_mgm <- data[i,]$jul_mgm
+  AUG_mgm <- data[i,]$aug_mgm
+  SEP_mgm <- data[i,]$sep_mgm
+  OCT_mgm <- data[i,]$oct_mgm
+  NOV_mgm <- data[i,]$nov_mgm
+  DEC_mgm <- data[i,]$dec_mgm
+
   
   timeseries_values <- c(JAN_mgm,
                          FEB_mgm,
