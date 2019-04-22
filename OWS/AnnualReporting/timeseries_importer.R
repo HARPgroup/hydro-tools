@@ -16,7 +16,9 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
 #####################
 #Load import file
-data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #AQUAVA
+data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2018
+#data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2017/AquaVA2017_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2017
+
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #SYDNOR
 
 reporting_year <- 2018
@@ -30,8 +32,8 @@ num_recs <- length(data[,1])
 #i <- 304
 
 #---Begin MP Feature Loop
-#for (i in 1:num_recs){
-for (i in 304:num_recs){
+for (i in 1:num_recs){
+#for (i in 304:num_recs){
 
   featureid <- paste(data[i,]$deq.mp.hydroid)
   #IF STATEMENT TO ONLY IMPORT DATA FOR EXISTING VAHYDRO WELLS
@@ -69,7 +71,7 @@ for (i in 304:num_recs){
                          OCT_mgm,
                          NOV_mgm,
                          DEC_mgm)
-  dates <- c(paste(2018,"-01-01",sep=""),
+  dates <- c(paste(reporting_year,"-01-01",sep=""),
              paste(reporting_year,"-02-01",sep=""),
              paste(reporting_year,"-03-01",sep=""),
              paste(reporting_year,"-04-01",sep=""),
@@ -114,8 +116,9 @@ for (i in 304:num_recs){
       tstime = tstime
     )
 
-    ts <- postTimeseries(inputs, site)
-    get_ts <- getTimeseries(inputs, site)
+    #ts <- postTimeseries(inputs, site)
+    ts <- postTimeseriesIFempty(inputs, site)
+    #get_ts <- getTimeseries(inputs, site)
     ################################################
   } #---END MP Timeseries Loop
   
