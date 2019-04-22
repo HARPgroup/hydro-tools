@@ -109,7 +109,7 @@ getTimeseries <- function(inputs, base_url, ts){
   ts_cont <- content(ts);
   
   if (length(ts_cont$list) != 0) {
-    print(paste("Number of timeseries found: ",length(ts_cont$list),sep=""))
+    print(paste("----- Number of timeseries found: ",length(ts_cont$list),sep=""))
     
     ts <- data.frame(
                        tid=character(),
@@ -143,7 +143,7 @@ getTimeseries <- function(inputs, base_url, ts){
       ts  <- rbind(ts, ts_i)
     }
   } else {
-    print("This timeseries does not exist")
+    print("----- This timeseries does not exist")
     return(FALSE)
   }
   ts <- ts
@@ -195,7 +195,7 @@ postTimeseries <- function(inputs, base_url, ts){
   );
   
   if (is.null(tid)){
-    print("Creating timeseries...")
+    print("----- Creating timeseries...")
     ts <- POST(paste(base_url,"/dh_timeseries/",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
                  body = pbody,
@@ -205,7 +205,7 @@ postTimeseries <- function(inputs, base_url, ts){
     } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Created Successfully",sep="")}
     
   } else if (length(dataframe$tid) == 1){
-    print("Single timeseries Exists, Updating...")
+    print("----- Single timeseries Exists, Updating...")
     ts <- PUT(paste(base_url,"/dh_timeseries/",tid,sep=""), 
                 add_headers(HTTP_X_CSRF_TOKEN = token),
                 body = pbody,
@@ -213,6 +213,76 @@ postTimeseries <- function(inputs, base_url, ts){
     );
     if (ts$status == 200){ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
     } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")}
+  } else {
+    ts <- print("----- Multiple timeseries Exist, Execution Halted")
+  }
+  
+}
+
+postTimeseriesIFempty <- function(inputs, base_url, ts){
+  
+  #Search for existing tserty matching supplied varkey, featureid, entity_type 
+  dataframe <- getTimeseries(inputs, base_url, ts)
+  if (is.data.frame(dataframe)) {
+    tid <- as.character(dataframe$tid)
+  } else {
+    tid = NULL
+  }
+  if (!is.null(inputs$varkey)) {
+    # this would use REST 
+    # getVarDef(list(varkey = inputs$varkey), token, base_url)
+    # but it is broken for vardef for now metadatawrapper fatal error
+    # EntityMetadataWrapperException: Invalid data value given. Be sure it matches the required data type and format. 
+    # in EntityDrupalWrapper->set() 
+    # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
+    
+    tsdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
+    tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
+    varid <- tsdef_table[1][which(tsdef_table$varkey == inputs$varkey),]
+    print(paste("varid: ",varid,sep=""))
+    if (is.null(varid)) {
+      # we sent a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+  if (!is.null(inputs$varid)) {
+    varid = inputs$varid
+  }
+  
+  if (is.null(varid)) {
+    print("Variable IS is null - returning.")
+    return(FALSE)
+  }
+  
+  pbody = list(
+    featureid = inputs$featureid,
+    varid = varid,
+    entity_type = inputs$entity_type,
+    tsvalue = inputs$tsvalue,
+    tscode = inputs$tscode,
+    tstime = inputs$tstime,
+    tsendtime = inputs$tsendtime
+  );
+  
+  if (is.null(tid)){
+    print("Creating timeseries...")
+    ts <- POST(paste(base_url,"/dh_timeseries/",sep=""), 
+               add_headers(HTTP_X_CSRF_TOKEN = token),
+               body = pbody,
+               encode = "json"
+    );
+    if (ts$status == 201){ts <- paste("Status ",ts$status,", timeseries Created Successfully",sep="")
+    } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Created Successfully",sep="")}
+    
+  } else if (length(dataframe$tid) == 1){
+    print("Single timeseries Exists, Skipping...")
+    # ts <- PUT(paste(base_url,"/dh_timeseries/",tid,sep=""), 
+    #           add_headers(HTTP_X_CSRF_TOKEN = token),
+    #           body = pbody,
+    #           encode = "json"
+    # );
+    # if (ts$status == 200){ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
+    # } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")}
   } else {
     ts <- print("Multiple timeseries Exist, Execution Halted")
   }
