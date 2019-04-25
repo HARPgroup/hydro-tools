@@ -2,7 +2,7 @@ library(httr) #required for REST
 library(lubridate) #required for leap.year
 
 #----------------------------------------------
-site <- "http://deq2.bse.vt.edu/d.alpha"
+site <- "http://deq2.bse.vt.edu/d.dh"
 #----------------------------------------------
 
 #Set Repo Location
@@ -16,12 +16,13 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
 #####################
 #Load import file
-data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2018
-#data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2017/AquaVA2017_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2017
+#data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/final_import_file/AquaVA2018_mgm_ALL.csv",sep=",",header=TRUE) #AQUAVA 2017
+data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2017/final_import_file/AquaVA2017_mgm_ALL.csv",sep=",",header=TRUE) #AQUAVA 2017
+
 
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #SYDNOR
 
-reporting_year <- 2018
+reporting_year <- 2017
 
 #---Summary variables
 run_started <- Sys.time()
@@ -32,7 +33,7 @@ num_recs <- length(data[,1])
 #i <- 304
 
 #---Begin MP Feature Loop
-for (i in 1:num_recs){
+for (i in 199:num_recs){
 #for (i in 304:num_recs){
 
   featureid <- paste(data[i,]$deq.mp.hydroid)
@@ -116,8 +117,8 @@ for (i in 1:num_recs){
       tstime = tstime
     )
 
-    #ts <- postTimeseries(inputs, site)
-    ts <- postTimeseriesIFempty(inputs, site)
+    #ts <- postTimeseries(inputs, site)       #UPDATES TS DATA IF EXISTS
+    ts <- postTimeseriesIFempty(inputs, site) #ONLY IMPORTS TS DATA IF NONE EXISTS
     #get_ts <- getTimeseries(inputs, site)
     ################################################
   } #---END MP Timeseries Loop
