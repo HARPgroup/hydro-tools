@@ -43,7 +43,8 @@ Groupings[25,] <- t(addrow)
 
 
 #continue with code: create upstream csv for use later 
-modelgage <- read.csv("updated_gage_seg_link.csv", stringsAsFactors = F)
+modelgage <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRqnbZ5yjvVsizdYJ09yml5VOPXsRD3C9EFH5JXOtIqLeqjP000CJXYv3-MQQwK4AnYNhsPaqsOT1xE/pub?output=csv", stringsAsFactors = F)
+
 i <- 1
 for (i in 1:nrow(modelgage)){
   segofi <- modelgage$segment[i]
@@ -270,29 +271,44 @@ legend("topleft", legend=c(title), lty=0, pt.cex=3, bty='n', y.intersp=0.75, x.i
 dev.off()
 
 
+
+
+
 #create a different outline for the lone wolf segments? or just plot by number: ----
 
-#Greyed out lone wolves ---------------
-title<-('Lone Wolves Major Watershed Basins')
+#Gage Segment linked gages 
+GageSegs <- RiverSeg
+
+# get the segments pulled out of gagesegs and match for a plot
+which(GageSegs@data$RiverSeg==modelgage$segment)
+
+
+title<-('Gage-Segment Links')
 dir.create(paste0(file_path), showWarnings = FALSE);
-png(filename=paste0(file_path, "\\LoneWolf_MajRiverBasins.png"), 
+png(filename=paste0(file_path, "\\GageLinkedBasins.png"), 
     width=1400, height=950, units="px")
 
-
-LoneSeg <- RiverSeg
-LoneSeg@data$color<- cut(LoneSeg@data$Group,c(0.5,1.5,2.5,3.5,4.5,5.5,6.5,7.5,8.5,9.5,10.5,11.5,12.5,13.5,14.5,15.5,16.5,17.5,18.5,19.5,20.5,21.5,22.5,23.5,24.5,25.5 ), 
+GageSegs@data$color<- cut(RiverSeg@data$Maj,c(0.5,1.5,2.5,3.5,4.5,5.5,6.5,7.5), 
                           labels=c('blue', 'turquoise4', 'brown', 'brown1', 'burlywood1', 
-                                   'cadetblue1', 'chartreuse', 'red', 'purple', 'orange',
-                                   'red', 'blue', 'purple', 'green', 'black',
-                                   'red', 'blue', 'purple', 'green', 'black',
-                                   'red', 'blue', 'purple', 'green', 'black'))
+                                   'cadetblue1', 'chartreuse'))
+i <- 1
+RiverSeg@data$color <- as.character(RiverSeg@data$color)
+for (i in 1:nrow(RiverSeg@data)){
+  riversim <- as.character(RiverSeg@data$RiverSimu[i])
+  if (riversim =="Direct Drainage, CB"){
+    RiverSeg@data$color[i] <- "grey40"
+  }else if (riversim !="Direct Drainage, CB"){
+    RiverSeg@data$color[i] <- RiverSeg@data$color[i]
+  }
+}
 
-LoneWolves<- LoneSeg[!is.na (LoneSeg@data$color),]
-plot(LoneWolves, col=paste0(LoneWolves@data$color))
+SouthernRivers<- RiverSeg[!is.na (RiverSeg@data$color),]
+plot(SouthernRivers, col=paste0(SouthernRivers@data$color))
 plot(States, add=TRUE, col='gray')
 lines(States, col='white')
-plot(LoneWolves, col=paste0(LoneSeg@data$color), add=T)
-legend("bottomleft", legend=c(paste0(unique(gsub(",.*$", "", LoneSeg@data$Group)))), col=c('blue', 'turquoise4', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse', 'blue', 'turquoise4', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse', 'blue', 'turquoise4', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse', 'blue', 'turquoise4', 'brown', 'brown1', 'burlywood1'), lty=0, pch=15, pt.cex=2, bty='n', y.intersp=0.8, x.intersp=0.3, cex=2, lwd=2, ncol=1)
+plot(SouthernRivers, col=paste0(SouthernRivers@data$color), add=T)
+legend("bottomleft", legend=c(paste0(unique(gsub(",.*$", "", RiverSeg@data$MajBas)))), col=c('blue', 'turquoise4', 'brown', 'brown1', 'burlywood1', 'cadetblue1', 'chartreuse'), lty=0, pch=15, pt.cex=2, bty='n', y.intersp=0.8, x.intersp=0.3, cex=2, lwd=2, ncol=1)
 legend("topleft", legend=c(title), lty=0, pt.cex=3, bty='n', y.intersp=0.75, x.intersp=0.3, cex=5, lwd=2)
 
 dev.off()
+
