@@ -42,10 +42,10 @@ spholla_W$Value <- as.numeric(gsub(",", "",spholla_W$Value))
 wayside_W <- subset(wayside_W, varkey=="wd_mgm")
 spholla_W <- subset(spholla_W, varkey=="wd_mgm")
 
-# units are in mgd
+# units are in mgm 
 #convert mgd to cfs for vahydro 
-#    MGD  <-  gal/Mgal *  ft3/gal    *   day/hr *  hr/sec
-unit_conv <-  (10^6)   * (1/7.480519) *  (1/24)  * (1/3600)
+#    MGM  <-  gal/Mgal *  ft3/gal     *  month/day * day/hr  *  hr/sec
+unit_conv <-  (10^6)   * (1/7.480519) *   (1/30)   * (1/24)  * (1/3600)
 wayside_W$Value <- wayside_W$Value * unit_conv
 spholla_W$Value <- spholla_W$Value * unit_conv
 
@@ -118,3 +118,37 @@ upstream_view <- ggplot(wayside_gage, aes(Date)) +
                      limits=c(1,10000))
 ggsave(file="wayside_gage_v_vahydro_2002.png", width=9, height=5, units="in")
 
+
+
+#--------------------------------
+# plot wayside model vs gage vs withdrawals for vahydro
+#--------------------------------
+upstream_view <- ggplot(wayside_gage, aes(Date)) + 
+  geom_line(aes(y=X_00060_00003, colour="gage"), size=0.5) + 
+  geom_line(data=wayside_Q, aes(x=timestamp, y=Qout, colour="vahydromodel"), size=0.7) + 
+  geom_line(data=wayside_W, aes(x=Date, y=Value, colour="Wayside_withdrawal"), size=0.7) + 
+  geom_line(data=spholla_W, aes(x=Date, y=Value, colour="sphol_withdrawal"), size=0.7) + 
+  scale_colour_manual(values=c("blue", "grey", "red", "green")) + 
+  labs(x="Date", y="Flow [cfs]", colour="Legend") + 
+  coord_cartesian( xlim=c(as.Date("1984-01-01"), as.Date("2005-12-31"))) + 
+  ggtitle("Wayside gage v. vahydro model") + 
+  scale_y_continuous(trans = log_trans(), 
+                     breaks = c(10, 100, 1000, 10000, 10000), 
+                     limits=c(1,10000))
+ggsave(file="wayside_gage_v_vahydro_v_withdrawal.png", width=9, height=5, units="in")
+
+
+#zoom the same thing down to 2002
+upstream_view <- ggplot(wayside_gage, aes(Date)) + 
+  geom_line(aes(y=X_00060_00003, colour="gage"), size=0.5) + 
+  geom_line(data=wayside_Q, aes(x=timestamp, y=Qout, colour="vahydromodel"), size=0.7) + 
+  geom_line(data=wayside_W, aes(x=Date, y=Value, colour="Wayside_withdrawal"), size=0.7) + 
+  geom_line(data=spholla_W, aes(x=Date, y=Value, colour="sphol_withdrawal"), size=0.7) + 
+  scale_colour_manual(values=c("blue", "grey", "red", "green")) + 
+  labs(x="Date", y="Flow [cfs]", colour="Legend") + 
+  coord_cartesian(xlim=c(as.Date("2002-01-01"), as.Date("2002-12-31"))) + 
+  ggtitle("Wayside gage v. vahydro model 2002") + 
+  scale_y_continuous(trans = log_trans(), 
+                     breaks = c(10, 100, 1000, 10000, 10000), 
+                     limits=c(1,10000))
+ggsave(file="wayside_gage_v_vahydro_v_withdrawal_2002.png", width=9, height=5, units="in")

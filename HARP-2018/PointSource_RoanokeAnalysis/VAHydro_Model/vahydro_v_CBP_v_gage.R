@@ -34,7 +34,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 options(timeout=1200); # set timeout to twice default level to avoid abort due to high traffic
 
 # inputs for pulling via REST -----------------------------------
-hydrocode = "vahydrosw_wshed_OR2_8020_8130";
+hydrocode = "vahydrosw_wshed_OR2_8130_7900";
 ftype = 'vahydro'; # nhd_huc8, nhd_huc10, vahydro
 inputs <- list (
   hydrocode = hydrocode,
@@ -138,7 +138,10 @@ hydro_view <- ggplot(gage, aes(Date)) +
   geom_line(data=vahydroflow, aes(x=timestamp, y=Qout, colour="vahydromodel"), size=0.7) + 
   scale_colour_manual(values=c("blue", "black")) + 
   labs(x="Date", y="Flow [cfs]", colour="Legend") + 
-  coord_cartesian(ylim=c(0,300), xlim=c(as.Date("2003-12-31"), as.Date("2005-12-31")))
+  ggtitle("Wayside gage v. vahydro") + 
+  scale_y_continuous(trans = log_trans(), 
+                     breaks = c(10, 100, 1000, 10000, 10000), 
+                     limits=c(1,10000))
 ggsave(file="vahydro_v_gageflow.png", width=9, height=5, units="in")
 
 
@@ -183,6 +186,10 @@ hydro_view <- ggplot(gage, aes(Date)) +
   geom_line(data=modeldata, aes(x=date, y=flow, colour="CPB_model"), size=0.7) + 
   scale_colour_manual(values=c("black", "blue", "red")) + 
   labs(x="Date", y="Flow [cfs]", colour="Legend") + 
-  coord_cartesian(ylim=c(0,300), xlim=c(as.Date("2001-12-31"), as.Date("2002-12-31")))
+  coord_cartesian(xlim=c(as.Date("2002-01-01"), as.Date("2002-12-31"))) + 
+  ggtitle("Wayside gage v. vahydro v. CB model") + 
+  scale_y_continuous(trans = log_trans(), 
+                     breaks = c(10, 100, 1000, 10000, 10000), 
+                     limits=c(1,10000))
 ggsave(file="CPB_v_vahydro_v_gageflow_2002.png", width=9, height=5, units="in")
 
