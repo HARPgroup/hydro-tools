@@ -99,7 +99,7 @@ dat <- fn_get_runfile(elid, runid, site= omsite,  cached = TRUE);
 
 dat <- window(dat, start = as.Date("1984-01-01"), end = as.Date("2005-12-31"))
 setwd("C:/Users/Kelsey/Desktop/GitHub/hydro-tools/HARP-2018/PointSource_RoanokeAnalysis/VAHydro_Model")
-write.csv(dat, "vahydro_sphollow_flow.csv")
+write.csv(dat, "vahydro_upstream_flow.csv")
 
 #--------------------------------------
 # end rest retrieval
