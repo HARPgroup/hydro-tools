@@ -1,6 +1,6 @@
 library(httr) #required for REST
 library(lubridate) #required for leap.year
-
+library("readxl") #required for read_excel()
 #----------------------------------------------
 site <- "http://deq2.bse.vt.edu/d.alpha"
 #----------------------------------------------
@@ -16,17 +16,22 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
 #####################
 #Load import file
-data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2018
+#data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2018
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2017/AquaVA2017_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2017
 
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #SYDNOR
+data <- read_excel("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/Sydnor/Sydnor_VAHydro.xlsx", sheet = "import-ready")
+
+names(data) <- as.character(data[1,])
+data <- data[-1,]
+
 
 reporting_year <- 2018
 
 #---Summary variables
 run_started <- Sys.time()
 print (paste("Run Started: ",run_started, sep=""))
-num_recs <- length(data[,1])
+num_recs <- length(data$deq.mp.hydroid)
 
 #i <- 1
 #i <- 304
@@ -44,19 +49,34 @@ for (i in 1:num_recs){
   
   print (paste("Processing MP Feature ",i," of ",num_recs,sep=""))
   
-  #Monthly data MGM
-  JAN_mgm <- data[i,]$jan_mgm
-  FEB_mgm <- data[i,]$feb_mgm
-  MAR_mgm <- data[i,]$mar_mgm
-  APR_mgm <- data[i,]$apr_mgm
-  MAY_mgm <- data[i,]$may_mgm
-  JUN_mgm <- data[i,]$jun_mgm
-  JUL_mgm <- data[i,]$jul_mgm
-  AUG_mgm <- data[i,]$aug_mgm
-  SEP_mgm <- data[i,]$sep_mgm
-  OCT_mgm <- data[i,]$oct_mgm
-  NOV_mgm <- data[i,]$nov_mgm
-  DEC_mgm <- data[i,]$dec_mgm
+  #needed to convert gal/mo to mgm for Sydnor data
+  JAN_mgm <- as.numeric(data[i,]$jan_gal)/1000000
+  FEB_mgm <- as.numeric(data[i,]$feb_gal)/1000000
+  MAR_mgm <- as.numeric(data[i,]$mar_gal)/1000000
+  APR_mgm <- as.numeric(data[i,]$apr_gal)/1000000
+  MAY_mgm <- as.numeric(data[i,]$may_gal)/1000000
+  JUN_mgm <- as.numeric(data[i,]$jun_gal)/1000000
+  JUL_mgm <- as.numeric(data[i,]$jul_gal)/1000000
+  AUG_mgm <- as.numeric(data[i,]$aug_gal)/1000000
+  SEP_mgm <- as.numeric(data[i,]$sep_gal)/1000000
+  OCT_mgm <- as.numeric(data[i,]$oct_gal)/1000000
+  NOV_mgm <- as.numeric(data[i,]$nov_gal)/1000000
+  DEC_mgm <- as.numeric(data[i,]$dec_gal)/1000000
+
+  
+  # #Monthly data MGM
+  # JAN_mgm <- data[i,]$jan_mgm
+  # FEB_mgm <- data[i,]$feb_mgm
+  # MAR_mgm <- data[i,]$mar_mgm
+  # APR_mgm <- data[i,]$apr_mgm
+  # MAY_mgm <- data[i,]$may_mgm
+  # JUN_mgm <- data[i,]$jun_mgm
+  # JUL_mgm <- data[i,]$jul_mgm
+  # AUG_mgm <- data[i,]$aug_mgm
+  # SEP_mgm <- data[i,]$sep_mgm
+  # OCT_mgm <- data[i,]$oct_mgm
+  # NOV_mgm <- data[i,]$nov_mgm
+  # DEC_mgm <- data[i,]$dec_mgm
 
   
   timeseries_values <- c(JAN_mgm,
