@@ -1,7 +1,7 @@
 #VAHydro-1.0 Authentication 
-username <- 'itsasecret'
-hash <- 'itsasecret'
+username <- "TRICKY_USERNAME"
+hash <- "TRICKY_PASSWORD"
 
-#VAHydro-2.0 REST Authentication 
-rest_uname <- 'restws_acct'
-rest_pw <- 'itsasecret'
+#VAHydro-2.0 Admin REST Authentication 
+rest_uname <- 'TRICKY_USERNAME'
+rest_pw <- 'TRICKY_PASSWORD'

@@ -1,6 +1,5 @@
 #The purpose of this code is to calculate the average daily flow of model and gage outputs
 #Not only is this a useful metric but it allows us to make sure we have the correct river segments and gage associated
-#If multiple river segements area assoiated with one gage include all of them in the river_seg variable, separating the segments with a + (ie. OD5_8900_8770+OD5_8890_8770)
 
 #Load Libraries---------------------------------------------------------------------
 library(pander);
@@ -13,31 +12,31 @@ library(lubridate);
 URL_model_daily <- 'https://docs.google.com/spreadsheets/d/11gh7lb8DqZR6frLeVgIXld4Y1rFErJrPXZUCOTfL5YY/pub?output=csv'
 river_seg<-'OD3_8630_8720'
 siteNo <- "02073000"
+start.date <- "1984-10-01"
+end.date <- "2005-12-05"
 
 # LOADS MODEL DATA ------------------------------------------------------------
 model_daily = read.csv(URL_model_daily, header = TRUE, sep = ",", stringsAsFactors = FALSE);
 
-#Adjust model data to be correct date range (1984-10-01 to 2005-09-30)
-start_date<-(which(model_daily$date == '1984-10-01'))
-end_date<-(which(model_daily$date=='2005-09-30'))
+#Adjust model data to be correct date range (start.date to end.date)
+start_date<-(which(model_daily$date == start.date))
+end_date<-(which(model_daily$date== end.date))
 model_daily_WY<-model_daily[start_date:end_date,]
 
 # LOADS GAGE DATA---------------------------------------------------------------
 pCode <- "00060"
-start.date <- "1984-10-01"
-end.date <- "2005-09-30"
 gage_data <- readNWISdv(siteNumbers = siteNo,
-                     parameterCd = pCode,
-                     startDate = start.date,
-                     endDate = end.date)
+                        parameterCd = pCode,
+                        startDate = start.date,
+                        endDate = end.date)
 
 # Cleans up names of gage data columns
-names(gage_data)
+#names(gage_data)
 gage_data <- renameNWISColumns(gage_data)
 
 # AREA WEIGHTED CALCULATION ---------------------------------------------------
 #Pull in data on river segment areas
-URL_model_area <- 'https://docs.google.com/spreadsheets/d/1AV7jO5o-892hvO8mUVe-jS2UA8gSs-5aOhHLFKdvwEY/pub?output=csv'
+URL_model_area <- 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY5BkQ0Ha269jchgbuZYaND5_rxaSTV1rBoW6dDtr7NnlrCIcMaODmST-WAfSzUwUWwOuv3ghVUwNH/pub?output=csv'
 model_area_all = read.csv(URL_model_area, header = TRUE, sep = ",", stringsAsFactors = FALSE);
 
 
@@ -65,12 +64,15 @@ colnames(OUTPUT_MATRIX) = c('USGS', 'Model')
 # PLOT AVERAGE DAILY FLOWS -------------------------------------------------------
 gage_legend<- paste('Gage',siteNo)                        #Creates legend title for gage
 model_legend<-paste('Model River Seg. \n', river_seg)     #Creates legend title for model
-
+error <- abs(OUTPUT_MATRIX[1,1]-OUTPUT_MATRIX[1,2])/OUTPUT_MATRIX[1,1]*100
+error <- round(error, digits = 2)
 par(mfrow=c(1,1))                                                                                #Both data sets on one graph
 par(cex=1.1)
-plot(gage_data$Date, gage_data$Flow, type='l', col="red", xlab='Date', ylab='Flow (cfs)', lwd=1.5) #USGS gage data
+plot(gage_data$Date, gage_data$Flow, type='l', col="red", xlab=paste('Date Range:', start.date, ':', end.date, ' ', 'Error:', error,'%'), ylab='Flow (cfs)', lwd=1.5) #USGS gage data
 lines(area_weighted_model$date, area_weighted_model$flow, col="blue", type='l', lwd=1.5)                 #Model data
 legend ("topright", legend=c(gage_legend,model_legend), col=c('red','blue'), lty=1, bty='n')
 
 # OUTPUT MATRIX------------------------------------------------------------------------
 OUTPUT_MATRIX
+
+# DETERMINING PERIODS OF ERROR --------------------------------------------------------
