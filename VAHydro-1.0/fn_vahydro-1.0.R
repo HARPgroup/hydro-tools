@@ -49,7 +49,7 @@ fn_get_rundata <- function(
 
 fn_get_runfile_info <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu"
+  site = "http://deq2.bse.vt.edu", outaszoo=TRUE
 ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -132,7 +132,12 @@ fn_get_runfile <- function(
     datv$timestamp <- as.POSIXct(datv$timestamp,origin="1970-01-01")
     f3 <- zoo(datv, order.by = datv$timestamp)
   }
-  return(f3);
+  unlink('tempfile')
+  if(outaszoo){
+    return(f3)  
+  }else{
+    return(datv)  
+  }
 }
 
 fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
