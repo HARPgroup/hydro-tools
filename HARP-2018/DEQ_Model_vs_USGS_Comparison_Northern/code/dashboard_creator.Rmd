@@ -7,14 +7,14 @@ output:
 ```{r inputs, include=FALSE, echo=FALSE}
 # INPUTS ------------------------------------------------------------------
 # Link to hydro-tools folder within GitHub folder
-basepath='C:\\Users\\danie\\Downloads\\Downloads\\HARP\\GitHub\\hydro-tools';
+basepath='C:\\Users\\danie\\Documents\\HARP\\GitHub\\hydro-tools';
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
 container <- paste0(basepath, "\\HARP-2018\\DEQ_Model_vs_USGS_Comparison_Northern")
 
 # USGS Gage number
-siteNo <- "02027800"
+siteNo <- "01653000"
 # CARRYOVER IF MASTER IS BEING RUN ----------------------------------------
 if (exists("container.master") == TRUE) {
   container <- container.master
@@ -31,8 +31,8 @@ RivSeg <- gage.to.segment$segment
 ```
 ---
 title: |
-    | Appendix A.23: USGS Gage `r paste(siteNo, "vs.", RivSeg)`
-    | Lower James River
+    | Appendix B.23: USGS Gage `r paste(siteNo, "vs.", RivSeg)`
+    | Lower Potomac River
 output:
   pdf_document: default
 ---
@@ -46,7 +46,8 @@ site <- "http://deq2.bse.vt.edu/d.dh"    #Specify the site of interest, either d
 
 source(paste(basepath,'config.local.private',sep='/'));
 source(paste(hydro_tools,"VAHydro-2.0/rest_functions.R", sep = "/")); 
-source(paste(hydro_tools, "HARP-2018/DEQ_Model_vs_USGS_Comparison_Northern/code/fn_gage+seg_mapper.R", sep = "/"));
+#source(paste(hydro_tools, "HARP-2018/DEQ_Model_vs_USGS_Comparison_Northern/code/fn_gage+seg_mapper.R", sep = "/"));
+source(paste(hydro_tools, "HARP-2018/DEQ_Model_vs_USGS_Comparison_Northern/code/fn_gage+seg_mapper_fromNWIS.R", sep = "/"));
 #retrieve rest token
 source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and password, contained in auth.private file
 token <- rest_token(site, token, rest_uname, rest_pw);
