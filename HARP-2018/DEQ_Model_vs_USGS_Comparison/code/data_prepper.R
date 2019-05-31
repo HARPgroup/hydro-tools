@@ -6,18 +6,32 @@
 # LOADING LIBRARIES -------------------------------------------------------
 
 library('lubridate')
+library('dataRetrieval')
 
 # INPUTS ------------------------------------------------------------------
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+container <- "C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools\\HARP-2018\\DEQ_Model_vs_USGS_Comparison"
 
 # USGS Gage number
-siteNo <- "03175500"
+siteNo <- "03208500"
 
 # Should new or original data be used?
 new.or.original <- "new"
+
+site <- "http://deq2.bse.vt.edu/d.bet"    #Specify the site of interest, either d.bet OR d.dh
+
+basepath='C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools';
+
+# SETUP
+
+source(paste(basepath,'config.local.private',sep='/'));
+#retrieve rest token
+source(paste(hydro_tools,"VAHydro-2.0/rest_functions.R", sep = "/")); 
+source(paste(hydro_tools,"auth.private", sep = "/"));#load rest username and password, contained in auth.private file
+token <- rest_token(site, token, rest_uname, rest_pw);
+options(timeout=120); # set timeout to twice default level to avoid abort due to high traffic
 
 # CARRYOVER IF MASTER IS BEING RUN ----------------------------------------
 if (exists("container.master") == TRUE) {
@@ -104,13 +118,49 @@ data$model.flow <- data$model.flow * 0.504167
 # EXPORTING "TRIMMED FLOW" ------------------------------------------------
 
 # Exporting "trimmed flow"
-write.csv(data, file = paste0(container, "/data/new_(updated)_data/derived_data/trimmed_data/", siteNo, "_vs_", RivSeg," - Derived Data.csv"))
+write.csv(data, file = paste0(container, container.cont, "/derived_data/trimmed_data/", siteNo, "_vs_", RivSeg," - Derived Data.csv"))
 
 # AREA-ADJUSTING FLOW -----------------------------------------------------
 
-gage.area <- gage.to.segment$gage_area
-model.area <- gage.to.segment$segment_area
-data$model.flow <- data$model.flow*(gage.area/model.area)
+gage.area <- readNWISsite(siteNo)
+gage.area <- gage.area$drain_area_va
+
+# Splitting the River Segment string into each segment name
+RivSegStr <- strsplit(RivSeg, "\\+")
+RivSegStr <- RivSegStr[[1]]
+num.segs <- length(RivSegStr)
+sum.model.area <- 0
+
+for (i in 1:num.segs) {
+
+# GETTING MODEL DATA FROM VA HYDRO
+hydrocode = paste("vahydrosw_wshed_",RivSegStr[i],sep="");
+ftype = 'vahydro'; # nhd_huc8, nhd_huc10, vahydro
+inputs <- list (
+  hydrocode = hydrocode,
+  bundle = 'watershed',
+  ftype = 'vahydro'
+)
+#property dataframe returned
+feature = FALSE;
+odata <- getFeature(inputs, token, site, feature);
+hydroid <- odata[1,"hydroid"];
+fname <- as.character(odata[1,]$name );
+print(paste("Retrieved hydroid",hydroid,"for", fname,RivSegStr[i], sep=' '));
+# Getting the local drainage area feature
+areainfo <- list(
+  varkey = "wshed_drainage_area_sqmi",
+  featureid = as.integer(as.character(hydroid)),
+  entity_type = "dh_feature"
+)
+model.area <- getProperty(areainfo, site, model.area)
+model.area <- model.area$propvalue
+sum.model.area <- sum.model.area + model.area
+}
+
+ratio <- gage.area/sum.model.area
+
+data$model.flow <- data$model.flow*(gage.area/sum.model.area)
 
 # EXPORTING "TRIMMED + AREA-ADJUSTED FLOW ---------------------------------
 

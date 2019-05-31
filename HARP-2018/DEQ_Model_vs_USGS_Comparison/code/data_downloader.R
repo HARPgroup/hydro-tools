@@ -13,10 +13,10 @@ library(plyr)
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+container <- "C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools\\HARP-2018\\DEQ_Model_vs_USGS_Comparison"
 
 # USGS Gage number
-siteNo <- "03175500"
+siteNo <- "02077500"
 
 # Start and end dates of data (Model: Has data from 1984-01-01 to 2005-12-31)
 start.date <- "1984-01-01"
@@ -30,6 +30,7 @@ if (exists("container.master") == TRUE) {
 }
 
 # CREATING DIRECTORIES FOR DATA STORAGE
+dir.create(paste0(container, "\\data\\new_(updated)_data"), showWarnings = FALSE)
 dir.create(paste0(container,"\\data\\new_(updated)_data\\raw_data"), showWarnings = FALSE);
 dir.create(paste0(container,"\\data\\new_(updated)_data\\raw_data\\gage_data"), showWarnings = FALSE)
 dir.create(paste0(container,"\\data\\new_(updated)_data\\raw_data\\merged_data"), showWarnings = FALSE)
@@ -39,7 +40,7 @@ dir.create(paste0(container,"\\data\\new_(updated)_data\\raw_data\\model_data\\d
 
 # LINKING MODEL SEGMENT ---------------------------------------------------
 
-gage.to.segment <- read.csv(file.path(container, "data", "Gage_To_Segment.csv"),
+gage.to.segment <- read.csv(file.path(container, "data", "Gage_To_Segment_Northern.csv"),
                           header = TRUE, sep = ',', stringsAsFactors = FALSE)
 gage.to.segment <- subset(gage.to.segment, gage.to.segment$gage_number == as.numeric(siteNo))
 RivSeg <- gage.to.segment$river_segment

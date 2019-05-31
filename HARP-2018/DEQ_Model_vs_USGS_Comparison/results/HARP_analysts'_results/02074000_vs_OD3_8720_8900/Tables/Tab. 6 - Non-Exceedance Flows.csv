@@ -1,7 +1,7 @@
 "","USGS Gage","Model","Pct. Error"
-"1% Non-Exceedance",115,78.8,31.5
+"1% Non-Exceedance",115,78.4,31.8
 "5% Non-Exceedance",185,115,37.8
-"50% Non-Exceedance",496,402,19
-"95% Non-Exceedance",1770,1800,-1.69
-"99% Non-Exceedance",3980,4230,-6.28
-"Sept. 10% Non-Exceedance",124,185,-49.2
+"50% Non-Exceedance",496,401,19.2
+"95% Non-Exceedance",1770,1790,-1.13
+"99% Non-Exceedance",3980,4210,-5.78
+"Sept. 10% Non-Exceedance",185,124,33
