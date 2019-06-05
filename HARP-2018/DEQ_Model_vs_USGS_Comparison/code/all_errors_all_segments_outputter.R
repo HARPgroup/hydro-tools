@@ -8,7 +8,7 @@
 
 # Address of "DEQ_Model_vs_USGS_Comparison" folder
 # Include "DEQ_Model_vs_USGS_Comparison" in address!
-container <- "C:\\Users\\Daniel\\Documents\\HARP\\DEQ_Model_vs_USGS_Comparison"
+container <- "C:\\Users\\Daniel\\Documents\\HARP\\GitHub\\hydro-tools\\HARP-2018\\DEQ_Model_vs_USGS_Comparison"
 
 # Should new or original data be used?
 new.or.original <- "new"
@@ -25,7 +25,7 @@ if (exists("container.master") == TRUE) {
 if (new.or.original == "new") {
   container.cont <- "\\results\\user's_results\\"
 } else if (new.or.original == "original") {
-  container.cont <- "\\results\\harp_analysts'_results\\"
+  container.cont <- "\\results\\HARP_analysts'_results\\"
 } else {
   print("ERROR: neither new or original data specified")
 }

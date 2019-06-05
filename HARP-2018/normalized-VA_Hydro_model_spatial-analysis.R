@@ -141,7 +141,7 @@ for (i in 1:num.segs) {
   )
   contrib.drain.area <- getProperty(areainfo, site, contrib.drain.area)
   all.metrics[1,num.metrics] <- contrib.drain.area$propvalue
-  all.metrics[1,num.metrics] <- all.metrics[1,num.metrics]*5280*5280 #Converting from sq. miles to sq.feet
+  all.metrics[1,num.metrics] <- all.metrics[1,num.metrics]
   
   # GETTING MODEL METRICS FROM VA HYDRO
   
@@ -804,8 +804,6 @@ for (i in 1:num.segs) {
   all.errors.all.segments[all.errors.line.no,] <- all.metrics[1,1:num.metrics]
   #Normalizing data: dividing all metrics by the contributing drainage area of the river segment
   all.errors.all.segments[all.errors.line.no,-num.metrics] <- all.errors.all.segments[all.errors.line.no,-num.metrics]/all.errors.all.segments[all.errors.line.no,num.metrics]
-  #Converting from feet/sec to mm/year
-  all.errors.all.segments[all.errors.line.no, -num.metrics] <- all.errors.all.segments[all.errors.line.no,-num.metrics]*60*60*24*365*12*25.4
   all.errors.line.no <- all.errors.line.no + 1
 }
 
@@ -907,6 +905,22 @@ OHProjected@data$id <- rownames(OHProjected@data)
 OHPoints <- fortify( OHProjected, region = "id")
 OHDF <- merge(OHPoints,  OHProjected@data, by = "id")
 
+SC <- STATES[which(STATES$state == "SC"),]
+SC_geom <- readWKT(SC$geom)
+SC_geom_clip <- gIntersection(bb, SC_geom)
+SCProjected <- SpatialPolygonsDataFrame(SC_geom_clip,data.frame("id"), match.ID = TRUE)
+SCProjected@data$id <- rownames(SCProjected@data)
+SCPoints <- fortify( SCProjected, region = "id")
+SCDF <- merge(SCPoints,  SCProjected@data, by = "id")
+
+DC <- STATES[which(STATES$state == "DC"),]
+DC_geom <- readWKT(DC$geom)
+DC_geom_clip <- gIntersection(bb, DC_geom)
+DCProjected <- SpatialPolygonsDataFrame(DC_geom_clip,data.frame("id"), match.ID = TRUE)
+DCProjected@data$id <- rownames(DCProjected@data)
+DCPoints <- fortify( DCProjected, region = "id")
+DCDF <- merge(DCPoints,  DCProjected@data, by = "id")
+
 for (i in 1:num.segs) {
   RivSeg <- all.riv.segs[i]
   namer <- paste0("watershedDF", i)
@@ -944,7 +958,7 @@ ctr <- 1
 # Determining metric column names
 metric.names <- metrics.names
 num.metrics <- length(metrics.names)-1
-cols <- rainbow(11)
+cols <- rainbow(6)
 
 for (ctr in 1:num.metrics) {
   
@@ -955,48 +969,59 @@ for (ctr in 1:num.metrics) {
   # GRAPHING -----
 
   map <- ggplot(data = VADF, aes(x=long, y=lat, group = group))+
+    geom_polygon(data = bbDF, color="black", fill = "powderblue",lwd=0.5)+
     geom_polygon(data = VADF, color="gray46", fill = "gray")+
-    geom_polygon(data = TNDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = NCDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = KYDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = WVDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = MDDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = DEDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = PADF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = NJDF, color="gray46", fill = NA, lwd=0.5)+
-    geom_polygon(data = OHDF, color="gray46", fill = NA, lwd=0.5)
+    geom_polygon(data = TNDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = NCDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = SCDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = KYDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = WVDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = MDDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = DEDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = PADF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = NJDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = OHDF, color="gray46", fill = "gray", lwd=0.5)+
+    geom_polygon(data = DCDF, color="gray46", fill = "gray", lwd=0.5)
   for (i in 1:num.segs) {
       namer <- paste0('watershedDF', i)
-      if (Metrics$DesiredMetric[i] < 5) {
+      if (Metrics$DesiredMetric[i] < 0.25) {
         map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='a'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 10) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='b'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 25) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='c'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 50) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='d'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 100) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='e'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 250) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='f'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 500) {
+      } else if (Metrics$DesiredMetric[i] < 0.5) {
         map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='g'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 1000) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='h'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 2500) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='i'), lwd = 0.1)
-      } else if (Metrics$DesiredMetric[i] < 5000) {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='j'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 2.5) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='b'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 5) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='c'), lwd = 0.1)
+      } else if (Metrics$DesiredMetric[i] < 25) {
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='d'), lwd = 0.1)
       } else {
-        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='k'), lwd = 0.1)
+        map <- map + geom_polygon(data = eval(parse(text = namer)), color='black', aes(fill='f'), lwd = 0.1)
       }
   }
 #Add legend, add title, ggsave
   map <- map + ggtitle(DesiredMetric)
-  map <- map + scale_fill_manual(breaks = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), limits=c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'), labels=c("Less than 5", "5 to 10", "10 to 25", "25 to 50", "50 to 100", "100 to 250", "250 to 500", "500 to 1000", "1000 to 2500", "2500 to 5000", "Greater than 5000"), values=cols, name = "Flow (mm/year)")
+  map <- map + scale_fill_manual(breaks = c('a', 'g', 'b', 'c', 'd', 'f'), limits=c('a', 'g', 'b', 'c', 'd', 'f'), labels=c("Less than 0.25", '0.25 to 0.5', '0.5 to 2.5', '2.5 to 5', "5 to 25", "Greater than 25"), values=cols, name = "Flow (cfs/sqmi)")
   #ADD NORTH ARROW AND SCALE BAR
-  map <- map + north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
-    scalebar(bbDF, dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE, st.size = 3.8)
+  map<-map+north(bbDF, location = 'topleft', symbol = 12, scale=0.1)+
+    scalebar(bbDF, location = 'bottomleft', dist = 100, dd2km = TRUE, model = 'WGS84',st.bottom=FALSE, st.size = 3.5,
+             anchor = c(
+               x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.1,
+               y = extent$y[1]+(extent$y[1])*0.001
+             ))+
+    scale_x_continuous(limits = c(extent$x))+
+    scale_y_continuous(limits = c(extent$y))+
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          panel.border = element_blank(),
+          #axis.text =element_text(size=rel(2)),    #Uncomment to display lat/long on plot
+          #axis.title = element_text(size=rel(2)),  #Uncomment to display lat/long on plot
+          axis.ticks = element_blank(),
+          axis.text = element_blank(),
+          axis.title = element_blank(),
+          legend.text = element_text(size=rel(1)),
+          legend.title = element_text(size= rel(1.2)))
+  
   # Incrementing counter
   ctr <- ctr + 1
   ggsave(filename = paste0(DesiredMetric, ".jpeg"), device = "jpeg", path = new.output_location, width = 7, height = 4.5)
