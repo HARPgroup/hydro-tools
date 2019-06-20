@@ -49,7 +49,7 @@ fn_get_rundata <- function(
 
 fn_get_runfile_info <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu", outaszoo=TRUE
+  site = "http://deq2.bse.vt.edu"
 ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -78,7 +78,7 @@ fn_get_runfile_info <- function(
 
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu", cached = TRUE
+  site = "http://deq2.bse.vt.edu", cached = TRUE, outaszoo=TRUE
   ) {
   if (elementid == -1 ) {
     return(FALSE);
