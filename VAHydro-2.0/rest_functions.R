@@ -211,12 +211,18 @@ postTimeseries <- function(inputs, base_url, ts){
                 body = pbody,
                 encode = "json"
     );
-    if (ts$status == 200){ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
-    } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")}
+    if (ts$status == 200){
+      tsrecord = ts
+      tsparts = strsplit(tsrecord$url, '/', fixed = TRUE)
+      tid = as.integer(tsparts[[1]][length(tsparts[[1]])])
+      ts <- paste("Status ",ts$status,", timeseries Updated Successfully",sep="")
+    } else {
+      ts <- paste("Status ",ts$status,", Error: timeseries Not Updated Successfully",sep="")
+    }
   } else {
     ts <- print("----- Multiple timeseries Exist, Execution Halted")
   }
-  
+  return(tid)
 }
 
 postTimeseriesIFempty <- function(inputs, base_url, ts){
