@@ -6,7 +6,7 @@ a <- c('agricultural', 'industrial', 'municipal', 'mining', 'commercial', 'manuf
 b <- c('Surface Water Intake', 'Well', 'Total (GW + SW)')
 cat_table <- expand.grid(a,b)
 
-for (y in 2015:2015) {
+for (y in 2017:2017) {
   print(y)
   startdate <- paste(y, "-01-01",sep='')
   enddate <- paste(y, "12-31", sep='')
@@ -32,7 +32,12 @@ for (y in 2015:2015) {
   # wells <- which(data$Source_Type == 'Well',arr.ind = TRUE)
   # data[data$Source_Type == 'Well','Source_Type'] <- 'Groundwater'
   # data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
-  # 
+  
+  levels(data$Source_Type) <- c(levels(data$Source_Type), "Groundwater", "Surface Water")
+  data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
+  data$Source_Type[data$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
+  
+  
   catsum = data
   catsum$Source_Type <- "Total (GW + SW)"
   catsum <- catsum %>% group_by(Use_Type, Source_Type)
