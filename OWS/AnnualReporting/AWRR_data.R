@@ -9,12 +9,10 @@ b <- c('Surface Water Intake', 'Well', 'Total (GW + SW)')
 cat_table <- expand.grid(a,b)
 
 for (y in 2014:2018) {
- 
+  
   print(y)
   startdate <- paste(y, "-01-01",sep='')
   enddate <- paste(y, "-12-31", sep='')
-  #data.vwuds <- read.csv(file=paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=77498",sep=""), header=TRUE, sep=",")
-  
   
   localpath <- tempdir()
   filename <- paste("data.all_",y,".csv",sep="")
@@ -38,11 +36,6 @@ for (y in 2014:2018) {
   #make use type values lowecase
   data$Use_Type <- str_to_lower(data$Use_Type)
   #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
-  
-  # wells <- which(data$Source_Type == 'Well',arr.ind = TRUE)
-  # data[data$Source_Type == 'Well','Source_Type'] <- 'Groundwater'
-  # data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
-  
   levels(data$Source_Type) <- c(levels(data$Source_Type), "Groundwater", "Surface Water")
   data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
   data$Source_Type[data$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
@@ -64,14 +57,8 @@ for (y in 2014:2018) {
     mgd = sum(mgd),
     mgy = sum(mgy)
   )
-  year_table = rbind(catsourcesum, catsum)
-  if(cat_table == FALSE){
-    cat_table = year_table[,-4]
-  }else{
-    yr = as.character(y)
-    cat_table <- cbind(cat_table, newcol = year_table$mgd)
-  }
-  
+  year_table <- rbind(catsourcesum, catsum)
+  cat_table <- cbind(cat_table, newcol = year_table$mgd)
 
 }
 
