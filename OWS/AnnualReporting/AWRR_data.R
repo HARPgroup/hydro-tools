@@ -1,4 +1,3 @@
-library("readxl")
 
 startdate <- "2018-01-01"
 enddate <- "2018-12-31"
