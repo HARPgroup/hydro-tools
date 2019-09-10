@@ -2,7 +2,7 @@
 library("dplyr")
 library('httr')
 library('stringr')
-
+library("kableExtra")
 
 a <- c('agricultural', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
 b <- c('Surface Water', 'Groundwater', 'Total (GW + SW)')
@@ -78,8 +78,30 @@ for (y in year.range) {
 
 }
 
-names(cat_table) <- c('Category', 'Source Type', year.range)
+#cat_table_raw <- cat_table <- cat_table_raw
 
+cat_table <- data.frame(cat_table[2],cat_table[1],cat_table[3:(length(year.range)+2)])
+names(cat_table) <- c('Source Type', 'Category', year.range)
+
+multi_yr_avg <- signif((rowMeans(cat_table[3:(length(year.range)+2)], na.rm = FALSE, dims = 1)),2)
+#names(multi_yr_avg) <- paste(length(year.range)," Year Avg.",sep="")
+cat_table <- cbind(cat_table,multi_yr_avg)
+pct_chg <- signif(((cat_table["2018"]-cat_table["multi_yr_avg"])/cat_table["multi_yr_avg"])*100, 1)
+names(pct_chg) <- '% Change 2018 to Avg.'
+cat_table <- cbind(cat_table,'pct_chg' = pct_chg)
+
+print(cat_table)
+
+
+kable(cat_table, "latex", booktabs = T) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>% 
+  column_spec(7, width = "5em") %>%
+  column_spec(8, width = "5em") %>%
+  column_spec(9, width = "5em") %>%
+  column_spec(10, width = "4em")
+
+
+#names(multi_yr_avg) <- paste(length(year.range)," Year Avg.",sep="")
 
 #year_frame <- arrange(year_table, Source_Type, Use_Type)
 
