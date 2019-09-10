@@ -1,19 +1,29 @@
 #library("readxl")
 library("dplyr")
 library('httr')
-options(timeout=24000)
+
+
+
 a <- c('agricultural', 'industrial', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
 b <- c('Surface Water Intake', 'Well', 'Total (GW + SW)')
 cat_table <- expand.grid(a,b)
 
-for (y in 2017:2017) {
+for (y in 2014:2018) {
+
   print(y)
   startdate <- paste(y, "-01-01",sep='')
-  enddate <- paste(y, "12-31", sep='')
+  enddate <- paste(y, "-12-31", sep='')
   #data.vwuds <- read.csv(file=paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=77498",sep=""), header=TRUE, sep=",")
   
+  
+  localpath <- tempdir()
+  filename <- paste("data.all_",y,".csv",sep="")
+  destfile <- paste(localpath,filename,sep="\\")  
+  download.file(paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
+  df.new <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
+  
   #has 3 issuing authorities, does not include power
-  data.all <- read.csv(file=paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), header=TRUE, sep=",")
+#  data.all <- read.csv(file=paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), header=TRUE, sep=",")
   
   data <- data.all
   
