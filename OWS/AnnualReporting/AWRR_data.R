@@ -4,12 +4,16 @@ library('httr')
 library('stringr')
 
 
-a <- c('agricultural', 'industrial', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
-b <- c('Surface Water Intake', 'Well', 'Total (GW + SW)')
-cat_table <- expand.grid(a,b)
+a <- c('agricultural', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
+b <- c('Surface Water', 'Groundwater', 'Total (GW + SW)')
+cat_table<- data.frame(expand.grid(a,b))
 
-for (y in 2014:2018) {
-  
+colnames(cat_table) <- c('Use_Type', 'Source_Type')
+
+year.range <- 2014:2018
+
+for (y in year.range) {
+  #y<-2014
   print(y)
   startdate <- paste(y, "-01-01",sep='')
   enddate <- paste(y, "-12-31", sep='')
@@ -29,7 +33,11 @@ for (y in 2014:2018) {
   data <- distinct(data, HydroID, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
-  data <- data[-which(data$Use_Type=='Facility'),]
+  
+  if (length(which(data$Use.Type=='facility')) > 0) {
+    data <- data[-which(data$Use.Type=='facility'),]
+  }
+ 
   #rename columns
   colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
                       'MP_Name', 'Facility', 'Use_Type', 'Year',
@@ -41,8 +49,11 @@ for (y in 2014:2018) {
   data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
   data$Source_Type[data$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
   
+
+  data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
-  catsum = data
+  
+  catsum <- data
   catsum$Source_Type <- "Total (GW + SW)"
   catsum <- catsum %>% group_by(Use_Type, Source_Type)
   
@@ -59,13 +70,18 @@ for (y in 2014:2018) {
     mgy = sum(mgy)
   )
   year_table <- rbind(catsourcesum, catsum)
-  cat_table <- cbind(cat_table, newcol = year_table$mgd)
+  #year_table <- arrange(year_table, Source_Type, Use_Type)
+  #cat_table <- arrange(cat_table, Source_Type, Use_Type)
+ 
+    cat_table <- cbind(cat_table, year_table[,3])
+
 
 }
 
-names(cat_table) <- c('cat', 'use_type', 'y1', 'y2', 'y3')
+names(cat_table) <- c('Category', 'Source Type', year.range)
 
-year_frame <- arrange(year_table, Source_Type, Use_Type)
+
+#year_frame <- arrange(year_table, Source_Type, Use_Type)
 
 
 
