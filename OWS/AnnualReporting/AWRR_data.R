@@ -29,6 +29,7 @@ for (y in 2014:2018) {
   data <- distinct(data, HydroID, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
+  data <- data[-which(data$Use_Type=='Facility'),]
   #rename columns
   colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
                       'MP_Name', 'Facility', 'Use_Type', 'Year',
