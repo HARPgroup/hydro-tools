@@ -106,6 +106,17 @@ names(pct_chg) <- '% Change 2018 to Avg.'
 cat_table <- cbind(cat_table,'pct_chg' = pct_chg)
 
 ##############################################################
+# ADD BOTTOM ROW OF TOTALS TO TABLE
+
+multi_yr_avg.sums <- mean(c(sum(cat_table.total[3]),
+                            sum(cat_table.total[4]),
+                            sum(cat_table.total[5]),
+                            sum(cat_table.total[6]),
+                            sum(cat_table.total[7])))
+
+total_pct_chg <- signif(((sum(cat_table.total[7])-multi_yr_avg.sums)/multi_yr_avg.sums)*100, 1)
+
+
 cat_table.total <- cat_table[c(13:18),]
 catsum.sums <- data.frame(Source_Type="",
                           Category="Total (GW + SW)",
@@ -114,9 +125,11 @@ catsum.sums <- data.frame(Source_Type="",
                           mgd=sum(cat_table.total[5]),
                           mgd=sum(cat_table.total[6]),
                           mgd=sum(cat_table.total[7]),
-                          mgd=sum(cat_table.total[8]),
-                          mgd=sum(cat_table.total[9])
+                          mgd=multi_yr_avg.sums,
+                          mgd=total_pct_chg 
 )
+
+
 colnames(catsum.sums) <- c('Source Type', 'Category','2014','2015','2016','2017','2018','multi_yr_avg','% Change 2018 to Avg.')
 cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
