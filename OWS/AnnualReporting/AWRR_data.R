@@ -52,8 +52,17 @@ for (y in year.range) {
 
   data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
+
   
-  catsum <- data
+  catsourcesum <- data %>% group_by(Use_Type, Source_Type)
+  
+  catsourcesum <- catsourcesum %>% summarise(
+    mgd = sum(mgd),
+    mgy = sum(mgy)
+  )
+  
+  
+  catsum <- catsourcesum
   catsum$Source_Type <- "Total (GW + SW)"
   catsum <- catsum %>% group_by(Use_Type, Source_Type)
   
@@ -63,12 +72,6 @@ for (y in year.range) {
     mgy = sum(mgy)
   )
   
-  catsourcesum <- data %>% group_by(Use_Type, Source_Type)
-  
-  catsourcesum <- catsourcesum %>% summarise(
-    mgd = sum(mgd),
-    mgy = sum(mgy)
-  )
   year_table <- rbind(catsourcesum, catsum)
   #year_table <- arrange(year_table, Source_Type, Use_Type)
   #cat_table <- arrange(cat_table, Source_Type, Use_Type)
