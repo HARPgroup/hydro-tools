@@ -4,16 +4,24 @@ library('httr')
 library('stringr')
 library("kableExtra")
 
-a <- c('agricultural', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
-b <- c('Surface Water', 'Groundwater', 'Total (GW + SW)')
+a <- c(
+  'agricultural', 
+  'commercial', 
+  'irrigation',
+  'manufacturing',  
+  'mining', 
+  'municipal'
+)
+b <- c('Groundwater', 'Surface Water', 'Total (GW + SW)')
 cat_table<- data.frame(expand.grid(a,b))
 
 colnames(cat_table) <- c('Use_Type', 'Source_Type')
-
+cat_table <- arrange(cat_table, Source_Type, Use_Type )
+#cat_table = FALSE
 year.range <- 2014:2018
 
 for (y in year.range) {
-  #y<-2014
+  
   print(y)
   startdate <- paste(y, "-01-01",sep='')
   enddate <- paste(y, "-12-31", sep='')
@@ -53,28 +61,35 @@ for (y in year.range) {
   data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
   
-  catsum <- data
-  catsum$Source_Type <- "Total (GW + SW)"
-  catsum <- catsum %>% group_by(Use_Type, Source_Type)
-  
-  
-  catsum <- catsum %>% summarise(
-    mgd = sum(mgd),
-    mgy = sum(mgy)
-  )
-  
   catsourcesum <- data %>% group_by(Use_Type, Source_Type)
   
   catsourcesum <- catsourcesum %>% summarise(
     mgd = sum(mgd),
     mgy = sum(mgy)
   )
+  catsourcesum <- arrange(catsourcesum, Source_Type, Use_Type)
+  
+  
+  catsum <- catsourcesum
+  catsum$Source_Type <- "Total (GW + SW)"
+  catsum <- catsum %>% group_by(Use_Type, Source_Type)
+  
+  catsum <- catsum %>% summarise(
+    mgd = sum(mgd),
+    mgy = sum(mgy)
+  )
+  catsum <- arrange(catsum, Source_Type, Use_Type)
+  
+  
   year_table <- rbind(catsourcesum, catsum)
-  #year_table <- arrange(year_table, Source_Type, Use_Type)
-  #cat_table <- arrange(cat_table, Source_Type, Use_Type)
- 
+  year_table <- arrange(year_table, Source_Type, Use_Type)
+  assign(paste("y", y, sep=''), year_table)
+  if (is.logical(cat_table)) {
+    cat_table = year_table[,1:3]
+  } else {
     cat_table <- cbind(cat_table, year_table[,3])
-
+  }
+  
 
 }
 
