@@ -61,11 +61,30 @@ sqldf(
   group by Source_type, Use_Type"
 )
 
-sqldf(
+#the percent column needs to be calculated ...but that was saved for another day
+permit_srctype <- sqldf(
+  "select Source_type, has_permit, 
+  ROUND(sum(mgd),2) AS mgd, count(*) 
+  from data_pi 
+  group by Source_type, has_permit"
+)
+
+permit_src_use <- sqldf(
   "select Source_type, Use_Type, has_permit, ROUND(sum(mgd),2) AS mgd, count(*) 
   from data_pi 
   group by Source_type, Use_Type, has_permit"
 )
+
+kable(permit_src_use, "latex", booktabs = T, align = 'c') %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  #column_spec(column = 2, bold = TRUE) 
+  column_spec(4, width = "5em") %>%
+  column_spec(5, width = "5em")
+
+kable(permit_srctype, "latex", booktabs = T, align = 'c') %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(4, width = "5em") %>%
+  column_spec(5, width = "5em")
 
 
 #sqldf("select a.Use_Type, a.Source_Type, a.mgd, b.mgd from y2017 as a left outer join y2018 as b on (a.Use_Type = b.Use_Type and a.Source_type = b.Source_Type)")
