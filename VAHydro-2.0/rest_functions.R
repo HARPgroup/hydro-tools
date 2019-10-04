@@ -481,7 +481,7 @@ postProperty <- function(inputs,fxn_locations,base_url,prop){
     
   } else if (length(dataframe$pid) == 1){
     print("Single Property Exists, Updating...")
-    print(paste("Posting", pbody$varid )) 
+    print(paste("Puting", pbody$varid )) 
     print(pbody) 
     #pbody$pid = pid
     prop <- PUT(paste(base_url,"/dh_properties/",pid,sep=""), 
