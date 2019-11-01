@@ -569,7 +569,9 @@ getVarDef <- function(inputs, token, base_url, vardef){
   return(vardef)
 }
 
-getFeature <- function(inputs, token, base_url, feature){
+getFeature <- function(
+  inputs, token, base_url, feature, debug = FALSE
+  ){
   #inputs <-    conveyance_inputs 
   #base_url <- site
   #print(inputs)
@@ -596,7 +598,6 @@ getFeature <- function(inputs, token, base_url, feature){
     query = pbody, 
     encode = "json"
   );
-  feature_cont <- content(feature);
   
   if (length(feature_cont$list) != 0) {
     print(paste("Number of features found: ",length(feature_cont$list),sep=""))
