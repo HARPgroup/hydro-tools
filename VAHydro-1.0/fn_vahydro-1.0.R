@@ -91,6 +91,8 @@ fn_get_runfile <- function(
 
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
+  print("Found File Info:");
+  print(finfo)
   if (!is.list(finfo)) {
     return(FALSE);
   }
