@@ -91,10 +91,17 @@ fn_get_runfile <- function(
 
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
-  print("Found File Info:");
-  print(finfo)
   if (!is.list(finfo)) {
     return(FALSE);
+  }
+  if (finfo$compressed == 1) {
+    # If the host is not the same as site, and finfo$compressed == 1, then we need to 
+    # Repeat this request on the other host
+    host_site <- paste0('http://',finfo$host)
+    if (host_site != site) {
+      print("Compressed file requested, repeating req1uest on model run host site")
+      finfo <- fn_get_runfile_info(elementid, runid, scenid, host_site)
+    }
   }
   filename = as.character(finfo$remote_url);
   localname = basename(as.character(finfo$output_file));
