@@ -320,7 +320,9 @@ getProperty <- function(inputs, base_url, prop){
   # now, verify that we have either a proper varid OR a propname
   if (is.null(inputs$varid) & is.null(inputs$propname)) {
     # we were sent a bad variable id so we should return FALSE
-    return(FALSE)
+    if(is.null(inputs$pid)) {
+      return(FALSE)
+    } 
   }
   
   pbody = list(

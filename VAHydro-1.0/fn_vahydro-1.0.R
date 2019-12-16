@@ -61,11 +61,11 @@ fn_get_runfile_info <- function(
   #setInternet2(TRUE)
   
   # just get the run file
-  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&elementid=", sep='/');
+  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
   print(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   print(paste("From ", filename))
-  finfo = try(read.csv(filename, header = TRUE, sep = ",")) ;
+  finfo = try(read.csv(filename, header = TRUE, sep = "\t")) ;
   if (class(finfo)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: retrieving ", filename))
@@ -123,9 +123,10 @@ fn_get_runfile <- function(
     }
   } else {
     # does not exist locally
+    print(paste("Downloading Run File ", filename));
+    download.file(filename,'tempfile',mode="wb", method = "libcurl");
     if (finfo$compressed == 1) {
-      print(paste("Downloading Compressed Run File ", filename));
-      download.file(filename,'tempfile',mode="wb", method = "libcurl");
+      print(paste("Unpacking Compressed Run File ", filename));
       filename <-  unzip ('tempfile');
     }
   }
