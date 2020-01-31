@@ -1,16 +1,11 @@
 library("rgdal")
 
-#poly_path <- paste(localpath,gdb_path,sep="")
-#poly_layer_name <- layer_name
-#point_df <- data_sp
-#HUC6_code <- 'all'
-#HUC6_code <- '020700'
-
 #Spatial containment function 
 # Supply 1) file path to .gdb containing layer of polygon features 
 #        2) polygon layer of interest within the .gdb above (must have "Name" and "Code" attributes)
 #        3) Large SpatialPointsDataFrame of point features with column of coordinates
-#        4) epsg code of interest, default to 4326
+#        4) HUC6_code code of interest example: '020700' or 'all' for all
+#        5) epsg code of interest, default to 4326
 # Function returns a Large SpatialPointsDataFrame
 sp_contain <- function(poly_path,poly_layer_name,HUC6_code,point_df,epsg_code = "4326"){
   
@@ -18,10 +13,8 @@ sp_contain <- function(poly_path,poly_layer_name,HUC6_code,point_df,epsg_code = 
   print(paste("Start time: ",start_time,sep=""))
   
   # read in polygons
-  #poly_layer_load <- readOGR(paste(localpath,poly_path,sep=""),layer=poly_layer_name)
   poly_layer_load <- readOGR(poly_path,layer=poly_layer_name)
   poly_layer <-spTransform(poly_layer_load, CRS(paste("+init=epsg:",epsg_code,sep="")))
-  #plot(poly_layer)
   
   if (HUC6_code != 'all') {
      poly_layer <- poly_layer[poly_layer$HUC6 == HUC6_code,]
