@@ -1,71 +1,61 @@
 library(rgeos) #readWKT()
-library(ggplot2) #fortify()
+library(rgdal) #readOGR()
+library(raster) #bind()
 
-MinorBasins <- read.csv('C:/Users/nrf46657/Desktop/MinorBasinsAll.csv')
-class(MinorBasins)
+#####################################################################################
+# USER INPUTS
+#####################################################################################
+#WKT_layer <- read.csv('C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/GIS_LAYERS/MinorBasins.csv')
+WKT_layer <- read.table(file = 'https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/GIS_LAYERS/MinorBasins.csv', sep = ',', header = TRUE)
 
-#-----------------------------------------------------------------
-MinorBasins$id <- as.numeric(rownames(MinorBasins))
-MB.list <- list()
+output_location <- "C:/Users/nrf46657/Desktop/shp_output/"
+output_file <- "MinorBasins.shp"
+#####################################################################################
+#####################################################################################
+
+WKT_layer$id <- as.numeric(rownames(WKT_layer))
+WKT_layer.list <- list()
 
 #i <- 1
-for (i in 1:length(MinorBasins$hydroid)) {
-  print(paste("i = ",i,sep=''))
-  print(as.character(MinorBasins$hydroid[i]))
-  MB_geom <- readWKT(MinorBasins$geom[i])
-  MB_name <- as.character(MinorBasins$name[i])
-  MBProjected <- SpatialPolygonsDataFrame(MB_geom, data.frame('id'), match.ID = TRUE)
-  MBProjected@data$id <- as.character(i)
-  MBProjected@data$name <- as.character(MinorBasins$basin[i])
-  MBProjected@data$code <- as.character(MinorBasins$name[i])
-  MB.list[[i]] <- MBProjected
-#}
-# MB <- do.call('rbind', MB.list)
-# MB@data <- merge(MB@data, MinorBasins, by = 'id')
-# MB@data <- MB@data[,-c(2:3)]
-# MB.df <- fortify(MB, region = 'id')
-# MB.df <- merge(MB.df, MB@data, by = 'id')
-#-----------------------------------------------------------------
-raster::shapefile(MBProjected, paste("C:/Users/nrf46657/Desktop/Code_Copies_2.21.20/GIS_LAYERS_NEW/WKTtest2/",MB_name,".shp",sep=""),overwrite=TRUE)
+for (i in 1:length(WKT_layer$code)) {
+  print(paste("i = ",i," of ",length(WKT_layer$code),sep=''))
+  print(as.character(WKT_layer$code[i]))
+  if (WKT_layer$geom[i] == "") {
+    WKT_layer_geom <- "NA"
+  } else {
+    WKT_layer_geom <- readWKT(WKT_layer$geom[i])
+    WKT_layerProjected <- SpatialPolygonsDataFrame(WKT_layer_geom, data.frame('id'), match.ID = TRUE)
+  }
+  WKT_layer_name <- as.character(WKT_layer$name[i])
+  WKT_layer_code <- as.character(WKT_layer$code[i])
+  WKT_layerProjected@data$id <- as.character(i)
+  WKT_layerProjected@data$name <- as.character(WKT_layer$name[i])
+  WKT_layerProjected@data$code <- as.character(WKT_layer$code[i])
+  WKT_layer.list[[i]] <- WKT_layerProjected
+
+raster::shapefile(WKT_layerProjected, paste(output_location,WKT_layer_code,".shp",sep=""),overwrite=TRUE)
 }
 
 #-----------------------------------------------------------------
-#MinorBasins$name
-shp_path <- 'C:/Users/nrf46657/Desktop/Code_Copies_2.21.20/GIS_LAYERS_NEW/WKTtest2/'
-TU <- readOGR(paste(shp_path,'TU.shp',sep=''))
-RL <- readOGR(paste(shp_path,'RL.shp',sep=''))
-OR <- readOGR(paste(shp_path,'OR.shp',sep=''))
-EL <- readOGR(paste(shp_path,'EL.shp',sep=''))
-ES <- readOGR(paste(shp_path,'ES.shp',sep=''))
-PU <- readOGR(paste(shp_path,'PU.shp',sep=''))
-RU <- readOGR(paste(shp_path,'RU.shp',sep=''))
-YM <- readOGR(paste(shp_path,'YM.shp',sep=''))
-JA <- readOGR(paste(shp_path,'JA.shp',sep=''))
-MN <- readOGR(paste(shp_path,'MN.shp',sep=''))
-PM <- readOGR(paste(shp_path,'PM.shp',sep=''))
-NR <- readOGR(paste(shp_path,'NR.shp',sep=''))
-YL <- readOGR(paste(shp_path,'YL.shp',sep=''))
-BS <- readOGR(paste(shp_path,'BS.shp',sep=''))
-PL <- readOGR(paste(shp_path,'PL.shp',sep=''))
-YP <- readOGR(paste(shp_path,'YP.shp',sep=''))
-PS <- readOGR(paste(shp_path,'PS.shp',sep=''))
-OD <- readOGR(paste(shp_path,'OD.shp',sep=''))
-JU <- readOGR(paste(shp_path,'JU.shp',sep=''))
-JB <- readOGR(paste(shp_path,'JB.shp',sep=''))
-JL <- readOGR(paste(shp_path,'JL.shp',sep=''))
+#IF MORE THAN ONE FEATURE-  BIND ALL shp files into single shp
+WKT_layer_code <- as.character(WKT_layer$code)
+WKT_feature.1 <- readOGR(paste(output_location,WKT_layer_code[1],'.shp',sep='')) 
+WKT_feature.2 <- readOGR(paste(output_location,WKT_layer_code[2],'.shp',sep='')) 
+WKT_BIND <- bind(WKT_feature.1,WKT_feature.2)
+  
+#x <- 1
+for (x in 3:length(WKT_layer_code)){
+  print(paste("Joining shape ",x," of ",length(WKT_layer$code),sep=''))
+  WKT_layer_code_x <- WKT_layer_code[x]
+  WKT.shp <- readOGR(paste(output_location,WKT_layer_code_x,'.shp',sep='')) 
+  WKT_BIND <- bind(WKT_BIND,WKT.shp)
+}
+length(WKT_BIND)  
+
+raster::shapefile(WKT_BIND, paste(output_location,output_file,sep=""),overwrite=TRUE)
 
 
-x <- bind(TU,RL,OR,EL,ES,PU,RU,YM,JA,MN,PM,NR,YL,BS,PL,YP,PS,OD,JU,JB,JL)
-
-raster::shapefile(x, paste("C:/Users/nrf46657/Desktop/Code_Copies_2.21.20/GIS_LAYERS_NEW/WKTtest2/","MinorBasins",".shp",sep=""),overwrite=TRUE)
-
-
-#REMAINING STEPS 
+#REMAINING STEPS IF GDB IS DESIRED
 # 1) Load resulting .shp file in arcmap 
 # 2) save as gdb
-
 #-----------------------------------------------------------------
-
-
-
-
