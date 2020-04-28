@@ -1,5 +1,5 @@
 ## Graph of how 7 day minimums change over time
-rm(list = ls())   # clear variables
+#rm(list = ls())   # clear variables
 # Load necessary libraries
 library('lubridate')
 library('zoo')
@@ -10,15 +10,14 @@ library('plyr')
 library('ggplot2')
 
 #update to file location of config.local.private
-config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
+config_file <- "/var/www/R"
 
 #----------------------------------------------------------------------------------------
 #load functions
 source(paste(config_file,'config.local.private',sep='/'))
-#save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- paste(repo_location,"plots",sep="")
+save_directory <- "/var/www/html/images/dh/dev"
 dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
-source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = ""))
+source(paste(hydro_tools,"/USGS/usgs_gage_functions.R", sep = ""))
 
 # Initialize variables
 x7q10 <- c()
@@ -28,19 +27,20 @@ current_date <- Sys.Date()
 ## Finding all active VA stream gages
 # URL to list of all active streamgages in VA
 url <- "http://waterservices.usgs.gov/nwis/dv/?format=rdb&stateCd=va&siteStatus=active&variable=00060"
+if (exists("gage")) {
+  print(paste("Single Gage Selected: ", gage, sep=''));
+} else {
+  all_info <- scan(url, what="character", skip=10, nlines=1)
+  num_sites <- as.numeric(all_info[6])
+  gage_info <- scan(url, what="character", skip=11, sep="\t", nlines=num_sites)
+  # setting up a pattern to pull only the gage numbers from the string
+  pattern <- "([[:digit:]]{8})"
+  x <- str_extract_all(gage_info, pattern)
+  # set the gage numbers as a vector
+  gage <- as.character(x)
+}
 
 
-# Determining how many active gages there are to specify when to stop reading data
-all_info <- scan(url, what="character", skip=10, nlines=1)
-num_sites <- as.numeric(all_info[6])
-gage_info <- scan(url, what="character", skip=11, sep="\t", nlines=num_sites)
-
-
-# Setting up a pattern to pull only the gage numbers from the string
-pattern <- "([[:digit:]]{8})"
-x <- str_extract_all(gage_info, pattern)
-
-gage <- as.character(x) #keeps leading zero
 ### Calculating 7 Day minimums for year and each gage and graphing ###
 
 #i <- 10

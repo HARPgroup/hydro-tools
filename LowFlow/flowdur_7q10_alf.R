@@ -1,21 +1,20 @@
 ### CREATE IMAGE FILES of AUGUST LOW FLOW - FLOW DURATION PLOT for ALL USGS GAGES
-rm(list = ls()) # clear variables
+#rm(list = ls()) # clear variables
 ## Load necessary libraries
 library('zoo')
 library('IHA')
 library("stringr")
 
 #update to file location of config.local.private
-config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
+config_file <- "/var/www/R"
 
 #----------------------------------------------------------------------------------------
 #load functions
 source(paste(config_file,'config.local.private',sep='/'))
-#save_directory <- "/var/www/html/images/dh/dev"
-save_directory <- paste(repo_location,"plots",sep="")
+save_directory <- "/var/www/html/images/dh/dev"
 dir.create(save_directory, showWarnings = FALSE) #create "plots" directory if doesn't exist 
-source(paste(repo_location,"hydro-tools\\USGS\\usgs_gage_functions.R", sep = ""))
-source(paste(repo_location,"hydro-tools\\LowFlow\\fn_iha.R", sep = ""));
+source(paste(hydro_tools,"/USGS/usgs_gage_functions.R", sep = ""))
+source(paste(hydro_tools,"/LowFlow/fn_iha.R", sep = ""));
 
 ## Initialize ALF
 alf <- c()
@@ -27,16 +26,18 @@ NP.alf <- c()
 url <- "http://waterservices.usgs.gov/nwis/dv/?format=rdb&stateCd=va&siteStatus=active&variable=00060"
 
 # determining how many active gages there are to specify when to stop reading data
-all_info <- scan(url, what="character", skip=10, nlines=1)
-num_sites <- as.numeric(all_info[6])
-gage_info <- scan(url, what="character", skip=11, sep="\t", nlines=num_sites)
-
-# setting up a pattern to pull only the gage numbers from the string
-pattern <- "([[:digit:]]{8})"
-x <- str_extract_all(gage_info, pattern)
-
-# set the gage numbers as a vector
-gage <- as.character(x)
+if (exists("gage")) {
+  print(paste("Single Gage Selected: ", gage, sep=''));
+} else {
+  all_info <- scan(url, what="character", skip=10, nlines=1)
+  num_sites <- as.numeric(all_info[6])
+  gage_info <- scan(url, what="character", skip=11, sep="\t", nlines=num_sites)
+  # setting up a pattern to pull only the gage numbers from the string
+  pattern <- "([[:digit:]]{8})"
+  x <- str_extract_all(gage_info, pattern)
+  # set the gage numbers as a vector
+  gage <- as.character(x)
+}
 
 #i <- 10
 ## Calculations & Plot for Each Gage 
@@ -81,7 +82,7 @@ for (i in 1:length(gage)) {
     sortflow <- rep(NA, times=length(NP)) #create vector of 0s for all NP values
     
     # Create plot file - showing ERROR
-    file.name <- paste("usgs_", gage[i], "_alf_line_flowdur.png", sep="") #create name for file
+    file.name <- paste("usgs_", gage[i], "_7q10_line_flowdur.png", sep="") #create name for file
     file.location <- paste("/var/www/html/images/dh/", file.name, sep="") #attach file name to proper directory
     write(c(), file = file.location)  #create file where image will be saved
     png(file.location)  #start writing to that file	
@@ -128,7 +129,7 @@ for (i in 1:length(gage)) {
   #-----------------------------------------------------------------------------------------
   
   ## Create Plot File
-  file.name <- paste("/usgs_", gage[i], "_alf_line_flowdur.png", sep="") #create name for file
+  file.name <- paste("/usgs_", gage[i], "_7q10_line_flowdur.png", sep="") #create name for file
   file.location <- paste(save_directory, file.name, sep="") #attach file name to proper directory
   write(c(), file = file.location)  #create file where image will be saved
   png(file.location)  #start writing to that file	
