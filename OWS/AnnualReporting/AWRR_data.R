@@ -224,7 +224,7 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
   
 
 filename <- paste("Agriculture 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
 #irrig
@@ -264,7 +264,7 @@ ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Irrigation 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
 
@@ -305,7 +305,7 @@ ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Commercial 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
@@ -346,7 +346,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Mining 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
@@ -356,7 +356,7 @@ rownames(mantable13) <- c()
 
 kable(mantable13, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
+  row_spec(row = 3, bold = TRUE) 
 ################################################################################################
 #transform wide to long table
 mantable13 <- mantable13[-3,-8]
@@ -386,7 +386,7 @@ ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Manufacturing Industrial 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
@@ -427,7 +427,7 @@ ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Public Water Supply 2014-2018 Bar Graph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
 
@@ -465,7 +465,7 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Power2014-2018BarGraph",".pdf", sep="_")
-ggsave(file=filename, path = "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Maps/Bar Graphs/", width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 gw_average <- power[c(1:2),-c(4:5)]
 
