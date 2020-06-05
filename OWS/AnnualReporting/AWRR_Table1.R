@@ -17,8 +17,8 @@ cat_table<- data.frame(expand.grid(a,b))
 colnames(cat_table) <- c('Use_Type', 'Source_Type')
 cat_table <- arrange(cat_table, Source_Type, Use_Type )
 #cat_table = FALSE
-syear = 2014
-eyear = 2018
+syear = 2015
+eyear = 2019
 year.range <- syear:eyear
 
 for (y in year.range) {
@@ -39,7 +39,7 @@ for (y in year.range) {
   data <- data.all
   
   #remove duplicates (keeps one row)
-  data <- distinct(data, HydroID, .keep_all = TRUE)
+  data <- distinct(data, MP_hydroid, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
   
@@ -150,8 +150,8 @@ colnames(sw_sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg')
 cat_table <- rbind(cat_table,gw_sums, sw_sums)
 
 
-pct_chg <- round(((cat_table["2018"]-cat_table["multi_yr_avg"])/cat_table["multi_yr_avg"])*100, 1)
-names(pct_chg) <- '% Change 2018 to Avg.'
+pct_chg <- round(((cat_table[paste(eyear)]-cat_table["multi_yr_avg"])/cat_table["multi_yr_avg"])*100, 1)
+names(pct_chg) <- paste('% Change',eyear,'to Avg.')
 cat_table <- cbind(cat_table,'pct_chg' = pct_chg)
 
 ##############################################################
@@ -179,17 +179,18 @@ catsum.sums <- data.frame(Source_Type="",
 )
 
 
-colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg','% Change 2018 to Avg.')
+colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg', paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
 
 print(cat_table)
 
 
-kable(cat_table, "latex", booktabs = T) %>%
+kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
-  column_spec(9, width = "5em")
+  column_spec(9, width = "5em") %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\summary_table_vahydro_",eyear+1,".html",sep = ''))
 
 
 ##################################################################################
