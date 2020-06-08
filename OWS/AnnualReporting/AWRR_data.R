@@ -207,8 +207,7 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = agtable5$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -247,8 +246,7 @@ ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = irrigtable7$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -288,8 +286,7 @@ ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = commtable9$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -329,8 +326,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = mintable11$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -369,8 +365,7 @@ ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = mantable13$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -410,8 +405,7 @@ ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
   geom_hline(yintercept = munitable16$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
-        panel.grid.major.y = element_line(colour = "light gray", 
-                                          size=.3),
+        panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
@@ -605,7 +599,7 @@ colnames(mean_mgd) <- c('Source', 'Power', 'MGD')
 #plot bar graph
 ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(data = mean_mgd,aes(yintercept = MGD), size = 1, colour = "black",linetype = "dashed") +
+  geom_hline(data = mean_mgd,aes(yintercept = MGD), size = .7, colour = "black",linetype = "dashed") +
   #geom_hline(yintercept = power$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
