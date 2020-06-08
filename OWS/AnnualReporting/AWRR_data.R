@@ -622,23 +622,5 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
             vjust = -.2)+
   facet_grid(Source~Power, scales = "free_y") 
 
-
-#+ scale_y_continuous(breaks = my_breaks)
-#my_breaks <- function(x) { if (max(x) < 100) seq(0, 1, .2) else seq(0, 4000, 1000) }
-#+ annotate("text", y=power$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=power$Average-3, x=.79, label = paste('=',power$Average, " MGD"))
-
-
 filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
-
-
-
-#plot bar graph
-ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
-  geom_col(position=position_dodge(), colour = "gray") +
-  geom_hline(data = mean_mgd,aes(yintercept = MGD), size = 1, colour = "black",linetype = "dashed") +
-  geom_text(aes(label=MGD),
-            position = position_stack(vjust = .5), 
-            vjust = -.2)+
-  facet_grid(Source~Power, scales = "free_y") 
