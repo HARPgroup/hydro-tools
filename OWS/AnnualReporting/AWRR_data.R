@@ -200,7 +200,7 @@ kable(agtable5, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'
 agtable5 <- agtable5[-3,-8]
 colnames(agtable5)[colnames(agtable5)=="Source Type"] <- "Source"
 colnames(agtable5)[colnames(agtable5)=="5 Year Avg."] <- "Average"
-agtable5 <- gather(agtable5,Year, MGD, "2014":'2018', factor_key = TRUE)
+agtable5 <- gather(agtable5,Year, MGD, "2015":'2019', factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
