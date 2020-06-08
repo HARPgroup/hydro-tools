@@ -239,8 +239,8 @@ kable(irrigtable7, "latex", booktabs = T, align = c('l','c','c','c','c','c','c',
 #transform wide to long table
 irrigtable7 <- irrigtable7[-3,-8]
 colnames(irrigtable7)[colnames(irrigtable7)=="Source Type"] <- "Source"
-colnames(irrigtable7)[colnames(irrigtable7)=="5 Year Avg."] <- "Average"
-irrigtable7 <- gather(irrigtable7,Year, MGD, "2014":'2018', factor_key = TRUE)
+colnames(irrigtable7)[colnames(irrigtable7)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
+irrigtable7 <- gather(irrigtable7,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
@@ -263,7 +263,7 @@ ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=irrigtable7$Average-3, x=.79, label = paste('=',irrigtable7$Average, " MGD"))
 
 
-filename <- paste("Irrigation 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Irrigation",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
@@ -280,8 +280,8 @@ kable(commtable9, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','
 #transform wide to long table
 commtable9 <- commtable9[-3,-8]
 colnames(commtable9)[colnames(commtable9)=="Source Type"] <- "Source"
-colnames(commtable9)[colnames(commtable9)=="5 Year Avg."] <- "Average"
-commtable9 <- gather(commtable9,Year, MGD, "2014":'2018', factor_key = TRUE)
+colnames(commtable9)[colnames(commtable9)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
+commtable9 <- gather(commtable9,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
@@ -304,7 +304,7 @@ ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=commtable9$Average-3, x=.79, label = paste('=',commtable9$Average, " MGD"))
 
 
-filename <- paste("Commercial 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Commercial",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
@@ -321,8 +321,8 @@ kable(mintable11, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','
 #transform wide to long table
 mintable11 <- mintable11[-3,-8]
 colnames(mintable11)[colnames(mintable11)=="Source Type"] <- "Source"
-colnames(mintable11)[colnames(mintable11)=="5 Year Avg."] <- "Average"
-mintable11 <- gather(mintable11,Year, MGD, "2014":'2018', factor_key = TRUE)
+colnames(mintable11)[colnames(mintable11)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
+mintable11 <- gather(mintable11,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
@@ -345,7 +345,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=mintable11$Average-3, x=.79, label = paste('=',mintable11$Average, " MGD"))
 
 
-filename <- paste("Mining 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Mining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
@@ -361,8 +361,8 @@ kable(mantable13, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','
 #transform wide to long table
 mantable13 <- mantable13[-3,-8]
 colnames(mantable13)[colnames(mantable13)=="Source Type"] <- "Source"
-colnames(mantable13)[colnames(mantable13)=="5 Year Avg."] <- "Average"
-mantable13 <- gather(mantable13,Year, MGD, "2014":'2018', factor_key = TRUE)
+colnames(mantable13)[colnames(mantable13)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
+mantable13 <- gather(mantable13,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
@@ -385,7 +385,7 @@ ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=mantable13$Average-3, x=.79, label = paste('=',mantable13$Average, " MGD"))
 
 
-filename <- paste("Manufacturing Industrial 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Manufacturing",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 
@@ -402,8 +402,8 @@ kable(munitable16, "latex", booktabs = T, align = c('l','c','c','c','c','c','c',
 #transform wide to long table
 munitable16 <- munitable16[-3,-8]
 colnames(munitable16)[colnames(munitable16)=="Source Type"] <- "Source"
-colnames(munitable16)[colnames(munitable16)=="5 Year Avg."] <- "Average"
-munitable16 <- gather(munitable16,Year, MGD, "2014":'2018', factor_key = TRUE)
+colnames(munitable16)[colnames(munitable16)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
+munitable16 <- gather(munitable16,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
@@ -426,7 +426,7 @@ ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=munitable16$Average-3, x=.79, label = paste('=',munitable16$Average, " MGD"))
 
 
-filename <- paste("Public Water Supply 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Public Water Supply",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
@@ -436,7 +436,7 @@ power1<- read.csv("C:/Users/maf95834/Desktop/power.csv")
 power <- power1[-c(3,6,7),-9]
 colnames(power) <- c('Source', 'Power', year.range, 'Average')
 
-power <- gather(power,Year, MGD, "2014":'2018', factor_key = TRUE)
+power <- gather(power,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
@@ -464,7 +464,7 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=power$Average-3, x=.79, label = paste('=',power$Average, " MGD"))
 
 
-filename <- paste("Power2014-2018BarGraph",".pdf", sep="_")
+filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 gw_average <- power[c(1:2),-c(4:5)]
@@ -485,37 +485,4 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 #              \begin{tabular}{>{\raggedright\arraybackslash}p{4cm}lllcc}
 #               \begin{tabular}{lllp{4cm}cc}
 
-
-
-
-
-
-
-
-
-
-
-
-
-#names(multi_yr_avg) <- paste(length(year.range)," Year Avg.",sep="")
-
-#year_frame <- arrange(year_table, Source_Type, Use_Type)
-
-
-
-
-#ardp <- 'U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2019 Report\\Water Use Exports\\All Withdrawals By Use Type\\Water Use Exports By Type and Permit_Use For AWRR\\'
-
-# Merge these 3
-# read vwuds tab, add 'ptype' <= 'vwuds' 
-# read VWP tab, add 'ptype' <= 'vwp' 
-# Read GWP file, add 'ptype' <= 'gwp' 
-
-
-#source <- "ALL SW VWP AND VWUDS SEPARATED CLEANED.xlsx"
-#folder <- ardp
-
-#sheet <- "VWUDS"
-#rawdata <- read_excel(paste(folder,source,sep=''),sheet)
-#data <- rawdata
 
