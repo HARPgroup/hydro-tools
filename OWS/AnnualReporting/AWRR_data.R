@@ -18,8 +18,8 @@ cat_table<- data.frame(expand.grid(a,b))
 colnames(cat_table) <- c('Use_Type', 'Source_Type')
 cat_table <- arrange(cat_table, Source_Type, Use_Type )
 #cat_table = FALSE
-syear = 2014
-eyear = 2018
+syear = 2015
+eyear = 2019
 year.range <- syear:eyear
 
 for (y in year.range) {
@@ -52,7 +52,7 @@ for (y in year.range) {
                       'MP_Name','Facility_hydroid','Facility', 'Use_Type', 'Year',
                       'mgy', 'mgd', 'lat', 'lon', 'fips','locality')
   
-  data$mgd <- data$mgd/365
+  data$mgd <- data$mgy/365
   #make use type values lowercase
   data$Use_Type <- str_to_lower(data$Use_Type)
   #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
@@ -136,8 +136,8 @@ colnames(sw_sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg')
 cat_table <- rbind(cat_table,gw_sums, sw_sums)
 
 
-pct_chg <- round(((cat_table["2018"]-cat_table["multi_yr_avg"])/cat_table["multi_yr_avg"])*100, 1)
-names(pct_chg) <- '% Change 2018 to Avg.'
+pct_chg <- round(((cat_table[paste(eyear)]-cat_table["multi_yr_avg"])/cat_table["multi_yr_avg"])*100, 1)
+names(pct_chg) <- paste('% Change',eyear,'to Avg.')
 cat_table <- cbind(cat_table,'pct_chg' = pct_chg)
 
 ##############################################################
@@ -165,7 +165,7 @@ catsum.sums <- data.frame(Source_Type="",
 )
 
 
-colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg','% Change 2018 to Avg.')
+colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg',paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
 
@@ -200,7 +200,7 @@ kable(agtable5, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'
 agtable5 <- agtable5[-3,-8]
 colnames(agtable5)[colnames(agtable5)=="Source Type"] <- "Source"
 colnames(agtable5)[colnames(agtable5)=="5 Year Avg."] <- "Average"
-agtable5 <- gather(agtable5,Year, MGD, "2014":'2018', factor_key = TRUE)
+agtable5 <- gather(agtable5,Year, MGD, "2015":'2019', factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
