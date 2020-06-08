@@ -599,10 +599,14 @@ colnames(power) <- c('Source', 'Power', year.range, 'Average')
 
 power <- gather(power,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
+mean_mgd <- power[1:4,1:3]
+colnames(mean_mgd) <- c('Source', 'Power', 'MGD')
+
 #plot bar graph
 ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = power$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(data = mean_mgd,aes(yintercept = MGD), size = 1, colour = "black",linetype = "dashed") +
+  #geom_hline(yintercept = power$Average, size = .4, colour = "black",linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", 
@@ -628,64 +632,8 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
-gw_average <- power[c(1:2),-c(4:5)]
-
-sw_average <- power[c(3:4),-c(4:5)]
-
-#plot bar graph
-ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
-  geom_col(position=position_dodge(), colour = "gray") +
-  geom_hline(data = gw_average, yintercept = gw_average$Average, size = .4, colour = "black",linetype = "dashed") +
-  #geom_hline(data = sw_average, yintercept = sw_average$Average, size = .4, colour = "black",linetype = "dashed") +
-  geom_text(aes(label=MGD),
-            position = position_stack(vjust = .5), 
-            vjust = -.2)+
-  facet_grid(Source~Power, scales = "free_y") 
-#use these to format the headers in latex 
-#             \begin{tabular}{lccccccp{2cm}}
-#              \begin{tabular}{>{\raggedright\arraybackslash}p{4cm}lllcc}
-#               \begin{tabular}{lllp{4cm}cc}
 
 
-
-
-
-StatMeanLine <- ggproto("StatMeanLine", Stat,
-                        compute_group = function(data, scales) {
-                          transform(data, yintercept=mean(y))
-                        },
-                        required_aes = c("x", "y")
-)
-
-stat_mean_line <- function(mapping = NULL, data = NULL, geom = "hline",
-                           position = "identity", na.rm = FALSE, show.legend = NA, 
-                           inherit.aes = TRUE, ...) {
-  layer(
-    stat = StatMeanLine, data = data, mapping = mapping, geom = geom, 
-    position = position, show.legend = show.legend, inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
-  )
-}
-
-ggplot(mtcars, aes(mpg, cyl)) +
-  stat_mean_line(color="red") +
-  geom_point() +
-  facet_wrap( ~ gear)
-
-#plot bar graph
-ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
-  geom_col(position=position_dodge(), colour = "gray") +
-  #stat_mean_line(linetype = "dashed")+
-  geom_hline(data = gw_average, yintercept = gw_average$Average, size = .4, colour = "black",linetype = "dashed") +
-  #geom_hline(data = sw_average, yintercept = sw_average$Average, size = .4, colour = "black",linetype = "dashed") +
-  geom_text(aes(label=MGD),
-            position = position_stack(vjust = .5), 
-            vjust = -.2)+
-  facet_grid(Source~Power, scales = "free_y") 
-
-
-mean_mgd <- power[1:4,1:3]
-colnames(mean_mgd) <- c('Source', 'Power', 'MGD')
 #plot bar graph
 ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") +
