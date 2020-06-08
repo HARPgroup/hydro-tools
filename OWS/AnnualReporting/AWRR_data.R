@@ -40,7 +40,7 @@ for (y in year.range) {
   data <- data.all
   
   #remove duplicates (keeps one row)
-  data <- distinct(data, HydroID, .keep_all = TRUE)
+  data <- distinct(data, MP_hydroid, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
   
@@ -49,8 +49,8 @@ for (y in year.range) {
   }
   #rename columns
   colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
-                      'MP_Name', 'Facility', 'Use_Type', 'Year',
-                      'mgy', 'mgd', 'lat', 'lon', 'locality')
+                      'MP_Name','Facility_hydroid','Facility', 'Use_Type', 'Year',
+                      'mgy', 'mgd', 'lat', 'lon', 'fips','locality')
   
   data$mgd <- data$mgd/365
   #make use type values lowercase
