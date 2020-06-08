@@ -218,13 +218,13 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -.88)
-#+ annotate("text", y=agtable5$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=agtable5$Average-3, x=.79, label = paste('=',agtable5$Average, " MGD"))
-  
+            vjust = -.8)
+  # annotate("text", y=agtable5$Average-1.8, x=.79, label =paste((eyear-syear)+1,"Year Avg."))+
+  # annotate("text", y=agtable5$Average-3, x=.79, label = paste('=',agtable5$Average, " MGD"))
+  # annotate("text", y=agtable5$Average[1:2]-1.8, x=.81, label =paste((eyear-syear)+1,"Year Avg.","=",agtable5$Average[1:2], " MGD"))
 
 filename <- paste("Agriculture",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs",sep = " "), width=12, height=6)
 
 #####################################################################################################
 #irrig
