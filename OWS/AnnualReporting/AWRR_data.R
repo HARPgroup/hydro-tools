@@ -185,7 +185,7 @@ library(tidyr)
 library(ggplot2)
 library(RColorBrewer)
 library(wesanderson)
-colnames(cat_table)[8] <- "5 Year Avg."
+colnames(cat_table)[8] <- paste((eyear-syear)+1,"Year Avg.")
 
 #ag
 agtable5 <- cat_table[c(1,7,13),-2]
@@ -200,7 +200,7 @@ kable(agtable5, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'
 agtable5 <- agtable5[-3,-8]
 colnames(agtable5)[colnames(agtable5)=="Source Type"] <- "Source"
 colnames(agtable5)[colnames(agtable5)=="5 Year Avg."] <- "Average"
-agtable5 <- gather(agtable5,Year, MGD, "2015":'2019', factor_key = TRUE)
+agtable5 <- gather(agtable5,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
 ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
