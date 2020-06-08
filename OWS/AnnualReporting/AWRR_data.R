@@ -199,7 +199,7 @@ kable(agtable5, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'
 #transform wide to long table
 agtable5 <- agtable5[-3,-8]
 colnames(agtable5)[colnames(agtable5)=="Source Type"] <- "Source"
-colnames(agtable5)[colnames(agtable5)=="5 Year Avg."] <- "Average"
+colnames(agtable5)[colnames(agtable5)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
 agtable5 <- gather(agtable5,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 #plot bar graph
@@ -223,7 +223,7 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=agtable5$Average-3, x=.79, label = paste('=',agtable5$Average, " MGD"))
   
 
-filename <- paste("Agriculture 2014-2018 Bar Graph",".pdf", sep="_")
+filename <- paste("Agriculture",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
 
 #####################################################################################################
