@@ -594,7 +594,7 @@ kable(cat_table, "latex", booktabs = T) %>%
 ########################################################################################
 
 #transform wide to long table
-power <- power1[-c(3,6,7),-9]
+power <- cat_table[1:4,-9]
 colnames(power) <- c('Source', 'Power', year.range, 'Average')
 
 power <- gather(power,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
@@ -647,3 +647,50 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 #               \begin{tabular}{lllp{4cm}cc}
 
 
+
+
+
+StatMeanLine <- ggproto("StatMeanLine", Stat,
+                        compute_group = function(data, scales) {
+                          transform(data, yintercept=mean(y))
+                        },
+                        required_aes = c("x", "y")
+)
+
+stat_mean_line <- function(mapping = NULL, data = NULL, geom = "hline",
+                           position = "identity", na.rm = FALSE, show.legend = NA, 
+                           inherit.aes = TRUE, ...) {
+  layer(
+    stat = StatMeanLine, data = data, mapping = mapping, geom = geom, 
+    position = position, show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+
+ggplot(mtcars, aes(mpg, cyl)) +
+  stat_mean_line(color="red") +
+  geom_point() +
+  facet_wrap( ~ gear)
+
+#plot bar graph
+ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
+  geom_col(position=position_dodge(), colour = "gray") +
+  #stat_mean_line(linetype = "dashed")+
+  geom_hline(data = gw_average, yintercept = gw_average$Average, size = .4, colour = "black",linetype = "dashed") +
+  #geom_hline(data = sw_average, yintercept = sw_average$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_text(aes(label=MGD),
+            position = position_stack(vjust = .5), 
+            vjust = -.2)+
+  facet_grid(Source~Power, scales = "free_y") 
+
+
+mean_mgd <- power[1:4,1:3]
+colnames(mean_mgd) <- c('Source', 'Power', 'MGD')
+#plot bar graph
+ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
+  geom_col(position=position_dodge(), colour = "gray") +
+  geom_hline(data = mean_mgd,aes(yintercept = MGD), size = 1, colour = "black",linetype = "dashed") +
+  geom_text(aes(label=MGD),
+            position = position_stack(vjust = .5), 
+            vjust = -.2)+
+  facet_grid(Source~Power, scales = "free_y") 
