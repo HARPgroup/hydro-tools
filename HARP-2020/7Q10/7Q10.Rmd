@@ -80,11 +80,12 @@ year <- (data2$year)
 
 #7Q10 calculations
 
+
 x7daymin[x7daymin< 0] <- NA
 
 log7daymin <- log(x7daymin)
 
-log7daymin<-na.omit(log7daymin)
+log7daymin <- na.omit(log7daymin)
 
 pars <- PearsonDS:::pearsonIIIfitML(log7daymin)
 x7Q10.1 <- exp(qpearsonIII(p, params = pars$par))
