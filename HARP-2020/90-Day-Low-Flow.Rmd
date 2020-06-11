@@ -2,7 +2,10 @@
 title: "Comparison of 90-day low flow metric across five Virginia rivers"
 author: "Sarah Loomis"
 date: "6/10/2020"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -20,11 +23,17 @@ The 90-day low flow metric is the 90 consecutive days in the water year that hav
 
 Summarized below are the 90-day low flows over the last 20 water years for 5 river systems across Virginia, as measured by gages:
 
-Site #01626000 - South River near Waynesboro, VA   
-Site #02047500 - Blackwater River near Dendron, VA  
-Site #01646502 - Potomac River near Washington, DC  
-Site #02040000 - Appomattox River near Mattoax, VA  
-Site #03475000 - Holston River near Meadowview, VA  
+Site #01626000 - South River near Waynesboro, VA     
+Site #02047500 - Blackwater River near Dendron, VA     
+Site #01646502 - Potomac River near Washington, D.C.    
+Site #02040000 - Appomattox River near Mattoax, VA     
+Site #03475000 - Holston River near Meadowview, VA    
+
+The following is a map of the sites around Virginia and D.C.  See Appendix A for code to create an interactive map of the sites from which this image was taken.
+
+```{r}
+knitr::include_graphics("C:\\Users\\sarah\\OneDrive - Virginia Tech\\Summer 2020\\HARP\\Week 3\\Gage Sites VA.png")
+```
 
 A summary of non-graph related code used is located at the end of the document (Appendix A).  
 
@@ -49,6 +58,9 @@ rawDailyQ5 <- readNWISdv(site_id5, pCode, startDate, endDate)
 
 dates <- rawDailyQ1$Date
 # assign dates to their own vector
+years <- c('01','02','03','04','05','06','07','08','09','10','11',
+           '12','13','14','15','16','17','18','19')
+years <- as.factor(years)
 
 rawDailyQ1 <- as.zoo(rawDailyQ1$X_00060_00003)
 rawDailyQ2 <- as.zoo(rawDailyQ2$X_00060_00003)
@@ -114,6 +126,9 @@ p$potomac <- as.factor(p$potomac)
 # Statistical Summary
 
 ### Statistics of each river's 90-day low flow over 20 years:
+
+This data refers to the statistics of specifically 90-day low flow.  That is, the Min column refers to the minimum 90-day low flow value within the 20 year span, and so on.
+
 River     |Min (cfs)|Max (cfs) |Avg (cfs)|St. Dev. (% of the mean)|Drainage Area (sq. mi)|Zero Flow Days|
 ----------|---------|----------|---------|------------------------|------------------------|--------------|
 South     | 19.14   | 91.18    | 45      | 41.65%                 | 127                    | 0            |
@@ -131,7 +146,7 @@ The Potomac river, despite having the largest drainage area by far, has the seco
 
 # Graphs
 
-### The following are boxplots detailing the span of 90-day low flows over 20 years for each of the five rivers being studied.
+### The following are boxplots detailing the span of 90-day low flows over 20 years for four of the five rivers being studied.
 
 ```{r}
 ggplot(r, aes(x = river, y = `90 Day Min`)) +
@@ -148,10 +163,25 @@ ggplot(r, aes(x = river, y = `90 Day Min`)) +
 
 \pagebreak
 
+### The following is a line plot of the 90-day low flows within the 20 year span for four of the fiver rivers being studied.
+
+```{r}
+ggplot(NULL, aes(x = years)) +
+  geom_line(aes(y = final1$`90 Day Min`, color = 'South River'), group = 1) + 
+  geom_line(aes(y = final2$`90 Day Min`, color = 'Blackwater River'), group = 2) +
+  geom_line(aes(y = final4$`90 Day Min`, color = 'Appomattox River'), group = 3) +
+  geom_line(aes(y = final5$`90 Day Min`, color = 'Holston River'), group = 4) +
+  theme_bw() + 
+  labs(title = "90 day low flows, 2001-2019 water years",
+       x = "Water Year (abbreviated)",
+       y = "Stream Discharge (cfs)")
+```
+
+\pagebreak
+
 ### The following is a boxplot detailing the span of 90-day low flows over 20 years for the Potomac River.
 
 ```{r}
-
 ggplot(p, aes(x = potomac, y = `90 Day Min`)) +
   geom_boxplot() +
   coord_cartesian(ylim = c(0,7000)) +
@@ -161,7 +191,19 @@ ggplot(p, aes(x = potomac, y = `90 Day Min`)) +
   labs(title = "Potomac River 90-Day low flow",
        x = "Virginia River",
        y = "Stream Discharge (cfs)")
+```
 
+\pagebreak
+
+### The following is a line plot of the 90-day low flows from the 2001-2019 water years for the Potomac River.
+
+```{r}
+ggplot(NULL, aes(x = years)) +
+  geom_line(aes(y = final3$`90 Day Min`, color = 'Potomac River'), group = 1) + 
+  theme_bw() + 
+  labs(title = "90 day low flows, 2001-2019 water years",
+       x = "Water Year (abbreviated)",
+       y = "Stream Discharge (cfs)")
 ```
 
 \pagebreak
@@ -185,8 +227,28 @@ rawDailyQ4 <- readNWISdv(site_id4, pCode, startDate, endDate)
 rawDailyQ5 <- readNWISdv(site_id5, pCode, startDate, endDate)
 # load in data
 
+#imap <- leaflet() %>%
+  #addTiles() %>%
+  #setView(lng = -79.6569, lat = 37.4316, zoom = 7) %>%
+  #addMarkers(lng = -77.12750000, lat = 38.94972222,
+             #popup = "Site #01646502 - Potomac River") %>%
+  #addMarkers(lng = -78.90833333, lat = 38.05750000,
+             #popup = "Site #01626000 - South River") %>%
+  #addMarkers(lng = -76.87500000, lat = 37.02500000,
+             #popup = "Site #02047500 - Blackwater River") %>%
+  #addMarkers(lng = -77.85916667, lat = 37.42138889,
+             #popup = "Site #02040000 - Appomattox River") %>%
+  #addMarkers(lng = -81.81888889, lat = 36.71305556,
+             #popup = "Site #03475000 - Holston River")
+#imap
+
+# makes interactive map of sites - does not load into rmarkdown so commented out
+
 dates <- rawDailyQ1$Date
 # assign dates to their own vector
+years <- c('01','02','03','04','05','06','07','08','09','10','11',
+           '12','13','14','15','16','17','18','19')
+years <- as.factor(years)
 
 rawDailyQ1 <- as.zoo(rawDailyQ1$X_00060_00003)
 rawDailyQ2 <- as.zoo(rawDailyQ2$X_00060_00003)
