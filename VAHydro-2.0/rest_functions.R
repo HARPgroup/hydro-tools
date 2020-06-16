@@ -655,7 +655,7 @@ getFeature <- function(inputs, token, base_url, feature){
                               "dh_link_admin_location" = if (!length(feature_cont$list[[i]]$dh_link_admin_location)){""} else {feature_cont$list[[i]]$dh_link_admin_location[[1]]$id},
                               "field_dh_from_entity" = if (!length(feature_cont$list[[i]]$field_dh_from_entity)){""} else {feature_cont$list[[i]]$field_dh_from_entity$id},
                               "field_dh_to_entity" = if (!length(feature_cont$list[[i]]$field_dh_to_entity)){""} else {feature_cont$list[[i]]$field_dh_to_entity$id},
-                           "dh_link_admin_fa_usafips" = if (!length(feature_cont$list[[i]]$dh_link_admin_fa_usafips)){""} else {feature_cont$list[[i]]$dh_link_admin_fa_usafips},   
+                           "dh_link_admin_fa_usafips" = if (!length(feature_cont$list[[i]]$dh_link_admin_fa_usafips)){""} else {feature_cont$list[[i]]$dh_link_admin_fa_usafips[[1]]$id},   
                            "dh_geofield" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom},
                               "geom" = if (is.null(feature_cont$list[[i]]$dh_geofield$geom)){""} else {feature_cont$list[[i]]$dh_geofield$geom}
       )
