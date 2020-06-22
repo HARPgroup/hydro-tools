@@ -28,9 +28,9 @@ site.id <- c(site_id.1, site_id.2, site_id.3, site_id.4, site_id.5)
  medianflow <- c()
 
  for(i in 1:5) {
-   siteinfo <- readNWISsite(site.id[i])
-   rawDailyQ <- readNWISdv(site.id[i], pCode, startDate, endDate)
-   meanflow[i] <- mean(rawDailyQ$X_00060_00003)
+  siteinfo <- readNWISsite(site.id[i])
+  rawDailyQ <- readNWISdv(site.id[i], pCode, startDate, endDate)
+  meanflow[i] <- mean(rawDailyQ$X_00060_00003)
   minflow[i] <- min(rawDailyQ$X_00060_00003)
   maxflow[i] <- max(rawDailyQ$X_00060_00003)
   medianflow[i] <- median(rawDailyQ$X_00060_00003)
