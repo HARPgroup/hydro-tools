@@ -83,6 +83,7 @@ scen.prop.id <- get.scen.prop(riv.seg, mod.scenario = 'vahydro-1.0', dat.source,
 
 
 # SETTING UP BASEPATH AND SOURCING FUNCTIONS
+
 basepath <- '/var/www/R'
 setwd(basepath)
 source(paste(basepath,"config.local.private", sep = "/"))
