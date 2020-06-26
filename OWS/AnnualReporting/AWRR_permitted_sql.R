@@ -98,7 +98,7 @@ permit_src_use <- sqldf(
   group by Source_type, Use_Type, has_permit"
 )
 
-#FORMAT Table 2: 2018 Permitted and Unpermitted (Excluded) Withdrawals (MGD)
+#FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD)
 table2_bysrc <- sqldf('SELECT Source_Type AS "Source Type", CASE 
                     WHEN has_permit = 1 
                     THEN "Permitted"
@@ -140,20 +140,23 @@ tot_unperm_pct <-  round((table2_total[2,3] / sqldf('SELECT sum("Withdrawal Amou
 pct <- rbind(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct)
 table2 <- cbind(rbind(table2_bysrc,table2_total),pct)
 
+#remove clutter 
+rm(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct,table2_total,table2_bysrc,pct)
 
+#KABLE
 kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
       caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
       label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
       col.names = c( 'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
-        '% of Total By Source Type')) %>%
+        '% of Total')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   pack_rows("Groundwater", 1, 2, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 3, 4, hline_before = T, hline_after = F) %>%
   pack_rows("Total (GW + SW)", 5, 6, hline_before = T, hline_after = F)
 
 
-#FORMAT Table 3: 2018 Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
+#FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
 table3_gw <- sqldf('SELECT Source_Type, Use_Type, CASE 
                     WHEN has_permit = 1 
                     THEN "Permitted"
@@ -200,14 +203,17 @@ table3_sw_tot <- sqldf('SELECT "Total Surface Water" AS Source_Type,
 
 table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
+#remove clutter
+rm(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
+#KABLE
 table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
       col.names = c( 'Use Type',
                      'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
-                     '% of Total By Source Type')) %>%
+                     '% of Total')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
@@ -215,6 +221,7 @@ table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c',
   row_spec(26,bold = T) %>%
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
 
+#CUSTOM LATEX CHANGES
 #remove extra characters inserted by collapse_rows because of repeating lines
 collaps_str <- "[t]{-2}{*}"
 
