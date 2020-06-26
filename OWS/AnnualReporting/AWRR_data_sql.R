@@ -6,8 +6,9 @@ options(timeout=24000)
 a <- c('agricultural', 'municipal', 'mining', 'commercial', 'manufacturing', 'irrigation')
 b <- c('Surface Water Intake', 'Well', 'Total (GW + SW)')
 cat_table <- expand.grid(a,b)
-syear = 2018
-eyear = 2018
+syear = 2019
+eyear = 2019
+year.range <- syear:eyear
 s_cols = FALSE
 
 
@@ -29,26 +30,42 @@ for (y in year.range) {
   data <- data.all
   
   #remove duplicates (keeps one row)
-  data <- distinct(data, HydroID, .keep_all = TRUE)
+  data <- distinct(data, MP_hydroid, Year, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
   
   if (length(which(data$Use.Type=='facility')) > 0) {
     data <- data[-which(data$Use.Type=='facility'),]
   }
-  assign(paste("yd", y, sep=''), data)
-  
   #rename columns
-  colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
-                      'MP_Name', 'Facility', 'Use_Type', 'Year',
-                      'mgy', 'mgd', 'lat', 'lon', 'locality')
-  #make use type values lowecase
+  # colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
+  #                     'MP_Name', 'Facility', 'Use_Type', 'Year',
+  #                     'mgy', 'mgd', 'lat', 'lon', 'locality')
+  
+  colnames(data) <- c('HydroID',
+                      'Hydrocode',
+                      'Source_Type',
+                      'MP_Name',
+                      'Facility_HydroID', 
+                      'Facility',
+                      'Use_Type', 
+                      'Year',
+                      'mgy',
+                      'mgd',
+                      'lat',
+                      'lon',
+                      'FIPS',
+                      'locality')
+  
+  data$mgd <- data$mgy/365
+  sum(data$mgy)
+  #make use type values lowercase
   data$Use_Type <- str_to_lower(data$Use_Type)
   #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
   levels(data$Source_Type) <- c(levels(data$Source_Type), "Groundwater", "Surface Water")
   data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
   data$Source_Type[data$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
-  data$mgd = data$mgy / 365.0
+  
   
   data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
