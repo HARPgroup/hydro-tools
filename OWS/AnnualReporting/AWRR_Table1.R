@@ -39,7 +39,7 @@ for (y in year.range) {
   data <- data.all
   
   #remove duplicates (keeps one row)
-  data <- distinct(data, MP_hydroid, .keep_all = TRUE)
+  data <- distinct(data, MP_hydroid, Year, .keep_all = TRUE)
   #exclude dalecarlia
   data <- data[-which(data$Facility=='DALECARLIA WTP'),]
   
@@ -66,7 +66,8 @@ for (y in year.range) {
                       'FIPS',
                       'locality')
   
-  data$mgd <- data$mgd/365
+  data$mgd <- data$mgy/365
+  sum(data$mgy)
   #make use type values lowercase
   data$Use_Type <- str_to_lower(data$Use_Type)
   #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
@@ -190,7 +191,7 @@ kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
   column_spec(9, width = "5em") %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\summary_table_vahydro_",eyear+1,".html",sep = ''))
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\summary_table_vahydro_",eyear+1,"_",Sys.Date(),".html",sep = ''))
 
 
 ##################################################################################
