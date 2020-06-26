@@ -183,10 +183,11 @@ catsum.sums <- data.frame(Source_Type="",
 colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg', paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
-
+#make Category values capital
+cat_table$Category <- str_to_title(cat_table$Category)
 print(cat_table)
 
-
+#QA CHECK
 kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
@@ -195,3 +196,24 @@ kable(cat_table, booktabs = T) %>%
 
 
 ##################################################################################
+
+#NOTE: To center the table and not have it run off the page; insert '\resizebox{\linewidth}{!}{' to wrap around '\begin{tabular}' and don't forget the curly bracket } after '\end{tabular}'
+#SAVE OVERLEAF .TEX TABLE FOR OVERLEAF
+kable(cat_table[2:9],'latex', booktabs = T,
+      caption = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
+      label = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
+      col.names = c(
+                    'Category',
+                    year.range,
+                    paste((eyear-syear)+1,"Year Avg."),
+                    paste('% Change', eyear,'to Avg.', sep = ' '))) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),font_size = 10, full_width = FALSE) %>%
+  column_spec(1, width = "10em") %>%
+  pack_rows("Surface Water", 1, 6, hline_before = T, hline_after = F) %>%
+  pack_rows("Groundwater", 7, 12, hline_before = T, hline_after = F) %>%
+  pack_rows("Total (GW + SW)", 13, 18, hline_before = T, hline_after = F) %>%
+  pack_rows("Total", 19, 20, hline_before = T, hline_after = F) %>%
+  row_spec(21, bold=T, extra_css = "border-top: 1px solid") %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table1_",eyear+1,".tex",sep = ''))
+
+

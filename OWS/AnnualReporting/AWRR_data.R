@@ -3,7 +3,23 @@ library("dplyr")
 library('httr')
 library('stringr')
 library("kableExtra")
+library('stringr')
 options(scipen = 999)
+
+file_extension <- ".html"
+#file_extension <- ".tex"
+
+#switch between file types to save in common drive folder; html or latex
+if (file_extension == ".html") {
+  options(knitr.table.format = "html") #"html" for viewing in Rstudio Viewer pane
+  file_ext <- ".html" #view in R or browser
+} else {
+  options(knitr.table.format = "latex") #"latex" when ready to output to Overleaf
+  file_ext <- ".tex" #for easy upload to Overleaf
+}
+#Kable Styling
+latexoptions <- c("scale_down")
+
 a <- c(
   'agricultural', 
   'commercial', 
@@ -22,6 +38,7 @@ syear = 2015
 eyear = 2019
 year.range <- syear:eyear
 
+#START LOOP
 for (y in year.range) {
   
   print(y)
@@ -167,11 +184,12 @@ catsum.sums <- data.frame(Source_Type="",
 colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg',paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
-
+#make Category values capital
+cat_table$Category <- str_to_title(cat_table$Category)
 print(cat_table)
 
 
-kable(cat_table, "latex", booktabs = T) %>%
+kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
   column_spec(9, width = "5em")
@@ -190,10 +208,14 @@ colnames(cat_table)[8] <- paste((eyear-syear)+1,"Year Avg.")
 agtable5 <- cat_table[c(1,7,13),-2]
 rownames(agtable5) <- c()
 
-kable(agtable5, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+kable(agtable5, booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+    caption = paste(syear,"-",eyear,"Agriculture Water Withdrawals by Source Type (MGD)",sep=" "),
+    label = paste(syear,"-",eyear,"Agriculture Water Withdrawal Trends",sep=" "),
+    col.names = c("Source Type",
+                  colnames(agtable5[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
-
+  row_spec(row = 3, bold = TRUE) %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\Agriculture_table",file_ext,sep = ''))
 ################################################################################################
 #transform wide to long table
 agtable5 <- agtable5[-3,-8]
