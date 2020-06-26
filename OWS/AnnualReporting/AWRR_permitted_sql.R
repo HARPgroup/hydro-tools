@@ -1,7 +1,8 @@
 #library("readxl")
-library("dplyr")
+library('dplyr')
 library('httr')
-library("sqldf")
+library('sqldf')
+library('stringr')
 
 y <- 2019
 eyear <- y
@@ -81,8 +82,8 @@ sqldf(
   group by Source_type, Use_Type"
 )
 
-library(stringr)
 data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
+
 #the percent column calculated in table 2 formatting
 permit_srctype <- sqldf(
   "select Source_type, has_permit, 
@@ -203,7 +204,7 @@ table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
-      col.names = c( 'Source Type',
+      col.names = c( 'Use Type',
                      'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
                      '% of Total By Source Type')) %>%
