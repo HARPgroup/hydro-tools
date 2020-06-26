@@ -81,7 +81,9 @@ sqldf(
   group by Source_type, Use_Type"
 )
 
-#the percent column needs to be calculated ...but that was saved for another day
+library(stringr)
+data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
+#the percent column calculated in table 2 formatting
 permit_srctype <- sqldf(
   "select Source_type, has_permit, 
   ROUND(sum(mgd),2) AS mgd, count(*) 
@@ -197,8 +199,8 @@ table3_sw_tot <- sqldf('SELECT "Total Surface Water" AS Source_Type,
 
 table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
-#option1
-kable(table3[2:5], booktabs = T, align =  c('l','l','c','c'),
+
+table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
       col.names = c( 'Source Type',
@@ -207,5 +209,14 @@ kable(table3[2:5], booktabs = T, align =  c('l','l','c','c'),
                      '% of Total By Source Type')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
-  pack_rows("Surface Water", 14, 25, hline_before = T, hline_after = F)  %>%
-  collapse_rows(columns = 1, valign = "top")
+  pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
+  row_spec(13,bold = T) %>%
+  row_spec(26,bold = T) %>%
+  collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
+
+#remove extra characters inserted by collapse_rows because of repeating lines
+collaps_str <- "[t]{-2}{*}"
+
+table3_tex <- gsub(pattern = collaps_str, 
+     repl    = "", 
+     x       = table3_latex, fixed= T)
