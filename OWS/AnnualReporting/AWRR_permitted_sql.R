@@ -198,10 +198,11 @@ table3_sw_tot <- sqldf('SELECT "Total Surface Water" AS Source_Type,
 table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
 #option1
-kable(table3[2:5], booktabs = T, align =  c('l','c','c'),
-      caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-      label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-      col.names = c( 'Withdrawal Type',
+kable(table3[2:5], booktabs = T, align =  c('l','l','c','c'),
+      caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
+      label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
+      col.names = c( 'Source Type',
+                     'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
                      '% of Total By Source Type')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
