@@ -151,15 +151,68 @@ kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
 
 
 #FORMAT Table 3: 2018 Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
-kable(permit_src_use, "latex", booktabs = T, align = 'c') %>%
+table3_gw <- sqldf('SELECT Source_Type, Use_Type, CASE 
+                    WHEN has_permit = 1 
+                    THEN "Permitted"
+                    WHEN has_permit = 0 
+                    THEN "Unpermitted"
+                    END AS "Withdrawal Type",
+                    mgd AS "Withdrawal Amount",
+                    round((mgd / 
+                    (SELECT sum(a.mgd)
+                    FROM permit_src_use a
+                    WHERE a.Source_Type = "Groundwater")) * 100,2)
+                    AS "pct_of_total"
+                   FROM permit_src_use
+                   WHERE Source_Type = "Groundwater"')
+
+table3_gw_tot <- sqldf('SELECT "Total Groundwater" AS Source_Type, 
+              "Total Groundwater" AS Use_Type,
+              "" AS "Withdrawal Type",
+              sum("Withdrawal Amount") AS "Withdrawal Amount",
+              round(sum(pct_of_total),1) AS pct_of_total
+      FROM table3_gw')
+
+table3_sw <- sqldf('SELECT Source_Type, Use_Type, CASE 
+                    WHEN has_permit = 1 
+                    THEN "Permitted"
+                    WHEN has_permit = 0 
+                    THEN "Unpermitted"
+                    END AS "Withdrawal Type",
+                    mgd AS "Withdrawal Amount",
+                    round((mgd / 
+                    (SELECT sum(a.mgd)
+                    FROM permit_src_use a
+                    WHERE a.Source_Type = "Surface Water")) * 100,2)
+                    AS "pct_of_total"
+                   FROM permit_src_use
+                   WHERE Source_Type = "Surface Water"')
+
+table3_sw_tot <- sqldf('SELECT "Total Surface Water" AS Source_Type, 
+              "Total Surface Water" AS Use_Type,
+              "" AS "Withdrawal Type",
+              sum("Withdrawal Amount") AS "Withdrawal Amount",
+              round(sum(pct_of_total),1) AS pct_of_total
+      FROM table3_sw')
+
+table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
+
+#option1
+kable(table3[2:5], booktabs = T, align =  c('l','c','c'),
+      caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
+      label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
+      col.names = c( 'Withdrawal Type',
+                     paste(eyear,"Withdrawal Amount",sep = ' '),
+                     '% of Total By Source Type')) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  #column_spec(column = 2, bold = TRUE) 
-  column_spec(4, width = "5em") %>%
-  column_spec(5, width = "5em")
+  pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
+  pack_rows("Surface Water", 14, 25, hline_before = T, hline_after = F)  %>%
+  collapse_rows(columns = 1, valign = "top")
 
-
-
-
+#option2
+kable(table3, booktabs = T, align = 'c') %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  collapse_rows(columns = 1:2, valign = "top")
 
 
 
