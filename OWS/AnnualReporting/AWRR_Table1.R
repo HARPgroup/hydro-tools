@@ -274,7 +274,7 @@ top_20 <- sqldf('SELECT Facility_HydroID, Facility,
                 LIMIT 20')
 
 #KABLE
-table4_latex <- kable(top_20,'latex', booktabs = T, align = c('l','l','c','l','c','c','l') ,
+table4_latex <- kable(top_20[2:8],'latex', booktabs = T, align = c('l','l','c','l','c','c','l') ,
                       caption = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
                       label = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
                       col.names = c(
