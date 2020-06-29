@@ -232,6 +232,7 @@ table1_tex %>%
 ################### TABLE 4 : TOP 20 USERS ##########################################
 #make Category values capital
 multi_yr_data$Use_Type <- str_to_title(multi_yr_data$Use_Type)
+multi_yr_data$Facility <- str_to_title(multi_yr_data$Facility)
 #transform from long to wide table
 data_all <- pivot_wider(data = multi_yr_data,id_cols = c(HydroID,Source_Type, MP_Name, Facility_HydroID, Facility, Use_Type, lat, lon, FIPS), names_from = Year, values_from = mgy)
 
@@ -251,9 +252,9 @@ data_all <- sqldf('SELECT a.*,  b.multi_yr_avg,
                   LEFT OUTER JOIN data_avg AS b
                   ON a.HydroID = b.HydroID')
 #group by facility
-data_all_fac <- sqldf('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum("2019")/365),1) AS mgd_2019, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum(',eyear,')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
                       FROM data_all
-                      GROUP BY Facility_HydroID')
+                      GROUP BY Facility_HydroID',sep = ''))
 #limit 20
 top_20 <- sqldf('SELECT Facility, 
                         FIPS AS "City/County", 
@@ -266,10 +267,33 @@ top_20 <- sqldf('SELECT Facility,
                         END AS Type,
                         "" AS "Major Source",
                         multi_yr_avg,
-                        mgd_2019,
+                        mgd,
                         Use_Type AS Category
                 FROM data_all_fac
                 ORDER BY multi_yr_avg DESC
                 LIMIT 20')
 
 #KABLE
+table4_latex <- kable(top_20,'latex', booktabs = T, align = c('l','l','c','l','c','c','l') ,
+                      caption = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
+                      label = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
+                      col.names = c(
+                        'Facility',
+                        'City/County',
+                        'Type',
+                        'Major Source',
+                        paste((eyear-syear)+1,"Year Avg."),
+                        paste(eyear, 'Withdrawal', sep = ' '),
+                        'Category')) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, width = "12em")
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+table4_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = table4_latex, fixed = T )
+table4_tex
+
+table4_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table4_",eyear+1,".tex",sep = ''))
