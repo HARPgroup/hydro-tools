@@ -3,6 +3,9 @@ library('httr')
 library('stringr')
 library("kableExtra")
 
+syear = 2015
+eyear = 2019
+
 a <- c(
   'agricultural', 
   'commercial', 
@@ -15,11 +18,12 @@ b <- c('Groundwater', 'Surface Water', 'Total (GW + SW)')
 cat_table<- data.frame(expand.grid(a,b))
 
 colnames(cat_table) <- c('Use_Type', 'Source_Type')
-cat_table <- arrange(cat_table, Source_Type, Use_Type )
+cat_table <- arrange(cat_table, Source_Type, Use_Type)
+
 #cat_table = FALSE
-syear = 2015
-eyear = 2019
 year.range <- syear:eyear
+
+multi_yr_data <- list()
 
 for (y in year.range) {
   
@@ -31,12 +35,12 @@ for (y in year.range) {
   filename <- paste("data.all_",y,".csv",sep="")
   destfile <- paste(localpath,filename,sep="\\")  
   download.file(paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
-  data.all <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
+  data.year <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
   
   #has 3 issuing authorities, does not include power
 #  data.all <- read.csv(file=paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), header=TRUE, sep=",")
   
-  data <- data.all
+  data <- data.year
   
   #remove duplicates (keeps one row)
   data <- distinct(data, MP_hydroid, Year, .keep_all = TRUE)
@@ -78,7 +82,10 @@ for (y in year.range) {
 
   data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
+  #combine each year of data into a single table
+  multi_yr_data <- rbind(multi_yr_data, data)
   
+  #begin summary table 1 manipulation
   catsourcesum <- data %>% group_by(Use_Type, Source_Type)
   
   catsourcesum <- catsourcesum %>% summarise(
@@ -199,7 +206,7 @@ kable(cat_table, booktabs = T) %>%
 
 #NOTE: To center the table and not have it run off the page; insert '\resizebox{\linewidth}{!}{' to wrap around '\begin{tabular}' and don't forget the curly bracket } after '\end{tabular}'
 #SAVE OVERLEAF .TEX TABLE FOR OVERLEAF
-kable(cat_table[2:9],'latex', booktabs = T,
+table1_latex <- kable(cat_table[2:9],'latex', booktabs = T,
       caption = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
       label = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
       col.names = c(
@@ -207,13 +214,22 @@ kable(cat_table[2:9],'latex', booktabs = T,
                     year.range,
                     paste((eyear-syear)+1,"Year Avg."),
                     paste('% Change', eyear,'to Avg.', sep = ' '))) %>%
-  kable_styling(latex_options = c("striped", "hold_position"),font_size = 10, full_width = FALSE) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(1, width = "10em") %>%
   pack_rows("Surface Water", 1, 6, hline_before = T, hline_after = F) %>%
   pack_rows("Groundwater", 7, 12, hline_before = T, hline_after = F) %>%
   pack_rows("Total (GW + SW)", 13, 18, hline_before = T, hline_after = F) %>%
   pack_rows("Total", 19, 20, hline_before = T, hline_after = F) %>%
-  row_spec(21, bold=T, extra_css = "border-top: 1px solid") %>%
+  row_spec(21, bold=T, extra_css = "border-top: 1px solid") 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+table1_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = table1_latex, fixed = T )
+table1_tex
+
+table1_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table1_",eyear+1,".tex",sep = ''))
 
 
