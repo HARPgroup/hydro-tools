@@ -16,9 +16,6 @@ eyear <- y
   download.file(paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
   data.all <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
   
-  #has 3 issuing authorities, does not include power
-  #  data.all <- read.csv(file=paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), header=TRUE, sep=",")
-  
   data <- data.all
   
   #remove duplicates (keeps one row)
@@ -61,6 +58,7 @@ eyear <- y
   
   data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
   
+  #PULL IN PERMITTED MPs (NO VWUDS) 
   download.file(paste("http://deq2.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200",sep=""), destfile = destfile, method = "libcurl")  
   datap <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
   
@@ -144,17 +142,23 @@ table2 <- cbind(rbind(table2_bysrc,table2_total),pct)
 rm(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct,table2_total,table2_bysrc,pct)
 
 #KABLE
-kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
+table2_latex <- kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
       caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
       label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
       col.names = c( 'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
         '% of Total')) %>%
-  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 12) %>%
   pack_rows("Groundwater", 1, 2, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 3, 4, hline_before = T, hline_after = F) %>%
   pack_rows("Total (GW + SW)", 5, 6, hline_before = T, hline_after = F)
 
+#CUSTOM LATEX CHANGES
+#insert hold position header
+table2_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = table2_latex, fixed = T )
+table2_tex
 
 #FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
 table3_gw <- sqldf('SELECT Source_Type, Use_Type, CASE 
@@ -214,7 +218,7 @@ table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c',
                      'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
                      '% of Total')) %>%
-  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 10) %>%
   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
   row_spec(13,bold = T) %>%
@@ -222,9 +226,14 @@ table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c',
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
 
 #CUSTOM LATEX CHANGES
+#insert hold position header
+table3_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = table3_latex, fixed = T )
+table2_tex
 #remove extra characters inserted by collapse_rows because of repeating lines
-collaps_str <- "[t]{-2}{*}"
-
-table3_tex <- gsub(pattern = collaps_str, 
+table3_tex <- gsub(pattern = "[t]{-2}{*}", 
      repl    = "", 
-     x       = table3_latex, fixed= T)
+     x       = table3_tex, fixed= T)
+
+table3_tex
