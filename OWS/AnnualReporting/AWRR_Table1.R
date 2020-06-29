@@ -252,11 +252,11 @@ data_all <- sqldf('SELECT a.*,  b.multi_yr_avg,
                   LEFT OUTER JOIN data_avg AS b
                   ON a.HydroID = b.HydroID')
 #group by facility
-data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum(',eyear,')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
                       FROM data_all
                       GROUP BY Facility_HydroID',sep = ''))
 #limit 20
-top_20 <- sqldf('SELECT Facility, 
+top_20 <- sqldf('SELECT Facility_HydroID, Facility, 
                         FIPS AS "City/County", 
                         CASE WHEN GW_Type > 0 AND SW_type IS NULL
                         THEN "GW"
