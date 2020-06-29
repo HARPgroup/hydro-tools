@@ -3,6 +3,9 @@ library('httr')
 library('stringr')
 library("kableExtra")
 library('tidyr')
+library('ggplot2')
+library('ggrepel')
+library('sqldf')
 
 syear = 2015
 eyear = 2019
@@ -298,3 +301,37 @@ table4_tex
 
 table4_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table4_",eyear+1,".tex",sep = ''))
+
+##################### Water Withdrawals by Water Use Category PIE CHARTS ################
+
+#FIGURE 10
+GW_pie <- sqldf('SELECT Category, 
+                "2019", 
+                round("2019" / (SELECT sum("2019") FROM cat_table WHERE"Source Type" LIKE "Groundwater") *100,1) AS prop_2019,
+                multi_yr_avg, 
+                round(multi_yr_avg / (SELECT sum(multi_yr_avg) FROM cat_table WHERE"Source Type" LIKE "Groundwater") *100,1) AS prop_multi
+                FROM cat_table
+                WHERE "Source Type" LIKE "Groundwater"
+                ORDER BY multi_yr_avg')
+
+GW_pie$ylab_2019 <- cumsum(GW_pie$prop_2019) - (0.5*GW_pie$prop_2019)
+GW_pie$ylab_multi <- cumsum(GW_pie$prop_multi) - (0.5*GW_pie$prop_multi)
+
+#a
+ggplot(GW_pie, aes(x=2, y=prop_multi, fill=Category)) +
+  geom_bar(stat="identity", color="white") +
+  coord_polar("y", start=0) +
+  theme_void() + 
+  #theme(legend.position="none") +
+  xlim(0.5, 2.5) +
+  
+  geom_text(aes(y = ylab_multi, label = prop_multi), color = "white", size=6) +
+  scale_fill_brewer(palette="Set2")
+
+#b
+#FIGURE 11
+#a
+#b
+#FIGURE 12
+#a
+#b
