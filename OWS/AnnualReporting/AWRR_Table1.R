@@ -2,6 +2,7 @@ library("dplyr")
 library('httr')
 library('stringr')
 library("kableExtra")
+library('tidyr')
 
 syear = 2015
 eyear = 2019
@@ -189,23 +190,19 @@ catsum.sums <- data.frame(Source_Type="",
 
 colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg', paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
-##############################################################
+
 #make Category values capital
 cat_table$Category <- str_to_title(cat_table$Category)
 print(cat_table)
 
-#QA CHECK
+################### MAY QA CHECK ##########################################
 kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
   column_spec(9, width = "5em") %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\summary_table_vahydro_",eyear+1,"_",Sys.Date(),".html",sep = ''))
 
-
-##################################################################################
-
-#NOTE: To center the table and not have it run off the page; insert '\resizebox{\linewidth}{!}{' to wrap around '\begin{tabular}' and don't forget the curly bracket } after '\end{tabular}'
-#SAVE OVERLEAF .TEX TABLE FOR OVERLEAF
+################### TABLE 1 : Summary ##########################################
 table1_latex <- kable(cat_table[2:9],'latex', booktabs = T,
       caption = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
       label = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
@@ -232,4 +229,47 @@ table1_tex
 table1_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table1_",eyear+1,".tex",sep = ''))
 
+################### TABLE 4 : TOP 20 USERS ##########################################
+#make Category values capital
+multi_yr_data$Use_Type <- str_to_title(multi_yr_data$Use_Type)
+#transform from long to wide table
+data_all <- pivot_wider(data = multi_yr_data,id_cols = c(HydroID,Source_Type, MP_Name, Facility_HydroID, Facility, Use_Type, lat, lon, FIPS), names_from = Year, values_from = mgy)
 
+#avg mgd, order by
+data_avg <- sqldf('SELECT HydroID, avg(mgy) as multi_yr_avg
+                  FROM multi_yr_data
+                  GROUP BY HydroID')
+data_all <- sqldf('SELECT a.*,  b.multi_yr_avg, 
+                        CASE WHEN Source_Type = "Groundwater"
+                        THEN 1
+                        END AS GW_type,
+                        CASE
+                        WHEN Source_Type = "Surface Water"
+                        THEN 1
+                        END AS SW_Type
+                  FROM data_all AS a
+                  LEFT OUTER JOIN data_avg AS b
+                  ON a.HydroID = b.HydroID')
+#group by facility
+data_all_fac <- sqldf('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum("2019")/365),1) AS mgd_2019, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+                      FROM data_all
+                      GROUP BY Facility_HydroID')
+#limit 20
+top_20 <- sqldf('SELECT Facility, 
+                        FIPS AS "City/County", 
+                        CASE WHEN GW_Type > 0 AND SW_type IS NULL
+                        THEN "GW"
+                        WHEN SW_Type > 0 AND GW_type IS NULL
+                        THEN "SW"
+                        WHEN GW_Type > 0 AND SW_Type > 0
+                        THEN "SW/GW"
+                        END AS Type,
+                        "" AS "Major Source",
+                        multi_yr_avg,
+                        mgd_2019,
+                        Use_Type AS Category
+                FROM data_all_fac
+                ORDER BY multi_yr_avg DESC
+                LIMIT 20')
+
+#KABLE
