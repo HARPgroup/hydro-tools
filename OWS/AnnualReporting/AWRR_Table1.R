@@ -121,6 +121,7 @@ for (y in year.range) {
 
 }
 
+
 #cat_table_raw <- cat_table <- cat_table_raw
 
 cat_table <- data.frame(cat_table[2],cat_table[1],cat_table[3:(length(year.range)+2)])
@@ -213,8 +214,8 @@ table1_latex <- kable(cat_table[2:9],'latex', booktabs = T,
                     paste('% Change', eyear,'to Avg.', sep = ' '))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(1, width = "10em") %>%
-  pack_rows("Surface Water", 1, 6, hline_before = T, hline_after = F) %>%
-  pack_rows("Groundwater", 7, 12, hline_before = T, hline_after = F) %>%
+  pack_rows("Groundwater", 1, 6, hline_before = T, hline_after = F) %>%
+  pack_rows("Surface Water", 7, 12, hline_before = T, hline_after = F) %>%
   pack_rows("Total (GW + SW)", 13, 18, hline_before = T, hline_after = F) %>%
   pack_rows("Total", 19, 20, hline_before = T, hline_after = F) %>%
   row_spec(21, bold=T, extra_css = "border-top: 1px solid") 
