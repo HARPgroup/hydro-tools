@@ -199,6 +199,10 @@ cat_table <- rbind(cat_table,catsum.sums)
 cat_table$Category <- str_to_title(cat_table$Category)
 print(cat_table)
 
+#save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
+write.csv(multi_yr_data, paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\mp_all_",syear,"-",eyear,sep = ''), row.names = F)
+
+
 ################### MAY QA CHECK ##########################################
 kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
@@ -328,10 +332,3 @@ ggplot(GW_pie, aes(x=2, y=prop_multi, fill=Category)) +
   geom_text(aes(y = ylab_multi, label = prop_multi), color = "white", size=6) +
   scale_fill_brewer(palette="Set2")
 
-#b
-#FIGURE 11
-#a
-#b
-#FIGURE 12
-#a
-#b
