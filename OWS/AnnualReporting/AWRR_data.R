@@ -344,7 +344,6 @@ comm_tex <- gsub(pattern = "{lccccccc}",
 comm_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Commercial_table",file_ext,sep = ''))
 
-
 ################################################################################################
 #transform wide to long table
 commtable9 <- commtable9[-3,-8]
@@ -373,7 +372,7 @@ ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Commercial",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
@@ -381,9 +380,27 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 mintable11 <- cat_table[c(5,11,17),-2]
 rownames(mintable11) <- c()
 
-kable(mintable11, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+min_tex <- kable(mintable11, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Mining Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Mining Water Withdrawal Trends",sep=" "),
+      col.names = c("Source Type",
+                    colnames(mintable11[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
+  row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+min_tex <- gsub(pattern = "{table}[t]", 
+                 repl    = "{table}[ht!]", 
+                 x       = min_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+min_tex <- gsub(pattern = "{lccccccc}", 
+                 repl    = "{lccccccp{2cm}}", 
+                 x       = min_tex, fixed = T )
+
+min_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Mining_table",file_ext,sep = ''))
 
 ################################################################################################
 #transform wide to long table
@@ -413,7 +430,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Mining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
@@ -421,9 +438,28 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 mantable13 <- cat_table[c(4,10,16),-2]
 rownames(mantable13) <- c()
 
-kable(mantable13, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+man_tex <- kable(mantable13, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear," Manufacturing and Industrial Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear," Manufacturing and Industrial Water Withdrawal Trends",sep=" "),
+      col.names = c("Source Type",
+                    colnames(mantable13[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+man_tex <- gsub(pattern = "{table}[t]", 
+                repl    = "{table}[ht!]", 
+                x       = man_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+man_tex <- gsub(pattern = "{lccccccc}", 
+                repl    = "{lccccccp{2cm}}", 
+                x       = man_tex, fixed = T )
+
+man_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Manufacturing_table",file_ext,sep = ''))
+
 ################################################################################################
 #transform wide to long table
 mantable13 <- mantable13[-3,-8]
@@ -452,7 +488,7 @@ ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Manufacturing",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 
 #####################################################################################################
