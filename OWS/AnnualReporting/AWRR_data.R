@@ -703,14 +703,39 @@ catsum.sums <- data.frame(Source_Type="",
 
 colnames(catsum.sums) <- c('Source Type', 'Category',year.range,'multi_yr_avg',paste('% Change',eyear,'to Avg.'))
 cat_table <- rbind(cat_table,catsum.sums)
-##############################################################
 
 print(cat_table)
+##############################################################
+#Table 19: 2014-2018 Power Generation Water Withdrawals by Source Type (MGD)
+powtable19 <- rbind(cat_table[1:2,],cat_table[7,],cat_table[3:4,],cat_table[8,],cat_table[9,])
+rownames(powtable19) <- NULL
 
-kable(cat_table, "latex", booktabs = T) %>%
+pow_tex <- kable(powtable19[2:9], booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Power Generation Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Power Generation Water Withdrawal Trends(MGD)",sep=" "),
+      col.names = c("Power Type",
+                    colnames(powtable19[3:7]),
+                    paste((eyear-syear)+1,"Year Avg."),
+                    colnames(powtable19[9]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  column_spec(8, width = "5em") %>%
-  column_spec(9, width = "5em")
+  pack_rows("Groundwater", 1, 3, hline_before = T, hline_after = F) %>%
+  pack_rows("Surface Water", 4, 6, hline_before = T, hline_after = F) %>%
+  row_spec(7, bold=T, extra_css = "border-top: 1px solid")
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+pow_tex <- gsub(pattern = "{table}[t]", 
+                 repl    = "{table}[ht!]", 
+                 x       = pow_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+pow_tex <- gsub(pattern  = "{lccccccc}", 
+                 repl    = "{lcccccp{2cm}p{2cm}}", 
+                 x       = pow_tex, fixed = T )
+
+pow_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Power_table",file_ext,sep = ''))
+
 
 ########################################################################################
 
@@ -744,4 +769,4 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   facet_grid(Source~Power, scales = "free_y") 
 
 filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf/",sep = " "), width=12, height=6)
