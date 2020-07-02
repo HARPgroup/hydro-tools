@@ -6,8 +6,8 @@ library("kableExtra")
 library('stringr')
 options(scipen = 999)
 
-file_extension <- ".html"
-#file_extension <- ".tex"
+#file_extension <- ".html"
+file_extension <- ".tex"
 
 #switch between file types to save in common drive folder; html or latex
 if (file_extension == ".html") {
@@ -208,14 +208,27 @@ colnames(cat_table)[8] <- paste((eyear-syear)+1,"Year Avg.")
 agtable5 <- cat_table[c(1,7,13),-2]
 rownames(agtable5) <- c()
 
-kable(agtable5, booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+ag_tex <- kable(agtable5, booktabs = T, align = c('l','c','c','c','c','c','c','c'),
     caption = paste(syear,"-",eyear,"Agriculture Water Withdrawals by Source Type (MGD)",sep=" "),
     label = paste(syear,"-",eyear,"Agriculture Water Withdrawal Trends",sep=" "),
     col.names = c("Source Type",
                   colnames(agtable5[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE) %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\May_QA\\Agriculture_table",file_ext,sep = ''))
+  row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+ag_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = ag_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+ag_tex <- gsub(pattern = "{lccccccc}", 
+               repl    = "{lccccccp{2cm}}", 
+               x       = ag_tex, fixed = T )
+
+ag_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Agriculture_table",file_ext,sep = ''))
 ################################################################################################
 #transform wide to long table
 agtable5 <- agtable5[-3,-8]
@@ -244,16 +257,34 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
   # annotate("text", y=agtable5$Average[1:2]-1.8, x=.81, label =paste((eyear-syear)+1,"Year Avg.","=",agtable5$Average[1:2], " MGD"))
 
 filename <- paste("Agriculture",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 #####################################################################################################
 #irrig
 irrigtable7 <- cat_table[c(3,9,15),-2]
 rownames(irrigtable7) <- c()
 
-kable(irrigtable7, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+irrig_tex <- kable(irrigtable7, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Irrigation Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Irrigation Water Withdrawal Trends",sep=" "),
+      col.names = c("Source Type",
+                    colnames(irrigtable7[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
+  row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+irrig_tex <- gsub(pattern = "{table}[t]", 
+               repl    = "{table}[ht!]", 
+               x       = irrig_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+irrig_tex <- gsub(pattern = "{lccccccc}", 
+               repl    = "{lccccccp{2cm}}", 
+               x       = irrig_tex, fixed = T )
+
+irrig_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Irrigation_table",file_ext,sep = ''))
 
 ################################################################################################
 #transform wide to long table
@@ -283,7 +314,7 @@ ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Irrigation",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 #####################################################################################################
 
@@ -291,9 +322,28 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 commtable9 <- cat_table[c(2,8,14),-2]
 rownames(commtable9) <- c()
 
-kable(commtable9, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+comm_tex <- kable(commtable9, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Commercial Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Commercial Water Withdrawal Trends",sep=" "),
+      col.names = c("Source Type",
+                    colnames(commtable9[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
+  row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+comm_tex <- gsub(pattern = "{table}[t]", 
+                  repl    = "{table}[ht!]", 
+                  x       = comm_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+comm_tex <- gsub(pattern = "{lccccccc}", 
+                  repl    = "{lccccccp{2cm}}", 
+                  x       = comm_tex, fixed = T )
+
+comm_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Commercial_table",file_ext,sep = ''))
+
 
 ################################################################################################
 #transform wide to long table
