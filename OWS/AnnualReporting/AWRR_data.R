@@ -247,7 +247,7 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -264,7 +264,7 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 irrigtable7 <- cat_table[c(3,9,15),-2]
 rownames(irrigtable7) <- c()
 
-irrig_tex <- kable(irrigtable7, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+irrig_tex <- kable(irrigtable7,  booktabs = T, align = c('l','c','c','c','c','c','c','c'),
       caption = paste(syear,"-",eyear,"Irrigation Water Withdrawals by Source Type (MGD)",sep=" "),
       label = paste(syear,"-",eyear,"Irrigation Water Withdrawal Trends",sep=" "),
       col.names = c("Source Type",
@@ -304,7 +304,7 @@ ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -322,7 +322,7 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 commtable9 <- cat_table[c(2,8,14),-2]
 rownames(commtable9) <- c()
 
-comm_tex <- kable(commtable9, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+comm_tex <- kable(commtable9,  booktabs = T, align = c('l','c','c','c','c','c','c','c'),
       caption = paste(syear,"-",eyear,"Commercial Water Withdrawals by Source Type (MGD)",sep=" "),
       label = paste(syear,"-",eyear,"Commercial Water Withdrawal Trends",sep=" "),
       col.names = c("Source Type",
@@ -362,7 +362,7 @@ ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -380,7 +380,7 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 mintable11 <- cat_table[c(5,11,17),-2]
 rownames(mintable11) <- c()
 
-min_tex <- kable(mintable11, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+min_tex <- kable(mintable11,  booktabs = T, align = c('l','c','c','c','c','c','c','c'),
       caption = paste(syear,"-",eyear,"Mining Water Withdrawals by Source Type (MGD)",sep=" "),
       label = paste(syear,"-",eyear,"Mining Water Withdrawal Trends",sep=" "),
       col.names = c("Source Type",
@@ -420,7 +420,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -438,9 +438,9 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 mantable13 <- cat_table[c(4,10,16),-2]
 rownames(mantable13) <- c()
 
-man_tex <- kable(mantable13, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c'),
-      caption = paste(syear,"-",eyear," Manufacturing and Industrial Water Withdrawals by Source Type (MGD)",sep=" "),
-      label = paste(syear,"-",eyear," Manufacturing and Industrial Water Withdrawal Trends",sep=" "),
+man_tex <- kable(mantable13,  booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Manufacturing and Industrial Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Manufacturing and Industrial Water Withdrawal Trends",sep=" "),
       col.names = c("Source Type",
                     colnames(mantable13[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
@@ -478,7 +478,7 @@ ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -496,9 +496,28 @@ ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resou
 munitable16 <- cat_table[c(6,12,18),-2]
 rownames(munitable16) <- c()
 
-kable(munitable16, "latex", booktabs = T, align = c('l','c','c','c','c','c','c','c')) %>%
+muni_tex <- kable(munitable16,  booktabs = T, align = c('l','c','c','c','c','c','c','c'),
+      caption = paste(syear,"-",eyear,"Public Water Supply Water Withdrawals by Source Type (MGD)",sep=" "),
+      label = paste(syear,"-",eyear,"Public Water Supply Water Withdrawal Trends",sep=" "),
+      col.names = c("Source Type",
+                    colnames(munitable16[2:8]))) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
-  row_spec(row = 3, bold = TRUE)
+  row_spec(row = 3, bold = TRUE) 
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+muni_tex <- gsub(pattern = "{table}[t]", 
+                repl    = "{table}[ht!]", 
+                x       = muni_tex, fixed = T )
+
+#make last column name wrap on 2 rows (adjusts column width) 
+muni_tex <- gsub(pattern = "{lccccccc}", 
+                repl    = "{lccccccp{2cm}}", 
+                x       = muni_tex, fixed = T )
+
+muni_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Public_Water_supply_table",file_ext,sep = ''))
+
 
 ################################################################################################
 #transform wide to long table
@@ -518,7 +537,7 @@ ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
         legend.box = "horizontal",
         axis.title.x=element_text(size=14),  # X axis title
         axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=11, vjust = 1)) +
+        axis.text.x = element_text(size=16, vjust = 1)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -528,7 +547,7 @@ ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
 
 
 filename <- paste("Public Water Supply",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
-ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Maps/Bar Graphs/",sep = " "), width=12, height=6)
+ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 ##############################################################
 ##############################################################
