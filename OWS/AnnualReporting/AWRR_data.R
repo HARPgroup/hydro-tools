@@ -710,6 +710,17 @@ print(cat_table)
 powtable19 <- rbind(cat_table[1:2,],cat_table[7,],cat_table[3:4,],cat_table[8,],cat_table[9,])
 rownames(powtable19) <- NULL
 
+powtable19 <- sqldf('SELECT "Source Type",
+                    CASE 
+                    WHEN "Category" LIKE "%fossil%"
+                    THEN "Fossil"
+                    WHEN "Category" LIKE "%nuclear%"
+                    THEN "Nuclear"
+                    ELSE "Category"
+                    END AS "Category",
+                    "2015", "2016", "2017", "2018", "2019", "multi_yr_avg", "% Change 2019 to Avg."
+                    FROM powtable19')
+
 pow_tex <- kable(powtable19[2:9], booktabs = T, align = c('l','c','c','c','c','c','c','c'),
       caption = paste(syear,"-",eyear,"Power Generation Water Withdrawals by Source Type (MGD)",sep=" "),
       label = paste(syear,"-",eyear,"Power Generation Water Withdrawal Trends(MGD)",sep=" "),
@@ -717,8 +728,8 @@ pow_tex <- kable(powtable19[2:9], booktabs = T, align = c('l','c','c','c','c','c
                     colnames(powtable19[3:7]),
                     paste((eyear-syear)+1,"Year Avg."),
                     colnames(powtable19[9]))) %>%
-  kable_styling(latex_options = c("striped", "scale_down")) %>%
-  pack_rows("Groundwater", 1, 3, hline_before = T, hline_after = F) %>%
+  kable_styling(latex_options = c("scale_down")) %>%
+  pack_rows("Groundwater", 1, 3,  hline_after = F) %>%
   pack_rows("Surface Water", 4, 6, hline_before = T, hline_after = F) %>%
   row_spec(7, bold=T, extra_css = "border-top: 1px solid")
 
@@ -730,8 +741,8 @@ pow_tex <- gsub(pattern = "{table}[t]",
 
 #make last column name wrap on 2 rows (adjusts column width) 
 pow_tex <- gsub(pattern  = "{lccccccc}", 
-                 repl    = "{lcccccp{2cm}p{2cm}}", 
-                 x       = pow_tex, fixed = T )
+                 repl    = "{lrrrrr>{\\raggedleft\\arraybackslash}p{5em}>{\\raggedleft\\arraybackslash}p{6em}}", 
+                 x       = pow_tex, fixed = T,useBytes = F )
 
 pow_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Power_table",file_ext,sep = ''))
