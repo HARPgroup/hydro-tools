@@ -88,7 +88,7 @@ data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
 write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
-d <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_permitted_",eyear,".csv",sep = ""))
+data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_permitted_",eyear,".csv",sep = ""))
 
 ##############################################################################################################
 
