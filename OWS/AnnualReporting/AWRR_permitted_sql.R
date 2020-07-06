@@ -82,7 +82,17 @@ sqldf(
 
 data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 
-#the percent column calculated in table 2 formatting
+
+########## STATIC DATA #######################################################################################
+
+#save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
+write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
+
+d <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_permitted_",eyear,".csv",sep = ""))
+
+##############################################################################################################
+
+#FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD)
 permit_srctype <- sqldf(
   "select Source_type, has_permit, 
   ROUND(sum(mgd),2) AS mgd, count(*) 
@@ -90,13 +100,6 @@ permit_srctype <- sqldf(
   group by Source_type, has_permit"
 )
 
-permit_src_use <- sqldf(
-  "select Source_type, Use_Type, has_permit, ROUND(sum(mgd),2) AS mgd, count(*) 
-  from data_pi 
-  group by Source_type, Use_Type, has_permit"
-)
-
-#FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD)
 table2_bysrc <- sqldf('SELECT Source_Type AS "Source Type", CASE 
                     WHEN has_permit = 1 
                     THEN "Permitted"
@@ -160,7 +163,15 @@ table2_tex <- gsub(pattern = "{table}[t]",
                    x       = table2_latex, fixed = T )
 table2_tex
 
+######################################################################################################
 #FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
+
+permit_src_use <- sqldf(
+  "select Source_type, Use_Type, has_permit, ROUND(sum(mgd),2) AS mgd, count(*) 
+  from data_pi 
+  group by Source_type, Use_Type, has_permit"
+)
+
 table3_gw <- sqldf('SELECT Source_Type, Use_Type, CASE 
                     WHEN has_permit = 1 
                     THEN "Permitted"
