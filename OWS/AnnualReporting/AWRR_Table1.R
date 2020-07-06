@@ -9,7 +9,9 @@ library('sqldf')
 
 syear = 2015
 eyear = 2019
+year.range <- syear:eyear
 
+############### PULL DIRECTLY FROM VAHYDRO ###################################################
 a <- c(
   'agricultural', 
   'commercial', 
@@ -25,7 +27,6 @@ colnames(cat_table) <- c('Use_Type', 'Source_Type')
 cat_table <- arrange(cat_table, Source_Type, Use_Type)
 
 #cat_table = FALSE
-year.range <- syear:eyear
 
 multi_yr_data <- list()
 
@@ -206,10 +207,11 @@ write.csv(cat_table, paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\Table1_",s
 write.csv(multi_yr_data, paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_all_",syear,"-",eyear,".csv",sep = ""), row.names = F)
 
 
-#########################IS THERE A STATIC TABLE? READ THAT IN AND BEGIN FROM HERE########################################
-cat_table <- read.csv("")
+######################### IS THERE A STATIC TABLE? READ THAT IN AND BEGIN FROM HERE ########################################
+cat_table <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\Table1_",syear,"-",eyear,".csv",sep = ""))
 
-multi_yr_data <- read.csv("")
+multi_yr_data <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_all_",syear,"-",eyear,".csv",sep = ""))
+
 ################### MAY QA CHECK ##########################################
 kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
@@ -311,35 +313,9 @@ table4_tex <- gsub(pattern = "{table}[t]",
 table4_tex
 
 table4_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table4_",eyear+1,".tex",sep = ''))
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\summary_table4_",eyear,".tex",sep = ''))
 ################### TOP USERS BY USE TYPE (TABLES 6, 8, 10, 12, 14, 15,  17, 20, ############################
 
 #Table 6: Highest Reported Agriculture Withdrawals in 2018 (MGD)
 
-
-##################### Water Withdrawals by Water Use Category PIE CHARTS ################
-
-#FIGURE 10
-GW_pie <- sqldf('SELECT Category, 
-                "2019", 
-                round("2019" / (SELECT sum("2019") FROM cat_table WHERE"Source Type" LIKE "Groundwater") *100,1) AS prop_2019,
-                multi_yr_avg, 
-                round(multi_yr_avg / (SELECT sum(multi_yr_avg) FROM cat_table WHERE"Source Type" LIKE "Groundwater") *100,1) AS prop_multi
-                FROM cat_table
-                WHERE "Source Type" LIKE "Groundwater"
-                ORDER BY multi_yr_avg')
-
-GW_pie$ylab_2019 <- cumsum(GW_pie$prop_2019) - (0.5*GW_pie$prop_2019)
-GW_pie$ylab_multi <- cumsum(GW_pie$prop_multi) - (0.5*GW_pie$prop_multi)
-
-#a
-ggplot(GW_pie, aes(x=2, y=prop_multi, fill=Category)) +
-  geom_bar(stat="identity", color="white") +
-  coord_polar("y", start=0) +
-  theme_void() + 
-  #theme(legend.position="none") +
-  xlim(0.5, 2.5) +
-  
-  geom_text(aes(y = ylab_multi, label = prop_multi), color = "white", size=6) +
-  scale_fill_brewer(palette="Set2")
 
