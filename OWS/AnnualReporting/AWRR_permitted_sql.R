@@ -161,7 +161,8 @@ table2_latex <- kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c')
 table2_tex <- gsub(pattern = "{table}[t]", 
                    repl    = "{table}[ht!]", 
                    x       = table2_latex, fixed = T )
-table2_tex
+table2_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\summary_table2_",eyear,".tex",sep = ''))
 
 ######################################################################################################
 #FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
@@ -247,4 +248,5 @@ table3_tex <- gsub(pattern = "[t]{-2}{*}",
      repl    = "", 
      x       = table3_tex, fixed= T)
 
-table3_tex
+table3_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\summary_table3_",eyear,".tex",sep = ''))
