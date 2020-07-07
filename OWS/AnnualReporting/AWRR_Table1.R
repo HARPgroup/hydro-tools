@@ -247,11 +247,18 @@ table1_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\overleaf\\summary_table1_",eyear+1,".tex",sep = ''))
 
 ################### TABLE 4 : TOP 20 USERS ##########################################
+#READ IN FIPS TABLE
+fips <- read.csv(file = "C:\\Users\\maf95834\\Documents\\Github\\vahydro\\R\\wsp\\wsp2020\\FoundationDataset\\fips_codes.csv")
 #make Category values capital
 multi_yr_data$Use_Type <- str_to_title(multi_yr_data$Use_Type)
 multi_yr_data$Facility <- str_to_title(multi_yr_data$Facility)
 #transform from long to wide table
-data_all <- pivot_wider(data = multi_yr_data,id_cols = c(HydroID,Source_Type, MP_Name, Facility_HydroID, Facility, Use_Type, lat, lon, FIPS), names_from = Year, values_from = mgy)
+data_all <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, Facility_HydroID, Facility,Use_Type, FIPS), names_from = Year, values_from = mgy)
+
+data_all <- sqldf('SELECT a.*, b.name AS Locality
+                  FROM data_all a
+                  LEFT OUTER JOIN fips b
+                  ON a.FIPS = b.code')
 
 #avg mgd, order by
 data_avg <- sqldf('SELECT HydroID, avg(mgy) as multi_yr_avg
@@ -269,15 +276,15 @@ data_all <- sqldf('SELECT a.*,  b.multi_yr_avg,
                   LEFT OUTER JOIN data_avg AS b
                   ON a.HydroID = b.HydroID')
 #group by facility
-data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, lat, lon, FIPS, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, Locality, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
                       FROM data_all
                       GROUP BY Facility_HydroID',sep = ''))
 #limit 20
 top_20 <- sqldf('SELECT Facility_HydroID, Facility, 
-                        FIPS AS "City/County", 
-                        CASE WHEN GW_Type > 0 AND SW_type IS NULL
+                        Locality, 
+                        CASE WHEN GW_Type > 0 AND SW_Type IS NULL
                         THEN "GW"
-                        WHEN SW_Type > 0 AND GW_type IS NULL
+                        WHEN SW_Type > 0 AND GW_Type IS NULL
                         THEN "SW"
                         WHEN GW_Type > 0 AND SW_Type > 0
                         THEN "SW/GW"
@@ -287,7 +294,7 @@ top_20 <- sqldf('SELECT Facility_HydroID, Facility,
                         mgd,
                         Use_Type AS Category
                 FROM data_all_fac
-                ORDER BY multi_yr_avg DESC
+                ORDER BY mgd DESC
                 LIMIT 20')
 
 #KABLE
@@ -296,7 +303,7 @@ table4_latex <- kable(top_20[2:8],'latex', booktabs = T, align = c('l','l','c','
                       label = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
                       col.names = c(
                         'Facility',
-                        'City/County',
+                        'Locality',
                         'Type',
                         'Major Source',
                         paste((eyear-syear)+1,"Year Avg."),
@@ -316,6 +323,159 @@ table4_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\summary_table4_",eyear,".tex",sep = ''))
 ################### TOP USERS BY USE TYPE (TABLES 6, 8, 10, 12, 14, 15,  17, 20, ############################
 
-#Table 6: Highest Reported Agriculture Withdrawals in 2018 (MGD)
+#Table: Highest Reported  Withdrawals in eyear (MGD)
+#use_types <- unique(x = data_all$Use_Type)
+use_types <- list("Municipal", "Agriculture", "Commercial", "Irrigation", "Mining")
 
+for (u in use_types) {
+  print(paste('PROCESSING TOP 5 TABLE: ',u),sep = '')
+  
+if (u == "Manufacturing") {
+  for (s in list("Groundwater","Surface Water")) {
+    
+    #group by source type from data_all
+    #group by facility
+    data_all_source <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, Locality, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+                      FROM data_all
+                      GROUP BY Facility_HydroID, Source_Type',sep = ''))
+    #top5
+    top5 <- sqldf(paste('SELECT Facility_HydroID, Facility, 
+                        Locality, 
+                        CASE 
+                        WHEN GW_Type > 0 AND SW_Type IS NULL
+                        THEN "GW"
+                        WHEN SW_Type > 0 AND GW_Type IS NULL
+                        THEN "SW"
+                        WHEN GW_Type > 0 AND SW_Type > 0
+                        THEN "SW/GW"
+                        END AS Type,
+                        "" AS "Major Source",
+                        multi_yr_avg,
+                        mgd,
+                        Use_Type AS Category
+                FROM data_all_source
+                WHERE Source_Type LIKE ',paste('"',s,'"', sep = ''),' 
+                AND Use_Type LIKE',paste('"',u,'"', sep = ''),'
+                ORDER BY mgd DESC
+                LIMIT 5',sep = ''))
+    
+    #KABLE
+    top5_latex <- kable(top5[2:7],'latex', booktabs = T, align = c('l','l','c','l','c','c') ,
+                        caption = paste("Highest Reported Manufacturing and Industrial",s,"Withdrawals in",eyear,"(MGD)",sep=" "),
+                        label = paste("Highest Reported Manufacturing and Industrial",s,"Withdrawals in",eyear,"(MGD)",sep=" "),
+                        col.names = c(
+                          'Facility',
+                          'Locality',
+                          'Type',
+                          'Major Source',
+                          paste((eyear-syear)+1,"Year Avg."),
+                          paste(eyear, 'Withdrawal', sep = ' '))) %>%
+      kable_styling(latex_options = c("striped", "scale_down")) %>%
+      column_spec(1, width = "12em")
+    
+    #CUSTOM LATEX CHANGES
+    #insert hold position header
+    top5_tex <- gsub(pattern = "{table}[t]", 
+                     repl    = "{table}[ht!]", 
+                     x       = top5_latex, fixed = T )
+    top5_tex
+    
+    top5_tex %>%
+      cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Manufacturing_",s,"_top5_",eyear,".tex",sep = ''))
+  }
+  
+}
+  else if (u == "Municipal") {
+  
+  top5 <- sqldf(paste('SELECT Facility_HydroID, Facility, 
+                        Locality, 
+                        CASE 
+                        WHEN GW_Type > 0 AND SW_Type IS NULL
+                        THEN "GW"
+                        WHEN SW_Type > 0 AND GW_Type IS NULL
+                        THEN "SW"
+                        WHEN GW_Type > 0 AND SW_Type > 0
+                        THEN "SW/GW"
+                        END AS Type,
+                        "" AS "Major Source",
+                        multi_yr_avg,
+                        mgd,
+                        Use_Type AS Category
+                FROM data_all_fac
+                WHERE Use_Type LIKE',paste('"',u,'"', sep = ''),'
+                ORDER BY mgd DESC
+                LIMIT 10',sep = ''))
+  
+  #KABLE
+  top5_latex <- kable(top5[2:7],'latex', booktabs = T, align = c('l','l','c','l','c','c') ,
+                      caption = paste("Highest Reported Public Water Supply Withdrawals in",eyear,"(MGD)",sep=" "),
+                      label = paste("Highest Reported Public Water Supply Withdrawals in",eyear,"(MGD)",sep=" "),
+                      col.names = c(
+                        'Facility',
+                        'Locality',
+                        'Type',
+                        'Major Source',
+                        paste((eyear-syear)+1,"Year Avg."),
+                        paste(eyear, 'Withdrawal', sep = ' '))) %>%
+    kable_styling(latex_options = c("striped", "scale_down")) %>%
+    column_spec(1, width = "12em")
+  
+  #CUSTOM LATEX CHANGES
+  #insert hold position header
+  top5_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = top5_latex, fixed = T )
+  top5_tex
+  
+  top5_tex %>%
+    cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Public_Water_Supply_top5_",eyear,".tex",sep = ''))
+  
+} else {
+  
+top5 <- sqldf(paste('SELECT Facility_HydroID, Facility, 
+                        Locality, 
+                        CASE 
+                        WHEN GW_Type > 0 AND SW_Type IS NULL
+                        THEN "GW"
+                        WHEN SW_Type > 0 AND GW_Type IS NULL
+                        THEN "SW"
+                        WHEN GW_Type > 0 AND SW_Type > 0
+                        THEN "SW/GW"
+                        END AS Type,
+                        "" AS "Major Source",
+                        multi_yr_avg,
+                        mgd,
+                        Use_Type AS Category
+                FROM data_all_fac
+                WHERE Use_Type LIKE',paste('"',u,'"', sep = ''),'
+                ORDER BY mgd DESC
+                LIMIT 5',sep = ''))
+
+#KABLE
+top5_latex <- kable(top5[2:7],'latex', booktabs = T, align = c('l','l','c','l','c','c') ,
+                      caption = paste("Highest Reported",u,"Withdrawals in",eyear,"(MGD)",sep=" "),
+                      label = paste("Highest Reported",u,"Withdrawals in",eyear,"(MGD)",sep=" "),
+                      col.names = c(
+                        'Facility',
+                        'Locality',
+                        'Type',
+                        'Major Source',
+                        paste((eyear-syear)+1,"Year Avg."),
+                        paste(eyear, 'Withdrawal', sep = ' '))) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, width = "12em")
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+top5_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = top5_latex, fixed = T )
+top5_tex
+
+#top5_tex %>%
+#  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\",u,"_top5_",eyear,".tex",sep = ''))
+
+}}
+
+#manu and industrial needs 2 tables - by source type
 
