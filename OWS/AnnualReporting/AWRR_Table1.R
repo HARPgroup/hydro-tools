@@ -275,6 +275,11 @@ data_all <- sqldf('SELECT a.*,  b.multi_yr_avg,
                   FROM data_all AS a
                   LEFT OUTER JOIN data_avg AS b
                   ON a.HydroID = b.HydroID')
+
+#save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
+write.csv(data_all, paste("U:\\OWS\\foundation_datasets\\awrr\\2020\\mp_all_wide_",syear,"-",eyear,".csv",sep = ""), row.names = F)
+
+
 #group by facility
 data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, Locality, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
                       FROM data_all
@@ -325,7 +330,7 @@ table4_tex %>%
 
 #Table: Highest Reported  Withdrawals in eyear (MGD)
 #use_types <- unique(x = data_all$Use_Type)
-use_types <- list("Municipal", "Agriculture", "Commercial", "Irrigation", "Mining")
+use_types <- list("Municipal", "Agriculture", "Commercial", "Irrigation", "Mining", "Manufacturing")
 
 for (u in use_types) {
   print(paste('PROCESSING TOP 5 TABLE: ',u),sep = '')
@@ -476,6 +481,4 @@ top5_tex
 #  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\",u,"_top5_",eyear,".tex",sep = ''))
 
 }}
-
-#manu and industrial needs 2 tables - by source type
 
