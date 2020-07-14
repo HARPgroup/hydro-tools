@@ -570,6 +570,8 @@ syear = 2015
 eyear = 2019
 year.range <- syear:eyear
 
+multi_yr_data <- list()
+
 for (y in year.range) {
   
   print(y)
@@ -608,6 +610,10 @@ for (y in year.range) {
   data_power$Source_Type[data_power$Source_Type == 'Well'] <- 'Groundwater'
   data_power$Source_Type[data_power$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
   
+  #combine each year of data into a single table
+  multi_yr_data <- rbind(multi_yr_data, data_power)
+  
+  #begin summary table 1 manipulation
   catsourcesum <- data_power %>% group_by(Use_Type, Source_Type)
   
   catsourcesum <- catsourcesum %>% summarise(
@@ -781,3 +787,81 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
 
 filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf/",sep = " "), width=12, height=6)
+
+################### TOP USERS BY USE TYPE  ############################
+
+#Table: Highest Reported  Withdrawals in eyear (MGD)
+#make Category values capital
+multi_yr_data$Use_Type <- str_to_title(multi_yr_data$Use_Type)
+multi_yr_data$Facility <- str_to_title(multi_yr_data$Facility)
+#transform from long to wide table
+data_all <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, Facility_hydroid, Facility,Use_Type, fips), names_from = Year, values_from = mgy)
+
+data_all <- sqldf('SELECT a.*, b.name AS Locality
+                  FROM data_all a
+                  LEFT OUTER JOIN fips b
+                  ON a.fips = b.code')
+
+#avg mgd, order by
+data_avg <- sqldf('SELECT HydroID, avg(mgy) as multi_yr_avg
+                  FROM multi_yr_data
+                  GROUP BY HydroID')
+data_all <- sqldf('SELECT a.*,  b.multi_yr_avg, 
+                        CASE WHEN Source_Type = "Groundwater"
+                        THEN 1
+                        END AS GW_type,
+                        CASE
+                        WHEN Source_Type = "Surface Water"
+                        THEN 1
+                        END AS SW_Type
+                  FROM data_all AS a
+                  LEFT OUTER JOIN data_avg AS b
+                  ON a.HydroID = b.HydroID')
+
+#group by facility
+data_all_fac <- sqldf(paste('SELECT Facility_HydroID, Facility, Source_Type, Use_Type, Locality, round((sum(',paste('"',eyear,'"', sep = ''),')/365),1) AS mgd, round((sum(multi_yr_avg)/365),1) as multi_yr_avg, sum(GW_type) AS GW_type, sum(SW_type) AS SW_type
+                      FROM data_all
+                      GROUP BY Facility_HydroID',sep = ''))
+
+top5 <- sqldf(paste('SELECT Facility_HydroID, Facility, 
+                        Locality, 
+                        CASE 
+                        WHEN GW_Type > 0 AND SW_Type IS NULL
+                        THEN "GW"
+                        WHEN SW_Type > 0 AND GW_Type IS NULL
+                        THEN "SW"
+                        WHEN GW_Type > 0 AND SW_Type > 0
+                        THEN "SW/GW"
+                        END AS Type,
+                        "" AS "Major Source",
+                        multi_yr_avg,
+                        mgd,
+                        Use_Type AS Category
+                FROM data_all_fac
+                WHERE Use_Type LIKE "%power%"
+                ORDER BY mgd DESC
+                LIMIT 5',sep = ''))
+
+#KABLE
+top5_latex <- kable(top5[2:7],'latex', booktabs = T, align = c('l','l','c','l','c','c') ,
+                    caption = paste("Highest Reported Power Generation Withdrawals in",eyear,"(MGD)",sep=" "),
+                    label = paste("Highest Reported Power Generation Withdrawals in",eyear,"(MGD)",sep=" "),
+                    col.names = c(
+                      'Facility',
+                      'Locality',
+                      'Type',
+                      'Major Source',
+                      paste((eyear-syear)+1,"Year Avg."),
+                      paste(eyear, 'Withdrawal', sep = ' '))) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, width = "12em")
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+top5_tex <- gsub(pattern = "{table}[t]", 
+                 repl    = "{table}[ht!]", 
+                 x       = top5_latex, fixed = T )
+top5_tex
+
+top5_tex %>%
+cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\Power_top5_",eyear,".tex",sep = ''))
