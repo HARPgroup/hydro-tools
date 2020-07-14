@@ -230,11 +230,11 @@ table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c',
                      'Withdrawal Type',
                      paste(eyear,"Withdrawal Amount",sep = ' '),
                      '% of Total')) %>%
-  kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 10) %>%
+  kable_styling( full_width = F,position = "center", font_size = 10) %>%
   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
-  row_spec(13,bold = T) %>%
-  row_spec(26,bold = T) %>%
+  row_spec(13,bold = T, background = "gray!6") %>%
+  row_spec(25,bold = T, background = "gray!6") %>%
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
 
 #CUSTOM LATEX CHANGES
@@ -247,6 +247,11 @@ table2_tex
 table3_tex <- gsub(pattern = "[t]{-2}{*}", 
      repl    = "", 
      x       = table3_tex, fixed= T)
+
+#custom striping
+table3_tex <- gsub(pattern = " & Unpermitted ", 
+                   repl    = "\\rowcolor{gray!6}   & Unpermitted ", 
+                   x       = table3_tex, fixed= T)
 
 table3_tex %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2020 Report\\Overleaf\\summary_table3_",eyear,".tex",sep = ''))
