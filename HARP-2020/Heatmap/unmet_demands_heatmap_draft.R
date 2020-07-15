@@ -74,14 +74,15 @@ ggplot(modat2, aes(x=month, y=year, fill= count_unmet_days)) +
   geom_tile(col='white')+
   geom_text(aes(label = count_unmet_days), size=2)+
   scale_fill_gradient(low="green", high="red",name = "Unmet Days")+
-  
-  scale_x_continuous(expand = c(0,0), breaks=seq(1,12, 1))+
+  scale_x_continuous(expand = c(0,0), breaks=seq(1,12, 1), position='top',
+                     labels = month.abb)+
   scale_y_reverse(expand=c(0,0), breaks=seq(1985,2014,1))+
-  labs(x="Month", 
-        y="Year", 
+  labs(x=NULL,
+        y=NULL, 
         title='Shennandoah @ Luray - Runid 18 - Unmet Demands', 
        legend)+
 theme(axis.ticks= element_blank())+
+  theme_gray()+
 theme(plot.title = element_text(size = 12, face = "bold",  hjust = 0.5))+
 theme(legend.title.align = 0.5)
 
