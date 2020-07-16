@@ -6,6 +6,7 @@ site <- "http://deq2.bse.vt.edu/d.dh"    #Specify the site of interest, either d
 library(ggplot2)
 library(sqldf)
 library(ggnewscale)
+library(dplyr)
 
 # source config.r
 basepath='/var/www/R';
