@@ -89,22 +89,41 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
   modat[is.na(modat)] = 0
   
   ########################################################### Calculating Totals
+  # numeric versions of eyear and syear
+  num_syear <- as.numeric(syear)  
+  num_eyear <- as.numeric(eyear)
   
   # monthly totals via sqldf
   mosum <- sqldf("SELECT  month, sum(count_unmet_days) count_unmet_days FROM modat GROUP BY month")
-  mosum$year <- rep(as.numeric(eyear)+1,12)
+  mosum$year <- rep(num_eyear+1,12)
   
   #yearly sum
   yesum <-  sqldf("SELECT year, sum(count_unmet_days) count_unmet_days FROM modat GROUP BY year")
   yesum$month <- rep(13,length(yesum$year))
   
+  # create monthly averages 
+  moavg<-
+    mosum %>%
+    mutate(avg=count_unmet_days/((num_eyear-num_syear)+1)) %>%
+    mutate(year=num_eyear+2)
+  
+  moavg$avg<-round(moavg$avg, 2)
+  
+  # create yearly averages
+  yeavg <-  
+    yesum %>%
+    mutate(avg=count_unmet_days/12) %>%
+    mutate(month=14)
+  
+  yeavg$avg<-round(yeavg$avg, 2)
+  
   # create x and y axis breaks
-  y_breaks <- seq(syear,as.numeric(eyear)+1,1)
-  x_breaks <- seq(1,13,1)
+  y_breaks <- seq(syear,num_eyear+2,1)
+  x_breaks <- seq(1,14,1)
   
   # create x and y labels
-  y_labs <- c(seq(syear,eyear,1),'Totals')
-  x_labs <- c(month.abb,'Totals')
+  y_labs <- c(seq(syear,eyear,1),'Totals', 'Avg')
+  x_labs <- c(month.abb,'Totals','Avg')
   
   
   ############################################################### Plot and Save
@@ -116,7 +135,7 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
                          midpoint = 15, guide = "colourbar", 
                          name= 'Unmet Days') +
     theme(panel.background = element_rect(fill = "transparent"))+
-    theme() + labs(title = 'Unmet Demand Heatmap', y='', x='') +
+    theme() + labs(title = 'Unmet Demand Heatmap', y=NULL, x=NULL) +
     scale_x_continuous(expand=c(0,0), breaks= x_breaks, labels=x_labs, position='top') + 
     scale_y_reverse(expand=c(0,0), breaks=y_breaks, labels= y_labs) +
     theme(axis.ticks= element_blank()) +
@@ -128,13 +147,22 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
     geom_tile(data = mosum, color='black', aes(x = month, y = year, fill = count_unmet_days)) +
     geom_text(data = yesum, size = 3.5, color='black', aes(x = month, y = year, label = count_unmet_days)) +
     geom_text(data = mosum, size = 3.5, color='black', aes(x = month, y = year, label = count_unmet_days)) +
-    scale_fill_gradient2(low = "#63D1F4", high = "#8A2BE2",mid='#CAB8FF',
-                         midpoint = 150, name= 'Total Unmet Days')
+    scale_fill_gradient2(low = "#63D1F4", high = "#8A2BE2", mid='#CAB8FF',
+                         midpoint = mean(mosum$count_unmet_days), name= 'Total Unmet Days')
+  
+  
+  unmet_avg <- unmet + new_scale_fill()+
+    geom_tile(data = yeavg, color='black', aes(x = month, y = year, fill = avg)) +
+    geom_tile(data = moavg, color='black', aes(x = month, y = year, fill = avg)) +
+    geom_text(data = yeavg, size = 3.5, color='black', aes(x = month, y = year, label = avg)) +
+    geom_text(data = moavg, size = 3.5, color='black', aes(x = month, y = year, label = avg))+
+    scale_fill_gradient2(low = "#FFF8DC", mid = "#FFDEAD", high ="#DEB887",
+                         name= 'Average Unmet Days', midpoint = mean(yeavg$avg))
   
   
   fname <- paste(save_directory,paste0('fig.unmet_grid_',elid, '.', runid, '.png'),sep = '/')
   
-  ggsave(fname,plot = unmet, width= 7, height=5)
+  ggsave(fname,plot = unmet_avg, width= 7, height=7)
   
   print('File saved to save_directory')
   
@@ -142,6 +170,6 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
   #here we would add vahydro posting eventually if needed
 }
 
-unmet_grid(elid,pid,18,save_directory=save_directory)
+unmet_grid(elid,pid,runid,save_directory=save_directory)
 
 
