@@ -108,7 +108,7 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
     mutate(avg=count_unmet_days/((num_eyear-num_syear)+1)) %>%
     mutate(year=num_eyear+2)
   
-  moavg$avg<-round(moavg$avg, 2)
+  moavg$avg<-round(moavg$avg, 1)
   
   # create yearly averages
   yeavg <-  
@@ -116,7 +116,7 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
     mutate(avg=count_unmet_days/12) %>%
     mutate(month=14)
   
-  yeavg$avg<-round(yeavg$avg, 2)
+  yeavg$avg<-round(yeavg$avg, 1)
   
   # create x and y axis breaks
   y_breaks <- seq(syear,num_eyear+2,1)
