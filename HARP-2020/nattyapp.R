@@ -5,55 +5,57 @@ library(dataRetrieval)
 library(ggplot2)
 library(datasets)
 library(plotly)
+library(gganimate)
+library(png)
+library(gifski)
+library(leaflet)
 
 site <- "http://deq2.bse.vt.edu/d.dh" 
 
-basepath<-'/var/www/R';
+basepath <-'/var/www/R'
 
 source(paste(basepath,'config.R',sep='/'))
 # source(paste(github_location,"hydro-tools/HARP-2020/Heatmap","unmet_heatmap.R", sep = "/"))
 
 
-ui<-dashboardPage(
+ui<-
+dashboardPage(
   dashboardHeader(title="Harp Plots"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("USGS Gage Plots", tabName="usgs",icon = icon('tint')),
       menuItem("VAHydro Plots",tabName="vahydro", icon = icon('tint')),
-      menuItem("Heatmap Plots", tabName="heatmap",icon = icon('tint')),
-      menuItem("Other Visualizations", tabName="other", icon = icon('tint'))
+      menuItem("ELF Plots", tabName="elf", icon = icon('tint'))
     )
   ),
   
   dashboardBody(
     tabItems(
       tabItem("usgs",
-        box(textInput("id",value = 13010065,label='siteid'),
-            plotlyOutput("plot"), width=6, height=500, background='black'),
-        box(
-          title = "Inputs", background = "black",
-          sliderInput("slider", "Slider input:", 1, 100, 50),
-          textInput("text", "Text input:")
-      ),
+        box(plotlyOutput("plot", height=225), width=6, height=250, background='black'),
+        box(textInput("id",value = '13010065',label='Site ID'),
+            dateInput("sdate", value=as.Date("2018-10-01"), label="Start Date"),
+            dateInput("edate", value=as.Date("2019-09-30"), label="End Date")),
+        box(plotlyOutput("plot2", height=225), width=6, height=235, background='black'),
+        box(leafletOutput("map"))),
       tabItem("vahydro",
-           box(plotOutput("plot2"))),
-      
-      tabItem("other",
-              "other plots here")
-    )
+           box(plotOutput("plot3")),
+           box(textInput("pid",value = 4964892,label='pid'),
+               textInput("elid", value= 299330, label="elid"),
+               textInput("runid", value=18, label="runid")))
+    
  )
-))
+ )
+)
 
 
 server<-function(input, output){
   
   output$plot <-renderPlotly({
-    
-    startDate <- '2018-10-01'
-    endDate <- '2019-09-30'
+
     pCode <-'00060'
     
-    rawDailyQ <- readNWISdv(input$id, pCode, startDate, endDate)
+    rawDailyQ <- readNWISdv(input$id, pCode, input$sdate, input$edate)
     
     p<-ggplot(rawDailyQ, 
            aes(x=Date, y = X_00060_00003))+
@@ -65,9 +67,43 @@ server<-function(input, output){
       theme(plot.title = element_text(size = 8, face = "bold",  hjust = 0.5))
     
     ggplotly(p)
+    
+  })
+  output$map <- renderLeaflet({
+    
+    siteinfo<- readNWISsite('13010065')
+    
+    
+    imap <- leaflet() %>%
+      addTiles() %>%
+      setView(lng = -78.90833333, lat = 38.05750000, zoom = 7) %>%
+      addMarkers(lng = -78.90833333, lat = 38.05750000,
+                 popup = "Site #01626000 - South River")
+    imap
+    
+  }
+    
+  )
+  output$plot2 <-renderPlotly({
+    
+    pCode <-'00060'
+    
+    rawDailyQ <- readNWISdv(input$id, pCode, input$sdate, input$edate)
+    
+    p<-ggplot(rawDailyQ, 
+              aes(x=Date, y = X_00060_00003))+
+      geom_line(outlier.shape = NA, col='darkblue')+
+      labs(title= 'USGS Gage Flow (LOG)')+
+      ylab('Discharge (cfs)')+ 
+      xlab('Date')+
+      scale_y_log10()+
+      theme_bw()+
+      theme(plot.title = element_text(size = 8, face = "bold",  hjust = 0.5))
+    
+    ggplotly(p)
   })
   
-  output$plot2<-renderPlot({
+  output$plot3<-renderPlot({
     ###############################
     #### *** Water Supply Element
     ################################
@@ -86,10 +122,9 @@ server<-function(input, output){
     save_directory <-  "/var/www/html/data/proj3/out"
     
     # Read Args
-    argst <- commandArgs(trailingOnly=T)
-    pid <- 4964892 #as.integer(argst[1])
-    elid <-  299330 #as.integer(argst[2])
-    runid <- 18#as.integer(argst[3])
+    pid <- input$pid #as.integer(argst[1])
+    elid <-  input$elid #as.integer(argst[2])
+    runid <- input$runid #as.integer(argst[3])
     
     dat <- fn_get_runfile(elid, runid, site= omsite,  cached = FALSE)
     syear = min(dat$year)
@@ -176,6 +211,17 @@ server<-function(input, output){
     ndx = which.max(as.numeric(unmet1[,"1 Day Max"]));
     unmet1 = round(loflows[ndx,]$"1 Day Max",6);
     
+    
+    if (sum(datdf$unmet_demand_mgd)==0) {
+      flows <- zoo(as.numeric(dat$Qintake*1.547), order.by = index(dat));
+      loflows <- group2(flows)
+      Qin30 <- loflows["30 Day Min"];
+      ndx1 = which.min(as.numeric(Qin30[,"30 Day Min"]))
+    }
+    # Define year at which highest 30 Day Max occurs (Lal's code, line 405)
+    u30_year2 = loflows[ndx1,]$"year";
+    
+    
     u30_year2 = loflows[ndx1,]$"year";
     
     ##### Define fname before graphing
@@ -219,10 +265,7 @@ server<-function(input, output){
       labs(y = "Flow (cfs)", x= paste("Critical Period:",u30_year2, sep=' '))
     #dev.off()
    
-
   })
-  
 }
 
-  
   shinyApp(ui, server)
