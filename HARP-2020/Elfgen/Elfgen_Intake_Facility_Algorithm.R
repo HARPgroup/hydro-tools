@@ -86,22 +86,16 @@ elf <- elfgen("watershed.df" = watershed.df,
 
 #### Solving for confidence interval lines
 
-xdat <- c(elf$plot$data$x_var)
-ydat <- c(elf$plot$data$y_var)
-data <- as.data.frame(elf$plot$data)
 uq <- elf$plot$plot_env$upper.quant
 
 upper.lm <- lm(y_var ~ log(x_var), data = uq)
 
-predict <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = mean_intake), interval = 'confidence'))
+predict.df <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = mean_intake), interval = 'confidence'))
 
-species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
-
-# Comparing predict to actual values
-#fit<-as.numeric(predict$fit)
-#species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
-#percent_error<-((fit-species_richness)/species_richness)*100
-
+# this section is not necessarily needed - use as a check for percent error
+# fit<-as.numeric(predict.df$fit)
+# species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
+# percent_error<-((fit-species_richness)/species_richness)*100  
 
 xmin <- min(uq$x_var)
 xmax <- max(uq$x_var)
@@ -119,10 +113,10 @@ m <- elf$stats$m
 b <- elf$stats$b
 int <- m*log(mean_intake) + b      # solving for mean_intake y-value
 
-m1 <- (ymax1-ymin1)/(log(xmax)-log(xmin)) # line 1
+m1 <- (ymax1-ymin1)/(log(xmax)-log(xmin)) # slope and intercept of confidence interval line 1
 b1 <- ymax1-(m1*log(xmax))
 
-m2 <- (ymax2-ymin2)/(log(xmax)-log(xmin)) # line 2
+m2 <- (ymax2-ymin2)/(log(xmax)-log(xmin)) # slope and intercept of confidence interval line 2
 b2 <- ymax2 - (m2*log(xmax))
 
 
@@ -143,15 +137,14 @@ elf$plot +
 elf$stats$m <- m1
 elf$stats$b <- b1
 
-percent_richness_change_bound1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
-abs_richness_change_bound1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
+pct_richness_change_1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
+abs_richness_change_1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
 
 elf$stats$m <- m2
 elf$stats$b <- b2
 
-percent_richness_change_bound2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
-abs_richness_change_bound2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
-
+pct_richness_change_2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
+abs_richness_change_2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
 
 
 #### Saving
