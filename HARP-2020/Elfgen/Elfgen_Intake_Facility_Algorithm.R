@@ -93,20 +93,15 @@ uq <- elf$plot$plot_env$upper.quant
 
 upper.lm <- lm(y_var ~ log(x_var), data = uq)
 
-interval <- as.data.frame(confint(upper.lm, level=0.95))
+predict <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = mean_intake), interval = 'confidence'))
 
-richness_change(elf$stats, flow_reduction_pct, 'xval' = min(uq$x_var))
-richness_change(elf$stats, flow_reduction_pct, 'xval' = max(uq$x_var))
+species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
 
-predict(upper.lm, newdata = data.frame(x_var = mean_intake), interval = 'confidence')
+# Comparing predict to actual values
+#fit<-as.numeric(predict$fit)
+#species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
+#percent_error<-((fit-species_richness)/species_richness)*100
 
-lwr<-as.numeric(predict$lwr)
-upr<-as.numeric(predict$upr)
-fit<-as.numeric(predict$fit)
-
-species_richness<-m*log(mean_intake)+b
-
-percent_error<-((fit-species_richness)/species_richness)*100
 
 xmin <- min(uq$x_var)
 xmax <- max(uq$x_var)
