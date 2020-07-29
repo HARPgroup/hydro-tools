@@ -97,6 +97,11 @@ predict <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = mean_int
 
 species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
 
+# Comparing predict to actual values
+#fit<-as.numeric(predict$fit)
+#species_richness<-elf$stats$m*log(mean_intake)+elf$stats$b
+#percent_error<-((fit-species_richness)/species_richness)*100
+
 
 xmin <- min(uq$x_var)
 xmax <- max(uq$x_var)
