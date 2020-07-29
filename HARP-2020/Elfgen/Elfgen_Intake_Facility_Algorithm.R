@@ -109,8 +109,8 @@ ymax1 <- yval2[3] # top right point, line 1
 ymin2 <- yval1[3] # top left point, line 2
 ymax2 <- yval2[2] # bottom right point, line 2
 
-m <- elf$stat$m
-b <- elf$stat$b
+m <- elf$stats$m
+b <- elf$stats$b
 int <- m*log(mean_intake) + b      # solving for mean_intake y-value
 
 m1 <- (ymax1-ymin1)/(log(xmax)-log(xmin)) # slope and intercept of confidence interval line 1
