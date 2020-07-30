@@ -142,17 +142,17 @@ plt <- elf$plot +
 
 #### Using confidence interval lines to find percent/absolute richness bounds
 
-elf$stats$m <- m1
-elf$stats$b <- b1
+elf$bound1stats$m <- m1
+elf$bound1stats$b <- b1
 
-percent_richness_change_bound1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
-abs_richness_change_bound1 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
+percent_richness_change_bound1 <- richness_change(elf$bound1stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
+abs_richness_change_bound1 <- richness_change(elf$bound1stats, "pctchg" = flow_reduction_pct)
 
-elf$stats$m <- m2
-elf$stats$b <- b2
+elf$bound2stats$m <- m2
+elf$bound2stats$b <- b2
 
-percent_richness_change_bound2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
-abs_richness_change_bound2 <- richness_change(elf$stats, "pctchg" = flow_reduction_pct)
+percent_richness_change_bound2 <- richness_change(elf$bound2stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
+abs_richness_change_bound2 <- richness_change(elf$bound2stats, "pctchg" = flow_reduction_pct)
 
 
 
