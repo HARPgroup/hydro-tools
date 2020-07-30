@@ -8,7 +8,7 @@
 library(elfgen)
 library(sqldf)
 library(ggplot2)
-
+library(stringr) #needed for str_remove()
 
 #### Load in directories and repositories
 site <- "http://deq2.bse.vt.edu/d.dh"
@@ -86,9 +86,9 @@ elf <- elfgen("watershed.df" = watershed.df,
 
 #### Solving for confidence interval lines
 
-xdat <- c(elf$plot$data$x_var)
-ydat <- c(elf$plot$data$y_var)
-data <- as.data.frame(elf$plot$data)
+# xdat <- c(elf$plot$data$x_var)
+# ydat <- c(elf$plot$data$y_var)
+# data <- as.data.frame(elf$plot$data)
 uq <- elf$plot$plot_env$upper.quant
 
 upper.lm <- lm(y_var ~ log(x_var), data = uq)
@@ -128,7 +128,7 @@ b2 <- ymax2 - (m2*log(xmax))
 
 #### Plot
 
-elf$plot +
+plt <- elf$plot +
   geom_segment(aes(x = mean_intake, y = -Inf, xend = mean_intake, yend = int), color = 'red', linetype = 'dashed') +
   geom_segment(aes(x = 0, xend = mean_intake, y = int, yend = int), color = 'red', linetype = 'dashed') +
   geom_point(aes(x = mean_intake, y = int, fill = 'Mean intake flow'), color = 'red', shape = 'triangle', size = 2) +

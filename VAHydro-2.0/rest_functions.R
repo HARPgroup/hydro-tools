@@ -579,7 +579,8 @@ getFeature <- function(inputs, token, base_url, feature){
     hydroid = inputs$hydroid,
     bundle = inputs$bundle,
     ftype = inputs$ftype,
-    hydrocode = inputs$hydrocode
+    hydrocode = inputs$hydrocode,
+    dh_link_facility_mps = inputs$dh_link_facility_mps
   );
   
 
@@ -588,6 +589,15 @@ getFeature <- function(inputs, token, base_url, feature){
       # forget about other attributes, just use hydroid if provided 
       pbody = list(
         hydroid = inputs$hydroid
+      )
+    }
+  }
+  
+  if (!is.null(inputs$dh_link_facility_mps)) {
+    if (inputs$dh_link_facility_mps > 0) {
+      # forget about other attributes, just use dh_link_facility_mps if provided 
+      pbody = list(
+        dh_link_facility_mps = inputs$dh_link_facility_mps
       )
     }
   }
