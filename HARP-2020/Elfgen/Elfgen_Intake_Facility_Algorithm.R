@@ -35,7 +35,7 @@ flow_reduction_pct <- 10
 
 #### Take in watershed and mean intake data
 
-site_comparison <- paste('http://deq1.bse.vt.edu/d.dh/dh-feature-contained-within-export', hydroid, 'watershed', sep = '/')
+site_comparison <- paste(site,'dh-feature-contained-within-export', hydroid, 'watershed', sep = '/')
 
 containing_watersheds <- read.csv(file=site_comparison, header=TRUE, sep=",")
 
@@ -133,14 +133,16 @@ b2 <- ymax2 - (m2*log(xmax))
 plt <- elf$plot +
   geom_segment(aes(x = mean_intake, y = -Inf, xend = mean_intake, yend = int), color = 'red', linetype = 'dashed') +
   geom_segment(aes(x = 0, xend = mean_intake, y = int, yend = int), color = 'red', linetype = 'dashed') +
-  geom_point(aes(x = mean_intake, y = int, fill = 'Mean intake flow'), color = 'red', shape = 'triangle', size = 2) +
+  geom_point(aes(x = mean_intake, y = int, fill = 'Intake'), color = 'red', shape = 'triangle', size = 2) +
   geom_segment(aes(x = xmin, y = (m1 * log(xmin) + b1), xend = xmax, yend = (m1 * log(xmax)) + b1), color = 'blue', linetype = 'dashed') +
   geom_segment(aes(x = xmin, y = (m2 * log(xmin) + b2), xend = xmax, yend = (m2 * log(xmax)) + b2), color = 'blue', linetype = 'dashed') +
   labs(fill = 'Intake Legend')
 
-
-
+plt
 #### Using confidence interval lines to find percent/absolute richness bounds
+#following two lines are for the base m and b values
+base_pct_richness <- richness_change(elf$stats, 'pctchg' =flow_reduction_pct, 'xval'=mean_intake)
+abs_base <- richness_change(elf$stats, 'pctchg' = flow_reduction_pc)
 
 elf$bound1stats$m <- m1
 elf$bound1stats$b <- b1
@@ -154,7 +156,13 @@ elf$bound2stats$b <- b2
 percent_richness_change_bound2 <- richness_change(elf$bound2stats, "pctchg" = flow_reduction_pct, "xval" = mean_intake)
 abs_richness_change_bound2 <- richness_change(elf$bound2stats, "pctchg" = flow_reduction_pct)
 
+# checking diffs in pct richness
+diff1 <- percent_richness_change_bound1 - base_pct_richness
+diff2 <- percent_richness_change_bound2 - base_pct_richness
 
+#checking diffs in abs richness
+abs_d1 <- abs_base - abs_richness_change_bound1
+abs_d2 <- abs_base - abs_richness_change_bound1
 
 #### Saving
 
