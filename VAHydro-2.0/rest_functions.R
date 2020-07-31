@@ -156,15 +156,21 @@ getTimeseries <- function(inputs, base_url, ts){
         )
         ts  <- rbind(ts, ts_i)
       }
-      morepages = TRUE
-      pbody$page = pbody$page + 1
+      trecs = as.integer(count(ts))
+      if (trecs >= pbody$limit) {
+        morepages = FALSE
+      } else {
+        morepages = TRUE
+        pbody$page = pbody$page + 1
+      }
     } else {
       morepages = FALSE
-      if (as.integer(count(ts)) == 0) {
+      trecs = as.integer(count(ts))
+      if (trecs == 0) {
         print("----- This timeseries does not exist")
         ts = FALSE
       } else {
-        print(paste("Total =", as.integer(count(ts))))
+        print(paste("Total =", trecs))
       }
     }
   }
