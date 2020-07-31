@@ -159,12 +159,13 @@ getTimeseries <- function(inputs, base_url, ts){
       morepages = TRUE
       pbody$page = pbody$page + 1
     } else {
+      morepages = FALSE
       if (as.integer(count(ts)) == 0) {
         print("----- This timeseries does not exist")
+        ts = FALSE
       } else {
         print(paste("Total =", as.integer(count(ts))))
       }
-      return(FALSE)
     }
   }
   return(ts)
