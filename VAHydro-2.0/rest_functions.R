@@ -59,6 +59,7 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
 getTimeseries <- function(inputs, base_url, ts){
 
   #Convert varkey to varid - needed for REST operations 
+  varid <- NULL 
   if (!is.null(inputs$varkey)) {
     # this would use REST 
     # getVarDef(list(varkey = inputs$varkey), token, base_url)
@@ -99,54 +100,74 @@ getTimeseries <- function(inputs, base_url, ts){
       )
     }
   }
-  
-  ts <- GET(
-    paste(base_url,"/dh_timeseries.json",sep=""), 
-    add_headers(HTTP_X_CSRF_TOKEN = token),
-    query = pbody, 
-    encode = "json"
-  );
-  ts_cont <- content(ts);
-  
-  if (length(ts_cont$list) != 0) {
-    print(paste("----- Number of timeseries found: ",length(ts_cont$list),sep=""))
-    
-    ts <- data.frame(
-                       tid=character(),
-                       tsvalue=character(),
-                       tscode=character(),
-                       tstime=character(),
-                       tsendtime=character(),
-                       featureid=character(),
-                       modified=character(),
-                       entity_type=character(),
-                       varid=character(),
-                       uid=character(),
-                       status=character(),
-                       stringsAsFactors=FALSE) 
-    
-    i <- 1
-    for (i in 1:length(ts_cont$list)) {
-      
-      ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
-                           "tsvalue" = if (is.null(ts_cont$list[[i]]$tsvalue)){""} else {ts_cont$list[[i]]$tsvalue},
-                           "tscode" = if (is.null(ts_cont$list[[i]]$tscode)){""} else {ts_cont$list[[i]]$tscode},
-                           "tstime" = if (is.null(ts_cont$list[[i]]$tstime)){""} else {ts_cont$list[[i]]$tstime},
-                           "tsendtime" = if (is.null(ts_cont$list[[i]]$tsendtime)){""} else {ts_cont$list[[i]]$tsendtime},
-                           "featureid" = if (is.null(ts_cont$list[[i]]$featureid)){""} else {ts_cont$list[[i]]$featureid},
-                           "modified" = if (is.null(ts_cont$list[[i]]$modified)){""} else {ts_cont$list[[i]]$modified},
-                           "entity_type" = if (is.null(ts_cont$list[[i]]$entity_type)){""} else {ts_cont$list[[i]]$entity_type},
-                           "varid" = if (is.null(ts_cont$list[[i]]$varid)){""} else {ts_cont$list[[i]]$varid},
-                           "uid" = if (is.null(ts_cont$list[[i]]$uid)){""} else {ts_cont$list[[i]]$uid},
-                           "status" = if (is.null(ts_cont$list[[i]]$status)){""} else {ts_cont$list[[i]]$status}
-      )
-      ts  <- rbind(ts, ts_i)
-    }
+  if (!is.null(inputs$page)) {
+    pbody$page = inputs$page
+    multipage = FALSE
   } else {
-    print("----- This timeseries does not exist")
-    return(FALSE)
+    page = 0
+    pbody$page = 0
+    multipage = TRUE ; # do we support multiple pages if records exceed limit?
   }
-  ts <- ts
+  if (!is.null(inputs$limit)) {
+    pbody$limit = inputs$limit
+  }
+  ts <- data.frame(
+    tid=character(),
+    tsvalue=character(),
+    tscode=character(),
+    tstime=character(),
+    tsendtime=character(),
+    featureid=character(),
+    modified=character(),
+    entity_type=character(),
+    varid=character(),
+    uid=character(),
+    status=character(),
+    stringsAsFactors=FALSE) 
+  # set morepages to true to start, if multipage = FALSE, this gets reset immediately after 1st retrieval
+  morepages = TRUE
+  while (morepages == TRUE) {
+    tsrest <- GET(
+      paste(base_url,"/dh_timeseries.json",sep=""), 
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      query = pbody, 
+      encode = "json"
+    );
+    ts_cont <- content(tsrest);
+    
+    if (length(ts_cont$list) != 0) {
+      
+      i <- 1
+      numrecs = length(ts_cont$list)
+      print(paste("----- Number of timeseries found: ",numrecs,sep=""))
+      for (i in 1:numrecs) {
+        
+        ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
+                             "tsvalue" = if (is.null(ts_cont$list[[i]]$tsvalue)){""} else {ts_cont$list[[i]]$tsvalue},
+                             "tscode" = if (is.null(ts_cont$list[[i]]$tscode)){""} else {ts_cont$list[[i]]$tscode},
+                             "tstime" = if (is.null(ts_cont$list[[i]]$tstime)){""} else {ts_cont$list[[i]]$tstime},
+                             "tsendtime" = if (is.null(ts_cont$list[[i]]$tsendtime)){""} else {ts_cont$list[[i]]$tsendtime},
+                             "featureid" = if (is.null(ts_cont$list[[i]]$featureid)){""} else {ts_cont$list[[i]]$featureid},
+                             "modified" = if (is.null(ts_cont$list[[i]]$modified)){""} else {ts_cont$list[[i]]$modified},
+                             "entity_type" = if (is.null(ts_cont$list[[i]]$entity_type)){""} else {ts_cont$list[[i]]$entity_type},
+                             "varid" = if (is.null(ts_cont$list[[i]]$varid)){""} else {ts_cont$list[[i]]$varid},
+                             "uid" = if (is.null(ts_cont$list[[i]]$uid)){""} else {ts_cont$list[[i]]$uid},
+                             "status" = if (is.null(ts_cont$list[[i]]$status)){""} else {ts_cont$list[[i]]$status}
+        )
+        ts  <- rbind(ts, ts_i)
+      }
+      morepages = TRUE
+      pbody$page = pbody$page + 1
+    } else {
+      if (as.integer(count(ts)) == 0) {
+        print("----- This timeseries does not exist")
+      } else {
+        print(paste("Total =", as.integer(count(ts))))
+      }
+      return(FALSE)
+    }
+  }
+  return(ts)
 }
 
 postTimeseries <- function(inputs, base_url, ts){
