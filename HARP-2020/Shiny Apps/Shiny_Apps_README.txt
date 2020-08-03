@@ -13,3 +13,6 @@ identified by the element id and PID The default facility is the Shenandoah Town
 
 USGS_flow_graph_shiny.R - The app shows a hydrograph of the streamflow for a given USGS gage over a given time period.
  The user inputs variables such as the desired USGS site ID, the start date, and the end date, to get their desired hydrograph.
+
+threshold_flow_heatmap_shiny.R - The app shows a heatmap of the number of days per month in which the USGS gage in question has a
+ flow that is less than the threshold flow. THe user input variables are the USGS gage id, start date, end date, and threshold flow.
