@@ -23,11 +23,9 @@ ui <- fluidPage(titlePanel("Interactive Facility Unmet Demand Data"),
                       inputId = "graph",
                       label = "Plot of Interest",
                       c("Unmet Demand Heatmap" , "Unmet Demand Flow Plot")),
-                    sliderInput(
+                    textInput(
                       inputId = "runid",
                       label = "Scenario run",
-                      min = 11,
-                      max = 18,
                       value = 18),
                     textInput(
                       inputId = "elid",
