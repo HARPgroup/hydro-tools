@@ -2,10 +2,11 @@
 
 library(ggplot2)
 
-site <- "http://deq2.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq2.bse.vt.edu/d.dh"  
 basepath <- '/var/www/R';
 source(paste(basepath,'config.R',sep='/'))
 
+# AllSegList created by previous HARPers
 #####
 AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_7890',
                 'OR2_8130_7900', 'OR5_8200_8370', 'OR4_8271_8120', 'TU3_8480_8680',
@@ -119,43 +120,55 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 
 
 
-#########################################################################################
 
+# Inputs/ Calculations
+################################################################################
 
-riv_seg <- 'PS4_5840_5240'
+# Inputs: desired river segment and runid
+riv_seg_i <- 'PS0_6150_6160'
 runid <- 18
 
-upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
+# Using Daniel/ previous HARPers up and downstream function to create list of 
+# all segments connected to input segment
+upstream <- data.frame((fn_ALL.upstream(riv_seg_i, AllSegList)))
 upstream<- upstream[nrow(upstream):1,]
 upstream <- data.frame(upstream)
 names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
 
+if (as.character(upstream[1]) != "NA") {
+  riv_seg <- as.character(upstream[1])
+}  else { 
+  riv_seg <- riv_seg_i
+}
+
 downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
 names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
 
-river <- rbind(upstream, riv_seg, downstream)
+river <- rbind(riv_seg, downstream)
+river <- sqldf("SELECT * from river
+                WHERE riv_seg 
+                != 'NA'")
 
+# Instantiating variables for loop
 i <- 1
 segment <- c()
 area <- c()
 intake <- c()
+seg_intake <- c()
 flow <- c()
+length <- c()
 
+# While loop that grabs data from Vahydro for each segment
 while (i <= nrow(river)) {
+  
+  # Creating river segment data frame
   riv_seg <- river[i, 1]
   segment <- append(segment, riv_seg)
-  #Getting pid of river segment curtasy of Daniel's function (step 1)
-  pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
-  #Getting elid (step2)
-  inputs <- list(
-    varkey = 'om_element_link',
-    propname = 'om_element_connection',
-    entity_type = 'dh_properties',
-    featureid = pid
-  )
-  prop <- getProperty(inputs, site)
-  elid <- prop$propvalue
   
+  # Getting pid of river segment curtasy of Daniel's function 
+  pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
+  
+  # Getting runid pid 
   inputs <- list(
     varkey = 'om_model_scenario',
     propname = paste('runid_', runid, sep = ''),
@@ -165,6 +178,7 @@ while (i <= nrow(river)) {
   prop <- getProperty(inputs, site)
   run_pid <- as.character(prop$pid)
   
+  # Creating cumulative intake data frame 
   inputs <- list(
     varkey = 'om_class_Constant',
     propname = 'wd_cumulative_mgd',
@@ -174,11 +188,19 @@ while (i <= nrow(river)) {
   prop <- getProperty(inputs, site)
   wd_cumulative_mgd <- prop$propvalue
   intake <- append(intake, wd_cumulative_mgd)
-
-  dat <- data.frame(fn_get_runfile(elid, runid, site, cached = FALSE))
-  drainage_area <- dat$area_sqmi[1]
-  area <- append(area, drainage_area)
   
+  # Creating river segment intake data frame
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'wd_mgd',
+    entity_type = 'dh_properties',
+    featureid = run_pid
+  )
+  prop <- getProperty(inputs, site)
+  wd_mgd <- prop$propvalue
+  seg_intake <- append(seg_intake, wd_mgd)
+  
+  # Creating stream flow data frame
   inputs <- list(
     varkey = 'om_class_Constant',
     propname = 'Qout',
@@ -189,23 +211,80 @@ while (i <= nrow(river)) {
   streamflow <- prop$propvalue
   flow <- append(flow, streamflow)
   
+  # Getting river channel pid
+  inputs <- list(
+    varkey = 'om_class_USGSChannelObject',
+    propname = '0. River Channel',
+    entity_type = 'dh_properties',
+    featureid = pid
+  )
+  prop <- getProperty(inputs, site)
+  riverchannel_pid <- prop$pid
+  
+  # Creating river length data frame
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'length',
+    entity_type = 'dh_properties',
+    featureid = riverchannel_pid
+  )
+  prop <- getProperty(inputs, site)
+  segment_length <- prop$propvalue
+  length <- append(length, segment_length)
+  
+  # Creating drainage area data frame
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'drainage_area',
+    entity_type = 'dh_properties',
+    featureid = riverchannel_pid
+  )
+  prop <- getProperty(inputs, site)
+  drainage_area <- prop$propvalue
+  area <- append(area, drainage_area)
+  
   i <- i + 1
 }
 
+# Creating one dataframe with everything from vahydro
 segment <- data.frame(segment)
 area <- data.frame(area)
 intake <- data.frame(intake)
+seg_intake <- data.frame(seg_intake)
 flow <- data.frame(flow)
-river_data <- cbind(segment, area, intake, flow)
+length <- data.frame(length)
+river_data <- cbind(segment, area, intake, seg_intake, flow, length)
 
-plt <- ggplot(river_data, aes(x = segment, y = intake)) +
-  geom_point() +
-  theme_bw() +
-  theme(plot.title = element_text(face = 'bold'))
-plt
+# River mile data manipulation
+i <- 1
+while (i <= nrow(river_data)) {
+  
+  river_length <- c()
+  
+  # Loop creates vector of current segment and upstream segment lengths
+  for (n in 1:i) {
+    n_length <- as.numeric(river_data$length[n])
+    river_length <- c(river_length, n_length)
+  }
+  # Makes length column to total length to segment from start of river
+  river_data$mile[i] <- sum(river_length)
+  
+  i <- i + 1
+}
 
-plt <- ggplot(river_data, aes(x = segment, y = flow)) +
-  geom_point() +
+# Changing mile column from ft to mi
+river_data$mile <- (1/5280)*river_data$mile
+
+# Turning river segment column into factor to keep order while graphing
+river_data$segment <- factor(river_data$segment, levels = river_data$segment)
+
+
+# Plotting 
+################################################################################
+
+plt <- ggplot(river_data, aes(x = mile)) +
+  geom_line(aes(y = flow, col = 'Flow')) +
+  geom_line(aes(y = intake, col = 'Cumulative Intake')) +
   theme_bw() +
   theme(plot.title = element_text(face = 'bold'))
 plt
