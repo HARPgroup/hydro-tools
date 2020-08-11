@@ -50,7 +50,7 @@ ui <- dashboardPage(
                         numericInput("runid",
                                      "RunID:",
                                      min = 1,
-                                     max = 19,
+                                     max = 1000,
                                      value = 18),
                         dateInput('sdate','Start Date',value = "1985-01-01",
                                   min='1984-01-01', max='2014-12-31'),
