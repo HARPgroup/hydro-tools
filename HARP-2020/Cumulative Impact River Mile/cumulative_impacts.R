@@ -120,123 +120,156 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 
 
 #########################################################################################
+riv_seg <- 'PS4_5840_5240' 
 
+#'PS3_5990_6161'
 
-riv_seg <- 'PS4_5840_5240'
-runid <- 18
+runid1 <- 11
+runid2 <- 18
 
-upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
-upstream<- upstream[nrow(upstream):1,]
-upstream <- data.frame(upstream)
-names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
-
-downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
-names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
-
-river <- rbind(upstream, riv_seg, downstream)
-
-i <- 1
-segment <- c()
-area <- c()
-intake <- c()
-flow <- c()
-length <-c()
-length_tot <- 0
-area_tot <- 0
-
-while (i <= nrow(river)) {
-  riv_seg <- river[i, 1]
-  segment <- append(segment, riv_seg)
-  #Getting pid of river segment curtasy of Daniel's function (step 1)
-  pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
+flow_and_intake <- function(AllSegList, riv_seg, runid) {
   
-  inputs <- list(
-    varkey = 'om_model_scenario',
-    propname = paste('runid_', runid, sep = ''),
-    entity_type = 'dh_properties',
-    featureid = pid
-  )
-  prop <- getProperty(inputs, site)
-  run_pid <- as.character(prop$pid)
+  upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
+  upstream <- upstream[nrow(upstream):1,]
+  upstream <- data.frame(upstream)
+  names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
-  prop <- getProperty(inputs, site)
-  elid <- prop$propvalue
+  riv_seg <- upstream[[1,1]]
+  downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
+  names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
   
-  inputs <- list(
-    varkey = 'om_class_Constant',
-    propname = 'wd_cumulative_mgd',
-    entity_type = 'dh_properties',
-    featureid = run_pid
-  )
-  prop <- getProperty(inputs, site)
-  wd_cumulative_mgd <- prop$propvalue
-  intake <- append(intake, wd_cumulative_mgd)
-  #Finding Qout for streamflow, is this right?
-  inputs <- list(
-    varkey = 'om_class_Constant',
-    propname = 'Qout',
-    entity_type = 'dh_properties',
-    featureid = run_pid
-  )
-  prop <- getProperty(inputs, site)
-  streamflow <- prop$propvalue
-  flow <- append(flow, streamflow)
-  #Trying to get river channel info
-  inputs <- list(
-    varkey = 'om_model_scenario',
-    propname = '0. River Channel',
-    entity_type = 'dh_properties',
-    featureid = pid
-  )
-  prop <- getProperty(inputs, site)
-  riv_pid <- prop$pid
-  #Now combine the lengths to find overall distance
-  inputs <- list(
-    varkey = 'om_class_Constant',
-    propname = 'length',
-    entity_type = 'dh_properties',
-    featureid = riv_pid
-  )
-  prop <- getProperty(inputs, site)
-  len <- prop$propvalue
-  length <- append(length, len)
-  length_tot <- length_tot + len
-  #get drainage area vector and total from riv seg instead of runfile
-  inputs <- list(
-    varkey = 'om_class_Constant',
-    propname = 'drainage_area',
-    entity_type = 'dh_properties',
-    featureid = riv_pid
-  )
-  prop <- getProperty(inputs, site)
-  drainage_area <- prop$propvalue
-  area <- append(area, drainage_area)
-  area_tot <- area_tot + drainage_area
+  river <- rbind(riv_seg, downstream)
   
-  i <- i + 1
+  i <- 1
+  segment <- c()
+  area <- c()
+  intake <- c()
+  flow <- c()
+  length <-c()
+  length_tot <- 0
+  area_tot <- 0
+  
+  while (i <= nrow(river)) {
+    riv_seg <- river[i, 1]
+    segment <- append(segment, riv_seg)
+    #Getting pid of river segment courtesy of Daniel's function (step 1)
+    pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
+    
+    inputs <- list(
+      varkey = 'om_model_scenario',
+      propname = paste('runid_', runid, sep = ''),
+      entity_type = 'dh_properties',
+      featureid = pid
+    )
+    prop <- getProperty(inputs, site)
+    run_pid <- as.character(prop$pid)
+    
+    prop <- getProperty(inputs, site)
+    elid <- prop$propvalue
+    
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = 'wd_cumulative_mgd',
+      entity_type = 'dh_properties',
+      featureid = run_pid
+    )
+    prop <- getProperty(inputs, site)
+    wd_cumulative_mgd <- prop$propvalue
+    intake <- append(intake, wd_cumulative_mgd)
+    #Finding Qout for streamflow, is this right?
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = 'Qout',
+      entity_type = 'dh_properties',
+      featureid = run_pid
+    )
+    prop <- getProperty(inputs, site)
+    streamflow <- prop$propvalue
+    flow <- append(flow, streamflow)
+    #Trying to get river channel info
+    inputs <- list(
+      varkey = 'om_model_scenario',
+      propname = '0. River Channel',
+      entity_type = 'dh_properties',
+      featureid = pid
+    )
+    prop <- getProperty(inputs, site)
+    riv_pid <- prop$pid
+    #Now combine the lengths to find overall distance
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = 'length',
+      entity_type = 'dh_properties',
+      featureid = riv_pid
+    )
+    prop <- getProperty(inputs, site)
+    len <- prop$propvalue
+    length <- append(length, len)
+    length_tot <- length_tot + len
+    #get drainage area vector and total from riv seg instead of runfile
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = 'drainage_area',
+      entity_type = 'dh_properties',
+      featureid = riv_pid
+    )
+    prop <- getProperty(inputs, site)
+    drainage_area <- prop$propvalue
+    area <- append(area, drainage_area)
+    area_tot <- area_tot + drainage_area
+    
+    i <- i + 1
+  }
+  
+  j <- 0
+  while (j <= length(length)){
+    length[j] <- sum(length[1:j])
+    j <- j+1
+  }
+  
+  segment <- data.frame(segment)
+  area <- data.frame(area)
+  flow <- data.frame(flow)
+  length <- length / 5280
+  intake <- data.frame(intake) * 1.547
+  river_data <- cbind(segment, area, intake, flow, length)
+  
+  plt <- ggplot(river_data, aes(x = length, y = intake)) +
+    geom_line(aes(colour='Intake Withdrawal')) +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+    geom_line(aes(x = length, y = flow, colour='Qout/streamflow'))+
+    theme(plot.title = element_text(face = 'bold')) + 
+    labs(colour='Legend') + 
+    ggtitle(paste0('Headwater: ', upstream[[1,1]], ', Runid: ', runid, sep = ' ')) +
+    scale_x_log10() +
+    xlab('Length from headwater (mi)') +
+    scale_y_continuous(
+      name = expression('Flow (cfs)'),
+      sec.axis = sec_axis(~ ./ 1.547, name = 'Flow (mgd)'))
+  plt
+  
+  return(plt)
 }
-j <- 0
-while (j <= length(length)){
-  length[j] <- sum(length[1:j])
-  j <- j+1
-}
 
-segment <- data.frame(segment)
-area <- data.frame(area)
-intake <- data.frame(intake)
-flow <- data.frame(flow)
-river_data <- cbind(segment, area, intake, flow, length)
+dat1 <- flow_and_intake(AllSegList, riv_seg, runid1)
 
-plt <- ggplot(river_data, aes(x = length, y = intake)) +
-  geom_point(aes(colour='Intake Withdrawal mgd')) +
-  theme_bw() +geom_point(aes(x = length, y = flow,colour='Qout/streamflow?'))+
-  theme(plot.title = element_text(face = 'bold')) + 
-  labs(colour='Legend') + 
-  scale_x_log10() + scale_y_log10()
-plt
+dat2 <- flow_and_intake(AllSegList, riv_seg, runid2)
 
+flow1 <- dat1$data$flow
+flow2 <- dat2$data$flow
+intake1 <- dat1$data$intake
+intake2 <- dat2$data$intake
 
+totaldat <- as.data.frame(cbind(flow1, flow2, intake1, intake2))
 
+ggplot(totaldat, aes(x = dat1$data$length)) +
+  geom_line(aes(y = flow1), color = 'red') +
+  geom_line(aes(y = flow2), color = 'green') +
+  geom_line(aes(y = intake1), color = 'blue') +
+  geom_line(aes(y = intake2), color = 'orange') +
+  scale_x_log10()
 
 
 
