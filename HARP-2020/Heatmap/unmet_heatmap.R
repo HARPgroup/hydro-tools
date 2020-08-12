@@ -505,7 +505,7 @@ unmet_values <- function(elid,pid,runid,start_date,end_date,save_directory) {
                            midpoint = max(modat$avg_unmet)/2.1, guide = "colourbar", 
                            name= 'Average Unmet Demand [mgd]') +
       theme(panel.background = element_rect(fill = "transparent"))+
-      theme() + labs( y=NULL, x=NULL) +
+      theme() + labs(title = 'Unmet Demand Heatmap', y=NULL, x=NULL) +
       scale_x_continuous(expand=c(0,0), breaks= x_breaks, labels=x_labs, position='top') + 
       scale_y_reverse(expand=c(0,0), breaks=y_breaks, labels= y_labs) +
       theme(axis.ticks= element_blank()) +
@@ -518,7 +518,7 @@ unmet_values <- function(elid,pid,runid,start_date,end_date,save_directory) {
       geom_text(data = yeavg, size = 3.5, color='black', aes(x = month, y = year, label = avg_unmet)) +
       geom_text(data = moavg, size = 3.5, color='black', aes(x = month, y = year, label = avg_unmet))+
       scale_fill_gradient2(low = "#FFF8DC", mid = "#FFDEAD", high ="#DEB887",
-                           name= 'Average Unmet Demand [mgd]', midpoint = mean(yeavg$avg_unmet))
+                           name= 'Overall Average Unmet Demand [mgd]', midpoint = mean(yeavg$avg_unmet))
     
   }
   
@@ -539,11 +539,9 @@ vals <- unmet_values(elid,pid,runid,save_directory=save_directory)
 
 combo <- ggarrange(
   counts, vals, labels = c("",""),
-  common.legend = FALSE, legend = "bottom",title='Unmet Demand Heatmap'
+  common.legend = FALSE, legend = "right",title='Unmet Demand Heatmap'
 )
-combo <- annotate_figure(combo,
-                top = text_grob(label = "Unmet Demand Heatmap", face = "bold", size = 14)
-)
+
 combo
 fname <- paste(save_directory,paste0('fig.combo', '.png'),sep = '/')
 
