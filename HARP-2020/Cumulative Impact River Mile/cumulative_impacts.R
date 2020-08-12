@@ -123,10 +123,12 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 riv_seg <- 'PS4_5840_5240' 
 
 #'PS3_5990_6161'
+# runid <- 11
 
 runid1 <- 11
 runid2 <- 18
 
+#### function returns graphs for given runid and main stream channel including river segment
 flow_and_intake <- function(AllSegList, riv_seg, runid) {
   
   upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
@@ -234,24 +236,24 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
   intake <- data.frame(intake) * 1.547
   river_data <- cbind(segment, area, intake, flow, length)
   
-  plt <- ggplot(river_data, aes(x = length, y = intake)) +
+  print(ggplot(river_data, aes(x = area, y = intake)) +
     geom_line(aes(colour='Intake Withdrawal')) +
     theme_bw() +
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) +
-    geom_line(aes(x = length, y = flow, colour='Qout/streamflow'))+
+    geom_line(aes(x = area, y = flow, colour='Qout/streamflow'))+
     theme(plot.title = element_text(face = 'bold')) + 
     labs(colour='Legend') + 
     ggtitle(paste0('Headwater: ', upstream[[1,1]], ', Runid: ', runid, sep = ' ')) +
-    scale_x_log10() +
-    xlab('Length from headwater (mi)') +
+    xlab('Cumulative Drainage Area (sq mi)') +
     scale_y_continuous(
       name = expression('Flow (cfs)'),
       sec.axis = sec_axis(~ ./ 1.547, name = 'Flow (mgd)'))
-  plt
-  
-  return(plt)
+    )
 }
+
+
+#### Comparative Graph between runid11 and runid18
 
 dat1 <- flow_and_intake(AllSegList, riv_seg, runid1)
 
@@ -264,12 +266,17 @@ intake2 <- dat2$data$intake
 
 totaldat <- as.data.frame(cbind(flow1, flow2, intake1, intake2))
 
-ggplot(totaldat, aes(x = dat1$data$length)) +
-  geom_line(aes(y = flow1), color = 'red') +
-  geom_line(aes(y = flow2), color = 'green') +
-  geom_line(aes(y = intake1), color = 'blue') +
-  geom_line(aes(y = intake2), color = 'orange') +
-  scale_x_log10()
+ggplot(totaldat, aes(x = dat1$data$area)) +
+  geom_line(aes(x = dat1$data$area, y = flow1, colour = 'runid11 Flow')) +
+  geom_line(aes(x = dat1$data$area, y = flow2, colour = 'runid18 Flow')) +
+  geom_line(aes(x = dat1$data$area, y = intake1, colour = 'runid11 Intake Withdrawal')) +
+  geom_line(aes(x = dat1$data$area, y = intake2, colour = 'runid18 Intake Withdrawal')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparative runid11 vs runid18')) +
+  xlab('Cumulative Drainage Area (sq mi)') +
+  scale_y_continuous(
+    name = expression('Flow (cfs)'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow (mgd)'))
 
 
 
