@@ -1,5 +1,7 @@
 ## Watershed Cumulative impacts graph (river mile)
 
+## Last Updated: 8/12/2020
+
 library(ggplot2)
 
 site <- "http://deq2.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
@@ -123,12 +125,13 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 riv_seg <- 'PS4_5840_5240' 
 
 #'PS3_5990_6161'
-# runid <- 11
+#runid <- 18
 
 runid1 <- 11
 runid2 <- 18
 
 #### function returns graphs for given runid and main stream channel including river segment
+
 flow_and_intake <- function(AllSegList, riv_seg, runid) {
   
   upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
@@ -146,6 +149,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
   segment <- c()
   area <- c()
   intake <- c()
+  cintake <- c()
   flow <- c()
   length <-c()
   length_tot <- 0
@@ -171,13 +175,24 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
     
     inputs <- list(
       varkey = 'om_class_Constant',
+      propname = 'wd_mgd',
+      entity_type = 'dh_properties',
+      featureid = run_pid
+    )
+    prop <- getProperty(inputs, site)
+    wd_mgd <- prop$propvalue
+    intake <- append(intake, wd_mgd)
+    
+    inputs <- list(
+      varkey = 'om_class_Constant',
       propname = 'wd_cumulative_mgd',
       entity_type = 'dh_properties',
       featureid = run_pid
     )
     prop <- getProperty(inputs, site)
     wd_cumulative_mgd <- prop$propvalue
-    intake <- append(intake, wd_cumulative_mgd)
+    cintake <- append(cintake, wd_cumulative_mgd)
+    
     #Finding Qout for streamflow, is this right?
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -233,15 +248,23 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
   area <- data.frame(area)
   flow <- data.frame(flow)
   length <- length / 5280
-  intake <- data.frame(intake) * 1.547
-  river_data <- cbind(segment, area, intake, flow, length)
+  cintake <- data.frame(cintake * 1.547)
+  intake <- data.frame(intake * 1.547)
+  pct <- intake / flow * 100
   
-  print(ggplot(river_data, aes(x = area, y = intake)) +
+  river_data <- cbind(segment, area, cintake, flow, length, pct)
+  colnames(river_data) <- c("segment", "area", "cintake", "flow", "length", "pct")
+  
+  #### Graph of River Flow and Cumulative Intake against Cumulative Drainage Area
+  
+  print(ggplot(river_data, aes(x = area, y = cintake)) +
     geom_line(aes(colour='Intake Withdrawal')) +
+    geom_point(aes(x = area, y = cintake, colour = 'Intake Withdrawal')) +
     theme_bw() +
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) +
     geom_line(aes(x = area, y = flow, colour='Qout/streamflow'))+
+    geom_point(aes(x = area, y = flow, colour = 'Qout/streamflow')) +
     theme(plot.title = element_text(face = 'bold')) + 
     labs(colour='Legend') + 
     ggtitle(paste0('Headwater: ', upstream[[1,1]], ', Runid: ', runid, sep = ' ')) +
@@ -250,10 +273,25 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
       name = expression('Flow (cfs)'),
       sec.axis = sec_axis(~ ./ 1.547, name = 'Flow (mgd)'))
     )
+  
+  #### Graph of Intake as a percentage of Flow against Cumulative Drainage Area
+  
+  print(ggplot(river_data, aes(x = area, y = pct)) +
+    geom_line(aes(colour='Intake as a percentage of Flow')) +
+    geom_point(aes(x = area, y = pct, colour='Intake as a percentage of Flow')) +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()) +
+    theme(plot.title = element_text(face = 'bold')) + 
+    labs(colour='Legend') + 
+    ggtitle(paste0('Headwater: ', upstream[[1,1]], ', Runid: ', runid, sep = ' ')) +
+    xlab('Cumulative Drainage Area (sq mi)') +
+    ylab('Percentage (%)')
+  )
 }
 
 
-#### Comparative Graph between runid11 and runid18
+########################## Comparative Graphs between runid11 and runid18
 
 dat1 <- flow_and_intake(AllSegList, riv_seg, runid1)
 
@@ -261,16 +299,25 @@ dat2 <- flow_and_intake(AllSegList, riv_seg, runid2)
 
 flow1 <- dat1$data$flow
 flow2 <- dat2$data$flow
-intake1 <- dat1$data$intake
-intake2 <- dat2$data$intake
+cintake1 <- dat1$data$cintake
+cintake2 <- dat2$data$cintake
+pct1 <- dat1$data$pct
+pct2 <- dat2$data$pct
 
-totaldat <- as.data.frame(cbind(flow1, flow2, intake1, intake2))
+totaldat <- as.data.frame(cbind(flow1, flow2, cintake1, cintake2, pct1, pct2))
+
+
+#### Comparison Graph of Flow and Intake against Drainage Area
 
 ggplot(totaldat, aes(x = dat1$data$area)) +
   geom_line(aes(x = dat1$data$area, y = flow1, colour = 'runid11 Flow')) +
+  geom_point(aes(x = dat1$data$area, y = flow1, colour = 'runid11 Flow')) +
   geom_line(aes(x = dat1$data$area, y = flow2, colour = 'runid18 Flow')) +
-  geom_line(aes(x = dat1$data$area, y = intake1, colour = 'runid11 Intake Withdrawal')) +
-  geom_line(aes(x = dat1$data$area, y = intake2, colour = 'runid18 Intake Withdrawal')) +
+  geom_point(aes(x = dat1$data$area, y = flow2, colour = 'runid18 Flow')) +
+  geom_line(aes(x = dat1$data$area, y = cintake1, colour = 'runid11 Intake Withdrawal')) +
+  geom_point(aes(x = dat1$data$area, y = cintake1, colour = 'runid11 Intake Withdrawal')) +
+  geom_line(aes(x = dat1$data$area, y = cintake2, colour = 'runid18 Intake Withdrawal')) +
+  geom_point(aes(x = dat1$data$area, y = cintake2, colour = 'runid18 Intake Withdrawal')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparative runid11 vs runid18')) +
   xlab('Cumulative Drainage Area (sq mi)') +
@@ -278,5 +325,15 @@ ggplot(totaldat, aes(x = dat1$data$area)) +
     name = expression('Flow (cfs)'),
     sec.axis = sec_axis(~ ./ 1.547, name = 'Flow (mgd)'))
 
+#### Comparison Graph of Intake as a Percentage of Flow against Drainage Area
 
+ggplot(totaldat, aes(x = dat1$data$area)) +
+  geom_line(aes(x = dat1$data$area, y = pct1, colour = 'runid11')) +
+  geom_point(aes(x = dat1$data$area, y = pct1, colour = 'runid11')) +
+  geom_line(aes(x = dat1$data$area, y = pct2, colour = 'runid18')) +
+  geom_point(aes(x = dat1$data$area, y = pct2, colour = 'runid18')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparative runid11 vs runid18')) +
+  xlab('Cumulative Drainage Area (sq mi)') +
+  ylab('Percentage (%)')
 
