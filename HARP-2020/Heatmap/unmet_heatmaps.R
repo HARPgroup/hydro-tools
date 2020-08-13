@@ -200,7 +200,7 @@ unmet_grid <- function(elid,pid,runid,start_date,end_date,save_directory) {
 
 counts <- unmet_grid(elid,pid,runid,save_directory=save_directory)
 
-# heatmap unmet count and value option
+# heatmap unmet count and value option returns the ggplot
 unmet_grid_vals <- function(elid,pid,runid,start_date,end_date,save_directory) {
   dat <- fn_get_runfile(elid, runid, site= omsite,  cached = FALSE) # get data
   # set start and end dates based on inputs
@@ -369,17 +369,17 @@ unmet_grid_vals <- function(elid,pid,runid,start_date,end_date,save_directory) {
   
   fname <- paste(save_directory,paste0('fig.unmet_grid_vals_', '.png'),sep = '/')
   
-  ggsave(fname,plot = unmet_avg, width= 9.5, height=5.25)
+  ggsave(fname,plot = unmet_avg, width= 9.5, height=6)
   
   print('File saved to save_directory')
   
   return(unmet_avg)
 }
 
-unmet_grid_vals(elid,pid,runid,save_directory=save_directory)
+vals_count <- unmet_grid_vals(elid,pid,runid,save_directory=save_directory)
 
 
-#Second heatmap version, with unmet values instead of count
+#Second heatmap version, with unmet values instead of count, returns the ggplot
 unmet_values <- function(elid,pid,runid,start_date,end_date,save_directory) {
   dat <- fn_get_runfile(elid, runid, site= omsite,  cached = FALSE) # get data
   # set start and end dates based on inputs
@@ -489,7 +489,7 @@ unmet_values <- function(elid,pid,runid,start_date,end_date,save_directory) {
       theme(axis.ticks= element_blank()) +
       theme(plot.title = element_text(size = 12, face = "bold",  hjust = 0.5)) +
       theme(legend.title.align = 0.5) 
-
+    
     unmet_avg <- count_grid + new_scale_fill()+
       geom_tile(data = yeavg, color='black', aes(x = month, y = year, fill = avg)) +
       geom_tile(data = moavg, color='black', aes(x = month, y = year, fill = avg)) +
@@ -535,14 +535,3 @@ unmet_values <- function(elid,pid,runid,start_date,end_date,save_directory) {
 }
 
 vals <- unmet_values(elid,pid,runid,save_directory=save_directory)
-
-
-combo <- ggarrange(
-  counts, vals, labels = c("",""),
-  common.legend = FALSE, legend = "right",title='Unmet Demand Heatmap'
-)
-
-combo
-fname <- paste(save_directory,paste0('fig.combo', '.png'),sep = '/')
-
-ggsave(fname,plot = combo, width= 10, height=10)
