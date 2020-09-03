@@ -283,7 +283,7 @@ ggplot(totaldat, aes(x = area)) +
   geom_line(aes(x = area, y = flow, colour = 'runid11')) +
   geom_line(aes(x = area, y = flow2, colour = 'runid18' )) +
   labs(colour = 'Legend') +
-  ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
+  ggtitle(paste0('Comparison of Flow for Runid11 and Runid18')) +
   xlab('Cumulative Drainage Area [sq mi]') +
   scale_y_continuous(
     name = expression('Flow  [cfs/sq mi]'),
@@ -306,7 +306,20 @@ ggplot(totaldat, aes(x = area)) +
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-
+################################################################ plot metric as a percent of avg flow
+ggplot(totaldat, aes(x = area)) +
+  geom_point(aes(x = area, y = (metric/flow * 100), colour = 'runid11')) +
+  geom_point(aes(x = area, y = (metric2/flow2 * 100), colour = 'runid18' )) +
+  geom_line(aes(x = area, y = (metric/flow * 100), colour = 'runid11')) +
+  geom_line(aes(x = area, y = (metric2/flow2 * 100), colour = 'runid18' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, 'and Average Flow for Runid11 and Runid18')) +
+  xlab('Cumulative Drainage Area [sq mi]') +
+  scale_y_continuous(
+    name = expression('7Q10 as a Percentage of Avg Flow')) + 
+  theme_bw() +
+  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 ################################################################ plot metric by drainage area
 ggplot(totaldat, aes(x = area)) +
   geom_point(aes(x = area, y = metric, colour = 'runid11')) +
