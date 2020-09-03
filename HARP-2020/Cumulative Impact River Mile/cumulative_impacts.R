@@ -143,7 +143,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid) {
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
   
-  river <- rbind(riv_seg, downstream)
+  river <- rbind(as.data.frame(riv_seg), downstream)
   
   i <- 1
   segment <- c()
