@@ -3,7 +3,7 @@
 
 library(ggplot2)
 
-site <- "http://deq2.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq1.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
 basepath <- '/var/www/R';
 source(paste(basepath,'config.R',sep='/'))
 
@@ -142,7 +142,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   riv_seg <- upstream[[1,1]]
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
-  
+  riv_seg <- as.data.frame(riv_seg)
   river <- rbind(riv_seg, downstream)
   
   i <- 1
@@ -153,6 +153,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   length <-c()
   length_tot <- 0
   area_tot <- 0
+  metric <- c()
   
   while (i <= nrow(river)) {
     riv_seg <- river[i, 1]
@@ -194,8 +195,8 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
       )
     }
     prop <- getProperty(inputs, site)
-    streamflow <- prop$propvalue
-    flow <- append(flow, streamflow)
+    metric_val <- prop$propvalue
+    metric <- append(metric, metric_val)
     #Trying to get river channel info
     inputs <- list(
       varkey = 'om_model_scenario',
@@ -205,6 +206,17 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     )
     prop <- getProperty(inputs, site)
     riv_pid <- prop$pid
+    #Now get overall flow
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = 'Qout',
+      entity_type = 'dh_properties',
+      featureid = run_pid
+    )
+    prop <- getProperty(inputs, site)
+    streamflow <- prop$propvalue
+    flow <- append(flow, streamflow)
+  
     #Now combine the lengths to find overall distance
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -230,21 +242,23 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     
     i <- i + 1
   }
-  
   j <- 0
   while (j <= length(length)){
     length[j] <- sum(length[1:j])
     j <- j+1
   }
+
   #Reversing order of length only for river mile!
   length <- length[length(length):1]
   
-  segment <- data.frame(segment)
+  segment <- data.frame(river)
   area <- data.frame(area)
   flow <- data.frame(flow)
+  metric <- data.frame(metric)
   length <- length / 5280
   intake <- data.frame(intake) * 1.547
-  river_data <- cbind(segment, area, intake, flow, length)
+  river_data <- cbind(segment, area, intake, flow, length, metric)
+  
   
   return(river_data)
 }
@@ -257,12 +271,12 @@ dat1 <- flow_and_intake(AllSegList, riv_seg, runid1,flow_metric)
 dat2 <- flow_and_intake(AllSegList, riv_seg, runid2,flow_metric)
 
 flow2 <- dat2$flow
+metric2 <- dat2$metric
 intake2 <- dat2$intake
 
-totaldat <- as.data.frame(cbind(dat1, flow2,intake2))
+totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2))
 
-
-#plot
+################################################################ plot flow by drainage area
 ggplot(totaldat, aes(x = area)) +
   geom_point(aes(x = area, y = flow, colour = 'runid11')) +
   geom_point(aes(x = area, y = flow2, colour = 'runid18' )) +
@@ -277,14 +291,45 @@ ggplot(totaldat, aes(x = area)) +
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
+################################################################ plot metric by drainage area
+ggplot(totaldat, aes(x = area)) +
+  geom_point(aes(x = area, y = metric, colour = 'runid11')) +
+  geom_point(aes(x = area, y = metric2, colour = 'runid18' )) +
+  geom_line(aes(x = area, y = metric, colour = 'runid11')) +
+  geom_line(aes(x = area, y = metric2, colour = 'runid18' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
+  xlab('Cumulative Drainage Area [sq mi]') +
+  scale_y_continuous(
+    name = expression('Flow  [cfs/sq mi]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd/sq mi]')) + 
+  theme_bw() +
+  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
+
+################################################################ plot metric by drainage area
+ggplot(totaldat, aes(x = area)) +
+  geom_point(aes(x = area, y = metric, colour = 'runid11')) +
+  geom_point(aes(x = area, y = metric2, colour = 'runid18' )) +
+  geom_line(aes(x = area, y = metric, colour = 'runid11')) +
+  geom_line(aes(x = area, y = metric2, colour = 'runid18' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
+  xlab('Cumulative Drainage Area [sq mi]') +
+  scale_y_continuous(
+    name = expression('Flow  [cfs/sq mi]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd/sq mi]')) + 
+  theme_bw() +
+  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
 ######################################################################### River mile
 #ok lets try plotting with river mile now :)
 ggplot(totaldat, aes(x = totaldat$length)) +
-  geom_point(aes(x = totaldat$length, y = flow, colour = 'runid11 Flow')) +
-  geom_point(aes(x = totaldat$length, y = flow2, colour = 'runid18 Flow')) +
-  geom_line(aes(x = totaldat$length, y = flow, colour = 'runid11 Flow')) +
-  geom_line(aes(x = totaldat$length, y = flow2, colour = 'runid18 Flow')) +
+  geom_point(aes(x = totaldat$length, y = metric, colour = 'runid11 Flow')) +
+  geom_point(aes(x = totaldat$length, y = metric2, colour = 'runid18 Flow')) +
+  geom_line(aes(x = totaldat$length, y = metric, colour = 'runid11 Flow')) +
+  geom_line(aes(x = totaldat$length, y = metric2, colour = 'runid18 Flow')) +
   labs(colour = 'Legend') + scale_x_log10() +
   ggtitle(paste0('Comparison of ',flow_metric,' for Runid11 and Runid18')) +
   xlab('River mile [mi]') +
@@ -295,7 +340,12 @@ ggplot(totaldat, aes(x = totaldat$length)) +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
+###################################################################
 
+
+
+
+#Ignore this for now
 ########################################################################## Critical periods
 #above uses the overall averages, 
 #how do we go about getting these values in specific critical periods?
