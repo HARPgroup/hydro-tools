@@ -448,7 +448,7 @@ getProperty <- function(inputs, base_url, prop){
 }
 
 
-postProperty <- function(inputs,fxn_locations,base_url,prop){
+postProperty <- function(inputs,base_url,prop){
   
   #inputs <-prop_inputs
   #base_url <- site
