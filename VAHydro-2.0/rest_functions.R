@@ -1072,7 +1072,7 @@ om_get_model <- function (entity_id, entity_type = 'dh_feature') {
   
   inputs <- list(
     varkey = "om_water_model_node",
-    featureid = featureid,
+    featureid = entity_id,
     entity_type = "dh_feature",
     propcode = "vahydro-1.0"
   )
