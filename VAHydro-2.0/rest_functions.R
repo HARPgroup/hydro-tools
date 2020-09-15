@@ -1,6 +1,7 @@
 library(httr);
 library(stringr);
 library(RCurl); #required for limiting connection timeout in vahydro_fe_data_icthy()
+library(plyr); #needed for count()
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   
@@ -134,6 +135,7 @@ getTimeseries <- function(inputs, base_url, ts){
       encode = "json"
     );
     ts_cont <- content(tsrest);
+
     
     if (length(ts_cont$list) != 0) {
       
@@ -156,7 +158,14 @@ getTimeseries <- function(inputs, base_url, ts){
         )
         ts  <- rbind(ts, ts_i)
       }
-      trecs = as.integer(count(ts))
+      
+
+      trecs <- length(ts[,1])
+      #print(trecs)
+      # trecs = as.integer(count(ts))
+      # pbody$limit <- 1
+      # print(pbody$limit)
+      
       if (trecs >= pbody$limit) {
         morepages = FALSE
       } else {
@@ -165,7 +174,8 @@ getTimeseries <- function(inputs, base_url, ts){
       }
     } else {
       morepages = FALSE
-      trecs = as.integer(count(ts))
+      #trecs = as.integer(count(ts))
+      trecs <- length(ts[,1])
       if (trecs == 0) {
         print("----- This timeseries does not exist")
         ts = FALSE
