@@ -406,3 +406,38 @@ ggplot(totaldat, aes(x = mile)) +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
+################################################################### Try plotting intake and lowflow on same plot
+# runid 1
+ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = metric, colour = 'runid11 flow')) +
+  geom_line(aes(y = metric, colour = 'runid11 flow')) +
+  geom_point(aes(y = intake, colour = 'runid11 intake')) +
+  geom_line(aes(y = intake, colour = 'runid11 intake')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
+  xlab('Distance from headwater [mi]') +
+  ylab('Flow or Intake [cfs]')
+
+# runid 2
+ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = metric2, colour = 'runid18 flow' )) +
+  geom_line(aes(y = metric2, colour = 'runid18 flow' )) +
+  geom_point(aes(y = intake2, colour = 'runid18 intake' )) +
+  geom_line(aes(y = intake2, colour = 'runid18 intake' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
+  xlab('Distance from headwater [mi]') +
+  ylab('Flow or Intake [cfs]')
+
+################################################################### Try plotting intake as % of lowflow
+ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = (intake/metric)*100, colour = 'runid11' )) +
+  geom_line(aes(y = (intake/metric)*100, colour = 'runid11' )) +
+  geom_point(aes(y = (intake2/metric2)*100, colour = 'runid18' )) +
+  geom_line(aes(y = (intake2/metric2)*100, colour = 'runid18' )) +
+  geom_line(aes(y = 100, colour = '100 %')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
+  xlab('Distance from headwater [mi]') +
+  ylab(paste0('Intake as percentage of ', flow_metric))
+
