@@ -293,16 +293,22 @@ dat2 <- flow_and_intake(AllSegList, riv_seg, runid2,flow_metric)
 flow2 <- dat2$flow
 metric2 <- dat2$metric
 intake2 <- dat2$intake
+pct <- (dat1$intake/dat1$flow)*100
+pct2 <- (dat2$intake/dat2$flow)*100
 
-totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2))
+totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2, pct, pct2))
 
 ################################################################ plot flow by river mile
-################################################################ plot flow 
+################################################################ Runid11 vs Runid18 Flow & Intake Comparison
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = flow, colour = 'runid11')) +
   geom_point(aes(x = mile, y = flow2, colour = 'runid18' )) +
   geom_line(aes(x = mile, y = flow, colour = 'runid11')) +
   geom_line(aes(x = mile, y = flow2, colour = 'runid18' )) +
+  geom_line(aes(x = mile, y = intake, colour = 'runid11 Intake Withdrawal')) +
+  geom_point(aes(x = mile, y = intake, colour = 'runid11 Intake Withdrawal')) +
+  geom_line(aes(x = mile, y = intake2, colour = 'runid18 Intake Withdrawal')) +
+  geom_point(aes(x = mile, y = intake2, colour = 'runid18 Intake Withdrawal')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of Flow for Runid11 and Runid18')) +
   xlab('Miles from Headwater [mi]') +
@@ -312,7 +318,46 @@ ggplot(totaldat, aes(x = mile)) +
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-################################################################ plot metric 
+
+################################################################ Intake as a Percentage of Flow (line graph, bar graph)
+
+ggplot(totaldat, aes(x = mile)) +
+  geom_line(aes(x = mile, y = pct, colour = 'runid11')) +
+  geom_point(aes(x = mile, y = pct, colour = 'runid11')) +
+  geom_line(aes(x = mile, y = pct2, colour = 'runid18')) +
+  geom_point(aes(x = mile, y = pct2, colour = 'runid18')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Intake as a Percentage of Flow (Runid 11 vs Runid18)')) +
+  xlab('Miles from Headwater [mi]') +
+  ylab('Percentage (%)')
+
+df11 <- data.frame(
+  pcttype = rep(c('pct1'), each = 17),
+  xaxis <- c(1:17),
+  vals <- c(pct)
+)
+colnames(df11) <- c('pcttype', 'xaxis', 'vals')
+
+df18 <- data.frame(
+  pcttype = rep(c('pct2'), each = 17),
+  xaxis <- c(1:17),
+  vals <- c(pct2)
+)
+colnames(df18) <- c('pcttype', 'xaxis', 'vals')
+
+ggplot(df11, aes(x = xaxis, y = vals)) +
+  geom_bar(stat = 'identity', fill = 'blue') +
+  xlab('Segment number in list, starting at headwater') +
+  ylab('Percentage (%)') +
+  ggtitle('Intake as a Percentage of Flow: Runid11')
+
+ggplot(df18, aes(x = xaxis, y = vals)) +
+  geom_bar(stat = 'identity', fill = 'blue') +
+  xlab('Segment number in list, starting at headwater') +
+  ylab('Percentage (%)') +
+  ggtitle('Intake as a Percentage of Flow: Runid18')
+
+################################################################ Runid11 vs Runid18 Metric Comparison
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = metric, colour = 'runid11')) +
   geom_point(aes(x = mile, y = metric2, colour = 'runid18' )) +
@@ -327,7 +372,8 @@ ggplot(totaldat, aes(x = mile)) +
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-################################################################ plot metric as a percent of avg flow
+
+################################################################ Metric as a percentage of average flow
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = (metric/flow * 100), colour = 'runid11')) +
   geom_point(aes(x = mile, y = (metric2/flow2 * 100), colour = 'runid18' )) +
@@ -341,23 +387,8 @@ ggplot(totaldat, aes(x = mile)) +
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-################################################################ plot metric 
-ggplot(totaldat, aes(x = mile)) +
-  geom_point(aes(x = mile, y = metric, colour = 'runid11')) +
-  geom_point(aes(x = mile, y = metric2, colour = 'runid18' )) +
-  geom_line(aes(x = mile, y = metric, colour = 'runid11')) +
-  geom_line(aes(x = mile, y = metric2, colour = 'runid18' )) +
-  labs(colour = 'Legend') +
-  ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
-  xlab('Miles from Headwater [mi]') +
-  scale_y_continuous(
-    name = expression('Flow  [cfs]'),
-    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
-  theme_bw() +
-  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
-################################################################### Try plotting flow and metric on same plot
+################################################################### Metric and Flow on the same plot
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = (metric), colour = 'runid11')) +
   geom_point(aes(x = mile, y = (metric2), colour = 'runid18' )) +
@@ -374,30 +405,4 @@ ggplot(totaldat, aes(x = mile)) +
   theme_bw() + scale_y_log10()+
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-
-
-#very specific graph delete if not chosen
-##################################################################### River mile just for flow for 11
-ggplot(totaldat, aes(x = mile)) +
-  geom_point(aes(x = mile, y = intake, colour = 'Intake' )) +
-  geom_line(aes(x = mile, y = intake, colour = 'Intake')) +
-  geom_point(aes(x = mile, y = flow, colour = 'Qout/Flow')) +
-  geom_line(aes(x = mile, y = flow, colour = 'Qout/Flow')) +
-  labs(colour = 'Legend') + scale_x_log10() +
-  ggtitle(paste0('Headwater: PS3_5990_6161, Runid: 11')) +
-  xlab('River mile [mi]') +
-  scale_y_continuous(
-    name = expression('Flow [cfs]'),
-    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow [mgd]')) +
-  theme_bw() + 
-  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
-
-
-
-
-
-
-
-
 
