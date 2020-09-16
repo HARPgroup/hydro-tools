@@ -3,7 +3,7 @@
 
 library(ggplot2)
 
-site <- "http://deq1.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq2.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
 basepath <- '/var/www/R';
 source(paste(basepath,'config.R',sep='/'))
 
@@ -239,6 +239,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     drainage_area <- prop$propvalue
     area <- append(area, drainage_area)
     area_tot <- area_tot + drainage_area
+  
     
     i <- i + 1
   }
@@ -276,6 +277,7 @@ intake2 <- dat2$intake
 
 totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2))
 
+################################################################ plot flow by river mile
 ################################################################ plot flow by drainage area
 ggplot(totaldat, aes(x = area)) +
   geom_point(aes(x = area, y = flow, colour = 'runid11')) +
@@ -286,8 +288,8 @@ ggplot(totaldat, aes(x = area)) +
   ggtitle(paste0('Comparison of Flow for Runid11 and Runid18')) +
   xlab('Cumulative Drainage Area [sq mi]') +
   scale_y_continuous(
-    name = expression('Flow  [cfs/sq mi]'),
-    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd/sq mi]')) + 
+    name = expression('Flow  [cfs]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
@@ -301,8 +303,8 @@ ggplot(totaldat, aes(x = area)) +
   ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
   xlab('Cumulative Drainage Area [sq mi]') +
   scale_y_continuous(
-    name = expression('Flow  [cfs/sq mi]'),
-    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd/sq mi]')) + 
+    name = expression('Flow  [cfs]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
@@ -313,10 +315,10 @@ ggplot(totaldat, aes(x = area)) +
   geom_line(aes(x = area, y = (metric/flow * 100), colour = 'runid11')) +
   geom_line(aes(x = area, y = (metric2/flow2 * 100), colour = 'runid18' )) +
   labs(colour = 'Legend') +
-  ggtitle(paste0('Comparison of ', flow_metric, 'and Average Flow for Runid11 and Runid18')) +
+  ggtitle(paste0('Comparison of ', flow_metric, ' as a Percentage of Average Flow')) +
   xlab('Cumulative Drainage Area [sq mi]') +
   scale_y_continuous(
-    name = expression('7Q10 as a Percentage of Avg Flow')) + 
+    name = expression('Percentage')) + 
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
@@ -330,8 +332,8 @@ ggplot(totaldat, aes(x = area)) +
   ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
   xlab('Cumulative Drainage Area [sq mi]') +
   scale_y_continuous(
-    name = expression('Flow  [cfs/sq mi]'),
-    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd/sq mi]')) + 
+    name = expression('Flow  [cfs]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
   theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
@@ -353,48 +355,47 @@ ggplot(totaldat, aes(x = totaldat$length)) +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
-###################################################################
+################################################################### Try plotting flow and metric on same plot
+ggplot(totaldat, aes(x = area)) +
+  geom_point(aes(x = area, y = (metric), colour = 'runid11')) +
+  geom_point(aes(x = area, y = (metric2), colour = 'runid18' )) +
+  geom_line(aes(x = area, y = (metric), colour = 'runid11')) +
+  geom_line(aes(x = area, y = (metric2), colour = 'runid18' )) +
+  geom_point(aes(x = area, y = (flow), colour = 'runid11 flow')) +
+  geom_point(aes(x = area, y = (flow2), colour = 'runid18 flow' )) +
+  geom_line(aes(x = area, y = (flow), colour = 'runid11 flow')) +
+  geom_line(aes(x = area, y = (flow2), colour = 'runid18 flow' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of ', flow_metric, ' and Flow')) +
+  xlab('Cumulative Drainage Area [sq mi]') +
+  ylab('Flow in cfs') +
+  theme_bw() + scale_y_log10()+
+  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
+
+
+#very specific graph delete if not chosen
+##################################################################### River mile just for flow for 11
+ggplot(totaldat, aes(x = totaldat$length)) +
+  geom_point(aes(x = totaldat$length, y = intake, colour = 'Intake' )) +
+  geom_line(aes(x = totaldat$length, y = intake, colour = 'Intake')) +
+  geom_point(aes(x = totaldat$length, y = flow, colour = 'Qout/Flow')) +
+  geom_line(aes(x = totaldat$length, y = flow, colour = 'Qout/Flow')) +
+  labs(colour = 'Legend') + scale_x_log10() +
+  ggtitle(paste0('Headwater: PS3_5990_6161, Runid: 11')) +
+  xlab('River mile [mi]') +
+  scale_y_continuous(
+    name = expression('Flow [cfs]'),
+    sec.axis = sec_axis(~ ./ 1.547, name = 'Flow [mgd]')) +
+  theme_bw() + 
+  theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
 
 
 
-#Ignore this for now
-########################################################################## Critical periods
-#above uses the overall averages, 
-#how do we go about getting these values in specific critical periods?
-source(paste(basepath,'config.R',sep='/'))
-#step 1 determine time of critical period
-# do this by using run file?
-#Starting from scratch
-runid <- 18
-riv_seg <- 'PS4_5840_5240' 
-
-upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
-upstream <- upstream[nrow(upstream):1,]
-upstream <- data.frame(upstream)
-names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
 
 
-riv_seg <- upstream[[1,1]]
-downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
-names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
-
-river <- rbind(riv_seg, downstream)
-
-#now find elid for segment furthest upstream
-#first we get pid
-pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
-#Getting elid 
-inputs <- list(
-  varkey = 'om_element_link',
-  propname = 'om_element_connection',
-  entity_type = 'dh_properties',
-  featureid = pid
-)
-prop <- getProperty(inputs, site)
-elid <- prop$propvalue
 
 
-dat <- as.data.frame(fn_get_runfile(elid,runid,site = omsite,cached = FALSE))
-flow1<-as.data.frame(datdf1$Qintake + (datdf1$discharge_mgd - datdf1$wd_mgd))
 
