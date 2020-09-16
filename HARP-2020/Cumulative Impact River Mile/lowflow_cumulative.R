@@ -151,7 +151,6 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   intake <- c()
   flow <- c()
   length <-c()
-  length_tot <- 0
   area_tot <- 0
   metric <- c()
   
@@ -227,7 +226,6 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     prop <- getProperty(inputs, site)
     len <- prop$propvalue
     length <- append(length, len)
-    length_tot <- length_tot + len
     #get drainage area vector and total from riv seg instead of runfile
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -243,14 +241,14 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     
     i <- i + 1
   }
-  j <- 0
-  while (j <= length(length)){
-    length[j] <- sum(length[1:j])
-    j <- j+1
-  }
+  # j <- 0
+  # while (j <= length(length)){
+  #   length[j] <- sum(length[1:j])
+  #   j <- j+1
+  # }
 
   #Reversing order of length only for river mile!
-  length <- length[length(length):1]
+  #length <- length[length(length):1]
   
   segment <- data.frame(river)
   area <- data.frame(area)
@@ -260,6 +258,21 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   intake <- data.frame(intake) * 1.547
   river_data <- cbind(segment, area, intake, flow, length, metric)
   
+  i <- 1
+  while (i <= nrow(river_data)) {
+    
+    river_length <- c()
+    
+    # Loop creates vector of current segment and upstream segment lengths
+    for (n in 1:i) {
+      n_length <- as.numeric(river_data$length[n])
+      river_length <- c(river_length, n_length)
+    }
+    # Makes length column to total length to segment from start of river
+    river_data$mile[i] <- sum(river_length)
+    
+    i <- i + 1
+  }
   
   return(river_data)
 }
@@ -280,13 +293,13 @@ totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2))
 ################################################################ plot flow by river mile
 ################################################################ plot flow by drainage area
 ggplot(totaldat, aes(x = area)) +
-  geom_point(aes(x = area, y = flow, colour = 'runid11')) +
-  geom_point(aes(x = area, y = flow2, colour = 'runid18' )) +
-  geom_line(aes(x = area, y = flow, colour = 'runid11')) +
-  geom_line(aes(x = area, y = flow2, colour = 'runid18' )) +
+  geom_point(aes(x = mile, y = flow, colour = 'runid11')) +
+  geom_point(aes(x = mile, y = flow2, colour = 'runid18' )) +
+  geom_line(aes(x = mile, y = flow, colour = 'runid11')) +
+  geom_line(aes(x = mile, y = flow2, colour = 'runid18' )) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of Flow for Runid11 and Runid18')) +
-  xlab('Cumulative Drainage Area [sq mi]') +
+  xlab('Miles from Headwater [mi]') +
   scale_y_continuous(
     name = expression('Flow  [cfs]'),
     sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
