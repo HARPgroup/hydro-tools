@@ -2,6 +2,7 @@
 # low flow metrics/ critical periods version
 
 library(ggplot2)
+library(stringr)
 
 site <- "http://deq2.bse.vt.edu/d.dh"  #Specify the site of interest, either d.bet OR d.dh
 basepath <- '/var/www/R';
@@ -143,7 +144,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   if(upstream == 'NA'){
     riv_seg <- riv_seg
   }
-  else{
+  else {
     riv_seg <- upstream
   }
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
@@ -159,6 +160,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   length <-c()
   area_tot <- 0
   metric <- c()
+  name <- c()
   
   while (i <= nrow(river)) {
     riv_seg <- river[i, 1]
@@ -166,6 +168,14 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     #Getting pid of river segment courtesy of Daniel's function (step 1)
     pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
     
+    #Getting names for each riv seg
+    inputs <- list(
+      hydrocode = paste0('vahydrosw_wshed_', riv_seg))
+    feature <- getFeature(inputs, token, site)
+    riv_seg_name <- feature$name
+    name <- append(name, riv_seg_name)
+    
+    #getting runid info
     inputs <- list(
       varkey = 'om_model_scenario',
       propname = paste('runid_', runid, sep = ''),
@@ -261,8 +271,9 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   flow <- data.frame(flow)
   metric <- data.frame(metric)
   length <- length / 5280
+  name <- data.frame(name)
   intake <- data.frame(intake) * 1.547
-  river_data <- cbind(segment, area, intake, flow, length, metric)
+  river_data <- cbind(segment, name, area, intake, flow, length, metric)
   
   i <- 1
   while (i <= nrow(river_data)) {
@@ -279,6 +290,8 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     
     i <- i + 1
   }
+  #Trying to reverse mile info for river mile
+  river_data$mile <- rev(river_data$mile)
   
   return(river_data)
 }
@@ -298,7 +311,22 @@ pct2 <- (dat2$intake/dat2$flow)*100
 
 totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2, pct, pct2))
 
-################################################################ plot flow by river mile
+################################################################ For graphing pulling different segment chnages
+#try separating by when first word changes
+river_name <- word(totaldat$name, 1)
+i <- 1
+riv_changes <- c()
+while (i<=(length(river_name)-1)){
+  if (river_name[i]==river_name[i+1]) {
+  } else {
+    riv_changes <- append(riv_changes,i+1)
+  }
+  i <-i+1
+}
+#then pull full name/info, by pulling row for each value in df
+# add for loop to iterate through each value of 
+changes_df <- totaldat[1,]
+
 ################################################################ Runid11 vs Runid18 Flow & Intake Comparison
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = flow, colour = 'runid11')) +
@@ -311,7 +339,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = intake2, colour = 'runid18 Intake Withdrawal')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of Flow for Runid11 and Runid18')) +
-  xlab('Miles from Headwater [mi]') +
+  xlab('River Mile [mi]') +
   scale_y_continuous(
     name = expression('Flow  [cfs]'),
     sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
@@ -328,7 +356,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = pct2, colour = 'runid18')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Intake as a Percentage of Flow (Runid 11 vs Runid18)')) +
-  xlab('Miles from Headwater [mi]') +
+  xlab('River Mile [mi]') +
   ylab('Percentage (%)')
 
 df11 <- data.frame(
@@ -365,7 +393,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(x = mile, y = metric2, colour = 'runid18' )) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' for Runid11 and Runid18')) +
-  xlab('Miles from Headwater [mi]') +
+  xlab('River Mile [mi]') +
   scale_y_continuous(
     name = expression('Flow  [cfs]'),
     sec.axis = sec_axis(~ ./ 1.547, name = 'Flow  [mgd]')) + 
@@ -381,7 +409,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(x = mile, y = (metric2/flow2 * 100), colour = 'runid18' )) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' as a Percentage of Average Flow')) +
-  xlab('Miles from Headwater [mi]') +
+  xlab('River Mile [mi]') +
   scale_y_continuous(
     name = expression('Percentage')) + 
   theme_bw() +
@@ -400,9 +428,9 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(x = mile, y = (flow2), colour = 'runid18 flow' )) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' and Flow')) +
-  xlab('Miles from Headwater [mi]') +
+  xlab('River Mile [mi]') +
   ylab('Flow in cfs') +
-  theme_bw() + scale_y_log10()+
+  theme_bw() +
   theme(axis.title.y.right = element_text(margin = margin(t = 0, r = 0, b = 0, l = 10))) +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)))
 
@@ -415,7 +443,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(y = intake, colour = 'runid11 intake')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
-  xlab('Distance from headwater [mi]') +
+  xlab('River Mile [mi]') +
   ylab('Flow or Intake [cfs]')
 
 # runid 2
@@ -426,7 +454,7 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(y = intake2, colour = 'runid18 intake' )) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
-  xlab('Distance from headwater [mi]') +
+  xlab('River Mile [mi]') +
   ylab('Flow or Intake [cfs]')
 
 ################################################################### Try plotting intake as % of lowflow
@@ -438,6 +466,17 @@ ggplot(totaldat, aes(x = mile)) +
   geom_line(aes(y = 100, colour = '100 %')) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of ', flow_metric, ' and Intake')) +
-  xlab('Distance from headwater [mi]') +
+  xlab('River Mile [mi]') +
   ylab(paste0('Intake as percentage of ', flow_metric))
+
+################################################################### Intake as a percentage of just flow :)
+ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = (intake/flow)*100, colour = 'runid11' )) +
+  geom_line(aes(y = (intake/flow)*100, colour = 'runid11' )) +
+  geom_point(aes(y = (intake2/flow2)*100, colour = 'runid18' )) +
+  geom_line(aes(y = (intake2/flow2)*100, colour = 'runid18' )) +
+  labs(colour = 'Legend') +
+  ggtitle('Segement Intake as a Percentage of Flow') +
+  xlab('River Mile [mi]') +
+  ylab('Percentage [%]') + theme_bw()
 
