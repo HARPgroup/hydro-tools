@@ -493,7 +493,12 @@ ggplot(totaldat, aes(x = mile)) +
   labs(colour = 'Legend') +
   ggtitle(paste0('Comparison of Flow')) +
   xlab('River Mile [mi]') +
-  ylab(paste0('Flow [cfs]')) + geom_point(data=changes_df, aes(x=mile, y=flow, colour = changes_df$name)) + 
-  geom_vline(data=changes_df,(aes(xintercept = changes_df$mile, name = changes_df$name)), line='dashed')
+  ylab(paste0('Flow [cfs]')) + 
+  geom_vline(data=changes_df,(aes(xintercept = changes_df$mile)),linetype=8) +
+  geom_text(data= changes_df, aes(x=changes_df$mile, label=paste(changes_df$name), y=max(flow)/2), colour="blue", angle=90, vjust=-1, text=element_text(size=3)) 
   
+
+  
+             
+             
              
