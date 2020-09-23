@@ -140,11 +140,10 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   upstream <- data.frame(upstream)
   names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
-  upstream <- upstream[[1,1]]
+  upstream <- as.character(upstream[[1,1]])
   if(upstream == 'NA'){
     riv_seg <- riv_seg
-  }
-  else {
+  } else {
     riv_seg <- upstream
   }
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
@@ -324,8 +323,13 @@ while (i<=(length(river_name)-1)){
   i <-i+1
 }
 #then pull full name/info, by pulling row for each value in df
-# add for loop to iterate through each value of 
-changes_df <- totaldat[1,]
+# add for loop to iterate through each value of
+changes_df <- data.frame()
+for (val in riv_changes) {
+  change <- totaldat[val,]
+  changes_df <- rbind(changes_df,change)
+}
+
 
 ################################################################ Runid11 vs Runid18 Flow & Intake Comparison
 ggplot(totaldat, aes(x = mile)) +
@@ -480,3 +484,16 @@ ggplot(totaldat, aes(x = mile)) +
   xlab('River Mile [mi]') +
   ylab('Percentage [%]') + theme_bw()
 
+###################################################################### Try to add map markers to plot of flow
+ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = flow, colour = 'runid11' )) +
+  geom_line(aes(y = flow, colour = 'runid11' )) +
+  geom_point(aes(y = flow2, colour = 'runid18' )) +
+  geom_line(aes(y = flow2, colour = 'runid18' )) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of Flow')) +
+  xlab('River Mile [mi]') +
+  ylab(paste0('Flow [cfs]')) + geom_point(data=changes_df, aes(x=mile, y=flow, colour = changes_df$name)) + 
+  geom_vline(data=changes_df,(aes(xintercept = changes_df$mile, name = changes_df$name)), line='dashed')
+  
+             
