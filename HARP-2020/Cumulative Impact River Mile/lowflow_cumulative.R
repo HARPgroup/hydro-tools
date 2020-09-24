@@ -129,7 +129,7 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 flow_metric <-'7q10' # input flow metric vahydro name as a string
 runid1 <- 11 # inputs for the two runids to compare
 runid2 <- 18
-riv_seg <- 'PS3_5990_6161' 
+riv_seg <- 'PM7_4820_0001' 
 
 #### function returns graphs for given runid and main stream channel including river segment
 # returns df of riversegments and their associated info
@@ -296,7 +296,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
 }
 
 
-#### Comparative Graph between runid11 and runid18
+#### Comparative Graph between runids
 
 dat1 <- flow_and_intake(AllSegList, riv_seg, runid1,flow_metric)
 
@@ -311,16 +311,26 @@ pct2 <- (dat2$intake/dat2$flow)*100
 totaldat <- as.data.frame(cbind(dat1, flow2,intake2,metric2, pct, pct2))
 
 ################################################################ For graphing pulling different segment chnages
-#try separating by when first word changes
-river_name <- word(totaldat$name, 1)
-i <- 1
+#try separating by when first word changes #this was not the ideal move
+# river_name <- word(totaldat$name, 1)
+# i <- 1
+# riv_changes <- c()
+# while (i<=(length(river_name)-1)){
+#   if (river_name[i]==river_name[i+1]) {
+#   } else {
+#     riv_changes <- append(riv_changes,i+1)
+#   }
+#   i <-i+1
+# }
+########So now try seperating by percent flow change
 riv_changes <- c()
-while (i<=(length(river_name)-1)){
-  if (river_name[i]==river_name[i+1]) {
-  } else {
+for (i in 1:(length(totaldat$flow)-1)){
+  val1 <- totaldat$flow[i]
+  val2 <- totaldat$flow[i+1]
+  pct_change <- val2/val1 *100
+  if (pct_change >= 140 | pct_change <= 60) {
     riv_changes <- append(riv_changes,i+1)
   }
-  i <-i+1
 }
 #then pull full name/info, by pulling row for each value in df
 # add for loop to iterate through each value of
@@ -495,7 +505,7 @@ ggplot(totaldat, aes(x = mile)) +
   xlab('River Mile [mi]') +
   ylab(paste0('Flow [cfs]')) + 
   geom_vline(data=changes_df,(aes(xintercept = changes_df$mile)),linetype=8) + theme_bw() +
-  geom_text(data= changes_df, aes(x=changes_df$mile, label=paste(changes_df$name), y=max(flow)/2), colour="blue", angle=90, vjust=-1, text=element_text(size=3)) 
+  geom_text(data= changes_df, aes(x=changes_df$mile, label=paste(changes_df$name), y=(max(totaldat$flow)/2)), colour="blue", angle=90, vjust=-1, text=element_text(size=3)) 
   
 
   
