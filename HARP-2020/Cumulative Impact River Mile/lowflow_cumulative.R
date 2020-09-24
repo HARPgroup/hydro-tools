@@ -129,7 +129,7 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 flow_metric <-'7q10' # input flow metric vahydro name as a string
 runid1 <- 11 # inputs for the two runids to compare
 runid2 <- 18
-riv_seg <- 'PM7_4820_0001' 
+riv_seg <- 'PS3_5990_6161' 
 
 #### function returns graphs for given runid and main stream channel including river segment
 # returns df of riversegments and their associated info
