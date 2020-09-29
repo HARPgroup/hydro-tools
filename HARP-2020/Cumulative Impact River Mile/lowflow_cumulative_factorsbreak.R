@@ -129,7 +129,7 @@ AllSegList <- c('OR5_7980_8200', 'OR2_8020_8130', 'OR2_8070_8120', 'OR4_8120_789
 flow_metric <-'7q10' # input flow metric vahydro name as a string
 runid1 <- 11 # inputs for the two runids to compare
 runid2 <- 18
-riv_seg <- 'PS3_5990_6161' 
+riv_seg <- 'PS4_6360_5840' 
 
 #### function returns graphs for given runid and main stream channel including river segment
 # returns df of riversegments and their associated info
@@ -140,16 +140,17 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   upstream <- data.frame(upstream)
   names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
-  upstream <- upstream[[1,1]]
-  if(upstream == 'NA'){
+  upstream <- (upstream[[1,1]])
+  upstream <- as.character(upstream)
+  
+    if(upstream == 'NA'){
     riv_seg <- riv_seg
-  }
-  else {
+  }else {
     riv_seg <- upstream
   }
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
-  riv_seg <- as.data.frame(riv_seg)
+  riv_seg <- data.frame(riv_seg)
   river <- rbind(riv_seg, downstream)
   
   i <- 1
@@ -163,7 +164,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   name <- c()
   
   while (i <= nrow(river)) {
-    riv_seg <- river[i, 1]
+    riv_seg <- as.character(river[i, 1])
     segment <- append(segment, riv_seg)
     #Getting pid of river segment courtesy of Daniel's function (step 1)
     pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
@@ -172,7 +173,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     inputs <- list(
       hydrocode = paste0('vahydrosw_wshed_', riv_seg))
     feature <- getFeature(inputs, token, site)
-    riv_seg_name <- feature$name
+    riv_seg_name <- as.character(feature$name)
     name <- append(name, riv_seg_name)
     
     #getting runid info
@@ -231,7 +232,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     prop <- getProperty(inputs, site)
     streamflow <- prop$propvalue
     flow <- append(flow, streamflow)
-  
+    
     #Now combine the lengths to find overall distance
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -253,7 +254,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
     drainage_area <- prop$propvalue
     area <- append(area, drainage_area)
     area_tot <- area_tot + drainage_area
-  
+    
     
     i <- i + 1
   }
@@ -262,7 +263,7 @@ flow_and_intake <- function(AllSegList, riv_seg, runid, flow_metric) {
   #   length[j] <- sum(length[1:j])
   #   j <- j+1
   # }
-
+  
   #Reversing order of length only for river mile!
   #length <- length[length(length):1]
   
@@ -325,7 +326,11 @@ while (i<=(length(river_name)-1)){
 }
 #then pull full name/info, by pulling row for each value in df
 # add for loop to iterate through each value of 
-changes_df <- totaldat[1,]
+changes_df <- data.frame()
+for (val in riv_changes) {
+  change <- totaldat[val,]
+  changes_df <- rbind(changes_df,change)
+}
 
 ################################################################ Runid11 vs Runid18 Flow & Intake Comparison
 ggplot(totaldat, aes(x = mile)) +
