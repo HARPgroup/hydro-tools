@@ -1054,7 +1054,7 @@ vahydro_prop_matrix <- function (featureid, entity_type='dh_feature',varkey, dat
   matrix_dataframe <- matrix_dataframe #return dataframe object
 }
 
-om_get_feature <- function (hydrocode = FALSE, bundle = 'watershed', ftype = 'vahydro') {
+om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', ftype = 'vahydro') {
   inputs <- list (
     hydrocode = hydrocode,
     bundle = bundle,
@@ -1063,30 +1063,30 @@ om_get_feature <- function (hydrocode = FALSE, bundle = 'watershed', ftype = 'va
   
   #property dataframe returned
   feature = FALSE;
-  feature <- getFeature(inputs, token, site, feature)
+  feature <- getFeature(inputs, token, base_url, feature)
   
   return(feature)
 }
 
-om_get_model <- function (entity_id, entity_type = 'dh_feature') {
+om_get_model <- function (base_url, entity_id, entity_type = 'dh_feature', model_version = 'vahydro-1.0') {
   
   inputs <- list(
     varkey = "om_water_model_node",
     featureid = entity_id,
-    entity_type = "dh_feature",
-    propcode = "vahydro-1.0"
+    entity_type = entity_type,
+    propcode = model_version
   )
-  model <- getProperty(inputs, site, model)
+  model <- getProperty(inputs, base_url, model)
   return(model)
 }
 
-om_get_model_elementid <- function(mid) {
+om_get_model_elementid <- function(base_url, mid) {
   
   inputs <- list(
     varkey = "om_element_connection",
     featureid = mid,
     entity_type = "dh_properties"
   )
-  prop <- getProperty(inputs, site, prop)
+  prop <- getProperty(inputs, base_url, prop)
   return(prop$propvalue)
 }
