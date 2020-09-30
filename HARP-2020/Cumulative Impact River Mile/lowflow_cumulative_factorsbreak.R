@@ -332,6 +332,68 @@ for (val in riv_changes) {
   changes_df <- rbind(changes_df,change)
 }
 
+
+
+######################################################################
+#Runid11 vs. Runid18
+
+p<-ggplot(totaldat, aes(x = mile)) +
+  geom_point(aes(y = flow, colour = 'runid11', text= name )) +
+  geom_line(aes(y = flow, colour = 'runid11')) +
+  geom_point(aes(y = flow2, colour = 'runid18',text= name)) +
+  geom_line(aes(y = flow2, colour = 'runid18')) +
+  labs(colour = 'Legend') +
+  ggtitle(paste0('Comparison of Flow')) +
+  xlab('River Mile [mi]') +
+  ylab(paste0('Flow [cfs]')) 
+  # geom_vline(data=changes_df,(aes(xintercept = changes_df$mile)),linetype=8) + theme_bw() +
+  # geom_text(data= changes_df, aes(x=changes_df$mile, label=paste(changes_df$name), 
+                                  # y=max(flow)/2), colour="blue", angle=90, vjust=-1, 
+                                  # text=element_text(size=3))
+library(plotly)
+ggplotly(p, tooltip = c("text"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ################################################################ Runid11 vs Runid18 Flow & Intake Comparison
 ggplot(totaldat, aes(x = mile)) +
   geom_point(aes(x = mile, y = flow, colour = 'runid11')) +
