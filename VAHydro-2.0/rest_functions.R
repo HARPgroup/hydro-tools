@@ -1104,6 +1104,7 @@ om_get_model <- function (
       return(model)
     }
   }
+  return(FALSE)
 }
 
 om_get_model_elementid <- function(base_url, mid) {
