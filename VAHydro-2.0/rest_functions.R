@@ -1078,16 +1078,32 @@ om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', f
   return(feature)
 }
 
-om_get_model <- function (base_url, entity_id, entity_type = 'dh_feature', model_version = 'vahydro-1.0') {
+om_get_model <- function (
+  base_url, entity_id, entity_type = 'dh_feature', 
+  model_version = 'vahydro-1.0', model_varkey = "om_water_model_node", addnew = TRUE
+  ) {
   
-  inputs <- list(
-    varkey = "om_water_model_node",
-    featureid = entity_id,
-    entity_type = entity_type,
-    propcode = model_version
-  )
-  model <- getProperty(inputs, base_url, model)
-  return(model)
+  if (model_varkey == 'any') {
+    # try all known model element varkey types, return first one
+    # @todo: add other valid model varkeys here 
+    model_varkeys <- c('om_water_model_node', 'om_model_element')
+  } else {
+    model_varkeys <- c(model_varkey)
+  }
+  
+  for (i in index(model_varkeys)) {
+    model_varkey <- model_varkeys[i]
+    inputs <- list(
+      varkey = model_varkey,
+      featureid = entity_id,
+      entity_type = entity_type,
+      propcode = model_version
+    )
+    model <- getProperty(inputs, base_url, model)
+    if (!is.logical(model)) {
+      return(model)
+    }
+  }
 }
 
 om_get_model_elementid <- function(base_url, mid) {
@@ -1099,4 +1115,87 @@ om_get_model_elementid <- function(base_url, mid) {
   )
   prop <- getProperty(inputs, base_url, prop)
   return(prop$propvalue)
+}
+
+
+om_get_set_model_run <- function(mid, runid, site, token) {
+  # GETTING SCENARIO PROPERTY FROM VA HYDRO
+  # or create one if it does nto exist
+  sceninfo <- list(
+    varkey = 'om_scenario',
+    propname = runid,
+    featureid = as.integer(mid),
+    entity_type = "dh_properties",
+    startdate = NULL,
+    enddate = NULL
+    # for some reason we do not use the start an end?  Date format trouble?
+  )
+  scenprop <- getProperty(sceninfo, site, scenprop)
+  
+  # POST PROPERTY IF IT IS NOT YET CREATED
+  if (identical(scenprop, FALSE)) {
+    # create
+    message("Creating scenario property")
+    inputs$pid = NULL
+    postProperty(sceninfo, site, scenprop) 
+  } else {
+    sceninfo$pid = scenprop$pid
+  }
+  
+  # RETRIEVING PROPERTY ONE LAST TIME TO RETURN HYDROID OF PROP
+  scenprop <- getProperty(sceninfo, site, scenprop)
+  
+  if (scenprop == FALSE) {
+    return(FALSE)
+  }
+  
+  return(scenprop)
+}
+
+om_create_model <- function(featureid, entity_type, model_name, model_version, model_varkey, site, token) {
+  # GETTING SCENARIO PROPERTY FROM VA HYDRO
+  # or create one if it does nto exist
+  modelinfo <- list(
+    varkey = model_varkey,
+    propname = model_name,
+    featureid = featureid,
+    propcode = model_version,
+    entity_type = entity_type,
+    startdate = NULL,
+    enddate = NULL
+    # for some reason we do not use the start an end?  Date format trouble?
+  )
+  model <- getProperty(modelinfo, site, model)
+  
+  # POST PROPERTY IF IT IS NOT YET CREATED
+  if (identical(model, FALSE)) {
+    # create
+    message("Creating model property")
+    modelinfo$pid = NULL
+    postProperty(modelinfo, site, model) 
+  } else {
+    return(model)
+  }
+  
+  # RETRIEVING PROPERTY ONE LAST TIME TO RETURN HYDROID OF PROP
+  model <- getProperty(modelinfo, site, model)
+  
+  return(model)
+}
+
+om_get_watershed_model_data <- function(
+  data_source, riverseg_or_gage, runid, 
+  model_phase, model_scenario, start_date, end_date
+) {
+  # Get data set by type
+  if (data_source == 'vahydro') {
+    message("Getting VAHydro data for source 1")
+    data1 <- vahydro_import_data_cfs(riverseg_or_gage, runid, token, site, start_date, end_date)
+  } else if (data_source == 'gage') {
+    message("Getting USGS gage data for source 1")
+    data1 <- gage_import_data_cfs(riverseg_or_gage, start_date, end_date)
+  } else if (data_source == 'cbp_model') {
+    data1 <- model_import_data_cfs(riverseg_or_gage, model_phase, model_scenario, start_date, end_date)
+  }
+  return(data1)
 }
