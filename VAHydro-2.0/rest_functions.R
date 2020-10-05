@@ -1136,7 +1136,7 @@ om_get_set_model_run <- function(mid, runid, site, token) {
   if (identical(scenprop, FALSE)) {
     # create
     message("Creating scenario property")
-    inputs$pid = NULL
+    sceninfo$pid = NULL
     postProperty(sceninfo, site, scenprop) 
   } else {
     sceninfo$pid = scenprop$pid
