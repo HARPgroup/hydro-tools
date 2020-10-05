@@ -1115,7 +1115,10 @@ om_get_model_elementid <- function(base_url, mid) {
     entity_type = "dh_properties"
   )
   prop <- getProperty(inputs, base_url, prop)
-  return(prop$propvalue)
+  if (!is.logical(prop)) {
+    return(prop$propvalue)
+  }
+  return(FALSE)
 }
 
 
