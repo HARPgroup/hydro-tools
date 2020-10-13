@@ -505,7 +505,8 @@ postProperty <- function(inputs,base_url,prop){
     propcode = inputs$propcode,
     startdate = inputs$startdate,
     propname = inputs$propname,
-    enddate = inputs$enddate
+    enddate = inputs$enddate,
+    field_dh_matrix = inputs$field_dh_matrix$value
   );
   
   if (is.null(pid)){
