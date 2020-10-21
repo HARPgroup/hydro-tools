@@ -23,7 +23,7 @@ hydrocode = paste0('vahydrosw_wshed_', riv_seg))
 feature <- getFeature(inputs, token, site)
  
 hydroid<-as.character(feature$hydroid)
-huc_level<- 'huc8'
+huc_level<- 'huc10'
 
 # Read Args
 # argst <- commandArgs(trailingOnly=T)
@@ -31,7 +31,7 @@ huc_level<- 'huc8'
 # elid <- as.integer(argst[2])
 # runid <- as.integer(argst[3])
 
-elfgen_huc8 <- function(runid, hydroid, huc_level ){
+elfgen_huc <- function(runid, hydroid, huc_level ){
 
   hydroid <- hydroid
     scen.propname<-paste0('runid_', runid)
@@ -184,11 +184,29 @@ elfgen_huc8 <- function(runid, hydroid, huc_level ){
     #checking diffs in abs richness
     abs_d1 <- round((abs_change - abs_richness_change_bound1),2)
     abs_d2 <- round((abs_change - abs_richness_change_bound2),2)
+  
+    # lt <- elf$plot +
+    #   geom_segment(aes(x = outlet_flow, y = -Inf, xend = outlet_flow, yend = int), color = 'red', linetype = 'dashed') +
+    #   geom_segment(aes(x = 0, xend = outlet_flow, y = int, yend = int), color = 'red', linetype = 'dashed') +
+    #   geom_point(aes(x = outlet_flow, y = int, fill = 'Intake'), color = 'red', shape = 'triangle', size = 2) +
+    #   geom_segment(aes(x = xmin, y = (m1 * log(xmin) + b1), xend = xmax, yend = (m1 * log(xmax)) + b1), color = 'blue', linetype = 'dashed') +
+    #   geom_segment(aes(x = xmin, y = (m2 * log(xmin) + b2), xend = xmax, yend = (m2 * log(xmax)) + b2), color = 'blue', linetype = 'dashed') +
+    #   theme(plot.title = element_text(face = 'bold', vjust = -5)) +
+    #   ylim(0,ymax)
     
     #Scenario Property posts
-    vahydro_post_metric_to_scenprop(scenprop$pid, 'om_class_Constant', nhd_code$hydrocode, paste('elfgen_richness_change_', huc_level, sep=''), NULL, site, token)
+    inputs <- list(
+      varkey = 'om_class_Constant',
+      propname = paste('elfgen_richness_change_', huc_level, sep=''),
+      entity_type = 'dh_properties',
+      propcode = nhd_code$hydrocode,
+      featureid = scenprop$pid,
+      proptext = 'VAHydro-EDAS', #figure out how to make this part changeable
+      propvalue = NULL)
     
+    postProperty(inputs, site)
     
+   
     #Abs change branch
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -199,7 +217,7 @@ elfgen_huc8 <- function(runid, hydroid, huc_level ){
     
     prop<-getProperty(inputs, site)
     
-    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_abs', abs_change, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_abs', -abs_change, site, token)
     
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -209,11 +227,11 @@ elfgen_huc8 <- function(runid, hydroid, huc_level ){
     
     prop_abs<-getProperty(inputs, site)
     
-    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'upper_confidence', abs_d2, site, token)
-    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'lower_confidence', abs_d1, site, token)
+    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'upper_confidence', -abs_d1, site, token) #flipped and negated to match negative richness change value
+    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'lower_confidence', -abs_d2, site, token)
     
     #Pct Change branch
-    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_pct', pct_change, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_pct', -pct_change, site, token)
     
     inputs <- list(
       varkey = 'om_class_Constant',
@@ -223,19 +241,22 @@ elfgen_huc8 <- function(runid, hydroid, huc_level ){
     
     prop_pct<-getProperty(inputs, site)
     
-    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'upper_confidence', pct_d2, site, token)
-    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'lower_confidence', pct_d1, site, token)
+    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'upper_confidence', -pct_d1, site, token) #flipped similar to vahydro
+    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'lower_confidence', -pct_d2, site, token)
     
-    ####Elf stats posts---------------------------
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_bkpt', elf$stats$bkpt, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_qu', elf$stats$quantile, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_m', elf$stats$m, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_b', elf$stats$b, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_rsq', elf$stats$rsquared, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_adj_rsq', elf$stats$rsquared_adj, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_p', elf$stats$p, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_n_tot', elf$stats$n_total, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_n_sub', elf$stats$n_subset, site, token)
-    # vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'stat_quantreg_n', elf$stats$n_subset_upper, site, token)
-  }
+    #Elf stats posts---------------------------
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_bkpt', NULL, 'breakpt', elf$stats$breakpt, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_qu', NULL, 'quantile', elf$stats$quantile, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_m', NULL, 'm', elf$stats$m, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_b', NULL, 'b', elf$stats$b, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_rsq', NULL, 'rsquared', elf$stats$rsquared, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_adj_rsq', NULL, 'rsquared_adj', elf$stats$rsquared_adj, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_p', NULL, 'p', elf$stats$p, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_tot', NULL, 'n_total', elf$stats$n_total, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_sub', NULL, 'n_subset', elf$stats$n_subset, site, token)
+    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n', NULL, 'n_subset_upper', elf$stats$n_subset_upper, site, token)
+    
+    print('DONE')
 }
+
+elfgen_huc(runid, hydroid, huc_level)
