@@ -13,7 +13,10 @@ library(elfgen)
 save_directory <- "/var/www/html/data/proj3/out"
 save_url <- paste(str_remove(site, 'd.dh'), "data/proj3/out", sep='');
 
-riv_seg <- 'PS3_5990_6161'  # TU3_9040_9180' random example for practice
+#------------------------------------------------
+#Inputs
+
+riv_seg <- 'PS3_5990_6161' #'TU4_8680_8810' 'TU3_9040_9180' random example for practice
 runid<-11
 
 pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
@@ -23,7 +26,9 @@ hydrocode = paste0('vahydrosw_wshed_', riv_seg))
 feature <- getFeature(inputs, token, site)
  
 hydroid<-as.character(feature$hydroid)
-huc_level<- 'huc10'
+huc_level<- 'huc8'
+
+dataset <- 'VAHydro-EDAS' #'VAHydro-EDAS' or 'IchthyMaps'
 
 # Read Args
 # argst <- commandArgs(trailingOnly=T)
@@ -31,8 +36,7 @@ huc_level<- 'huc10'
 # elid <- as.integer(argst[2])
 # runid <- as.integer(argst[3])
 
-elfgen_huc <- function(runid, hydroid, huc_level ){
-
+elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   hydroid <- hydroid
     scen.propname<-paste0('runid_', runid)
     
@@ -101,11 +105,19 @@ elfgen_huc <- function(runid, hydroid, huc_level ){
     y.metric <- 'aqbio_nt_total'
     y.sampres <- 'species'
     datasite <- site
-    
-    # elfdata_vahydro() function for retrieving data from VAHydro
-    watershed.df <- elfdata_vahydro(watershed.code,watershed.bundle,watershed.ftype,x.metric,y.metric,y.sampres,datasite)
-    # clean_vahydro() function for cleaning data by removing any stations where the ratio of DA:Q is greater than 1000, also aggregates to the maximum richness value at each flow value
-    watershed.df <- clean_vahydro(watershed.df)
+   
+    if (dataset == 'IchthyMaps'){
+      #if loop below works only for huc:6,8,10 due to naming convention in containing_watershed
+      if(huc_level == 'huc8'){ 
+        watershed.code <- str_sub(watershed.code, -8,-1)
+        }
+      watershed.df <- elfdata(watershed.code)
+    }else{
+      # elfdata_vahydro() function for retrieving data from VAHydro
+      watershed.df <- elfdata_vahydro(watershed.code,watershed.bundle,watershed.ftype,x.metric,y.metric,y.sampres,datasite)
+      # clean_vahydro() function for cleaning data by removing any stations where the ratio of DA:Q is greater than 1000, also aggregates to the maximum richness value at each flow value
+      watershed.df <- clean_vahydro(watershed.df)
+    }
     
     elf_quantile <- 0.80
     
