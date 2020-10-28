@@ -2,7 +2,7 @@
 site <- "http://deq2.bse.vt.edu/d.dh"    #Specify the site of interest, either d.bet OR d.dh
 #----------------------------------------------
 # Load Libraries
-basepath='/var/www/R';
+basepath='/var/www/R'; 
 
 source(paste(basepath,'config.R', sep='/'))
 library(stringr)
@@ -16,7 +16,7 @@ save_url <- paste(str_remove(site, 'd.dh'), "data/proj3/out", sep='');
 #------------------------------------------------
 #Inputs
 
-riv_seg <- 'PS3_5990_6161' #'TU4_8680_8810' 'TU3_9040_9180' random example for practice
+riv_seg <- 'PS3_5990_6161' #PS3_5990_6161' #'TU4_8680_8810' 'TU3_9040_9180' random examples for practice
 runid<-11
 
 pid <- get.overall.vahydro.prop(riv_seg, site = site, token = token)
@@ -26,9 +26,9 @@ hydrocode = paste0('vahydrosw_wshed_', riv_seg))
 feature <- getFeature(inputs, token, site)
  
 hydroid<-as.character(feature$hydroid)
-huc_level<- 'huc8'
+huc_level<- 'huc10'
 
-dataset <- 'VAHydro-EDAS' #'VAHydro-EDAS' or 'IchthyMaps'
+dataset <- 'IchthyMaps' #'VAHydro-EDAS' or 'IchthyMaps'
 
 # Read Args
 # argst <- commandArgs(trailingOnly=T)
@@ -38,237 +38,245 @@ dataset <- 'VAHydro-EDAS' #'VAHydro-EDAS' or 'IchthyMaps'
 
 elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   hydroid <- hydroid
-    scen.propname<-paste0('runid_', runid)
+  scen.propname<-paste0('runid_', runid)
     
-    # GETTING SCENARIO PROPERTY FROM VA HYDRO
-    sceninfo <- list(
-      varkey = 'om_scenario',
-      propname = scen.propname,
-      featureid = pid,
-      entity_type = "dh_properties"
-    )
-    scenprop <- getProperty(sceninfo, site, scenprop)
-    # POST PROPERTY IF IT IS NOT YET CREATED
-    if (identical(scenprop, FALSE)) {
-      # create
-      sceninfo$pid = NULL
-    } else {
-      sceninfo$pid = scenprop$pid
-    }
-    #scenprop = postProperty(inputs=sceninfo,base_url=base_url,prop)
-    scenprop <- getProperty(sceninfo, site, scenprop)
-    
-    # Create an algorithm that finds the outlet point for the watershed 
-    
-    nhdplus_views <- paste(site,'dh-feature-containing-export', hydroid, 'watershed/nhdplus/nhdp_drainage_sqmi',  sep = '/')
-    nhdplus_df <- read.csv(file=nhdplus_views, header=TRUE, sep=",")
-    
-    hydroid_out <-sqldf("SELECT hydroid, max(propvalue)
-                    FROM nhdplus_df ")
-    
-    inputs <- list(
-      varkey = 'om_class_Constant',
-      propname = 'consumptive_use_frac',
-      entity_type = 'dh_properties',
-      featureid = scenprop$pid
-    )
-    prop <- getProperty(inputs, site)
-    cuf <- prop$propvalue
-    
-    inputs <- list(
-      varkey = 'erom_q0001e_mean',
-      featureid = as.numeric(hydroid_out$hydroid),
-      entity_type = "dh_feature"
-    )
-    
-    prop <- getProperty(inputs, site)
-    outlet_flow <- prop$propvalue #outlet flow as erom_q0001e_mean of nhdplus segment
-    
-    
-    site_comparison <- paste(site,'dh-feature-contained-within-export', hydroid_out$hydroid, 'watershed', sep = '/')
-    containing_watersheds <- read.csv(file=site_comparison, header=TRUE, sep=",")
-    
-    nhd_code <- sqldf(paste("SELECT hydrocode 
-               FROM containing_watersheds 
-               WHERE ftype = 'nhd_", huc_level,"'", sep = "" ))
-
-    
-    
-    # Load the model result data for this scenario for "consumptive_use_frac" property
-    # Example input parameters for retrieving data from VAHydro
-    
-    #HUC Section---------------------------------------------------------------------------
-    watershed.code <- as.character(nhd_code$hydrocode)
-    watershed.bundle <- 'watershed'
-    watershed.ftype <- paste("nhd_", huc_level, sep = "") #watershed.ftpe[i] when creating function
-    x.metric <- 'erom_q0001e_mean'
-    y.metric <- 'aqbio_nt_total'
-    y.sampres <- 'species'
-    datasite <- site
-   
-    if (dataset == 'IchthyMaps'){
-      #if loop below works only for huc:6,8,10 due to naming convention in containing_watershed
-      if(huc_level == 'huc8'){ 
-        watershed.code <- str_sub(watershed.code, -8,-1)
-        }
-      watershed.df <- elfdata(watershed.code)
-    }else{
-      # elfdata_vahydro() function for retrieving data from VAHydro
-      watershed.df <- elfdata_vahydro(watershed.code,watershed.bundle,watershed.ftype,x.metric,y.metric,y.sampres,datasite)
-      # clean_vahydro() function for cleaning data by removing any stations where the ratio of DA:Q is greater than 1000, also aggregates to the maximum richness value at each flow value
-      watershed.df <- clean_vahydro(watershed.df)
-    }
-    
-    elf_quantile <- 0.80
-    
-    #breakpt <- bkpt_pwit("watershed.df" = watershed.df, "quantile" = elf_quantile, "blo" = 100, "bhi" = 1000)  
-    breakpt<-530
-    
-    elf <- elfgen("watershed.df" = watershed.df,
-                  "quantile" = elf_quantile,
-                  "breakpt" = breakpt,
-                  "yaxis_thresh" = 53, 
-                  "xlabel" = "Mean Annual Flow (ft3/s)",
-                  "ylabel" = "Fish Species Richness")
-    
-    #Confidence Interval information
-    uq <- elf$plot$plot_env$upper.quant
-    
-    upper.lm <- lm(y_var ~ log(x_var), data = uq)
-    
-    predict <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = outlet_flow), interval = 'confidence'))
-    
-    species_richness<-elf$stats$m*log(outlet_flow)+elf$stats$b
-    
-    xmin <- min(uq$x_var)
-    xmax <- max(uq$x_var)
-    
-    yval1 <- predict(upper.lm, newdata = data.frame(x_var = xmin), interval = 'confidence')
-    yval2 <- predict(upper.lm, newdata = data.frame(x_var = xmax), interval = 'confidence')
-    
-    ymin1 <- yval1[2] # bottom left point, line 1
-    ymax1 <- yval2[3] # top right point, line 1
-    
-    ymin2 <- yval1[3] # top left point, line 2
-    ymax2 <- yval2[2] # bottom right point, line 2
-    
-    m <- elf$stats$m
-    b <- elf$stats$b
-    int <- round((m*log(outlet_flow) + b),2)      # solving for outlet_flow y-value
-    
-    m1 <- (ymax1-ymin1)/(log(xmax)-log(xmin)) # line 1
-    b1 <- ymax1-(m1*log(xmax))
-    
-    m2 <- (ymax2-ymin2)/(log(xmax)-log(xmin)) # line 2
-    b2 <- ymax2 - (m2*log(xmax))
-    
-    # Calculating y max value based on greatest point value or intake y val
-    if (int > max(watershed.df$NT.TOTAL.UNIQUE)) {
-      ymax <- int + 2
-    } else {
-      ymax <- as.numeric(max(watershed.df$NT.TOTAL.UNIQUE)) + 2
-    }
-    
-    
-    #### Calculating median percent/absolute richness change
-    
-    pct_change <- round(richness_change(elf$stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
-    abs_change <- round(richness_change(elf$stats, "pctchg" = cuf*100),2)
-    
-    #### Using confidence interval lines to find percent/absolute richness bounds
-    
-    elf$bound1stats$m <- m1
-    elf$bound1stats$b <- b1
-    
-    percent_richness_change_bound1 <- round(richness_change(elf$bound1stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
-    abs_richness_change_bound1 <- round(richness_change(elf$bound1stats, "pctchg" = cuf*100),2)
-    
-    elf$bound2stats$m <- m2
-    elf$bound2stats$b <- b2
-    
-    percent_richness_change_bound2 <- round(richness_change(elf$bound2stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
-    abs_richness_change_bound2 <- round(richness_change(elf$bound2stats, "pctchg" = cuf*100),2)
-    
-    # checking diffs in pct richness
-    pct_d1 <- round((pct_change - percent_richness_change_bound1),2)
-    pct_d2 <- round((pct_change - percent_richness_change_bound2),2)
-    
-    #checking diffs in abs richness
-    abs_d1 <- round((abs_change - abs_richness_change_bound1),2)
-    abs_d2 <- round((abs_change - abs_richness_change_bound2),2)
+  # GETTING SCENARIO PROPERTY FROM VA HYDRO
+  sceninfo <- list(
+    varkey = 'om_scenario',
+    propname = scen.propname,
+    featureid = pid,
+    entity_type = "dh_properties"
+  )
+  scenprop <- getProperty(sceninfo, site, scenprop)
+  # POST PROPERTY IF IT IS NOT YET CREATED
+  if (identical(scenprop, FALSE)) {
+    # create
+    sceninfo$pid = NULL
+  } else {
+    sceninfo$pid = scenprop$pid
+  }
+  #scenprop = postProperty(inputs=sceninfo,base_url=base_url,prop)
+  scenprop <- getProperty(sceninfo, site, scenprop)
   
-    # lt <- elf$plot +
-    #   geom_segment(aes(x = outlet_flow, y = -Inf, xend = outlet_flow, yend = int), color = 'red', linetype = 'dashed') +
-    #   geom_segment(aes(x = 0, xend = outlet_flow, y = int, yend = int), color = 'red', linetype = 'dashed') +
-    #   geom_point(aes(x = outlet_flow, y = int, fill = 'Intake'), color = 'red', shape = 'triangle', size = 2) +
-    #   geom_segment(aes(x = xmin, y = (m1 * log(xmin) + b1), xend = xmax, yend = (m1 * log(xmax)) + b1), color = 'blue', linetype = 'dashed') +
-    #   geom_segment(aes(x = xmin, y = (m2 * log(xmin) + b2), xend = xmax, yend = (m2 * log(xmax)) + b2), color = 'blue', linetype = 'dashed') +
-    #   theme(plot.title = element_text(face = 'bold', vjust = -5)) +
-    #   ylim(0,ymax)
-    
-    #Scenario Property posts
-    inputs <- list(
-      varkey = 'om_class_Constant',
-      propname = paste('elfgen_richness_change_', huc_level, sep=''),
-      entity_type = 'dh_properties',
-      propcode = nhd_code$hydrocode,
-      featureid = scenprop$pid,
-      proptext = 'VAHydro-EDAS', #figure out how to make this part changeable
-      propvalue = NULL)
-    
-    postProperty(inputs, site)
-    
-   
-    #Abs change branch
-    inputs <- list(
-      varkey = 'om_class_Constant',
-      propname = paste('elfgen_richness_change_', huc_level, sep=''),
-      entity_type = 'dh_properties',
-      propcode = nhd_code$hydrocode,
-      featureid = scenprop$pid)
-    
-    prop<-getProperty(inputs, site)
-    
-    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_abs', -abs_change, site, token)
-    
-    inputs <- list(
-      varkey = 'om_class_Constant',
-      propname = 'richness_change_abs',
-      entity_type = 'dh_properties',
-      featureid = prop$pid)
-    
-    prop_abs<-getProperty(inputs, site)
-    
-    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'upper_confidence', -abs_d1, site, token) #flipped and negated to match negative richness change value
-    vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'lower_confidence', -abs_d2, site, token)
-    
-    #Pct Change branch
-    vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_pct', -pct_change, site, token)
-    
-    inputs <- list(
-      varkey = 'om_class_Constant',
-      propname = 'richness_change_pct',
-      entity_type = 'dh_properties',
-      featureid = prop$pid)
-    
-    prop_pct<-getProperty(inputs, site)
-    
-    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'upper_confidence', -pct_d1, site, token) #flipped similar to vahydro
-    vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'lower_confidence', -pct_d2, site, token)
-    
-    #Elf stats posts---------------------------
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_bkpt', NULL, 'breakpt', elf$stats$breakpt, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_qu', NULL, 'quantile', elf$stats$quantile, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_m', NULL, 'm', elf$stats$m, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_b', NULL, 'b', elf$stats$b, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_rsq', NULL, 'rsquared', elf$stats$rsquared, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_adj_rsq', NULL, 'rsquared_adj', elf$stats$rsquared_adj, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_p', NULL, 'p', elf$stats$p, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_tot', NULL, 'n_total', elf$stats$n_total, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_sub', NULL, 'n_subset', elf$stats$n_subset, site, token)
-    vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n', NULL, 'n_subset_upper', elf$stats$n_subset_upper, site, token)
-    
-    print('DONE')
+  #Determines watershed outlet nhd+ segment and hydroid
+  nhdplus_views <- paste(site,'dh-feature-containing-export', hydroid, 'watershed/nhdplus/nhdp_drainage_sqmi',  sep = '/')
+  nhdplus_df <- read.csv(file=nhdplus_views, header=TRUE, sep=",")
+  
+  hydroid_out <-sqldf("SELECT hydroid, max(propvalue)
+                  FROM nhdplus_df ")
+  
+  #Determines cumulative consumptive use fraction for the river segment
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'consumptive_use_frac',
+    entity_type = 'dh_properties',
+    featureid = scenprop$pid
+  )
+  prop <- getProperty(inputs, site)
+  cuf <- prop$propvalue
+  
+  #Pulls mean annual outlet flow
+  inputs <- list(
+    varkey = 'erom_q0001e_mean',
+    featureid = as.numeric(hydroid_out$hydroid),
+    entity_type = "dh_feature"
+  )
+  
+  prop <- getProperty(inputs, site)
+  outlet_flow <- prop$propvalue #outlet flow as erom_q0001e_mean of nhdplus segment
+  
+  #Determines huc of interest for outlet nhd+ segment
+  site_comparison <- paste(site,'dh-feature-contained-within-export', hydroid_out$hydroid, 'watershed', sep = '/')
+  containing_watersheds <- read.csv(file=site_comparison, header=TRUE, sep=",")
+  
+  nhd_code <- sqldf(paste("SELECT hydrocode 
+             FROM containing_watersheds 
+             WHERE ftype = 'nhd_", huc_level,"'", sep = "" ))
+
+  #HUC Section---------------------------------------------------------------------------
+  watershed.code <- as.character(nhd_code$hydrocode)
+  watershed.bundle <- 'watershed'
+  watershed.ftype <- paste("nhd_", huc_level, sep = "") #watershed.ftpe[i] when creating function
+  x.metric <- 'erom_q0001e_mean'
+  y.metric <- 'aqbio_nt_total'
+  y.sampres <- 'species'
+  datasite <- site
+ 
+  if (dataset == 'IchthyMaps'){
+    #if loop below works only for huc:6,8,10 due to naming convention in containing_watershed
+    if(huc_level == 'huc8'){ 
+      watershed.code <- str_sub(watershed.code, -8,-1)
+      }
+    watershed.df <- elfdata(watershed.code)
+  }else{
+    # elfdata_vahydro() function for retrieving data from VAHydro
+    watershed.df <- elfdata_vahydro(watershed.code,watershed.bundle,watershed.ftype,x.metric,y.metric,y.sampres,datasite)
+    # clean_vahydro() function for cleaning data by removing any stations where the ratio of DA:Q is greater than 1000, also aggregates to the maximum richness value at each flow value
+    watershed.df <- clean_vahydro(watershed.df)
+  }
+  
+  elf <- elfgen("watershed.df" = watershed.df,
+                "quantile" = 0.8,
+                "breakpt" = 530,
+                "yaxis_thresh" = 53, 
+                "xlabel" = "Mean Annual Flow (ft3/s)",
+                "ylabel" = "Fish Species Richness")
+  
+  #Confidence Interval information
+  uq <- elf$plot$plot_env$upper.quant
+  
+  upper.lm <- lm(y_var ~ log(x_var), data = uq)
+  
+  predict <- as.data.frame(predict(upper.lm, newdata = data.frame(x_var = outlet_flow), interval = 'confidence'))
+  
+  species_richness<-elf$stats$m*log(outlet_flow)+elf$stats$b
+  
+  xmin <- min(uq$x_var)
+  xmax <- max(uq$x_var)
+  
+  yval1 <- predict(upper.lm, newdata = data.frame(x_var = xmin), interval = 'confidence')
+  yval2 <- predict(upper.lm, newdata = data.frame(x_var = xmax), interval = 'confidence')
+  
+  ymin1 <- yval1[2] # bottom left point, line 1
+  ymax1 <- yval2[3] # top right point, line 1
+  
+  ymin2 <- yval1[3] # top left point, line 2
+  ymax2 <- yval2[2] # bottom right point, line 2
+  
+  m <- elf$stats$m
+  b <- elf$stats$b
+  int <- round((m*log(outlet_flow) + b),2)      # solving for outlet_flow y-value
+  
+  m1 <- (ymax1-ymin1)/(log(xmax)-log(xmin)) # line 1
+  b1 <- ymax1-(m1*log(xmax))
+  
+  m2 <- (ymax2-ymin2)/(log(xmax)-log(xmin)) # line 2
+  b2 <- ymax2 - (m2*log(xmax))
+  
+  # Calculating y max value based on greatest point value or intake y val
+  if (int > max(watershed.df$NT.TOTAL.UNIQUE)) {
+    ymax <- int + 2
+  } else {
+    ymax <- as.numeric(max(watershed.df$NT.TOTAL.UNIQUE)) + 2
+  }
+  
+  #Calculating median percent/absolute richness change
+  pct_change <- round(richness_change(elf$stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
+  abs_change <- round(richness_change(elf$stats, "pctchg" = cuf*100),2)
+  
+  #Using confidence interval lines to find percent/absolute richness bounds
+  elf$bound1stats$m <- m1
+  elf$bound1stats$b <- b1
+  
+  percent_richness_change_bound1 <- round(richness_change(elf$bound1stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
+  abs_richness_change_bound1 <- round(richness_change(elf$bound1stats, "pctchg" = cuf*100),2)
+  
+  elf$bound2stats$m <- m2
+  elf$bound2stats$b <- b2
+  
+  percent_richness_change_bound2 <- round(richness_change(elf$bound2stats, "pctchg" = cuf*100, "xval" = outlet_flow),2)
+  abs_richness_change_bound2 <- round(richness_change(elf$bound2stats, "pctchg" = cuf*100),2)
+  
+  #checking diffs in pct richness
+  pct_d1 <- round((pct_change - percent_richness_change_bound1),2)
+  pct_d2 <- round((pct_change - percent_richness_change_bound2),2)
+  
+  #checking diffs in abs richness
+  abs_d1 <- round((abs_change - abs_richness_change_bound1),2)
+  abs_d2 <- round((abs_change - abs_richness_change_bound2),2)
+
+  
+  #Elf$plot saving functions
+  fname <- paste(
+    save_directory,
+    paste0(
+      'fig.elfplot.',
+      pid, '.', runid, '.png'
+    ),
+    sep = '/'
+  )
+  
+  furl <- paste(
+    save_url,
+    paste0(
+      'fig.elfplot.',
+      watershed.code, '.png'
+    ),
+    sep = '/'
+  )
+  
+  print(fname)
+  ggsave(fname, plot = elf$plot, width = 7, height = 5.5)
+  
+  print(paste("Saved file: ", fname, "with URL", furl))
+  
+  #Scenario Property posts
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = paste('elfgen_richness_change_', huc_level, sep=''),
+    entity_type = 'dh_properties',
+    propcode = nhd_code$hydrocode,
+    featureid = scenprop$pid,
+    proptext = dataset, #figure out how to make this part changeable
+    propvalue = NULL)
+  
+  postProperty(inputs, site)
+  
+  #Absolute change branch - posted underneath elfgen_richness_change_huc_level scenario property
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = paste('elfgen_richness_change_', huc_level, sep=''),
+    entity_type = 'dh_properties',
+    propcode = nhd_code$hydrocode,
+    featureid = scenprop$pid)
+  
+  prop<-getProperty(inputs, site)
+  
+  vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_abs', -abs_change, site, token)
+  
+  #Absolute change confidence interval bounds - posted underneath richness_change_abs property 
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'richness_change_abs',
+    entity_type = 'dh_properties',
+    featureid = prop$pid)
+  
+  prop_abs<-getProperty(inputs, site)
+  
+  vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'upper_confidence', -abs_d1, site, token) #flipped and negated to match negative richness change value
+  vahydro_post_metric_to_scenprop(prop_abs$pid, 'om_class_Constant', NULL, 'lower_confidence', -abs_d2, site, token)
+  
+  #Percent change branch - posted underneath elfgen_richness_change_huc_level scenario property
+  vahydro_post_metric_to_scenprop(prop$pid, 'om_class_Constant', NULL, 'richness_change_pct', -pct_change, site, token)
+  
+  #Percent change confidence interval bounds - posted underneath richness_change_pct property 
+  inputs <- list(
+    varkey = 'om_class_Constant',
+    propname = 'richness_change_pct',
+    entity_type = 'dh_properties',
+    featureid = prop$pid)
+  
+  prop_pct<-getProperty(inputs, site)
+  
+  vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'upper_confidence', -pct_d1, site, token) #flipped similar to vahydro
+  vahydro_post_metric_to_scenprop(prop_pct$pid, 'om_class_Constant', NULL, 'lower_confidence', -pct_d2, site, token)
+  
+  #Elf$stats posts - posted underneath elfgen_richness_change_huc_level scenario property-----------------------
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_bkpt', NULL, 'breakpt', elf$stats$breakpt, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_qu', NULL, 'quantile', elf$stats$quantile, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_m', NULL, 'm', elf$stats$m, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_b', NULL, 'b', elf$stats$b, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_rsq', NULL, 'rsquared', elf$stats$rsquared, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_adj_rsq', NULL, 'rsquared_adj', elf$stats$rsquared_adj, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_p', NULL, 'p', elf$stats$p, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_tot', NULL, 'n_total', elf$stats$n_total, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n_sub', NULL, 'n_subset', elf$stats$n_subset, site, token)
+  vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n', NULL, 'n_subset_upper', elf$stats$n_subset_upper, site, token)
+  
+  #Elf$plot post - posted underneath elfgen_richness_change_huc_level scenario property------------
+  #vahydro_post_metric_to_scenprop(prop$pid, 'dh_image_file', furl, 'fig.elfplot', 0.0, site, token) 
+  
+  print('DONE')
 }
 
-elfgen_huc(runid, hydroid, huc_level)
+elfgen_huc(runid, hydroid, huc_level, dataset)
