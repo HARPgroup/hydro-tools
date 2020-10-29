@@ -33,8 +33,9 @@ dataset <- 'IchthyMaps' #'VAHydro-EDAS' or 'IchthyMaps'
 # Read Args
 # argst <- commandArgs(trailingOnly=T)
 # pid <- as.integer(argst[1])
-# elid <- as.integer(argst[2])
-# runid <- as.integer(argst[3])
+# runid <- as.integer(argst[2])
+# huc_level <- as.integer(argst[3])
+# dataset <- as.integer(argst[4])
 
 elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   hydroid <- hydroid
@@ -62,9 +63,8 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   nhdplus_views <- paste(site,'dh-feature-containing-export', hydroid, 'watershed/nhdplus/nhdp_drainage_sqmi',  sep = '/')
   nhdplus_df <- read.csv(file=nhdplus_views, header=TRUE, sep=",")
   
-  hydroid_out <-sqldf("SELECT hydroid, max(propvalue)
-                  FROM nhdplus_df ")
-  
+  hydroid_out <-sqldf("select hydroid from nhdplus_df where propvalue in (select max(propvalue) from nhdplus_df)")
+
   #Determines cumulative consumptive use fraction for the river segment
   inputs <- list(
     varkey = 'om_class_Constant',
@@ -72,8 +72,8 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
     entity_type = 'dh_properties',
     featureid = scenprop$pid
   )
-  prop <- getProperty(inputs, site)
-  cuf <- prop$propvalue
+  prop_cuf <- getProperty(inputs, site)
+  cuf <- prop_cuf$propvalue
   
   #Pulls mean annual outlet flow
   inputs <- list(
@@ -82,8 +82,8 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
     entity_type = "dh_feature"
   )
   
-  prop <- getProperty(inputs, site)
-  outlet_flow <- prop$propvalue #outlet flow as erom_q0001e_mean of nhdplus segment
+  prop_flow <- getProperty(inputs, site)
+  outlet_flow <- prop_flow$propvalue #outlet flow as erom_q0001e_mean of nhdplus segment
   
   #Determines huc of interest for outlet nhd+ segment
   site_comparison <- paste(site,'dh-feature-contained-within-export', hydroid_out$hydroid, 'watershed', sep = '/')
@@ -186,34 +186,17 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   abs_d2 <- round((abs_change - abs_richness_change_bound2),2)
 
   
-  #Elf$plot saving functions
-  fname <- paste(
-    save_directory,
-    paste0(
-      'fig.elfplot.',
-      pid, '.', runid, '.png'
-    ),
-    sep = '/'
-  )
-  
-  furl <- paste(
-    save_url,
-    paste0(
-      'fig.elfplot.',
-      watershed.code, '.png'
-    ),
-    sep = '/'
-  )
-  
-  print(fname)
-  ggsave(fname, plot = elf$plot, width = 7, height = 5.5)
-  
-  print(paste("Saved file: ", fname, "with URL", furl))
-  
   #Scenario Property posts
+  
+  if (dataset == 'IchthyMaps'){  
+    dataname='Ichthy'
+  }else{
+    dataname='EDAS'
+  }
+  
   inputs <- list(
     varkey = 'om_class_Constant',
-    propname = paste('elfgen_richness_change_', huc_level, sep=''),
+    propname = paste('elfgen_', dataname,'_', huc_level, sep=''),
     entity_type = 'dh_properties',
     propcode = nhd_code$hydrocode,
     featureid = scenprop$pid,
@@ -225,7 +208,7 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   #Absolute change branch - posted underneath elfgen_richness_change_huc_level scenario property
   inputs <- list(
     varkey = 'om_class_Constant',
-    propname = paste('elfgen_richness_change_', huc_level, sep=''),
+    propname = paste('elfgen_', dataname,'_', huc_level, sep=''),
     entity_type = 'dh_properties',
     propcode = nhd_code$hydrocode,
     featureid = scenprop$pid)
@@ -274,7 +257,46 @@ elfgen_huc <- function(runid, hydroid, huc_level, dataset){
   vahydro_post_metric_to_scenprop(prop$pid, 'stat_quantreg_n', NULL, 'n_subset_upper', elf$stats$n_subset_upper, site, token)
   
   #Elf$plot post - posted underneath elfgen_richness_change_huc_level scenario property------------
-  #vahydro_post_metric_to_scenprop(prop$pid, 'dh_image_file', furl, 'fig.elfplot', 0.0, site, token) 
+  
+
+  #Elf$plot saving functions
+  
+  plt <- elf$plot +
+    geom_segment(aes(x = outlet_flow, y = -Inf, xend = outlet_flow, yend = int), color = 'red', linetype = 'dashed') +
+    geom_segment(aes(x = 0, xend = outlet_flow, y = int, yend = int), color = 'red', linetype = 'dashed') +
+    geom_point(aes(x = outlet_flow, y = int, fill = 'Outlet Flow'), color = 'red', shape = 'triangle', size = 2) +
+    geom_segment(aes(x = xmin, y = (m1 * log(xmin) + b1), xend = xmax, yend = (m1 * log(xmax) + b1)), color = 'blue', linetype = 'dashed') +
+    geom_segment(aes(x = xmin, y = (m2 * log(xmin) + b2), xend = xmax, yend = (m2 * log(xmax) + b2)), color = 'blue', linetype = 'dashed') +
+    labs(fill = 'Outlet Legend', 
+         x=paste(elf$plot$labels$x, '  Breakpt:',elf$stats$breakpt,sep=' ')) + 
+    theme(plot.title = element_text(face = 'bold', vjust = -5)) + 
+    ylim(0,ymax)
+  
+  
+  
+  fname <- paste(
+    save_directory,
+    paste0(
+      'fig.elfgen.',
+      prop$pid,'.png'
+    ),
+    sep = '/'
+  )
+  
+  furl <- paste(
+    save_url,paste0(
+    'fig.elfgen.',
+    prop$pid,'.png'
+  ),
+    sep = '/'
+  )
+  
+  print(fname)
+  ggsave(fname, plot = plt, width = 7, height = 5.5)
+  
+  print(paste("Saved file: ", fname, "with URL", furl))
+  
+  vahydro_post_metric_to_scenprop(prop$pid, 'dh_image_file', furl, 'fig.elfgen', 0.0, site, token) 
   
   print('DONE')
 }
