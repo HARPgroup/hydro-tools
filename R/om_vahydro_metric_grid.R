@@ -1,3 +1,4 @@
+library('stringr')
 om_vahydro_metric_grid <- function (
   metric,
   runids,
