@@ -30,7 +30,13 @@ om_vahydro_metric_grid <- function (
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
     print(paste("retrieving ", url))
-    rawdata <- read.csv(url)
+    rawdat <- GET(
+      url,
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      encode = "xml", content_type("text/csv")
+    );
+    dat <- content(rawdat)
+    rawdata <- as.data.frame(dat)
     if (is.null(alldata) ) {
       alldata = sqldf(
         paste(
