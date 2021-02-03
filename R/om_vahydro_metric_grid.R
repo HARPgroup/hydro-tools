@@ -1,4 +1,10 @@
-library('stringr')
+#' The base class for executable equation based meta-model components.
+#'
+#' @param
+#' @return reference class of type openmi.om.equation
+#' @seealso
+#' @export om_vahydro_metric_grid
+#' @examples
 om_vahydro_metric_grid <- function (
   metric,
   runids,

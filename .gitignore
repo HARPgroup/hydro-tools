@@ -4,3 +4,4 @@ tempfile
 *.Rhistory
 *.out
 *.docx
+.Rproj.user
