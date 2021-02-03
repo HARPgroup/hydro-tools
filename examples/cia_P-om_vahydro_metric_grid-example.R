@@ -30,12 +30,20 @@ da_data <- sqldf(
    from da_data
   ")
 
+# df <- data.frame(
+#   'model_version' = c('vahydro-1.0',  'vahydro-1.0',  'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0'),
+#   'runid' = c('runid_11', 'runid_13', 'runid_11', 'runid_13', 'runid_11', 'runid_13', 'runid_11', 'runid_13', 'runid_11', 'runid_13'),
+#   'metric' = c('Qbaseline', 'Qbaseline','l90_Qout','l90_Qout','wd_cumulative_mgd','wd_cumulative_mgd','ps_cumulative_mgd','ps_cumulative_mgd','ps_nextdown_mgd','ps_nextdown_mgd'),
+#   'runlabel' = c('Qbaseline_2020', 'QBaseline_2040', 'L90_2020', 'L90_2040', 'WD_2020', 'WD_2040', 'PS_2020', 'PS_2040', 'PSNX_2020', 'PSNX_2040')
+# )
+
 df <- data.frame(
   'model_version' = c('vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'usgs-1.0', 'vahydro-1.0', 'usgs-1.0'),
   'runid' = c('runid_11', 'runid_11', 'runid_11', 'runid_11', 'runid_11', 'runid_11'),
   'metric' = c('wd_cumulative_mgd', 'ps_cumulative_mgd', 'l90_Qout','l90_Qout','l90_year','l90_year'),
   'runlabel' = c('wd2020', 'ps2020', 'L90_2020', 'L90_usgs', 'L90_year_2020', 'L90_year_usgs')
 )
+
 wshed_data <- om_vahydro_metric_grid(metric, df)
 
 wshed_data <- sqldf(
