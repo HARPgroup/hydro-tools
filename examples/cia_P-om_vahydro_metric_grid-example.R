@@ -1,6 +1,7 @@
 # Upper and Middle Potomac cia table for model debugging
 # where is the extra water comingfrom in 2040 baseline flows?
 
+library("httr")
 library("sqldf")
 library("stringr") #for str_remove()
 
@@ -38,10 +39,33 @@ da_data <- sqldf(
 # )
 
 df <- data.frame(
-  'model_version' = c('vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'usgs-1.0', 'vahydro-1.0', 'usgs-1.0'),
-  'runid' = c('runid_11', 'runid_11', 'runid_11', 'runid_11', 'runid_11', 'runid_11'),
-  'metric' = c('wd_cumulative_mgd', 'ps_cumulative_mgd', 'l90_Qout','l90_Qout','l90_year','l90_year'),
-  'runlabel' = c('wd2020', 'ps2020', 'L90_2020', 'L90_usgs', 'L90_year_2020', 'L90_year_usgs')
+  'model_version' = c('vahydro-1.0', 'usgs-1.0'),
+  'runid' = c('runid_11', 'runid_11'),
+  'metric' = c('l90_Qout', '90 Day Min Low Flow'),
+  'runlabel' = c('L90_2020', 'L90_usgs')
+)
+
+usgs_data <- om_vahydro_metric_grid(metric, df)
+
+df <- data.frame(
+  'model_version' = c('vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'usgs-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'usgs-1.0'),
+  'runid' = c('runid_11', 'runid_11', 'runid_11', 'runid_11', 'runid_17', 'runid_1363', 'runid_11', 'runid_11'),
+  'metric' = c('wd_cumulative_mgd', 'ps_cumulative_mgd', 'l90_Qout','90 Day Min Low Flow', 'l90_Qout','l90_Qout','l90_year','l90_year'),
+  'runlabel' = c('wd2020', 'ps2020', 'L90_2020', 'L90_usgs', 'L90_cc_2040', 'L90_3hour_2040', 'L90_year_2020', 'L90_year_usgs')
+)
+
+df <- data.frame(
+  'model_version' = c('vahydro-1.0'),
+  'runid' = c('runid_13'),
+  'metric' = c('consumptive_use_frac'),
+  'runlabel' = c('CU')
+)
+
+df <- data.frame(
+  'model_version' = c('vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0', 'vahydro-1.0'),
+  'runid' = c('runid_13', 'runid_13', 'runid_13', 'runid_13'),
+  'metric' = c('Qbaseline', 'Qout', 'consumptive_use_frac', 'daily_consumptive_use_frac'),
+  'runlabel' = c('Qbase', 'Qout', 'CU', 'CUalt')
 )
 
 wshed_data <- om_vahydro_metric_grid(metric, df)
@@ -59,7 +83,16 @@ wshed_case <- sqldf(
   "select * from 
   wshed_data 
   where 
+    riverseg like 'OR%' 
+  ")
+wshed_case$cu_calc <- (1.0 - wshed_case$Qout / wshed_case$Qbase)
+
+wshed_case <- sqldf(
+  "select * from 
+  wshed_data 
+  where 
     riverseg like 'P%' 
+    and L90_usgs is not null
   ")
 
 elid = 229119
@@ -80,7 +113,7 @@ for (minor_basin in minor_basin_list) {
       "select * from wshed_data where hydrocode like 'vahydrosw_wshed_",
       minor_basin,
       "%'
-      AND hydrocode not like '%0000'
+      AND hydrocode not like '%0000%'
       ORDER BY da"
     )
   )

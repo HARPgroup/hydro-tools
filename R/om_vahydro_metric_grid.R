@@ -1,4 +1,10 @@
-library('stringr')
+#' The base class for executable equation based meta-model components.
+#'
+#' @param
+#' @return reference class of type openmi.om.equation
+#' @seealso
+#' @export om_vahydro_metric_grid
+#' @examples
 om_vahydro_metric_grid <- function (
   metric,
   runids,
@@ -10,6 +16,7 @@ om_vahydro_metric_grid <- function (
   base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export"
 ) {
   alldata = NULL
+  mv_base = NULL
   for (i in 1:nrow(runids)) {
     runinfo = runids[i,]
     if (is.data.frame((runinfo))) {
@@ -24,6 +31,13 @@ om_vahydro_metric_grid <- function (
       # only runid is passed in
       runid = runinfo
       runlabel = runid
+    }
+    if (is.null(mv_base)) {
+      # Annotate the first model version here in order to prevent
+      # redundant joins if we are comparing models from 
+      # features that have multiple models in the same version domain
+      # as happens with some facility/riverseg models
+      mv_base <- model_version
     }
     runlabel <- str_replace_all(runlabel, '-', '_')
     runlabel <- str_replace_all(runlabel, ' ', '_')
@@ -53,8 +67,13 @@ om_vahydro_metric_grid <- function (
         left outer join rawdata as b 
         on (
           a.featureid = b.featureid
-        )"
+        "
       )
+      onclause <- ""
+      if (model_version == mv_base) {
+        mergeq <- paste(mergeq, " and a.pid = b.pid")
+      }
+      mergeq <- paste(mergeq, ")")
       message(mergeq)
       alldata = sqldf(
         mergeq

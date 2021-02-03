@@ -1044,9 +1044,15 @@ vahydro_prop_matrix <- function (featureid, entity_type='dh_feature',varkey, dat
   
   print(paste("Using ", matrix_url, sep=''));
   
-  raw_data <- fromJSON(matrix_url) #return entire property 
-  prop_matrix_json <- raw_data$entity_properties$property$prop_matrix #return property prop_matrix only 
-  json_file <- fromJSON(prop_matrix_json) #convert to json list 
+  rawdat <- GET(
+    matrix_url,
+    add_headers(HTTP_X_CSRF_TOKEN = token),
+    encode = "xml", content_type("text/csv")
+  );
+  dat <- content(rawdat)
+  rawdata <- as.data.frame(dat)
+  prop_matrix_json <- rawdata$entity_properties.property.prop_matrix #return property prop_matrix only 
+  json_file <- jsonlite::fromJSON(as.character(prop_matrix_json)) #convert to json list 
   
   #unlist json objects 
   json_file <- lapply(json_file, function(x) {
@@ -1065,6 +1071,19 @@ vahydro_prop_matrix <- function (featureid, entity_type='dh_feature',varkey, dat
   matrix_dataframe <- matrix_dataframe #return dataframe object
 }
 
+vahydro_auth_read <- function(uri, token, ctype = "text/csv", delim=',', enc="xml") {
+  # New method with httr
+  # specifically used with csrf token authentication
+  # Helps to allow any view to be retrieved with full system authentication
+  rawdat <- GET(
+    uri,
+    add_headers(HTTP_X_CSRF_TOKEN = token),
+    encode = enc, content_type(ctype)
+  );
+  cdat <- content(rawdat)
+  return(cdat)
+}
+
 om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', ftype = 'vahydro') {
   inputs <- list (
     hydrocode = hydrocode,
@@ -1077,6 +1096,24 @@ om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', f
   feature <- getFeature(inputs, token, base_url, feature)
   
   return(feature)
+}
+
+om_get_prop <- function (
+  base_url, entity_id, entity_type = 'dh_feature', 
+  propname
+) {
+  
+  
+  inputs <- list(
+    featureid = entity_id,
+    entity_type = entity_type,
+    propname = propname
+  )
+  model <- getProperty(inputs, base_url, model)
+  if (!is.logical(model)) {
+    return(model)
+  }
+  return(FALSE)
 }
 
 om_get_model <- function (
