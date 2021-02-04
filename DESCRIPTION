@@ -9,3 +9,5 @@ Encoding: UTF-8
 RoxygenNote: 6.1.1
 Collate: 
     'om_vahydro_metric_grid.R'
+Imports: 
+    stringr
