@@ -11,4 +11,5 @@ Collate:
     'om_vahydro_metric_grid.R'
 Imports: 
     stringr,
-    httr
+    httr,
+    sqldf
