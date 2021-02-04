@@ -1,10 +1,48 @@
-# hydro-tools
-Houses sets of commonly used hydrologic tools
+# hydrotools
 
-1. **HARP-2018** (home of all current analyst's code)
-2. **HARP-OLD** (home of all previous analyst's code)
-3. **LowFlow** (low flow metric generation and plotting)
-4. **USGS** (usgs gage data retrieval and cleansing)
-5. **VAHydro-1.0** (home of all "om" functions)
-6. **VAHydro-2.0** (home of all REST functions)
-7. **ows-model-postproc** (ows post processing of model run data)
+# Overview
+ 
+The hydro-tools repository is currently undergoing maintenance in order to be converted into the 'hydrotools' R package. 
+
+# Installation
+
+``` r
+install.packages("devtools")
+install_github("HARPgroup/hydro-tools")
+
+#EXAMPLE FUNCTION DOCUMENTATION
+??om_vahydro_metric_grid
+```
+
+# Example
+## This is for testing purposes at this point.
+
+``` r
+library(hydrotools)
+library(httr)
+library(sqldf)
+library(stringr)
+
+basepath='/var/www/R';
+site <- "http://deq2.bse.vt.edu/d.dh"
+source(paste(basepath,'config.R',sep='/'))
+folder <- "C:/Workspace/tmp/"
+
+df <- data.frame(
+  'model_version' = c('vahydro-1.0',  'vahydro-1.0',  'vahydro-1.0'),
+  'runid' = c('runid_11', '0.%20River%20Channel', 'local_channel'),
+  'runlabel' = c('QBaseline_2020', 'comp_da', 'subcomp_da'),
+  'metric' = c('Qbaseline', 'drainage_area', 'drainage_area')
+)
+
+da_data <- om_vahydro_metric_grid(metric = 'wd_mgy',df)
+
+da_data <- sqldf(
+  "select pid, comp_da, subcomp_da,
+   CASE
+    WHEN comp_da is null then subcomp_da
+    ELSE comp_da
+    END as da
+   from da_data
+  ")
+```
