@@ -1,11 +1,11 @@
 #' Retrieve a token from vaydro REST service.  TBD: replace with object to store token and dn connection
 #'
 #' @param base_url character deprecated to be replaced by global datasource
-#' @return token from VAHydro REST web service
+#' @return token character from VAHydro REST web service
 #' @seealso NA
-#' @export om_vahydro_get_token
+#' @export om_vahydro_token
 #' @examples NA
-om_vahydro_get_token <- function(base_url='http://deq2.bse.vt.edu/d.dh') {
+om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh') {
   rest_uname <- readline("REST Username: ")
   rest_pw <- getPass::getPass("REST Password: ")
   # do something
