@@ -9,9 +9,32 @@ om_vahydro_metric_grid(metric, runids, featureid = "all",
   ftype = "vahydro", model_version = "vahydro-1.0",
   base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export")
 }
+\arguments{
+\item{metric}{character deprecated in favor of runids array}
+
+\item{runids}{dataframe with model and run info}
+
+\item{featureid}{integer or 'all'}
+
+\item{entity_type}{character}
+
+\item{bundle}{character}
+
+\item{ftype}{character feature type}
+
+\item{model_version}{character default 'vahydro-1.0'}
+
+\item{base_url}{character deprecated to be replaced by global datasource}
+}
 \value{
 reference class of type openmi.om.equation
 }
 \description{
 The base class for executable equation based meta-model components.
+}
+\examples{
+NA
+}
+\seealso{
+NA
 }

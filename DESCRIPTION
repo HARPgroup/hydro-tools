@@ -3,7 +3,7 @@ Title: Data processing and accessors for VAHydro.
 Version: 0.0.0.1
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
-Depends: R (>= 3.4.3)
+Depends: R (>= 3.5)
 License: GPL
 Encoding: UTF-8
 RoxygenNote: 6.1.1

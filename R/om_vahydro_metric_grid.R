@@ -1,10 +1,17 @@
 #' The base class for executable equation based meta-model components.
 #'
-#' @param
+#' @param metric character deprecated in favor of runids array
+#' @param runids dataframe with model and run info
+#' @param featureid integer or 'all' 
+#' @param entity_type character
+#' @param bundle character 
+#' @param ftype character feature type
+#' @param model_version character default 'vahydro-1.0'
+#' @param base_url character deprecated to be replaced by global datasource
 #' @return reference class of type openmi.om.equation
-#' @seealso
+#' @seealso NA
 #' @export om_vahydro_metric_grid
-#' @examples
+#' @examples NA
 om_vahydro_metric_grid <- function (
   metric,
   runids,
