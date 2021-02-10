@@ -3,12 +3,17 @@
 library('zoo')
 #library('IHA')
 options(timeout=480); # set timeout to twice default level to avoid abort due to high traffic
-#dirname(rstudioapi::getActiveDocumentContext()$path);
-
-#Set auth file location dynamically, and load auth info 
-#path <- substr(getwd(),1,nchar(getwd())-11)
-#source(paste(path,"auth.private", sep = "")); 
-
+#' Retrieve Run summary data from Old OM model
+#'
+#' @param elid integer OM model element id
+#' @param runid integer run id 
+#' @param varname character - if set will isolate a single column of data
+#' @param scenid integer - model domain ID
+#' @param site URL of om server
+#' @return reference class of type openmi.om.equation
+#' @seealso NA
+#' @export fn_get_rundata
+#' @examples NA
 fn_get_rundata <- function(
   elementid = -1, runid = -1, 
   varname = 'Qout', scenid = 37,
@@ -46,6 +51,16 @@ fn_get_rundata <- function(
   
 }
 
+#' Retrieve Info About Run File from Old OM model
+#'
+#' @param elid integer OM model element id
+#' @param runid integer run id 
+#' @param scenid integer - model domain ID
+#' @param site URL of om server
+#' @return reference class of type openmi.om.equation
+#' @seealso NA
+#' @export fn_get_runfile_info
+#' @examples NA
 fn_get_runfile_info <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu"
@@ -75,6 +90,19 @@ fn_get_runfile_info <- function(
   
 }
 
+#' Retrieve Entire Run Log File from Old OM model
+#'
+#' @param elementid integer OM model element id
+#' @param runid integer run id 
+#' @param scenid integer - model domain ID
+#' @param site URL of om server
+#' @param cached boolean - use local copy or force refresh
+#' @param outaszoo boolean return as a zoo timeseries if TRUE, or as data frame
+#' @param usetz character pass in a custom timezone for zoo
+#' @return reference class of type openmi.om.equation
+#' @seealso NA
+#' @export fn_get_runfile_info
+#' @examples NA
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu", cached = TRUE, 
