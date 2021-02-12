@@ -4,9 +4,15 @@
 \alias{fn_get_runfile}
 \title{Retrieve Entire Run Log File from Old OM model}
 \usage{
-fn_get_runfile(elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu", cached = TRUE, outaszoo = TRUE,
-  use_tz = FALSE)
+fn_get_runfile(
+  elementid = -1,
+  runid = -1,
+  scenid = 37,
+  site = "http://deq2.bse.vt.edu",
+  cached = TRUE,
+  outaszoo = TRUE,
+  use_tz = FALSE
+)
 }
 \arguments{
 \item{elementid}{integer OM model element id}
@@ -21,7 +27,7 @@ fn_get_runfile(elementid = -1, runid = -1, scenid = 37,
 
 \item{outaszoo}{boolean return as a zoo timeseries if TRUE, or as data frame}
 
-\item{usetz}{character pass in a custom timezone for zoo}
+\item{use_tz}{character pass in a custom timezone for zoo}
 }
 \value{
 reference class of type openmi.om.equation

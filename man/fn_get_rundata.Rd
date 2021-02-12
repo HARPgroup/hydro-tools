@@ -4,10 +4,17 @@
 \alias{fn_get_rundata}
 \title{Retrieve Run summary data from Old OM model}
 \usage{
-fn_get_rundata(elementid = -1, runid = -1, varname = "Qout",
-  scenid = 37, site = "http://deq2.bse.vt.edu")
+fn_get_rundata(
+  elementid = -1,
+  runid = -1,
+  varname = "Qout",
+  scenid = 37,
+  site = "http://deq2.bse.vt.edu"
+)
 }
 \arguments{
+\item{elementid}{integer OM model element id}
+
 \item{runid}{integer run id}
 
 \item{varname}{character - if set will isolate a single column of data}
@@ -15,8 +22,6 @@ fn_get_rundata(elementid = -1, runid = -1, varname = "Qout",
 \item{scenid}{integer - model domain ID}
 
 \item{site}{URL of om server}
-
-\item{elid}{integer OM model element id}
 }
 \value{
 reference class of type openmi.om.equation

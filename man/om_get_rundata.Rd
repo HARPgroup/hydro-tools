@@ -4,8 +4,13 @@
 \alias{om_get_rundata}
 \title{The base class for executable equation based meta-model components.}
 \usage{
-om_get_rundata(elid, runid, site = "http://deq2.bse.vt.edu",
-  cached = FALSE, hydrowarmup = TRUE)
+om_get_rundata(
+  elid,
+  runid,
+  site = "http://deq2.bse.vt.edu",
+  cached = FALSE,
+  hydrowarmup = TRUE
+)
 }
 \arguments{
 \item{elid}{integer OM model element id}

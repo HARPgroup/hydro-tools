@@ -21,8 +21,13 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu', cached=FA
     edate <- paste0(eyear,"-09-30")
   } else {
     # take a couple months in the begining to make some modest warmup.
-    sdate <- paste0(syear,"-02-01")
-    edate <- paste0(eyear,"-12-31")
+    if (nrow(dat) > 90) {
+      sdate <- paste0(syear,"-02-01")
+      edate <- paste0(eyear,"-12-31")
+    } else {
+      sdate <- paste0(syear,"-01-01")
+      edate <- paste0(eyear,"-12-31")
+    }
   }
   dat <- window(dat, start = sdate, end = edate);
   mode(dat) <- 'numeric'

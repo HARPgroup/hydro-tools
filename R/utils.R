@@ -5,7 +5,7 @@ library('zoo')
 options(timeout=480); # set timeout to twice default level to avoid abort due to high traffic
 #' Retrieve Run summary data from Old OM model
 #'
-#' @param elid integer OM model element id
+#' @param elementid integer OM model element id
 #' @param runid integer run id 
 #' @param varname character - if set will isolate a single column of data
 #' @param scenid integer - model domain ID
@@ -53,7 +53,7 @@ fn_get_rundata <- function(
 
 #' Retrieve Info About Run File from Old OM model
 #'
-#' @param elid integer OM model element id
+#' @param elementid integer OM model element id
 #' @param runid integer run id 
 #' @param scenid integer - model domain ID
 #' @param site URL of om server
@@ -98,7 +98,7 @@ fn_get_runfile_info <- function(
 #' @param site URL of om server
 #' @param cached boolean - use local copy or force refresh
 #' @param outaszoo boolean return as a zoo timeseries if TRUE, or as data frame
-#' @param usetz character pass in a custom timezone for zoo
+#' @param use_tz character pass in a custom timezone for zoo
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export fn_get_runfile_info
