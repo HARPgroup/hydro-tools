@@ -4,10 +4,16 @@
 \alias{om_vahydro_metric_grid}
 \title{The base class for executable equation based meta-model components.}
 \usage{
-om_vahydro_metric_grid(metric, runids, featureid = "all",
-  entity_type = "dh_feature", bundle = "watershed",
-  ftype = "vahydro", model_version = "vahydro-1.0",
-  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export")
+om_vahydro_metric_grid(
+  metric,
+  runids,
+  featureid = "all",
+  entity_type = "dh_feature",
+  bundle = "watershed",
+  ftype = "vahydro",
+  model_version = "vahydro-1.0",
+  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export"
+)
 }
 \arguments{
 \item{metric}{character deprecated in favor of runids array}
