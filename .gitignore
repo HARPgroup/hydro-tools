@@ -5,3 +5,4 @@ tempfile
 *.out
 *.docx
 .Rproj.user
+*.Rdata
