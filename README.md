@@ -10,6 +10,10 @@ The hydro-tools repository is currently undergoing maintenance in order to be co
 install.packages("devtools")
 install_github("HARPgroup/hydro-tools")
 
+# hydrotools uses IHA for some metrics.
+# Install IHA as:
+devtools::install_github("jasonelaw/iha")
+
 #EXAMPLE FUNCTION DOCUMENTATION
 ??om_vahydro_metric_grid
 ```
