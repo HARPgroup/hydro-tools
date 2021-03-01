@@ -7,7 +7,7 @@
 #' @param enc encoding
 #' @return data frame from delimited file
 #' @seealso NA
-#' @export om_vahydro_token
+#' @export om_auth_read
 #' @examples NA
 om_auth_read <- function(uri, token, ctype = "text/csv", delim=',', enc="xml") {
   # New method with httr
