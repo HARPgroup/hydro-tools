@@ -18,6 +18,16 @@ devtools::install_github("jasonelaw/iha")
 ??om_vahydro_metric_grid
 ```
 
+# Troubleshooting Installation
+```
+# Early install tests have failed when installing R6, 
+# which is due o a "Error converted from Warning" (see: https://github.com/r-lib/remotes/issues/403)
+# Was with R6 version 2.5, so we ran:
+install_version("R6", version = "2.4.1")
+# todo: sort that out.
+
+```
+
 # Example
 ## This is for testing purposes at this point.
 

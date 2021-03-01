@@ -2,9 +2,9 @@
 #'
 #' @param uri character deprecated to be replaced by global datasource
 #' @param token for CSRF autentication use
-#' @ctype content-type
-#' @delim delimiter to expect in final data set
-#' @enc encoding
+#' @param ctype content-type
+#' @param delim delimiter to expect in final data set
+#' @param enc encoding
 #' @return data frame from delimited file
 #' @seealso NA
 #' @export om_vahydro_token

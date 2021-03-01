@@ -14,16 +14,7 @@ RomDataSource <- R6Class(
     },
     get_token = function() {
       private$token <- om_vahydro_get_token(self$base_url)
-    }
-  )
-)
-
-
-# Global DF Holds all timeseries variables in current environment
-# must be passed to RomFeature on new() 
-RomTimeSeries <- R6Class(
-  "RomTimeSeries",
-  public = list(
+    },
     timeline = NULL,
     tsvalues = data.frame(
       tid=character(),
@@ -37,14 +28,8 @@ RomTimeSeries <- R6Class(
       varid=character(),
       uid=character(),
       status=character(),
-      stringsAsFactors=FALSE)
-  )
-)
-
-RomProperties <- R6Class(
-  "RomProperties",
-  public = list(
-    timeline = 1,
+      stringsAsFactors=FALSE
+    ),
     props = data.frame(
       proptext=character(),
       pid=character(),
@@ -63,7 +48,8 @@ RomProperties <- R6Class(
       status=character(),
       module=character(),
       field_dh_matrix=character(),
-      stringsAsFactors=FALSE) 
+      stringsAsFactors=FALSE
+    ) 
   )
 )
 
