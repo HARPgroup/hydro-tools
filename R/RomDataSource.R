@@ -9,7 +9,7 @@
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples NA
-#' @export
+#' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
   # Note: do not document private fields, since they are private
