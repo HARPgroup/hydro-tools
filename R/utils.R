@@ -182,6 +182,148 @@ fn_get_runfile <- function(
   }
 }
 
+
+#' Retrieve Variable Def from View (not REST)
+#'
+#' @param site URL of om server
+#' @param varkey character variable key
+#' @return integer variable id
+#' @seealso NA
+#' @export getVarDefView
+#' @examples NA
+fn_getVarDefView <- function(site, varkey, debug = FALSE) {
+  tsdef_url<- paste(site,"/?q=vardefs.tsv/", varkey,sep="")
+  tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
+  varid <- tsdef_table[1][which(tsdef_table$varkey == varkey),]
+  if (debug) {
+    message(paste("varid: ",varid,sep=""))
+  }
+  if (is.null(varid)) {
+    # we sent a bad variable id so we should return FALSE
+    return(FALSE)
+  }
+  return(varid)
+}
+
+fn_getTimeseries <- function(inputs, site, ts){
+  #Convert varkey to varid - needed for REST operations 
+  varid <- NULL 
+  if (!is.null(inputs$varkey)) {
+    varid <- fn_getVarDefView(site, inputs$varkey)
+    if (!varid) {
+      # we got a bad variable id so we should return FALSE
+      return(FALSE)
+    }
+  }
+  
+  pbody = list(
+    featureid = inputs$featureid,
+    entity_type = inputs$entity_type
+  );
+  if (!is.null(varid)) {
+    pbody$varid = varid
+  }
+  if (!is.null(inputs$tscode)) {
+    pbody$tscode = inputs$tscode
+  }
+  if (!is.null(inputs$tstime)) {
+    pbody$tstime = inputs$tstime
+  }
+  if (!is.null(inputs$tid)) {
+    if (inputs$tid > 0) {
+      # forget about other attributes, just use tid
+      pbody = list(
+        tid = inputs$tid
+      )
+    }
+  }
+  if (!is.null(inputs$page)) {
+    pbody$page = inputs$page
+    multipage = FALSE
+  } else {
+    page = 0
+    pbody$page = 0
+    multipage = TRUE ; # do we support multiple pages if records exceed limit?
+  }
+  if (!is.null(inputs$limit)) {
+    pbody$limit = inputs$limit
+  }
+  ts <- data.frame(
+    tid=character(),
+    tsvalue=character(),
+    tscode=character(),
+    tstime=character(),
+    tsendtime=character(),
+    featureid=character(),
+    modified=character(),
+    entity_type=character(),
+    varid=character(),
+    uid=character(),
+    status=character(),
+    stringsAsFactors=FALSE) 
+  # set morepages to true to start, if multipage = FALSE, this gets reset immediately after 1st retrieval
+  morepages = TRUE
+  while (morepages == TRUE) {
+    tsrest <- GET(
+      paste(site,"/dh_timeseries.json",sep=""), 
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      query = pbody, 
+      encode = "json"
+    );
+    ts_cont <- content(tsrest);
+    
+    
+    if (length(ts_cont$list) != 0) {
+      
+      i <- 1
+      numrecs = length(ts_cont$list)
+      print(paste("----- Number of timeseries found: ",numrecs,sep=""))
+      for (i in 1:numrecs) {
+        
+        ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
+                             "tsvalue" = if (is.null(ts_cont$list[[i]]$tsvalue)){""} else {ts_cont$list[[i]]$tsvalue},
+                             "tscode" = if (is.null(ts_cont$list[[i]]$tscode)){""} else {ts_cont$list[[i]]$tscode},
+                             "tstime" = if (is.null(ts_cont$list[[i]]$tstime)){""} else {ts_cont$list[[i]]$tstime},
+                             "tsendtime" = if (is.null(ts_cont$list[[i]]$tsendtime)){""} else {ts_cont$list[[i]]$tsendtime},
+                             "featureid" = if (is.null(ts_cont$list[[i]]$featureid)){""} else {ts_cont$list[[i]]$featureid},
+                             "modified" = if (is.null(ts_cont$list[[i]]$modified)){""} else {ts_cont$list[[i]]$modified},
+                             "entity_type" = if (is.null(ts_cont$list[[i]]$entity_type)){""} else {ts_cont$list[[i]]$entity_type},
+                             "varid" = if (is.null(ts_cont$list[[i]]$varid)){""} else {ts_cont$list[[i]]$varid},
+                             "uid" = if (is.null(ts_cont$list[[i]]$uid)){""} else {ts_cont$list[[i]]$uid},
+                             "status" = if (is.null(ts_cont$list[[i]]$status)){""} else {ts_cont$list[[i]]$status}
+        )
+        ts  <- rbind(ts, ts_i)
+      }
+      
+      
+      trecs <- length(ts[,1])
+      #print(trecs)
+      # trecs = as.integer(count(ts))
+      # pbody$limit <- 1
+      # print(pbody$limit)
+      
+      if (trecs >= pbody$limit) {
+        morepages = FALSE
+      } else {
+        morepages = TRUE
+        pbody$page = pbody$page + 1
+      }
+    } else {
+      morepages = FALSE
+      #trecs = as.integer(count(ts))
+      trecs <- length(ts[,1])
+      if (trecs == 0) {
+        print("----- This timeseries does not exist")
+        ts = FALSE
+      } else {
+        print(paste("Total =", trecs))
+      }
+    }
+  }
+  return(ts)
+}
+
+
 fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   # NOT FINISHED - JUST PASTED CODE
   url <- paste(site,"om/remote/setModelData.php?hash=", sep='/');
@@ -191,4 +333,56 @@ fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   #shell.exec(alf_url)  # opening the webpage
   print(ins_url);
   readLines(ins_url)
+}
+
+#' Retrieve TS data from tsvalues style data frame
+#'
+#' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+#' @param tsvalues data frame to search
+#' @return data frame of tsvalue or FALSE
+#' @seealso NA
+#' @export fn_search_tsvalues
+#' @examples NA
+fn_search_tsvalues <- function(config, tsvalues_tmp) {
+  tsvals = FALSE
+  where_clause = ""
+  number_cols = c("tid", "tsvalue", "featureid")
+  tss <- "select * from tsvalues_tmp where "
+  if (!is.null(config$tid)) {
+    where_clause <- paste(
+      where_clause,
+      "tid = ", config$tid
+    )
+  } else {
+    wand = ""
+    for (i in names(config)) {
+      if (nchar(where_clause) > 1) {
+        wand = "AND"
+      }
+      if (!is.null(config[i])) {
+        where_clause <- paste(
+          where_clause, 
+          wand, i, "="
+        )
+        if (is.element(i, number_cols)) {
+          where_clause <- paste(
+            where_clause, config[i]
+          )
+        } else {
+          where_clause <- paste0(
+            where_clause, " '", config[i], "'"
+          )
+        }
+      } 
+    }
+  }
+  if (nchar(where_clause) > 0 ) {
+    tss <- paste(tss, where_clause)
+    message(tss)
+    tsvals <- sqldf(tss)
+    if (!nrow(tsvals)) {
+      tsvals = FALSE
+    }
+  }
+  return(tsvals)
 }

@@ -3,6 +3,8 @@
 export(RomDataSource)
 export(fn_get_rundata)
 export(fn_get_runfile_info)
+export(fn_search_tsvalues)
+export(getVarDefView)
 export(om_auth_read)
 export(om_get_rundata)
 export(om_vahydro_metric_grid)
