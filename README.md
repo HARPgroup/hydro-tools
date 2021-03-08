@@ -13,6 +13,8 @@ install_github("HARPgroup/hydro-tools")
 # hydrotools uses IHA for some metrics.
 # Install IHA as:
 devtools::install_github("jasonelaw/iha")
+#HAVE ALSO HAD LUCK INSTALLING WITH THE FOLLOWING
+install.packages("IHA", repos="http://R-Forge.R-project.org")
 
 #EXAMPLE FUNCTION DOCUMENTATION
 ??om_vahydro_metric_grid
