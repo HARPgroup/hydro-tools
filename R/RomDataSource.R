@@ -40,7 +40,7 @@ RomDataSource <- R6Class(
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
-      # return_type = 'list' or 'object', default to list to maintain
+      # return_type = 'data.frame' or 'object', default to list to maintain
       # force_refresh = if FALSE, use local value if we already have one
       #    easier backwards compatibility, lower data needs?
       # if returning object, only take first value? 
@@ -48,18 +48,50 @@ RomDataSource <- R6Class(
       # or return 
       # search first in 
       tsvalues <- fn_search_tsvalues(config, self$tsvalues)
-      if (is.boolean(tsvalues)) {
+      if (is.logical(tsvalues)) {
         # none exists locally, so query
         force_refresh = TRUE
       }
-      if (!is.null(self$site)) {
-        ts <- fn_getTimeseries(config, self$site)
+      if (!is.null(self$site) & force_refresh) {
+        ts_vals <- fn_get_timeseries(config, self$site, self$token)
+        for (i in nrow(ts_vals)) {
+          print(paste("handling ts", i))
+          tsi <- as.list(ts_vals[i,])
+          tsi <- RomTS$new(self,tsi)
+          tsi <- tsi$to_list()
+          self$set_ts(tsi)
+        }
       } else {
         ts <- RomTS$new(self, config)
-        ts <- rbind(ts$to_list())
+        ts <- ts$to_list()
+        self$set_ts(ts)
       }
       # add to tsvalues data frame
       return(ts)
+    },
+    #' @param ts = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @return nothing sets internal private token
+    set_ts = function(ts) {
+      # check uniqueness
+      # search for existing based on uniqueness
+      # uniqueness is variable def related, not arbitrary 
+      print(ts)
+      ts_check = FALSE
+      if (!is.na(ts$tid)) {
+        if (ts$tid > 0) {
+          ts_check = fn_search_tsvalues(list(tid = ts$tid), self$tsvalues)
+          #print(ts_check)
+        }
+      }
+      if (is.logical(ts_check)) {
+        # not found, so add
+        message("Storing TS")
+        self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
+      } else {
+        # update 
+        message("Found, trying to load")
+        self$tsvalues[ts$ID] <- ts
+      }
     },
     #' @field timeline for default time series data
     timeline = NULL,
@@ -67,15 +99,15 @@ RomDataSource <- R6Class(
     tsvalues = data.frame(
       tid=character(),
       entity_type=character(),
-      featureid=character(),
-      varid=character(),
-      tstime=character(),
-      tsendtime=character(),
-      tsvalue=character(),
+      varid=integer(),
+      featureid=integer(),
+      tstime=integer(),
+      tsendtime=integer(),
+      tsvalue=numeric(),
       tscode=character(),
-      modified=character(),
-      uid=character(),
-      status=character(),
+      modified=integer(),
+      tlid=integer(),
+      uid=integer(),
       bundle=character(),
       stringsAsFactors=FALSE
     ),
@@ -103,7 +135,26 @@ RomDataSource <- R6Class(
     #' @field features table of physical features
     features = data.frame(),
     #' @field var_defs table of variable definitions
-    var_defs = data.frame(),
+    var_defs = data.frame(
+      varid = integer(),
+      varname = character(),
+      vardesc = character(),
+      vocabulary = character(),
+      varunits = character(),
+      varkey = character(),
+      datatype = character(),
+      varcode = character(),
+      isregular = character(),
+      timestep = numeric(),
+      timeunits = character(),
+      nodataval = numeric(),
+      status = character(),
+      data_entry = character(),
+      plugin = character(),
+      options = character(),
+      varabbrev = character(),
+      multiplicity = character()
+    ),
     #' @field admin_features table of adminreg features
     admin_features = data.frame(),
     #' @field ts_cache list of ts objects instantiated
