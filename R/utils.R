@@ -206,7 +206,16 @@ fn_getVarDefView <- function(site, varkey, debug = FALSE) {
   return(varid)
 }
 
-fn_getTimeseries <- function(inputs, site, ts){
+#' Retrieve time series value from RESTful web service
+#'
+#' @param site URL of om server
+#' @param varkey character variable key
+#' @param debug show debugging info
+#' @return integer variable id
+#' @seealso NA
+#' @export fn_getVarDefView
+#' @examples NA
+fn_get_timeseries <- function(inputs, site, token){
   #Convert varkey to varid - needed for REST operations 
   varid <- NULL 
   if (!is.null(inputs$varkey)) {
@@ -248,9 +257,11 @@ fn_getTimeseries <- function(inputs, site, ts){
   }
   if (!is.null(inputs$limit)) {
     pbody$limit = inputs$limit
+  } else {
+    pbody$limit = 0 # get all
   }
   ts <- data.frame(
-    tid=character(),
+    tid=integer(),
     tsvalue=character(),
     tscode=character(),
     tstime=character(),
@@ -271,8 +282,9 @@ fn_getTimeseries <- function(inputs, site, ts){
       query = pbody, 
       encode = "json"
     );
+    message(tsrest)
     ts_cont <- content(tsrest);
-    
+    message(paste(site,"/dh_timeseries.json",sep=""))
     
     if (length(ts_cont$list) != 0) {
       
@@ -281,17 +293,21 @@ fn_getTimeseries <- function(inputs, site, ts){
       print(paste("----- Number of timeseries found: ",numrecs,sep=""))
       for (i in 1:numrecs) {
         
-        ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
-                             "tsvalue" = if (is.null(ts_cont$list[[i]]$tsvalue)){""} else {ts_cont$list[[i]]$tsvalue},
-                             "tscode" = if (is.null(ts_cont$list[[i]]$tscode)){""} else {ts_cont$list[[i]]$tscode},
-                             "tstime" = if (is.null(ts_cont$list[[i]]$tstime)){""} else {ts_cont$list[[i]]$tstime},
-                             "tsendtime" = if (is.null(ts_cont$list[[i]]$tsendtime)){""} else {ts_cont$list[[i]]$tsendtime},
-                             "featureid" = if (is.null(ts_cont$list[[i]]$featureid)){""} else {ts_cont$list[[i]]$featureid},
-                             "modified" = if (is.null(ts_cont$list[[i]]$modified)){""} else {ts_cont$list[[i]]$modified},
-                             "entity_type" = if (is.null(ts_cont$list[[i]]$entity_type)){""} else {ts_cont$list[[i]]$entity_type},
-                             "varid" = if (is.null(ts_cont$list[[i]]$varid)){""} else {ts_cont$list[[i]]$varid},
-                             "uid" = if (is.null(ts_cont$list[[i]]$uid)){""} else {ts_cont$list[[i]]$uid},
-                             "status" = if (is.null(ts_cont$list[[i]]$status)){""} else {ts_cont$list[[i]]$status}
+        ts_i <- as.data.frame( 
+          list(
+            tid = if (is.null(ts_cont$list[[i]]$tid)){NA} else {as.integer(as.character(ts_cont$list[[i]]$tid))},
+            tsvalue = if (is.null(ts_cont$list[[i]]$tsvalue)){NA} else {as.numeric(as.character(ts_cont$list[[i]]$tsvalue))},
+            tscode = if (is.null(ts_cont$list[[i]]$tscode)){NA} else {as.character(ts_cont$list[[i]]$tscode)},
+            tstime = if (is.null(ts_cont$list[[i]]$tstime)){NA} else {as.integer(ts_cont$list[[i]]$tstime)},
+            tsendtime = if (is.null(ts_cont$list[[i]]$tsendtime)){NA} else {as.integer(ts_cont$list[[i]]$tsendtime)},
+            featureid = if (is.null(ts_cont$list[[i]]$featureid)){NA} else {as.integer(ts_cont$list[[i]]$featureid)},
+            modified = if (is.null(ts_cont$list[[i]]$modified)){NA} else {as.integer(ts_cont$list[[i]]$modified)},
+            entity_type = if (is.null(ts_cont$list[[i]]$entity_type)){NA} else {as.character(as.character(ts_cont$list[[i]]$entity_type))},
+            varid = if (is.null(ts_cont$list[[i]]$varid)){NA} else {as.integer(ts_cont$list[[i]]$varid)},
+            uid = if (is.null(ts_cont$list[[i]]$uid)){NA} else {as.integer(ts_cont$list[[i]]$uid)},
+            status = if (is.null(ts_cont$list[[i]]$status)){NA} else {as.integer(ts_cont$list[[i]]$status)}
+          ),
+          stringsAsFactors=FALSE
         )
         ts  <- rbind(ts, ts_i)
       }
@@ -303,7 +319,7 @@ fn_getTimeseries <- function(inputs, site, ts){
       # pbody$limit <- 1
       # print(pbody$limit)
       
-      if (trecs >= pbody$limit) {
+      if ( (pbody$limit > 0) & (trecs >= pbody$limit) ) {
         morepages = FALSE
       } else {
         morepages = TRUE
