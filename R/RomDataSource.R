@@ -17,35 +17,66 @@ RomDataSource <- R6Class(
     token = NULL # rest token if remote rest source is used
   ),
   public = list(
-    #' @field base_url URL of some RESTful repository
-    base_url = NULL,
-    #' @param base_url URL of some RESTful repository
+    #' @field site URL of some RESTful repository
+    site = NULL,
+    #' @param site URL of some RESTful repository
     #' @return object instance
-    initialize = function(base_url) {
-      self$base_url = base_url
+    initialize = function(site) {
+      self$site = site
     },
     #' @return nothing sets internal private token
     get_token = function() {
-      if (!is.character(self$base_url) ) {
+      if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$base_url)
+      private$token <- om_vahydro_token(self$site)
+    },
+    # need get_ts - get data frame of ts values matching criteria
+    # load_object - load entity single object config
+    # get_ts method description
+    # this could actually live in the RomTS object
+    #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @param return_type 'df' (data.frame) or 'object'
+    #' @param force_refresh if this ds has a remote source, whether to pull anew
+    #' @return nothing sets internal private token
+    get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+      # return_type = 'list' or 'object', default to list to maintain
+      # force_refresh = if FALSE, use local value if we already have one
+      #    easier backwards compatibility, lower data needs?
+      # if returning object, only take first value? 
+      # or, return FALSE with message that df is only option? Hmmmm.
+      # or return 
+      # search first in 
+      tsvalues <- fn_search_tsvalues(config, self$tsvalues)
+      if (is.boolean(tsvalues)) {
+        # none exists locally, so query
+        force_refresh = TRUE
+      }
+      if (!is.null(self$site)) {
+        ts <- fn_getTimeseries(config, self$site)
+      } else {
+        ts <- RomTS$new(self, config)
+        ts <- rbind(ts$to_list())
+      }
+      # add to tsvalues data frame
+      return(ts)
     },
     #' @field timeline for default time series data
     timeline = NULL,
     #' @field tsvalues table of time series data
     tsvalues = data.frame(
       tid=character(),
-      tsvalue=character(),
-      tscode=character(),
+      entity_type=character(),
+      featureid=character(),
+      varid=character(),
       tstime=character(),
       tsendtime=character(),
-      featureid=character(),
+      tsvalue=character(),
+      tscode=character(),
       modified=character(),
-      entity_type=character(),
-      varid=character(),
       uid=character(),
       status=character(),
+      bundle=character(),
       stringsAsFactors=FALSE
     ),
     #' @field props table of object properties (can be contained by objects)
@@ -74,6 +105,14 @@ RomDataSource <- R6Class(
     #' @field var_defs table of variable definitions
     var_defs = data.frame(),
     #' @field admin_features table of adminreg features
-    admin_features = data.frame()
+    admin_features = data.frame(),
+    #' @field ts_cache list of ts objects instantiated
+    ts_cache = list(),
+    #' @field feature_cache list of feature objects instantiated
+    feature_cache = list(),
+    #' @field prop_cache list of prop objects instantiated
+    prop_cache = list(),
+    #' @field var_cache list of var objects instantiated
+    var_cache = list()
   )
 )

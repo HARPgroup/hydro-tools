@@ -24,7 +24,7 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{base_url}}{URL of some RESTful repository}
+\item{\code{site}}{URL of some RESTful repository}
 
 \item{\code{timeline}}{for default time series data}
 
@@ -37,6 +37,14 @@ NA
 \item{\code{var_defs}}{table of variable definitions}
 
 \item{\code{admin_features}}{table of adminreg features}
+
+\item{\code{ts_cache}}{list of ts objects instantiated}
+
+\item{\code{feature_cache}}{list of feature objects instantiated}
+
+\item{\code{prop_cache}}{list of prop objects instantiated}
+
+\item{\code{var_cache}}{list of var objects instantiated}
 }
 \if{html}{\out{</div>}}
 }
@@ -45,6 +53,7 @@ NA
 \itemize{
 \item \href{#method-new}{\code{RomDataSource$new()}}
 \item \href{#method-get_token}{\code{RomDataSource$get_token()}}
+\item \href{#method-get_ts}{\code{RomDataSource$get_ts()}}
 \item \href{#method-clone}{\code{RomDataSource$clone()}}
 }
 }
@@ -53,13 +62,13 @@ NA
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(base_url)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{base_url}}{URL of some RESTful repository}
+\item{\code{site}}{URL of some RESTful repository}
 }
 \if{html}{\out{</div>}}
 }
@@ -75,6 +84,29 @@ object instance
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_ts"></a>}}
+\if{latex}{\out{\hypertarget{method-get_ts}{}}}
+\subsection{Method \code{get_ts()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "data.frame", force_refresh = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+
+\item{\code{return_type}}{'df' (data.frame) or 'object'}
+
+\item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 nothing sets internal private token
 }
