@@ -6,3 +6,4 @@ tempfile
 *.docx
 .Rproj.user
 *.Rdata
+.Rdata
