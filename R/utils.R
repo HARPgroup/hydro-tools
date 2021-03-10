@@ -187,9 +187,10 @@ fn_get_runfile <- function(
 #'
 #' @param site URL of om server
 #' @param varkey character variable key
+#' @param debug show debugging info
 #' @return integer variable id
 #' @seealso NA
-#' @export getVarDefView
+#' @export fn_getVarDefView
 #' @examples NA
 fn_getVarDefView <- function(site, varkey, debug = FALSE) {
   tsdef_url<- paste(site,"/?q=vardefs.tsv/", varkey,sep="")
@@ -338,7 +339,7 @@ fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
 #' Retrieve TS data from tsvalues style data frame
 #'
 #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-#' @param tsvalues data frame to search
+#' @param tsvalues_tmp data frame to search
 #' @return data frame of tsvalue or FALSE
 #' @seealso NA
 #' @export fn_search_tsvalues

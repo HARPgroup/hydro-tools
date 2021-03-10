@@ -10,6 +10,8 @@ fn_getVarDefView(site, varkey, debug = FALSE)
 \item{site}{URL of om server}
 
 \item{varkey}{character variable key}
+
+\item{debug}{show debugging info}
 }
 \value{
 integer variable id

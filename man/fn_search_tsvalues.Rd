@@ -9,7 +9,7 @@ fn_search_tsvalues(config, tsvalues_tmp)
 \arguments{
 \item{config}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
-\item{tsvalues}{data frame to search}
+\item{tsvalues_tmp}{data frame to search}
 }
 \value{
 data frame of tsvalue or FALSE

@@ -93,7 +93,7 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-get_ts}{}}}
 \subsection{Method \code{get_ts()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "list", force_refresh = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "data.frame", force_refresh = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -101,7 +101,7 @@ nothing sets internal private token
 \describe{
 \item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
-\item{\code{return_type}}{'list' or 'object'}
+\item{\code{return_type}}{'df' (data.frame) or 'object'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
 }
