@@ -46,15 +46,15 @@ om_vahydro_metric_grid <- function (
       # as happens with some facility/riverseg models
       mv_base <- model_version
     }
-    runlabel <- str_replace_all(runlabel, '-', '_')
-    runlabel <- str_replace_all(runlabel, ' ', '_')
+    runlabel <- stringr::str_replace_all(runlabel, '-', '_')
+    runlabel <- stringr::str_replace_all(runlabel, ' ', '_')
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
     print(paste("retrieving ", url))
-    rawdat <- GET(
+    rawdat <- httr::GET(
       url,
-      add_headers(HTTP_X_CSRF_TOKEN = token),
-      encode = "xml", content_type("text/csv")
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+      encode = "xml", httr::content_type("text/csv")
     );
     dat <- content(rawdat)
     rawdata <- as.data.frame(dat)

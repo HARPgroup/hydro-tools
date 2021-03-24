@@ -43,6 +43,8 @@ NA
 
 \item{\code{uid}}{user id of creator}
 
+\item{\code{modified}}{timestamp}
+
 \item{\code{datasource}}{RomDataSource}
 }
 \if{html}{\out{</div>}}
@@ -54,6 +56,7 @@ NA
 \item \href{#method-from_list}{\code{RomTS$from_list()}}
 \item \href{#method-to_list}{\code{RomTS$to_list()}}
 \item \href{#method-set_prop}{\code{RomTS$set_prop()}}
+\item \href{#method-save}{\code{RomTS$save()}}
 \item \href{#method-clone}{\code{RomTS$clone()}}
 }
 }
@@ -62,7 +65,7 @@ NA
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$new(datasource = NULL, config = list())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomTS$new(datasource = NULL, config = list(), load_remote = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -71,6 +74,8 @@ NA
 \item{\code{datasource}}{optional RomDataSource for remote and local storage}
 
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+
+\item{\code{load_remote}}{automatically query REST data source for matches?}
 
 \item{\code{site}}{URL of some RESTful repository}
 }
@@ -132,6 +137,25 @@ list of object attributes suitable for input to new() and from_list() methods
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-save"></a>}}
+\if{latex}{\out{\hypertarget{method-save}{}}}
+\subsection{Method \code{save()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomTS$save(push_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{push_remote}}{whether to automatically propagate changes to remote data source}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+boolean TRUE on success, FALSE on failure
 }
 }
 \if{html}{\out{<hr>}}
