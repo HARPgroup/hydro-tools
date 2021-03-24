@@ -53,7 +53,10 @@ NA
 \itemize{
 \item \href{#method-new}{\code{RomDataSource$new()}}
 \item \href{#method-get_token}{\code{RomDataSource$get_token()}}
+\item \href{#method-get_vardef}{\code{RomDataSource$get_vardef()}}
 \item \href{#method-get_ts}{\code{RomDataSource$get_ts()}}
+\item \href{#method-auth_read}{\code{RomDataSource$auth_read()}}
+\item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
 \item \href{#method-clone}{\code{RomDataSource$clone()}}
 }
 }
@@ -89,6 +92,27 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-get_vardef}{}}}
+\subsection{Method \code{get_vardef()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, debug = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{varkey}}{= variable key}
+
+\item{\code{debug}}{show info}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_ts"></a>}}
 \if{latex}{\out{\hypertarget{method-get_ts}{}}}
 \subsection{Method \code{get_ts()}}{
@@ -104,6 +128,55 @@ nothing sets internal private token
 \item{\code{return_type}}{'df' (data.frame) or 'object'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-auth_read"></a>}}
+\if{latex}{\out{\hypertarget{method-auth_read}{}}}
+\subsection{Method \code{auth_read()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$auth_read(
+  uri,
+  content_type = "text/csv",
+  delim = ",",
+  enc = "xml"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{uri}}{remote address to retrieve data}
+
+\item{\code{content_type}}{http content-type}
+
+\item{\code{delim}}{delimiter}
+
+\item{\code{enc}}{encoding}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+result of web request
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_ts"></a>}}
+\if{latex}{\out{\hypertarget{method-set_ts}{}}}
+\subsection{Method \code{set_ts()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_ts(ts)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{ts}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 }
 \if{html}{\out{</div>}}
 }

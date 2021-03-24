@@ -8,7 +8,7 @@ ds$features
 ts <- RomTS$new(ds)
 ts$tid = 5
 ts$tsvalue = 1.4
-ts$save()
+ts$save() # save(), applies to local data, store() synchs with REST if applicable
 #ts$to_list()
 ds$tsvalues
 

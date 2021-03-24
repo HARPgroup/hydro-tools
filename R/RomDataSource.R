@@ -31,6 +31,14 @@ RomDataSource <- R6Class(
       }
       private$token <- om_vahydro_token(self$site)
     },
+    # this could actually live in the RomTS object
+    #' @param varkey = variable key
+    #' @param debug show info
+    #' @return nothing sets internal private token
+    get_vardef = function(varkey, debug = FALSE) {
+      vardef <- fn_get_vardef_view(varkey, self$site, self$token, debug)
+      return(vardef)
+    },
     # need get_ts - get data frame of ts values matching criteria
     # load_object - load entity single object config
     # get_ts method description
@@ -69,6 +77,15 @@ RomDataSource <- R6Class(
       # add to tsvalues data frame
       return(ts)
     },
+    #' @param uri remote address to retrieve data
+    #' @param content_type http content-type
+    #' @param delim delimiter
+    #' @param enc encoding
+    #' @return result of web request
+    auth_read = function(uri, content_type = "text/csv", delim = ",", enc = "xml") {
+      auth_result <- om_auth_read(uri, self$token, content_type, delim, enc)
+      return(auth_result)
+    },
     #' @param ts = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
     #' @return nothing sets internal private token
     set_ts = function(ts) {
@@ -95,6 +112,9 @@ RomDataSource <- R6Class(
     },
     #' @field timeline for default time series data
     timeline = NULL,
+    # todo: these should be defined in the RomTS object so that there is one and only one 
+    #       place to maintain a list of fields that need to exist in this table.
+    #       Alternatively, this can live here, but then RomTS must look here for template.
     #' @field tsvalues table of time series data
     tsvalues = data.frame(
       tid=character(),

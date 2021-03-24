@@ -13,11 +13,11 @@ om_auth_read <- function(uri, token, ctype = "text/csv", delim=',', enc="xml") {
   # New method with httr
   # specifically used with csrf token authentication
   # Helps to allow any view to be retrieved with full system authentication
-  rawdat <- GET(
+  rawdat <- httr::GET(
     uri,
-    add_headers(HTTP_X_CSRF_TOKEN = token),
-    encode = enc, content_type(ctype)
+    httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+    encode = enc, httr::content_type(ctype)
   );
-  cdat <- content(rawdat)
+  cdat <- httr::content(rawdat)
   return(cdat)
 }
