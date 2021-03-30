@@ -7,11 +7,11 @@
 fn_get_timeseries(inputs, site, token)
 }
 \arguments{
-\item{inputs}{list of query terms (see RomTS::to_list())}
+\item{inputs}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
 \item{site}{URL of om server}
 
-\item{token}{for httpx authentication}
+\item{token}{show debugging info}
 }
 \value{
 integer variable id
