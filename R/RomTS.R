@@ -23,7 +23,7 @@ RomTS <- R6Class(
     tsendtime = NA,
     #' @field tsvalue numerical value
     tsvalue = NA,
-    #' @field tscode alphanumerical value
+    #' @field tscode alphanumeric value
     tscode = NA,
     #' @field tlid timeline ID (for future use)
     tlid = NA,
