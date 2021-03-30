@@ -33,7 +33,7 @@ NA
 
 \item{\code{tsvalue}}{numerical value}
 
-\item{\code{tscode}}{alphanumerical value}
+\item{\code{tscode}}{alphanumeric value}
 
 \item{\code{tlid}}{timeline ID (for future use)}
 
