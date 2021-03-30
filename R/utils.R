@@ -14,7 +14,6 @@ options(timeout=480); # set timeout to twice default level to avoid abort due to
 #' @seealso NA
 #' @export fn_get_rundata
 #' @examples NA
-#' @import zoo
 fn_get_rundata <- function(
   elementid = -1, runid = -1, 
   varname = 'Qout', scenid = 37,
@@ -36,7 +35,7 @@ fn_get_rundata <- function(
   filename<-paste(urlbase, elementid, "&variables=", varname, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   print(paste("From ", filename));
   
-  dat = try(utils::read.table(filename, header = TRUE, sep = ",")) 
+  dat = try(read.table(filename, header = TRUE, sep = ",")) 
   if (class(dat)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: empty file ", filename))
@@ -80,7 +79,7 @@ fn_get_runfile_info <- function(
   print(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   print(paste("From ", filename))
-  finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
+  finfo = try(read.csv(filename, header = TRUE, sep = "\t")) ;
   if (class(finfo)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: retrieving ", filename))
@@ -104,7 +103,6 @@ fn_get_runfile_info <- function(
 #' @seealso NA
 #' @export fn_get_runfile_info
 #' @examples NA
-#' @import zoo
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu", cached = TRUE, 
@@ -142,7 +140,7 @@ fn_get_runfile <- function(
       if (finfo$compressed == 1) {
         print(paste("Downloading Compressed Run File ", filename));
         download.file(filename,'tempfile',mode="wb", method = "libcurl");
-        filename <-  utils::unzip ('tempfile');
+        filename <-  unzip ('tempfile');
       } else {
         print(paste("Downloading Un-compressed Run File ", filename));
       }
@@ -154,13 +152,13 @@ fn_get_runfile <- function(
   } else {
     # does not exist locally
     print(paste("Downloading Run File ", filename));
-    utils::download.file(filename,'tempfile',mode="wb", method = "libcurl");
+    download.file(filename,'tempfile',mode="wb", method = "libcurl");
     if (finfo$compressed == 1) {
       print(paste("Unpacking Compressed Run File ", filename));
-      filename <-  utils::unzip ('tempfile');
+      filename <-  unzip ('tempfile');
     }
   }
-  dat = try(utils::read.table( filename, header = TRUE, sep = ",")) ;
+  dat = try(read.table( filename, header = TRUE, sep = ",")) ;
   if (class(dat)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: empty file ", filename))
@@ -197,7 +195,7 @@ fn_get_runfile <- function(
 #' @examples NA
 fn_get_vardef_view <- function(varkey, site, token, debug = FALSE) {
   tsdef_url<- paste(site,"/?q=vardefs.tsv/", varkey,sep="")
-  tsdef_table <- utils::read.table(tsdef_url,header = TRUE, sep = "\t")    
+  tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
   varid <- tsdef_table[1][which(tsdef_table$varkey == varkey),]
   if (debug) {
     message(paste("varid: ",varid,sep=""))
@@ -211,9 +209,9 @@ fn_get_vardef_view <- function(varkey, site, token, debug = FALSE) {
 
 #' Retrieve time series value from RESTful web service
 #'
-#' @param inputs list of query terms (see RomTS::to_list())
+#' @param inputs = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
 #' @param site URL of om server
-#' @param token for httpx authentication
+#' @param token show debugging info
 #' @return integer variable id
 #' @seealso NA
 #' @export fn_get_timeseries
@@ -279,14 +277,14 @@ fn_get_timeseries <- function(inputs, site, token){
   # set morepages to true to start, if multipage = FALSE, this gets reset immediately after 1st retrieval
   morepages = TRUE
   while (morepages == TRUE) {
-    tsrest <- httr::GET(
+    tsrest <- GET(
       paste(site,"/dh_timeseries.json",sep=""), 
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+      add_headers(HTTP_X_CSRF_TOKEN = token),
       query = pbody, 
       encode = "json"
     );
     message(tsrest)
-    ts_cont <- httr::content(tsrest);
+    ts_cont <- content(tsrest);
     message(paste(site,"/dh_timeseries.json",sep=""))
     
     if (length(ts_cont$list) != 0) {
@@ -343,70 +341,42 @@ fn_get_timeseries <- function(inputs, site, token){
   return(ts)
 }
 
-fn_post_timeseries <- function(inputs, site, token){
+fn_post_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  if (!is.null(inputs$tid)) {
-    tid <- inputs$tid
-  } else {
-    tid = NULL
-  }
-  if (!is.null(inputs$varkey)) {
-    varid <- fn_get_vardef_view(inputs$varkey, site, token)
-    if (is.null(varid)) {
-      # we sent a bad variable id so we should return FALSE
-      return(FALSE)
-    }
-  }
-  if (!is.null(inputs$varid)) {
-    varid = inputs$varid
-  }
-  
-  if (is.null(varid)) {
-    print("Variable IS is null - returning.")
-    return(FALSE)
-  }
-  
-  pbody = list(
-    featureid = inputs$featureid,
-    varid = varid,
-    entity_type = inputs$entity_type,
-    tsvalue = inputs$tsvalue,
-    tscode = inputs$tscode,
-    tstime = inputs$tstime,
-    tsendtime = inputs$tsendtime
-  );
-  
-  if (is.null(tid)){
-    print("----- Creating timeseries...")
-    ts_result <- httr::POST(
-      paste(site,"/dh_timeseries/",sep=""), 
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      body = pbody,
+  pkid <- as.integer(as.character(inputs[pk]))
+  this_result <- list(
+    status = FALSE
+  )
+  if (!is.na(pkid)) {
+    message(paste0("----- Creating ", entity_type, "..."))
+    this_result <- POST(
+      paste0(site, "/",entity_type, "/"), 
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      body = inputs,
       encode = "json"
-    );
-    if (ts_result$status == 201){
-      msg <- paste("Status ",ts_result$status,", timeseries Created Successfully",sep="")
-    } else {
-      msg <- paste("Status ",ts_result$status,", Error: timeseries Not Created Successfully",sep="")
-    }
+    )
     
   } else {
-    # old code screened to see if multiple were sent, this only handles one.
-    message("----- Single timeseries Exists, Updating...")
-    ts_result <- httr::PUT(
-      paste(site,"/dh_timeseries/",tid,sep=""), 
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      body = pbody,
+    message(paste0("----- Updating ", entity_type, "..."))
+    this_result <- PUT(
+      paste0(site, "/",entity_type, "/"), 
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      body = inputs,
       encode = "json"
     );
-    if (ts_result$status == 200){
-      tsrecord = ts_result
-      tsparts = strsplit(tsrecord$url, '/', fixed = TRUE)
-      tid = as.integer(tsparts[[1]][length(tsparts[[1]])])
-      msg <- paste("Status ",ts_result$status,", timeseries Updated Successfully",sep="")
-    } else {
-      msg <- paste("Status ",ts_result$status,", Error: timeseries Not Updated Successfully",sep="")
-    }
+  }
+  rest_parts = strsplit(this_result$url, '/', fixed = TRUE)
+  pkid = as.integer(rest_parts[[1]][length(rest_parts[[1]])])
+  if (!is.boolean(this_result$status )) {
+    return_id <- switch(
+      this_result$status,
+      "200" = pkid,
+      "201" = pkid,
+      "400" = FALSE,
+      "500" = FALSE
+    )
+  } else {
+    return_id = FALSE
   }
   return(tid)
 }
@@ -431,7 +401,6 @@ fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
 #' @seealso NA
 #' @export fn_search_tsvalues
 #' @examples NA
-#' @import sqldf
 fn_search_tsvalues <- function(config, tsvalues_tmp) {
   tsvals = FALSE
   where_clause = ""
