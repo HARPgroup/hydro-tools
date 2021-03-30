@@ -8,7 +8,8 @@ ts <- RomTS$new(
     varkey="geologic_map", 
     featureid=hid, 
     entity_type="dh_feature", 
-    tscode="mount alto quad"
+    tsvalue=1.0,
+    tscode="test"
   )
 )
 
