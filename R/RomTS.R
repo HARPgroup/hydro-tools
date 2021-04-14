@@ -55,7 +55,8 @@ RomTS <- R6Class(
       config_cols <- names(config)
       if (is.element("varkey", config_cols)) {
         if (!is.null(self$datasource)) {
-          config$varid = self$datasource$get_vardef(config$varkey)
+          vardef = self$datasource$get_vardef(config$varkey)
+          config$varid = vardef$varid
         }
       }
       self$from_list(config)
@@ -99,11 +100,15 @@ RomTS <- R6Class(
         tstime = self$tstime,
         tsendtime = self$tsendtime,
         tsvalue = self$tsvalue,
-        tscode = self$tscode,
-        modified = self$modified,
-        tlid = self$tlid,
-        uid = self$uid,
-        bundle = self$bundle
+        tscode = self$tscode 
+        # todo
+        #modified = self$modified,
+        # todo:
+        #tlid = self$tlid,
+        # todo:
+        # uid = self$uid
+        # todo:
+        # bundle = self$bundle
       )
       return(t_list)
     },
@@ -134,8 +139,8 @@ RomTS <- R6Class(
       # calls to set RomProperties linked to it?
       # self$hair <- val
       # do I have a varid? If not, get one, or fail.
-      self$datasource$set_ts(self$to_list(), push_remote)
-      self$datasource$post('dh_timeseries', self$to_list())
+      self$datasource$set_ts(self$to_list())
+      self$datasource$post('dh_timeseries', 'tid', self$to_list())
     }
   )
 )

@@ -93,7 +93,11 @@ getTimeseries <- function(inputs, base_url, ts){
   if (!is.null(inputs$tstime)) {
     pbody$tstime = inputs$tstime
   }
-  if (!is.null(inputs$tid)) {
+  
+  # TBD
+  # this code was added  then deleted, is it needed?  
+  # Need to test
+  if (is.integer(inputs$tid)) {
     if (inputs$tid > 0) {
       # forget about other attributes, just use tid
       pbody = list(
@@ -101,6 +105,17 @@ getTimeseries <- function(inputs, base_url, ts){
       )
     }
   }
+  # TBD
+  # this is the original code, is it needed?  
+  # Need to test
+  #if (!is.null(inputs$tid)) {
+  #  if (inputs$tid > 0) {
+  #    # forget about other attributes, just use tid
+  #    pbody = list(
+  #      tid = inputs$tid
+  #    )
+  #  }
+  #}
   if (!is.null(inputs$page)) {
     pbody$page = inputs$page
     multipage = FALSE
@@ -111,6 +126,8 @@ getTimeseries <- function(inputs, base_url, ts){
   }
   if (!is.null(inputs$limit)) {
     pbody$limit = inputs$limit
+  } else {
+    pbody$limit = 0 # get all
   }
   ts <- data.frame(
     tid=character(),
