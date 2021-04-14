@@ -95,7 +95,13 @@ RomDataSource <- R6Class(
           print(paste("handling ts", i))
           tsi <- as.list(ts_vals[i,])
           tsi <- RomTS$new(self,tsi)
+          if (return_type == 'object') {
+            ts <- tsi
+          } 
           tsi <- tsi$to_list()
+          if (return_type == 'data.frame') {
+            ts <- tsi
+          } 
           self$set_ts(tsi)
         }
       } else {
