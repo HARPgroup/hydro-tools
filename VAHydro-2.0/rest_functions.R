@@ -94,11 +94,13 @@ getTimeseries <- function(inputs, base_url, ts){
     pbody$tstime = inputs$tstime
   }
   if (!is.null(inputs$tid)) {
-    if (inputs$tid > 0) {
-      # forget about other attributes, just use tid
-      pbody = list(
-        tid = inputs$tid
-      )
+    if (is.integer(ss$tid)) {
+      if (inputs$tid > 0) {
+        # forget about other attributes, just use tid
+        pbody = list(
+          tid = inputs$tid
+        )
+      }
     }
   }
   if (!is.null(inputs$page)) {
@@ -234,6 +236,7 @@ postTimeseries <- function(inputs, base_url, ts){
   
   if (is.null(tid)){
     print("----- Creating timeseries...")
+    print(paste(" with token ", token))
     ts <- POST(paste(base_url,"/dh_timeseries/",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
                  body = pbody,
@@ -241,7 +244,7 @@ postTimeseries <- function(inputs, base_url, ts){
     );
     if (ts$status == 201){ts <- paste("Status ",ts$status,", timeseries Created Successfully",sep="")
     } else {ts <- paste("Status ",ts$status,", Error: timeseries Not Created Successfully",sep="")}
-    
+    print(pbody)
   } else if (length(dataframe$tid) == 1){
     print("----- Single timeseries Exists, Updating...")
     ts <- PUT(paste(base_url,"/dh_timeseries/",tid,sep=""), 

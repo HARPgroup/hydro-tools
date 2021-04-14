@@ -17,7 +17,7 @@ om_auth_read <- function(uri, token, ctype = "text/csv", delim=',', enc="xml") {
     uri,
     httr::add_headers(HTTP_X_CSRF_TOKEN = token),
     encode = enc, httr::content_type(ctype)
-  );
-  cdat <- httr::content(rawdat)
+  )
+  cdat <- httr::content(rawdat, type = ctype)
   return(cdat)
 }

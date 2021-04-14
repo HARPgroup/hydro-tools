@@ -33,11 +33,40 @@ RomDataSource <- R6Class(
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key
+    #' @param force_update Check remote repository for new info? 
     #' @param debug show info
     #' @return nothing sets internal private token
-    get_vardef = function(varkey, debug = FALSE) {
-      vardef <- fn_get_vardef_view(varkey, self$site, self$token, debug)
-      return(vardef)
+    get_vardef = function(varkey, force_update = FALSE, debug = FALSE) {
+      # NOt yet tested,
+      # check local store, if not there, check remote
+      var_def <- fn_search_vardefs(config, self$var_defs)
+      if (is.logical(var_def)) {
+        # none exists locally, so query
+        force_refresh = TRUE
+      }
+      if (!is.null(self$site) & force_refresh) {
+        var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
+        # TBD
+        # var_def <- RomVarDef$new(self,var_one)
+        # var_def <- var_def$to_list()
+         self$set_vardef(var_def)
+      } else {
+        # TBD
+        #var_def <- RomVarDef$new(self, config)
+        #var_def <- var_def$to_list()
+        #self$set_vardef(ts)
+      }
+      # after retrieval, store locally
+      return(var_def)
+    },
+    # get properties
+    #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @param return_type 'df' (data.frame) or 'object'
+    #' @param force_refresh if this ds has a remote source, whether to pull anew
+    #' @return nothing sets internal private token
+    get_props = function(config, return_type = 'df', force_refresh = FALSE) {
+      props <- fn_get_properties(config, self$site, private$token)
+      return(props)
     },
     # need get_ts - get data frame of ts values matching criteria
     # load_object - load entity single object config
@@ -61,7 +90,7 @@ RomDataSource <- R6Class(
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
-        ts_vals <- fn_get_timeseries(config, self$site, self$token)
+        ts_vals <- fn_get_timeseries(config, self$site, private$token)
         for (i in nrow(ts_vals)) {
           print(paste("handling ts", i))
           tsi <- as.list(ts_vals[i,])
@@ -83,7 +112,7 @@ RomDataSource <- R6Class(
     #' @param enc encoding
     #' @return result of web request
     auth_read = function(uri, content_type = "text/csv", delim = ",", enc = "xml") {
-      auth_result <- om_auth_read(uri, self$token, content_type, delim, enc)
+      auth_result <- om_auth_read(uri, private$token, content_type, delim, enc)
       return(auth_result)
     },
     #' @param ts = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -110,6 +139,39 @@ RomDataSource <- R6Class(
         self$tsvalues[ts$ID] <- ts
       }
     },
+    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
+    #' @return local df index?
+    set_vardef = function(var_def) {
+      # check uniqueness
+      # search for existing based on uniqueness
+      # uniqueness is variable def related, not arbitrary 
+      # Just return, the remainder is TBD (based on working ts value code)
+      return(TRUE)
+      print(var_def)
+      ts_check = FALSE
+      if (!is.na(var_def$varid)) {
+        if (var_def$varid > 0) {
+          var_check = fn_search_vardefs(list(varid = var_def$varid), self$var_defs)
+          #print(ts_check)
+        }
+      }
+      if (is.logical(var_check)) {
+        # not found, so add
+        message("Storing Var")
+        self$tsvalues <- rbind(self$var_defs, as.data.frame(var_def))
+      } else {
+        # update 
+        message("Found, trying to load")
+        self$var_defs[var_def$ID] <- var_def
+      }
+    },
+    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
+    #' @return local df index?
+    post = function(entity_type, pk, config) {
+      message(paste("site",self$site))
+      message(paste("token", private$token))
+      fn_post_rest(entity_type, pk, config, self$site, private$token)
+    },
     #' @field timeline for default time series data
     timeline = NULL,
     # todo: these should be defined in the RomTS object so that there is one and only one 
@@ -125,10 +187,11 @@ RomDataSource <- R6Class(
       tsendtime=integer(),
       tsvalue=numeric(),
       tscode=character(),
-      modified=integer(),
-      tlid=integer(),
-      uid=integer(),
-      bundle=character(),
+      #modified=integer(),
+      #tlid=integer(),
+      #uid=integer(),
+      # todo: add bundles?
+      #bundle=character(),
       stringsAsFactors=FALSE
     ),
     #' @field props table of object properties (can be contained by objects)
