@@ -47,17 +47,20 @@ RomTS <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
-      # if requested, we try to load, but then we can still overwrite if
-      # values exist
-      if (load_remote) {
-        self$datasource$get_ts(config)
-      }
       config_cols <- names(config)
       if (is.element("varkey", config_cols)) {
         if (!is.null(self$datasource)) {
           vardef = self$datasource$get_vardef(config$varkey)
           config$varid = vardef$varid
         }
+      }
+      # if requested, we try to load
+      # only the last one returned will be sent back to user if multiple
+      if (load_remote) {
+        ts <- self$datasource$get_ts(config, 'object', TRUE)
+        # merge config with ts
+        #message("Found")
+        config <- as.list(ts)
       }
       self$from_list(config)
     },

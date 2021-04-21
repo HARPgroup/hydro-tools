@@ -431,6 +431,11 @@ fn_search_tsvalues <- function(config, tsvalues_tmp) {
   } else {
     wand = ""
     for (i in names(config)) {
+      if (i == 'varkey') {
+        # for now we skip these as we count on varid in the vardef table.
+        message("Skipping varkey")
+        next
+      }
       if (nchar(where_clause) > 1) {
         wand = "AND"
       }
