@@ -16,6 +16,7 @@ ts <- RomTS$new(
   TRUE
 )
 
+# which returns the exact same object as
 ts1 <- ds$get_ts(list(
   varkey="geologic_map", 
   featureid=hid, 
@@ -24,7 +25,8 @@ ts1 <- ds$get_ts(list(
   tscode="test" 
 ), 'object', TRUE)
 
-# should work the same as 
+
+# both should work roughly the same as 
 ts2 <- getTimeseries(
   list(
     varkey="geologic_map", 
