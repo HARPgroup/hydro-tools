@@ -60,36 +60,87 @@ base.layers <- function(map_layers,extent = data.frame(x = c(-84, -75),y = c(35.
   ### PROCESS Minor Basin LAYER  #######################################################################
   ######################################################################################################
   mb_data <- MinorBasins.csv
-
-  # MB_df_sql <- paste('SELECT *
-  #             FROM mb_data
-  #             WHERE code = "',minorbasin,'"'
-  #                    ,sep="")
+  
+  mb_data$id <- as.numeric(rownames(mb_data))
+  mb.list <- list()
+  
+  for (z in 1:length(mb_data$code)) {
+    mb_geom <- readWKT(mb_data$geom[z])
+    mb_geom_clip <- gIntersection(bb, mb_geom)
+    
+    if (is.null(mb_geom_clip) == TRUE) {
+      # print("mb OUT OF MINOR BASIN EXTENT - SKIPPING") 
+      next
+    }
+    
+    mbProjected <- SpatialPolygonsDataFrame(mb_geom_clip, data.frame('id'), match.ID = TRUE)
+    mbProjected@data$id <- as.character(z)
+    mb.list[[z]] <- mbProjected
+  }
+  
+  length(mb.list)
+  #REMOVE THOSE MINOR BASINS THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
+  mb.list <- mb.list[which(!sapply(mb.list, is.null))]
+  length(mb.list)
+  
+  mb <- do.call('rbind', mb.list)
+  mb@data <- merge(mb@data, mb_data, by = 'id')
+  mb@data <- mb@data[,-c(2:3)]
+  mb.df <- fortify(mb, region = 'id')
+  mb.df <- merge(mb.df, mb@data, by = 'id') 
+  
+  #MB.df <- mb.df
+  
+  
+  
+  
+  
+  
+  
+  
+  # mb_data <- MinorBasins.csv
   # 
-  # if (minorbasin == "ES") {
-  #   print("COMBINING 2 EASTERN SHORE MINOR BASINS")
-  #   MB_df_sql <- paste('SELECT * FROM mb_data WHERE code = "ES" OR code = "EL"' ,sep="")
+  # #-------------------------------------------------------------------------------------
+  # # MB_df_sql <- paste('SELECT *
+  # #             FROM mb_data
+  # #             WHERE code = "',minorbasin,'"'
+  # #                    ,sep="")
+  # # # 
+  # # if (minorbasin == "ES") {
+  # #   print("COMBINING 2 EASTERN SHORE MINOR BASINS")
+  # #   MB_df_sql <- paste('SELECT * FROM mb_data WHERE code = "ES" OR code = "EL"' ,sep="")
+  # # }
+  # # # 
+  # # mb_data <- sqldf(MB_df_sql)
+  # # 
+  # # print(head(mb_data))
+  # #-------------------------------------------------------------------------------------
+  #  
+  # mb_data$id <- as.character(row_number(mb_data$code))
+  # MB.list <- list()
+  # 
+  # 
+  # for (z in 1:length(mb_data$code)) {
+  #   MB_geom <- readWKT(mb_data$geom[z])
+  #   MB_geom_clip <- gIntersection(bb, MB_geom)
+  # 
+  #   # if (is.null(MB_geom_clip) == TRUE) {
+  #   #   # print("MB OUT OF MINOR BASIN EXTENT - SKIPPING") 
+  #   #   next
+  #   # }
+  #   
+  #   MBProjected <- SpatialPolygonsDataFrame(MB_geom_clip, data.frame('id'), match.ID = TRUE)
+  # 
+  #   MBProjected@data$id <- as.character(z)
+  #   MB.list[[z]] <- MBProjected
   # }
   # 
-  # mb_data <- sqldf(MB_df_sql)
-
-  mb_data$id <- as.character(row_number(mb_data$code))
-  MB.list <- list()
-
-
-  for (z in 1:length(mb_data$code)) {
-    MB_geom <- readWKT(mb_data$geom[z])
-    MB_geom_clip <- gIntersection(bb, MB_geom)
-    MBProjected <- SpatialPolygonsDataFrame(MB_geom_clip, data.frame('id'), match.ID = TRUE)
-    MBProjected@data$id <- as.character(z)
-    MB.list[[z]] <- MBProjected
-  }
-  MB <- do.call('rbind', MB.list)
-  MB@data <- merge(MB@data, mb_data, by = 'id')
-  MB@data <- MB@data[,-c(2:3)]
-  MB.df <- fortify(MB, region = 'id')
-  MB.df <- merge(MB.df, MB@data, by = 'id')
-  
+  # MB <- do.call('rbind', MB.list)
+  # MB@data <- merge(MB@data, mb_data, by = 'id')
+  # MB@data <- MB@data[,-c(2:3)]
+  # MB.df <- fortify(MB, region = 'id')
+  # MB.df <- merge(MB.df, MB@data, by = 'id')
+  # #print("I made it here")
   ######################################################################################################
   ### PROCESS FIPS LAYER  #############################################################################
   ######################################################################################################
@@ -249,7 +300,7 @@ base.layers <- function(map_layers,extent = data.frame(x = c(-84, -75),y = c(35.
     
   baselayers.gg <- list("bb.gg" = bbDF, 
                     "states.gg" = state.df,
-                    "mb.gg" = MB.df,
+                    "mb.gg" = mb.df,
                     #"fips.gg" = fips.df,
                     "rivs.gg" = rivs.df,
                     "reservoirs.gg" = WBDF
