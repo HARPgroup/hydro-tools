@@ -19,8 +19,10 @@ source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 # BASEMAP EXAMPLE ##################################################################
 # DEFAULT MAP EXTENT IS STATEWIDE
 baselayers.gg <- base.layers(baselayers)
+
+source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 basemap.obj <- base.map(baselayers.gg)
-# ggsave(plot = basemap.obj, file = paste0(export_path, "tables_maps/Xfigures/","basemap.png",sep = ""), width=6.5, height=4.95)
+ggsave(plot = basemap.obj, file = paste0(export_path, "tables_maps/Xfigures/","basemap.png",sep = ""), width=6.5, height=4.95)
 ####################################################################################
 
 # LAYER OVERLAY EXAMPLE ############################################################
