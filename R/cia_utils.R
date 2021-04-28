@@ -4,6 +4,18 @@
 
 # CIA_data Function: Grabs data from vahydro and returns data frame 
 #data frame contains flow and percent change data for 2 runids of all upstream and downstream river segments
+#' Cumulative Impact Analysis Data Function
+#' @description Extracts metric data from all upstream river segments and downstream segments from inputed segment
+#' @param riv_seg Desired river segment
+#' @param runid1 First runid of interest
+#' @param runid2 Second runid of interest
+#' @param flow_metric Desired flow metric
+#' @param AllSegList A list of all river segments
+#' @return data frame of river segments downstream and upstream of inputed segment
+#' @import sqldf
+#' @import hydrotools
+#' @import cbp6_functions
+#' @export cia_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
