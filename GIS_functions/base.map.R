@@ -3,7 +3,10 @@ library(ggsn)
 library(ggmap) #used for get_stamenmap, get_map
 library(ggspatial) #annotation_north_arrow()
 
-base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6))){
+base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6)),
+                     plot_margin = c(-0.5,0.2,-0.5,0.1),
+                     plot_zoom = 9
+                     ){
   
   # LOAD gg-ready MAP LAYERS FROM THE baselayers.gg LIST 
   bb.gg <- baselayers.gg[[which(names(baselayers.gg) == "bb.gg")]]
@@ -16,7 +19,7 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                  bottom = extent$y[1],
                  right = extent$x[2],
                  top = extent$y[2]),
-    source = "osm", zoom = 9, maptype = "satellite" #good
+    source = "osm", zoom = plot_zoom, maptype = "satellite" #good
   )
   base_layer <- ggmap(tile_layer)
 
@@ -35,16 +38,18 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                     
         #ADD BORDER LAYER
         geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE)+
-        #ADD NORTH BAR
-        #north(bb.gg, location = 'topright', symbol = 3, scale=0.12) +
+        
+        #ADD SCALE BAR
         ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
+              
                        transform = TRUE, model = 'WGS84',st.bottom=FALSE,
                        st.size = 3.5, st.dist = 0.0285,
                        anchor = c(
                          x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
                          y = extent$y[1]+(extent$y[1])*0.001
                        ))+
-    
+        
+        #ADD NORTH BAR
         annotation_north_arrow(which_north = "grid", location = "tr",
                                height = unit(1, "cm"),
                                width = unit(1, "cm")
@@ -53,7 +58,7 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
         #CUSTOMIZE THEME
         theme(legend.justification=c(0,1), 
               legend.position="none",
-              plot.margin = unit(c(-0.5,0.2,-0.5,0.1), "cm"),
+              plot.margin = unit(plot_margin, "cm"),
               plot.title = element_text(size=12),
               plot.subtitle = element_text(size=10),
               axis.title.x=element_blank(),
