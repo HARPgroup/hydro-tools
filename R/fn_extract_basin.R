@@ -9,13 +9,13 @@
 
 fn_extract_basin <- function(cia_data_frame, end_seg){
   #calculating upstream segments
-  upstream <- data.frame((fn_ALL.upstream(outlet_point, AllSegList)))
+  upstream <- data.frame((fn_ALL.upstream(end_seg, AllSegList)))
   names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
   if(upstream == 'NA'){
-    river <- outlet_point
+    river <- end_seg
   }else {
-    river <- rbind(upstream,outlet_point)
+    river <- rbind(upstream,end_seg)
   }
   basin_data <- sqldf("SELECT * FROM river join cia_data_frame
                     WHERE riv_seg like riverseg")
