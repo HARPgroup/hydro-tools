@@ -1,6 +1,7 @@
 library(ggplot2)
 library(ggsn)
 library(ggmap) #used for get_stamenmap, get_map
+library(ggspatial) #annotation_north_arrow()
 
 base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6))){
   
@@ -21,18 +22,19 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
 
   map <- base_layer +
         #ADD STATE BORDER LAYER
-        geom_path(data = states.gg,aes(x = long, y = lat, group = group), color="gray20",lwd=0.5) +
+        geom_path(data = states.gg,aes(x = long, y = lat, group = group), color="gray20",lwd=0.5,na.rm=TRUE) +
+        
         #ADD RIVERS LAYER
-        geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
+        geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4,na.rm=TRUE) +
         # ADD WATERBODIES ###############################################################
         # geom_point(data = WBDF, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
-        # geom_path(data = WBDF, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
-        # geom_polygon(data = WBDF, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
+        # geom_path(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
+        # geom_polygon(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
      #   geom_point(data = reservoirs.gg, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
         #################################################################################
                     
         #ADD BORDER LAYER
-        geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5)+
+        geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE)+
         #ADD NORTH BAR
         #north(bb.gg, location = 'topright', symbol = 3, scale=0.12) +
         ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
@@ -42,6 +44,12 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                          x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
                          y = extent$y[1]+(extent$y[1])*0.001
                        ))+
+    
+        annotation_north_arrow(which_north = "grid", location = "tr",
+                               height = unit(1, "cm"),
+                               width = unit(1, "cm")
+                               )+
+    
         #CUSTOMIZE THEME
         theme(legend.justification=c(0,1), 
               legend.position="none",
