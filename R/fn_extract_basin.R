@@ -1,10 +1,12 @@
 #extracts only the upstream functions of intended intended outlet
-#' Upstream Segments Function
-#' @description Helps locate all upstream segments from the working segment
-#' @param riv.seg River segment of interest
-#' @param AllSegList A list of all segments
-#' @return All upstream segments
-#' @import rapportools
+#' Extracting Basin Function
+#' @description Trims data frame to include only segments upstream of end segment
+#' @param cia_data_frame Data frame of cumulative impact data
+#' @param end_seg Desired end river segment - river segment that is most downstream
+#' @return Trimmed cumulative impact data frame
+#' @import sqldf
+#' @import hydrotools
+#' @import cbp6_functions
 #' @export basin_data
 
 fn_extract_basin <- function(cia_data_frame, end_seg){

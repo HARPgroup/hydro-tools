@@ -1,8 +1,19 @@
 # fn_plot_cia_dend.R
 # Main Plot for the CIA static and Shiny dashboards.
+
 # fn_plot_cia_dend Function: Takes CIA_data out put and returns plots
-#As of latest update to code 
-#we did not figure out a way to separte this into multiple functions because of the way the graphing is done
+#' Dendritic Ploting Function
+#' @description Helps locate all upstream segments from the working segment
+#' @param cia_data_frame Data frame of cumulative impact data
+#' @param  riv_seg Downstream river segment that you wish to have no more tributaries below segment - cannot be any more downstream then segment entered into function
+#' @param runid1 Runid that corresponds to first metric in data frame
+#' @param runid2 Runid that corresponds to second metric in data frame
+#' @param flow_metric Flow metric that corresponds to data in data frame
+#' @return A dendritic plot of segments from data frame
+#' @import hydrotools
+#' @import sqldf
+#' @import ggplot2
+#' @export dend_plot
 fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, cia_data_frame){
   
   #Declaring initial inputed river segment for graphing dot
