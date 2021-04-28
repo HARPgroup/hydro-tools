@@ -14,7 +14,7 @@
 #' @import sqldf
 #' @import ggplot2
 #' @export dend_plot
-fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, cia_data_frame){
+fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, cia_data_frame){
   
   #Declaring initial inputed river segment for graphing dot
   riv_seg_i <- riv_seg
@@ -25,7 +25,6 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, cia_data_frame
   
   #While loop that runs the function for every upstream segment
   a <- 1
-  cia_data <- data.frame()
   p <- ggplot(NULL)
   while(a <= nrow(upstream)){
     if(upstream == 'NA'){
@@ -47,40 +46,9 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, cia_data_frame
       cia_data_loop <- sqldf("SELECT * FROM river join cia_data_frame
                         WHERE riv_seg like riverseg")
       
-      #Adding length segments together to form river mile (distance from headwater) column
-      i <- 1
-      while (i <= nrow(cia_data_loop)) {
-        
-        river_length <- c()
-        
-        #Loop creates vector of current segment and upstream segment lengths
-        for (n in 1:i) {
-          n_length <- as.numeric(cia_data_loop$length[n])
-          river_length <- c(river_length, n_length)
-        }
-        #Makes length column to total length to segment from start of river
-        cia_data_loop$mile[i] <- sum(river_length)
-        
-        i <- i + 1
-      }
-      
-      #Creating a river mile column
-      for (i in 1:(length(cia_data_loop$mile))){
-        if(i == 1){
-          cia_data_loop$rmile[i] <- cia_data_loop$mile[length(cia_data_loop$mile)]
-        }
-        else{
-          cia_data_loop$rmile[i] <- cia_data_loop$mile[length(cia_data_loop$mile)] - cia_data_loop$mile[i-1]
-        }
-      }
-      
-      #combine current data frame with new data frame
-      cia_data <- rbind(cia_data_loop, cia_data)
-      
       #plot graph
       p <- p +
         geom_line(data = cia_data_loop, aes(x = rmile, y = Metric_1, colour = Metric_change, size = metric_pc))
-      
       
     }
     
@@ -90,20 +58,15 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, cia_data_frame
   # Reversing scale for correct river mile orientation
   p <- p + scale_x_reverse()
   
-  #Creating data frame with segment ID numbers
-  cia_data <- cia_data[!duplicated(cia_data$riv_seg),]
-  #Makes numbers ordered by river mile (is this whats best? should we make it based on tributary?)
-  cia_data <- cia_data[order(cia_data$rmile, decreasing = TRUE),]
-  cia_data$seglist <- 1:nrow(cia_data)
   
   #Creating data frame with just original inputed river segment to graph point
-  riv_seg_og <- cia_data[cia_data$rivseg == riv_seg_i,]
+  riv_seg_og <- cia_data_frame[cia_data_frame$riverseg == riv_seg_i,]
   
   p <- p +
     geom_point(data = riv_seg_og, aes(x = rmile, y = Metric_1)) +
-    geom_text(data = cia_data, aes(x = rmile, y = Metric_1, label = seglist, vjust = 1.0)) + 
+    geom_text(data = cia_data_frame, aes(x = rmile, y = Metric_1, label = seglist, vjust = 1.0)) + 
     scale_size_continuous(range = c(0.2, 3), name = "Percent Change") +
-    scale_colour_manual(values = c("blue", "brown"), name = "Percent Change") +
+    scale_colour_manual(values = c("blue", "grey", "brown"), name = "Percent Change") +
     theme_bw() +
     ggtitle(paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2)) +
     xlab('River Mile [Mi]') +
