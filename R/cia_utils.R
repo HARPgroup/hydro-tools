@@ -13,8 +13,6 @@
 #' @param AllSegList A list of all river segments
 #' @return data frame of river segments downstream and upstream of inputed segment
 #' @import sqldf
-#' @import hydrotools
-#' @import cbp6_functions
 #' @export cia_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
@@ -148,4 +146,5 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
     
     a <- a + 1
   }
+}
 
