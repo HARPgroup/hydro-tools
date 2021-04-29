@@ -384,7 +384,7 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   print(this_result)
   rest_parts = strsplit(this_result$url, '/', fixed = TRUE)
   pkid = as.integer(rest_parts[[1]][length(rest_parts[[1]])])
-  if (!is.boolean(this_result$status )) {
+  if (!is.logical(this_result$status )) {
     return_id <- switch(
       this_result$status,
       "200" = pkid,
@@ -484,8 +484,8 @@ fn_get_properties <- function(inputs, site, token){
     }
     inputs$varid = varid
   }
-  # now, verify that we have either a proper varid OR a propname
-  if (is.null(inputs$varid) & is.null(inputs$propname)) {
+  # now, verify that we have either a proper varid OR a propname OR a featureid
+  if (is.null(inputs$varid) & is.null(inputs$propname) & is.null(inputs$featureid)) {
     # we were sent a bad variable id so we should return FALSE
     if(is.null(inputs$pid)) {
       return(FALSE)

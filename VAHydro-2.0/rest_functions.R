@@ -373,7 +373,7 @@ getProperty <- function(inputs, base_url, prop){
     inputs$varid = varid
   }
   # now, verify that we have either a proper varid OR a propname
-  if (is.null(inputs$varid) & is.null(inputs$propname)) {
+  if (is.null(inputs$varid) & is.null(inputs$propname) & is.null(inputs$featureid)) {
     # we were sent a bad variable id so we should return FALSE
     if(is.null(inputs$pid)) {
       return(FALSE)

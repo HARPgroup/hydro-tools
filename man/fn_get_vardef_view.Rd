@@ -16,7 +16,7 @@ fn_get_vardef_view(varkey, site, token, debug = FALSE)
 \item{debug}{show debugging info}
 }
 \value{
-integer variable id
+variable definition as list
 }
 \description{
 Retrieve Variable Def from View (not REST)
