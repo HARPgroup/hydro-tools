@@ -77,9 +77,10 @@ RomDataSource <- R6Class(
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
-      # return_type = 'data.frame' or 'object', default to list to maintain
+      # return_type = 'list', 'data.frame' or 'object', 
+      # default to data.frame to maintain compatibility with getTimeseries
       # force_refresh = if FALSE, use local value if we already have one
-      #    easier backwards compatibility, lower data needs?
+      # easier backwards compatibility, lower data needs?
       # if returning object, only take first value? 
       # or, return FALSE with message that df is only option? Hmmmm.
       # or return 
@@ -90,16 +91,18 @@ RomDataSource <- R6Class(
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
-        ts_vals <- fn_get_timeseries(config, self$site, private$token)
-        for (i in nrow(ts_vals)) {
+        tsvalues <- fn_get_timeseries(config, self$site, private$token)
+        for (i in nrow(tsvalues)) {
+          # this adds each to our local database in formatted fashion
           print(paste("handling ts", i))
-          tsi <- as.list(ts_vals[i,])
+          tsi <- as.list(tsvalues[i,])
           tsi <- RomTS$new(self,tsi)
           if (return_type == 'object') {
             ts <- tsi
           } 
           tsi <- tsi$to_list()
-          if (return_type == 'data.frame') {
+          if (return_type == 'list') {
+            # we just want one
             ts <- tsi
           } 
           self$set_ts(tsi)
@@ -108,9 +111,15 @@ RomDataSource <- R6Class(
         ts <- RomTS$new(self, config)
         ts <- ts$to_list()
         self$set_ts(ts)
+        tsvalues <- fn_search_tsvalues(config, self$tsvalues)
       }
       # add to tsvalues data frame
-      return(ts)
+      if (return_type != 'data.frame') {
+        return(ts)
+      } else {
+        return(tsvalues)
+      }
+      
     },
     #' @param uri remote address to retrieve data
     #' @param content_type http content-type
@@ -145,7 +154,7 @@ RomDataSource <- R6Class(
         self$tsvalues[ts$ID] <- ts
       }
     },
-    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
+    #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
     #' @return local df index?
     set_vardef = function(var_def) {
       # check uniqueness
@@ -171,7 +180,9 @@ RomDataSource <- R6Class(
         self$var_defs[var_def$ID] <- var_def
       }
     },
-    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
+    #' @param entity_type = dh_feature, dh_properties, ...
+    #' @param pk = primary key column name, e.g. hydroid, pid, ...
+    #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
     #' @return local df index?
     post = function(entity_type, pk, config) {
       message(paste("site",self$site))

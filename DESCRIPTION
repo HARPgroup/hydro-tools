@@ -16,4 +16,5 @@ Imports:
     sqldf,
     getPass,
     zoo,
-    utils
+    utils,
+    jsonlite

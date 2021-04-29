@@ -54,9 +54,12 @@ NA
 \item \href{#method-new}{\code{RomDataSource$new()}}
 \item \href{#method-get_token}{\code{RomDataSource$get_token()}}
 \item \href{#method-get_vardef}{\code{RomDataSource$get_vardef()}}
+\item \href{#method-get_props}{\code{RomDataSource$get_props()}}
 \item \href{#method-get_ts}{\code{RomDataSource$get_ts()}}
 \item \href{#method-auth_read}{\code{RomDataSource$auth_read()}}
 \item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
+\item \href{#method-set_vardef}{\code{RomDataSource$set_vardef()}}
+\item \href{#method-post}{\code{RomDataSource$post()}}
 \item \href{#method-clone}{\code{RomDataSource$clone()}}
 }
 }
@@ -96,7 +99,7 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-get_vardef}{}}}
 \subsection{Method \code{get_vardef()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, debug = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_update = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -104,7 +107,32 @@ nothing sets internal private token
 \describe{
 \item{\code{varkey}}{= variable key}
 
+\item{\code{force_update}}{Check remote repository for new info?}
+
 \item{\code{debug}}{show info}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_props"></a>}}
+\if{latex}{\out{\hypertarget{method-get_props}{}}}
+\subsection{Method \code{get_props()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_props(config, return_type = "df", force_refresh = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+
+\item{\code{return_type}}{'df' (data.frame) or 'object'}
+
+\item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
 }
 \if{html}{\out{</div>}}
 }
@@ -182,6 +210,48 @@ result of web request
 }
 \subsection{Returns}{
 nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-set_vardef}{}}}
+\subsection{Method \code{set_vardef()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_vardef(var_def)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{var_def}}{= list(varid, varkey, varname, varunits, varcode,...)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-post"></a>}}
+\if{latex}{\out{\hypertarget{method-post}{}}}
+\subsection{Method \code{post()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$post(entity_type, pk, config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+
+\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+
+\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
 }
 }
 \if{html}{\out{<hr>}}
