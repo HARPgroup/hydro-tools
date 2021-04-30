@@ -36,7 +36,7 @@ RomTS <- R6Class(
     #' @field modified timestamp 
     modified = NA,
     #' @field datasource RomDataSource
-    datasource = NULL,
+    datasource = NA,
     #' @param site URL of some RESTful repository
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?

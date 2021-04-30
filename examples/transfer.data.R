@@ -38,3 +38,21 @@ for (i in 1:nrow(ts1)) {
   t2 <- RomTS$new(ds2, tsl)
   t2$save()
 }
+
+tsfirst <- ts1[1,]
+tsfirst <- as.list(tsfirst)
+tsfirst$tid = NULL
+tsfirst$featureid = hid2
+tsfirst <- RomTS$new(ds2, tsfirst)
+tsfirst$save()
+
+# Doesn't work gives a 406, probably for the NA as tsendtime
+tslast <- ts1[926,]
+tslast <- as.list(tslast)
+tslast$tid = NULL
+tslast$tsendtime = NULL
+tslast$featureid = hid2
+tslast <- RomTS$new(ds2, tslast)
+tslast$save()
+tl <- tslast$to_list()
+tm <- as.matrix(tl)

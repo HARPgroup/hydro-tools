@@ -13,7 +13,7 @@
 #' @return A dendritic plot of segments from data frame
 #' @import sqldf
 #' @import ggplot2
-#' @export dend_plot
+#' @export fn_plot_cia_dend
 fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, cia_data_frame){
   
   #Declaring initial inputed river segment for graphing dot

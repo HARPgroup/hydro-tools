@@ -358,6 +358,11 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   
   pkid <- as.integer(as.character(inputs[pk]))
   
+  for (j in 1:length(inputs)) {
+    if (is.na(inputs[j])) {
+      inputs[j] <- NULL
+    }
+  }
   message(inputs)
   message(paste("pk= ", pkid))
   this_result <- list(

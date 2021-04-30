@@ -17,4 +17,5 @@ Imports:
     getPass,
     zoo,
     utils,
-    jsonlite
+    jsonlite,
+    ggplot2

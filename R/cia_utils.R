@@ -13,7 +13,7 @@
 #' @param AllSegList A list of all river segments
 #' @return data frame of river segments downstream and upstream of inputed segment
 #' @import sqldf
-#' @export cia_data
+#' @export CIA_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"

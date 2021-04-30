@@ -5,7 +5,7 @@
 #' @param end_seg Desired end river segment - river segment that is most downstream
 #' @return Trimmed cumulative impact data frame
 #' @import sqldf
-#' @export basin_data
+#' @export fn_extract_basin
 
 fn_extract_basin <- function(cia_data_frame, end_seg){
   #calculating upstream segments
