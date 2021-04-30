@@ -1,13 +1,18 @@
 #' Retrieve a token from vaydro REST service.  TBD: replace with object to store token and dn connection
 #'
 #' @param base_url character deprecated to be replaced by global datasource
+#' @param rest_uname username to authenticate (if omitted will prompt)
 #' @return token character from VAHydro REST web service
 #' @seealso NA
 #' @export om_vahydro_token
 #' @examples NA
-om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh') {
-  #rest_uname <- readline("REST Username: ")
-  rest_uname <- getPass::getPass("REST User Name: ")
+om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh', rest_uname = NULL) {
+  if (is.null(rest_uname)) {
+    # readline does *not* wait for input when run inside a fn
+    # so we use getPass which does.
+    #rest_uname <- readline("REST Username: ")
+    rest_uname <- getPass::getPass("REST User Name: ")
+  }
   rest_pw <- getPass::getPass("REST Password: ")
   message(paste("reading from", base_url))
   # do something
@@ -17,7 +22,6 @@ om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh') {
   print(paste("RETRIEVING REST TOKEN",sep=""))
   csrf <- GET(url=csrf_url,authenticate(rest_uname,rest_pw));
   print(csrf)
-  message("u/p ",paste(rest_uname,rest_pw))
   token <- content(csrf);
   
   if (length(token)==1){

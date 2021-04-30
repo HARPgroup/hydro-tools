@@ -1,6 +1,7 @@
 # install_github("HARPGroup/hydro-tools", force=TRUE)
 library("hydrotools")
-ds1 <- RomDataSource$new("http://deq2.bse.vt.edu/d.alpha")
+rest_uname <- 'restws_admin'
+ds1 <- RomDataSource$new("http://deq2.bse.vt.edu/d.alpha", rest_uname)
 ds1$get_token()
 hid <- 61565
 
@@ -19,7 +20,7 @@ ts1 <- ds1$get_ts(tsinfo, 'data.frame')
 #ts1_old <- getTimeseries(tsinfo, "http://deq2.bse.vt.edu/d.alpha")
 
 ## Now set up the destination 
-ds2 <- RomDataSource$new("http://deq2.bse.vt.edu/d.dh")
+ds2 <- RomDataSource$new("http://deq2.bse.vt.edu/d.dh", rest_uname)
 ds2$get_token()
 
 hid2 <- 473590

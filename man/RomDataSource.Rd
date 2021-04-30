@@ -26,6 +26,8 @@ NA
 \describe{
 \item{\code{site}}{URL of some RESTful repository}
 
+\item{\code{username}}{to connect to RESTful repository}
+
 \item{\code{timeline}}{for default time series data}
 
 \item{\code{tsvalues}}{table of time series data}
@@ -45,6 +47,13 @@ NA
 \item{\code{prop_cache}}{list of prop objects instantiated}
 
 \item{\code{var_cache}}{list of var objects instantiated}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{username}}{to connect to RESTful repository}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,7 +77,7 @@ NA
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site, rest_uname = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

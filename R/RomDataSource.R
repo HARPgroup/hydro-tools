@@ -19,17 +19,20 @@ RomDataSource <- R6Class(
   public = list(
     #' @field site URL of some RESTful repository
     site = NULL,
+    #' @field username to connect to RESTful repository
+    rest_uname = NULL,
     #' @param site URL of some RESTful repository
     #' @return object instance
-    initialize = function(site) {
+    initialize = function(site, rest_uname = NULL) {
       self$site = site
+      self$rest_uname = rest_uname
     },
     #' @return nothing sets internal private token
     get_token = function() {
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$site)
+      private$token <- om_vahydro_token(self$site, rest_uname)
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key
