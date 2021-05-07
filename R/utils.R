@@ -410,6 +410,71 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   return(return_id)
 }
 
+#' Get any entity from a RESTful web service
+#'
+#' @param entity_type = dh_feature, dh_properties, ...
+#' @param pk = primary key column name, e.g. hydroid, pid, ...
+#' @param inputs  contents of record to get in list(pid, propname, propvalue, ...)
+#' @param site URL of rest server
+#' @param token for xhttp auth
+fn_get_rest <- function(entity_type, pk, inputs, site, token){
+  #Search for existing ts matching supplied varkey, featureid, entity_type 
+  
+  pkid <- as.integer(as.character(inputs[pk]))
+  
+  for (j in 1:length(inputs)) {
+    if (is.na(inputs[j])) {
+      inputs[j] <- NULL
+    }
+  }
+  message(inputs)
+  message(paste("pk= ", pkid))
+  morepages = TRUE
+  entities = FALSE
+  while (morepages == TRUE) {
+    entity_rest <- GET(
+      paste0(site, "/",entity_type, ".json"), 
+      add_headers(HTTP_X_CSRF_TOKEN = token),
+      query = inputs, 
+      encode = "json"
+    );
+    message(entity_rest)
+    entity_cont <- content(entity_rest);
+    message(paste(site,"/dh_feature.json",sep=""))
+    
+    if (length(entity_cont$list) != 0) {
+      numrecs <- length(entity_cont$list)
+      for (i in 1:numrecs) {
+        entity <- as.data.frame(unlist(entity_cont$list[[i]]))
+        if (is.logical(entities)) {
+          entities <- as.data.frame(entity)
+        } else {
+          entities <- rbind(entities, as.data.frame(entity))
+        }
+      }
+      
+      trecs <- length(entities[,1])
+      
+      if ( (inputs$limit > 0) & (trecs >= inputs$limit) ) {
+        morepages = FALSE
+      } else {
+        morepages = TRUE
+        inputs$page = inputs$page + 1
+      }
+    } else {
+      morepages = FALSE
+      #trecs = as.integer(count(ts))
+      trecs <- length(ts[,1])
+      if (trecs == 0) {
+        print("----- This entity does not exist")
+        entities = FALSE
+      } else {
+        print(paste("Total =", trecs))
+      }
+    }
+  }
+  return(entities)
+}
 
 fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   # NOT FINISHED - JUST PASTED CODE
