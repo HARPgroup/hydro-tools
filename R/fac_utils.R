@@ -12,11 +12,13 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month") {
     '25%' = numeric(), 
     '30%' = numeric(),
     '50%' = numeric(),
+    'Mean' = numeric(),
     stringsAsFactors = FALSE) ;
   for (i in index(month.abb)) {
     moname <- month.abb[i]
     drows <- sqldf(paste("select * from df2sum where ", mo_col, " = ", i))
     q_drows <- quantile(drows[,q_col], probs=c(0,0.05,0.1,0.25, 0.3, 0.5), na.rm=TRUE)
+    q_mean <- mean(drows[,q_col])
     newline = data.frame(
       "Month" = moname,
       'Min' = round(as.numeric(q_drows["0%"]),1),
@@ -25,10 +27,11 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month") {
       '25%' = round(as.numeric(q_drows["25%"]),1), 
       '30%' = round(as.numeric(q_drows["30%"]),1),
       '50%' = round(as.numeric(q_drows["50%"]),1),
+      'Mean' = round(q_mean,1),
       stringsAsFactors = FALSE
     )
     intake_summary_tbl <- rbind(intake_summary_tbl, newline)
   }
-  names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%')
+  names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%', 'Mean')
   return(intake_summary_tbl)
 }
