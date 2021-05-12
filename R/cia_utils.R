@@ -85,6 +85,7 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
 #' @param AllSegList List of all vahydro river segments
 #' @param cia_data_frame CIA data frame with specific columns
 #' @return data frame of river segments, and associated river miles
+#' @import sqldf
 #' @export cia_data
 fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   
@@ -159,6 +160,32 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
                     Metric_2, metric_pc, Metric_change
                     FROM cia_data")
   return(cia_data)
+}
+
+
+#extracts only the upstream functions of intended intended outlet
+#' Extracting Basin Function
+#' @description Trims data frame to include only segments upstream of end segment
+#' @param cia_data_frame Data frame of cumulative impact data
+#' @param end_seg Desired end river segment - river segment that is most downstream
+#' @return Trimmed cumulative impact data frame
+#' @import sqldf
+#' @export basin_data
+fn_extract_basin <- function(cia_data_frame, end_seg){
+  #calculating upstream segments
+  upstream <- data.frame((fn_ALL.upstream(end_seg, AllSegList)))
+  names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
+  
+  if(upstream == 'NA'){
+    river <- end_seg
+  }else {
+    river <- rbind(upstream,end_seg)
+  }
+  basin_data <- sqldf("SELECT * FROM river join cia_data_frame
+                    WHERE riv_seg like riverseg")
+  basin_data$riv_seg <- NULL
+  
+  return(basin_data)
 }
 
 
