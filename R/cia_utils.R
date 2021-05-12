@@ -13,7 +13,7 @@
 #' @param AllSegList A list of all river segments
 #' @return data frame of river segments downstream and upstream of inputed segment
 #' @import sqldf
-#' @export CIA_data
+#' @export cia_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
@@ -80,9 +80,13 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
 
 
 
-# fn_river_network()
-# @inputs: riv_seg, AllSegList, and cia_data_frame (output of CIA_data function)
-# calculates river mile and returns data trimmed frame to be used in fn_plot_cia_dend()
+#' fn_river_network()
+#' @description Calculates ands adds river mile column to data frame of river segments
+#' @param riv_seg Desired river segment
+#' @param AllSegList List of all vahydro river segments
+#' @param cia_data_frame CIA data frame with specific columns
+#' @return data frame of river segments, and associated river miles
+#' @export cia_data
 fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   
   #Calculates Upstream River Segments
@@ -146,5 +150,6 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
     
     a <- a + 1
   }
+  return(cia_data)
 }
 

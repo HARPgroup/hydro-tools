@@ -5,7 +5,7 @@
 #' Dendritic Ploting Function
 #' @description Helps locate all upstream segments from the working segment
 #' @param riv_seg Downstream river segment that you wish to have no more tributaries below segment - cannot be any more downstream then segment entered into function
-#' @param AllSegList Data frame of cumulative impact data
+#' @param AllSegList List of all vahydro river segments
 #' @param runid1 Runid that corresponds to first metric in data frame
 #' @param runid2 Runid that corresponds to second metric in data frame
 #' @param flow_metric Flow metric that corresponds to data in data frame
