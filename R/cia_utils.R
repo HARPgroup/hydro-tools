@@ -190,7 +190,7 @@ fn_extract_basin <- function(cia_data_frame, end_seg){
 
 
 #############################################################################
-## Example Code to get more data frame
+## Example Code to get AllSegList
 # Download and Import csv with all river segments (copy commented lines below)
 # localpath <- tempdir()
 # filename <- paste("vahydro_riversegs_export.csv",sep="")
