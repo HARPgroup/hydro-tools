@@ -153,3 +153,182 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   return(cia_data)
 }
 
+
+#fn_upstream() copy from cbp6_functions
+fn_upstream <- function(riv.seg, AllSegList) {
+  library(stringr)
+  library(rapportools)
+  # Create dataframe for upstream and downstream segments based on code in string
+  ModelSegments <- data.frame(matrix(nrow = length(AllSegList), ncol = 6))
+  colnames(ModelSegments)<- c('RiverSeg', 'Middle', 'Last', 'AdditionalName', 'Downstream', 'Upstream')
+  ModelSegments$RiverSeg <- AllSegList
+  
+  # Pull out 4 digit codes in middle and end for upstream/downstream segments
+  i <- 1
+  for (i in 1:nrow(ModelSegments)){
+    
+    ModelSegments[i,2]<- str_sub(ModelSegments[i,1], start=5L, end=8L)
+    ModelSegments[i,3]<- str_sub(ModelSegments[i,1], start=10L, end=13L)
+    ModelSegments[i,4]<- str_sub(ModelSegments[i,1], start=15L, end=-1L)
+    i <- i + 1
+  }
+  
+  # Determine Downstream Segment ----------
+  j <- 1
+  for (j in 1:nrow(ModelSegments)){
+    if (ModelSegments[j,4] != ""){
+      Downstream <- which((ModelSegments$Middle==ModelSegments$Middle[j]) & (ModelSegments$Last==ModelSegments$Last[j]) & (ModelSegments$AdditionalName==""))
+      if (length(Downstream)==0){
+        ModelSegments[j,5]  <- 'NA'
+      }else if (length(Downstream)==1){
+        ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1])
+      }
+    }else if (ModelSegments[j,4]==""){
+      Downstream <- which((ModelSegments$Middle==ModelSegments$Last[j]) & (ModelSegments$AdditionalName==""))
+      if (length(Downstream)==0){
+        ModelSegments[j,5]  <- 'NA'
+      }else if (length(Downstream)==1){
+        ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1])
+      }else if (length(Downstream)>1){
+        ModelSegments[j,5] <- 'NA'
+      }
+    }
+    j<-j+1
+  }
+  # Determine Upstream Segment ----------
+  k<-1
+  for (k in 1:nrow(ModelSegments)){
+    Upstream <- which(as.character(ModelSegments$Downstream)==as.character(ModelSegments$RiverSeg[k]))
+    NumUp <- ModelSegments$RiverSeg[Upstream]
+    ModelSegments[k,6]<- paste(NumUp, collapse = '+')
+    if (is.empty(ModelSegments[k,6])==TRUE){
+      ModelSegments[k,6]<- 'NA'
+    } 
+    k<-k+1
+  }
+  SegUpstream <- as.numeric(which(as.character(ModelSegments$RiverSeg)==as.character(riv.seg)))
+  SegUpstream <- ModelSegments$Upstream[SegUpstream]
+  SegUpstream <- strsplit(as.character(SegUpstream), "\\+")
+  SegUpstream <- try(SegUpstream[[1]], silent = TRUE)
+  if (class(SegUpstream)=='try-error') {
+    SegUpstream <- NA
+  }
+  return(SegUpstream)
+}
+
+
+#fn_ALL.upstream() copy from cbp6_functions
+fn_ALL.upstream <- function(riv.seg, AllSegList) {
+  UpstreamSeg <- fn_upstream(riv.seg, AllSegList)
+  AllUpstream <- character(0)
+  BranchedSegs <- character(0)
+  while (is.na(UpstreamSeg[1])==FALSE || is.empty(BranchedSegs) == FALSE) {
+    while (is.na(UpstreamSeg[1])==FALSE) {
+      num.segs <- as.numeric(length(UpstreamSeg))
+      if (num.segs > 1) {
+        BranchedSegs[(length(BranchedSegs)+1):(length(BranchedSegs)+num.segs-1)] <- UpstreamSeg[2:num.segs]
+        UpstreamSeg <- UpstreamSeg[1]
+      }
+      AllUpstream[length(AllUpstream)+1] <- UpstreamSeg
+      UpstreamSeg <- fn_upstream(UpstreamSeg, AllSegList)
+    }
+    num.branched <- as.numeric(length(BranchedSegs))
+    UpstreamSeg <- BranchedSegs[1]
+    BranchedSegs <- BranchedSegs[-1]
+  }
+  AllUpstream <- AllUpstream[which(AllUpstream != 'NA')]
+  if (is.empty(AllUpstream[1])==TRUE) {
+    AllUpstream <- 'NA'
+  }
+  return(AllUpstream)
+}
+
+
+#fn_downstream() copy from cbp6_functions
+fn_downstream <- function(riv.seg, AllSegList) {
+  library(stringr)
+  library(rapportools)
+  # Create dataframe for upstream and downstream segments based on code in string
+  ModelSegments <- data.frame(matrix(nrow = length(AllSegList), ncol = 6))
+  colnames(ModelSegments)<- c('RiverSeg', 'Middle', 'Last', 'AdditionalName', 'Downstream', 'Upstream')
+  ModelSegments$RiverSeg <- AllSegList
+  
+  # Pull out 4 digit codes in middle and end for upstream/downstream segments
+  i <- 1
+  for (i in 1:nrow(ModelSegments)){
+    
+    ModelSegments[i,2]<- str_sub(ModelSegments[i,1], start=5L, end=8L)
+    ModelSegments[i,3]<- str_sub(ModelSegments[i,1], start=10L, end=13L)
+    ModelSegments[i,4]<- str_sub(ModelSegments[i,1], start=15L, end=-1L)
+    i <- i + 1
+  }
+  
+  # Determine Downstream Segment ----------
+  j <- 1
+  for (j in 1:nrow(ModelSegments)){
+    if (ModelSegments[j,4] != ""){
+      Downstream <- which((ModelSegments$Middle==ModelSegments$Middle[j]) & (ModelSegments$Last==ModelSegments$Last[j]) & (ModelSegments$AdditionalName==""))
+      if (length(Downstream)==0){
+        ModelSegments[j,5]  <- 'NA'
+      }else if (length(Downstream)==1){
+        ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1])
+      }
+    }else if (ModelSegments[j,4]==""){
+      Downstream <- which((ModelSegments$Middle==ModelSegments$Last[j]) & (ModelSegments$AdditionalName==""))
+      if (length(Downstream)==0){
+        ModelSegments[j,5]  <- 'NA'
+      }else if (length(Downstream)==1){
+        ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1])
+      }else if (length(Downstream)>1){
+        ModelSegments[j,5] <- 'NA'
+      }
+    }
+    j<-j+1
+  }
+  # Determine Upstream Segment ----------
+  k<-1
+  for (k in 1:nrow(ModelSegments)){
+    Upstream <- which(as.character(ModelSegments$Downstream)==as.character(ModelSegments$RiverSeg[k]))
+    NumUp <- ModelSegments$RiverSeg[Upstream]
+    ModelSegments[k,6]<- paste(NumUp, collapse = '+')
+    if (is.empty(ModelSegments[k,6])==TRUE){
+      ModelSegments[k,6]<- 'NA'
+    } 
+    k<-k+1
+  }
+  SegDownstream <- as.numeric(which(as.character(ModelSegments$RiverSeg)==as.character(riv.seg)))
+  SegDownstream <- ModelSegments$Downstream[SegDownstream]
+  SegDownstream <- strsplit(as.character(SegDownstream), "\\+")
+  SegDownstream <- try(SegDownstream[[1]], silent = TRUE)
+  if (class(SegDownstream)=='try-error') {
+    SegDownstream <- NA
+  }
+  return(SegDownstream)
+}
+
+
+#fn_ALL.downstream() copy form cbp6_functions
+fn_ALL.downstream <- function(riv.seg, AllSegList) {
+  downstreamSeg <- fn_downstream(riv.seg, AllSegList)
+  Alldownstream <- character(0)
+  BranchedSegs <- character(0)
+  while (is.na(downstreamSeg[1])==FALSE || is.empty(BranchedSegs) == FALSE) {
+    while (is.na(downstreamSeg[1])==FALSE) {
+      num.segs <- as.numeric(length(downstreamSeg))
+      if (num.segs > 1) {
+        BranchedSegs[(length(BranchedSegs)+1):(length(BranchedSegs)+num.segs-1)] <- downstreamSeg[2:num.segs]
+        downstreamSeg <- downstreamSeg[1]
+      }
+      Alldownstream[length(Alldownstream)+1] <- downstreamSeg
+      downstreamSeg <- fn_downstream(downstreamSeg, AllSegList)
+    }
+    num.branched <- as.numeric(length(BranchedSegs))
+    downstreamSeg <- BranchedSegs[1]
+    BranchedSegs <- BranchedSegs[-1]
+  }
+  Alldownstream <- Alldownstream[which(Alldownstream != 'NA')]
+  if (is.empty(Alldownstream[1])==TRUE) {
+    Alldownstream <- 'NA'
+  }
+  return(Alldownstream)
+}
