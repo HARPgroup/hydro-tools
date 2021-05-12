@@ -79,7 +79,6 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
 }
 
 
-
 #' fn_river_network()
 #' @description Calculates ands adds river mile column to data frame of river segments
 #' @param riv_seg Desired river segment
@@ -150,8 +149,29 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
     
     a <- a + 1
   }
+  #Creating data frame with segment ID numbers
+  cia_data <- cia_data[!duplicated(cia_data$riv_seg),]
+  #Makes numbers ordered by river mile (is this whats best? should we make it based on tributary?)
+  cia_data <- cia_data[order(cia_data$rmile, decreasing = TRUE),]
+  cia_data$seglist <- 1:nrow(cia_data)
+  #Triming to only solumns needed in fn_plot_cia_dend
+  cia_data <- sqldf("SELECT seglist, riverseg, propname, rmile, Metric_1,
+                    Metric_2, metric_pc, Metric_change
+                    FROM cia_data")
   return(cia_data)
 }
+
+
+#############################################################################
+## Example Code to get more data frame
+# Download and Import csv with all river segments (copy commented lines below)
+# localpath <- tempdir()
+# filename <- paste("vahydro_riversegs_export.csv",sep="")
+# destfile <- paste(localpath,filename,sep="\\")
+# download.file(paste(site,"/vahydro_riversegs_export",sep=""), destfile = destfile, method = "libcurl")
+# RSeg.csv <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
+# AllSegList <- substring(RSeg.csv$hydrocode, 17)
+############################################################################
 
 
 #fn_upstream() copy from cbp6_functions
