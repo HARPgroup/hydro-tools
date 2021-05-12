@@ -68,10 +68,10 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   #creating column describing - vs + change
   cia_data <- sqldf("select *, CASE
                      WHEN Metric_1 > Metric_2 
-                     THEN '-' 
+                     THEN -1 
                      WHEN Metric_2 < Metric_1
-                     THEN '+'
-                     ELSE '0' 
+                     THEN 1
+                     ELSE 1 
                      END as Metric_change 
                      FROM cia_data")
   
