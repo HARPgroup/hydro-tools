@@ -19,9 +19,10 @@ RomDataSource <- R6Class(
   public = list(
     #' @field site URL of some RESTful repository
     site = NULL,
-    #' @field username to connect to RESTful repository
+    #' @field rest_uname username to connect to RESTful repository
     rest_uname = NULL,
     #' @param site URL of some RESTful repository
+    #' @param rest_uname username to connect to RESTful repository
     #' @return object instance
     initialize = function(site, rest_uname = NULL) {
       self$site = site
@@ -150,6 +151,11 @@ RomDataSource <- R6Class(
       if (is.logical(ts_check)) {
         # not found, so add
         message("Storing TS")
+        #if (nrow(self$tsvalues) > 0) {
+        #  self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
+        #} else {
+        #  self$tsvalues <- as.data.frame(rbind(ts[names(self$tsvalues)]))
+        #}
         self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
       } else {
         # update 
@@ -182,6 +188,13 @@ RomDataSource <- R6Class(
         message("Found, trying to load")
         self$var_defs[var_def$ID] <- var_def
       }
+    },
+    #' @param entity_type = dh_feature, dh_properties, ...
+    #' @param pk = primary key column name, e.g. hydroid, pid, ...
+    #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
+    #' @return local df index?
+    get = function(entity_type, pk, config) {
+      fn_get_rest(entity_type, pk, config, self$site, private$token)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
     #' @param pk = primary key column name, e.g. hydroid, pid, ...

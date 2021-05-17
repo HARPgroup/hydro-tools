@@ -427,10 +427,21 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
       inputs[j] <- NULL
     }
   }
+  if (is.null(inputs$limit)) {
+    inputs$limit = 0
+  }
+  if (!is.null(inputs$page)) {
+    multipage = FALSE
+  } else {
+    page = 0
+    inputs$page = 0
+    multipage = TRUE ; # do we support multiple pages if records exceed limit?
+  }
   message(inputs)
   message(paste("pk= ", pkid))
   morepages = TRUE
   entities = FALSE
+  ecols = FALSE
   while (morepages == TRUE) {
     entity_rest <- GET(
       paste0(site, "/",entity_type, ".json"), 
@@ -445,17 +456,34 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     if (length(entity_cont$list) != 0) {
       numrecs <- length(entity_cont$list)
       for (i in 1:numrecs) {
-        entity <- as.data.frame(unlist(entity_cont$list[[i]]))
+        entity <- FALSE
+        # set up column names to fetch based on first returned row.
+        # this will limit overly broad queries
         if (is.logical(entities)) {
-          entities <- as.data.frame(entity)
+          ecols <- unlist(names(entity_cont$list[[i]]))
+        }
+        # now capture these entities
+        for (j in ecols) {
+          if (is.logical(entity)) {
+            entity <- rbind(unlist(entity_cont$list[[i]][j]))[1,]
+          } else {
+            if (is.null(unlist(entity_cont$list[[i]][j]))) {
+              entity[j] <- ''
+            } else {
+              entity[j] <- unlist(entity_cont$list[[i]][j])
+            }
+          }
+        }
+        if (is.logical(entities)) {
+          entities <- as.data.frame(t(entity))
         } else {
-          entities <- rbind(entities, as.data.frame(entity))
+          entities <- rbind(entities, as.data.frame(t(entity)))
         }
       }
       
-      trecs <- length(entities[,1])
+      trecs <- nrow(entities)
       
-      if ( (inputs$limit > 0) & (trecs >= inputs$limit) ) {
+      if ( entity_cont$self == entity_cont$last ) {
         morepages = FALSE
       } else {
         morepages = TRUE
@@ -464,7 +492,7 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     } else {
       morepages = FALSE
       #trecs = as.integer(count(ts))
-      trecs <- length(ts[,1])
+      trecs <- nrow(entities)
       if (trecs == 0) {
         print("----- This entity does not exist")
         entities = FALSE
@@ -501,16 +529,22 @@ fn_search_tsvalues <- function(config, tsvalues_tmp) {
   number_cols = c("tid", "tsvalue", "featureid")
   tss <- "select * from tsvalues_tmp where "
   if (!is.null(config$tid)) {
-    where_clause <- paste(
-      where_clause,
-      "tid = ", config$tid
-    )
+    if (!is.na(config$tid)) {
+      where_clause <- paste(
+        where_clause,
+        "tid = ", config$tid
+      )
+    }
   } else {
     wand = ""
     for (i in names(config)) {
       if (i == 'varkey') {
         # for now we skip these as we count on varid in the vardef table.
         message("Skipping varkey")
+        next
+      }
+      if (is.na(config[i])) {
+        message(paste("Skipping NULL", i))
         next
       }
       if (!(i %in% colnames(tsvalues_tmp))) {

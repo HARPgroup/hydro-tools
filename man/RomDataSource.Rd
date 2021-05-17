@@ -68,6 +68,7 @@ NA
 \item \href{#method-auth_read}{\code{RomDataSource$auth_read()}}
 \item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
 \item \href{#method-set_vardef}{\code{RomDataSource$set_vardef()}}
+\item \href{#method-get}{\code{RomDataSource$get()}}
 \item \href{#method-post}{\code{RomDataSource$post()}}
 \item \href{#method-clone}{\code{RomDataSource$clone()}}
 }
@@ -233,6 +234,29 @@ nothing sets internal private token
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{var_def}}{= list(varid, varkey, varname, varunits, varcode,...)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get"></a>}}
+\if{latex}{\out{\hypertarget{method-get}{}}}
+\subsection{Method \code{get()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get(entity_type, pk, config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+
+\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+
+\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
 }
 \if{html}{\out{</div>}}
 }
