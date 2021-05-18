@@ -4,12 +4,14 @@
 \alias{fn_search_tsvalues}
 \title{Retrieve TS data from tsvalues style data frame}
 \usage{
-fn_search_tsvalues(config, tsvalues_tmp)
+fn_search_tsvalues(config, tsvalues_tmp, multiplicity = "default")
 }
 \arguments{
 \item{config}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
 \item{tsvalues_tmp}{data frame to search}
+
+\item{multiplicity}{uniqueness criteria. default = tstime_singular which is varid + tstime (all are varid singular)}
 }
 \value{
 data frame of tsvalue or FALSE

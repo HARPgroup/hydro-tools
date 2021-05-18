@@ -57,10 +57,12 @@ RomTS <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        ts <- self$datasource$get_ts(config, 'object', TRUE)
+        ts <- self$datasource$get_ts(config, 'list', TRUE)
         # merge config with ts
         #message("Found")
-        config <- as.list(ts)
+        if (!is.logical(ts)) {
+          config <- ts
+        }
       }
       self$from_list(config)
     },
@@ -142,8 +144,14 @@ RomTS <- R6Class(
       # calls to set RomProperties linked to it?
       # self$hair <- val
       # do I have a varid? If not, get one, or fail.
+      if (push_remote) {
+        tid = self$datasource$post('dh_timeseries', 'tid', self$to_list())
+        message(paste("Post returned:", tid))
+        if (!is.logical(tid)) {
+          self$tid = tid
+        }
+      }
       self$datasource$set_ts(self$to_list())
-      self$datasource$post('dh_timeseries', 'tid', self$to_list())
     }
   )
 )

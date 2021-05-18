@@ -26,7 +26,7 @@ NA
 \describe{
 \item{\code{site}}{URL of some RESTful repository}
 
-\item{\code{username}}{to connect to RESTful repository}
+\item{\code{rest_uname}}{username to connect to RESTful repository}
 
 \item{\code{timeline}}{for default time series data}
 
@@ -50,17 +50,11 @@ NA
 }
 \if{html}{\out{</div>}}
 }
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{username}}{to connect to RESTful repository}
-}
-\if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{RomDataSource$new()}}
+\item \href{#method-reset}{\code{RomDataSource$reset()}}
 \item \href{#method-get_token}{\code{RomDataSource$get_token()}}
 \item \href{#method-get_vardef}{\code{RomDataSource$get_vardef()}}
 \item \href{#method-get_props}{\code{RomDataSource$get_props()}}
@@ -85,11 +79,32 @@ NA
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{site}}{URL of some RESTful repository}
+
+\item{\code{rest_uname}}{username to connect to RESTful repository}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-reset"></a>}}
+\if{latex}{\out{\hypertarget{method-reset}{}}}
+\subsection{Method \code{reset()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$reset(table)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{table}}{which table. Default 'all'}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing clears data tables
 }
 }
 \if{html}{\out{<hr>}}
