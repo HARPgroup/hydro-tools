@@ -246,7 +246,7 @@ fn_get_timeseries <- function(inputs, site, token){
     pbody$tstime = inputs$tstime
   }
   if (!is.null(inputs$tid)) {
-    if (inputs$tid > 0) {
+    if (!is.na(inputs$tid)) {
       # forget about other attributes, just use tid
       pbody = list(
         tid = inputs$tid
@@ -368,13 +368,13 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   this_result <- list(
     status = FALSE
   )
-  if (is.na(pkid)) {
-    if (!is.na(match(pk, names(inputs)) )) {
-      #remove this for saving if it is null
-      iix <- which(names(inputs) == pk)
-      inputs  <- inputs[-iix]
-      print(paste("removed ", pk, " from ", inputs))
-    }
+  if (!is.na(match(pk, names(inputs)) )) {
+    #remove this for saving if it is not null
+    iix <- which(names(inputs) == pk)
+    inputs  <- inputs[-iix]
+    message(paste("removed ", pk, " from inputs"))
+  }
+  if ( is.na(pkid) | is.null(pkid) ) {
     message(paste0("----- Creating ", entity_type, "..."))
     this_result <- POST(
       paste0(site, "/",entity_type, "/"), 
@@ -382,20 +382,25 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
       body = inputs,
       encode = "json"
     )
-    print(inputs)
-    
+    # need to harvest the id col since this is an insert
+    rest_parts = content(this_result)
+    print(paste("Parts:", rest_parts))
+    pkid = as.integer(rest_parts$id)
   } else {
     message(paste0("----- Updating ", entity_type, "..."))
+    message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
     this_result <- PUT(
-      paste0(site, "/",entity_type, "/"), 
+      paste0(site, "/",entity_type, "/", pkid), 
       add_headers(HTTP_X_CSRF_TOKEN = token),
       body = inputs,
       encode = "json"
     );
+    #print(this_result)
   }
-  print(this_result)
-  rest_parts = strsplit(this_result$url, '/', fixed = TRUE)
-  pkid = as.integer(rest_parts[[1]][length(rest_parts[[1]])])
+  #rest_parts = strsplit(this_result$url, '/', fixed = TRUE)
+  #print(paste("Rest Parts:", rest_parts))
+  #pkid = as.integer(rest_parts[[1]][length(rest_parts[[1]])])
+  
   if (!is.logical(this_result$status )) {
     return_id <- switch(
       this_result$status,
@@ -405,9 +410,10 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
       "500" = FALSE
     )
   } else {
-    return_id = FALSE
+    pkid = FALSE
   }
-  return(return_id)
+  message(paste("REST returned", pkid))
+  return(pkid)
 }
 
 #' Get any entity from a RESTful web service
@@ -519,15 +525,17 @@ fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
 #'
 #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
 #' @param tsvalues_tmp data frame to search
+#' @param multiplicity uniqueness criteria. default = tstime_singular which is varid + tstime (all are varid singular)
 #' @return data frame of tsvalue or FALSE
 #' @seealso NA
 #' @export fn_search_tsvalues
 #' @examples NA
-fn_search_tsvalues <- function(config, tsvalues_tmp) {
+fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
   tsvals = FALSE
   where_clause = ""
   number_cols = c("tid", "tsvalue", "featureid")
   tss <- "select * from tsvalues_tmp where "
+  print(paste("Searching for ", config))
   if (!is.null(config$tid)) {
     if (!is.na(config$tid)) {
       where_clause <- paste(
@@ -537,12 +545,12 @@ fn_search_tsvalues <- function(config, tsvalues_tmp) {
     }
   } else {
     wand = ""
-    for (i in names(config)) {
-      if (i == 'varkey') {
-        # for now we skip these as we count on varid in the vardef table.
-        message("Skipping varkey")
-        next
-      }
+    wcols = c('tstime', 'varid')
+    if ( (multiplicity == 'default') | (is.null(multiplicity)) ) {
+      wcols = c('tstime', 'varid')
+    }
+    # todo: handle other multiplicity modes
+    for (i in wcols) {
       if (is.na(config[i])) {
         message(paste("Skipping NULL", i))
         next

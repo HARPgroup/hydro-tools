@@ -28,6 +28,15 @@ RomDataSource <- R6Class(
       self$site = site
       self$rest_uname = rest_uname
     },
+    #' @param table which table. Default 'all'
+    #' @return nothing clears data tables
+    reset = function(table) {
+      for (t in c('props', 'features', 'tsvalues', 'var_defs')) {
+        if ( (table == 'all') | (t == table) ) {
+          self[[t]] <- self[[t]][0,]
+        }
+      }
+    },
     #' @return nothing sets internal private token
     get_token = function() {
       if (!is.character(self$site) ) {
@@ -81,7 +90,7 @@ RomDataSource <- R6Class(
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
-      # return_type = 'list', 'data.frame' or 'object', 
+      # return_type = 'list', or 'data.frame'
       # default to data.frame to maintain compatibility with getTimeseries
       # force_refresh = if FALSE, use local value if we already have one
       # easier backwards compatibility, lower data needs?
@@ -89,6 +98,7 @@ RomDataSource <- R6Class(
       # or, return FALSE with message that df is only option? Hmmmm.
       # or return 
       # search first in 
+      ts = FALSE
       tsvalues <- fn_search_tsvalues(config, self$tsvalues)
       if (is.logical(tsvalues)) {
         # none exists locally, so query
@@ -96,28 +106,14 @@ RomDataSource <- R6Class(
       }
       if (!is.null(self$site) & force_refresh) {
         tsvalues <- fn_get_timeseries(config, self$site, private$token)
-        for (i in nrow(tsvalues)) {
-          # this adds each to our local database in formatted fashion
-          print(paste("handling ts", i))
-          tsi <- as.list(tsvalues[i,])
-          tsi <- RomTS$new(self,tsi)
-          if (return_type == 'object') {
-            ts <- tsi
-          } 
-          tsi <- tsi$to_list()
-          if (return_type == 'list') {
-            # we just want one
-            ts <- tsi
-          } 
-          self$set_ts(tsi)
+        if (!is.logical(tsvalues)) {
+          if (nrow(tsvalues) >= 1) {
+            ts <- as.list(tsvalues[1,])
+          }
         }
-      } else {
-        ts <- RomTS$new(self, config)
-        ts <- ts$to_list()
-        self$set_ts(ts)
-        tsvalues <- fn_search_tsvalues(config, self$tsvalues)
       }
-      # add to tsvalues data frame
+      # return either the raw fn_get_timeseries/fn_search_tsvalues 
+      # or a the first found item
       if (return_type != 'data.frame') {
         return(ts)
       } else {
@@ -151,11 +147,6 @@ RomDataSource <- R6Class(
       if (is.logical(ts_check)) {
         # not found, so add
         message("Storing TS")
-        #if (nrow(self$tsvalues) > 0) {
-        #  self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
-        #} else {
-        #  self$tsvalues <- as.data.frame(rbind(ts[names(self$tsvalues)]))
-        #}
         self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
       } else {
         # update 
@@ -203,7 +194,8 @@ RomDataSource <- R6Class(
     post = function(entity_type, pk, config) {
       message(paste("site",self$site))
       message(paste("token", private$token))
-      fn_post_rest(entity_type, pk, config, self$site, private$token)
+      return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
+      return(return_id)
     },
     #' @field timeline for default time series data
     timeline = NULL,
