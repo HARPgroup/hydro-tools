@@ -5,8 +5,7 @@ Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("a
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Depends: 
     R (>= 3.5),
-    R6,
-    httr
+    R6
 License: GPL
 Encoding: UTF-8
 LazyData: true
@@ -18,4 +17,5 @@ Imports:
     zoo,
     utils,
     jsonlite,
-    ggplot2
+    ggplot2,
+    httr
