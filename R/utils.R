@@ -282,14 +282,14 @@ fn_get_timeseries <- function(inputs, site, token){
   # set morepages to true to start, if multipage = FALSE, this gets reset immediately after 1st retrieval
   morepages = TRUE
   while (morepages == TRUE) {
-    tsrest <- GET(
+    tsrest <- httr::GET(
       paste(site,"/dh_timeseries.json",sep=""), 
-      add_headers(HTTP_X_CSRF_TOKEN = token),
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       query = pbody, 
       encode = "json"
-    );
+    )
     message(tsrest)
-    ts_cont <- content(tsrest);
+    ts_cont <- httr::content(tsrest);
     message(paste(site,"/dh_timeseries.json",sep=""))
     
     if (length(ts_cont$list) != 0) {
@@ -379,12 +379,12 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
     message(paste0("----- Creating ", entity_type, "..."))
     this_result <- POST(
       paste0(site, "/",entity_type, "/"), 
-      add_headers(HTTP_X_CSRF_TOKEN = token),
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       body = inputs,
       encode = "json"
     )
     # need to harvest the id col since this is an insert
-    rest_parts = content(this_result)
+    rest_parts = httr::content(this_result)
     print(paste("Parts:", rest_parts))
     pkid = as.integer(rest_parts$id)
   } else {
@@ -392,7 +392,7 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
     message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
     this_result <- PUT(
       paste0(site, "/",entity_type, "/", pkid), 
-      add_headers(HTTP_X_CSRF_TOKEN = token),
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       body = inputs,
       encode = "json"
     );
@@ -450,14 +450,14 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
   entities = FALSE
   ecols = FALSE
   while (morepages == TRUE) {
-    entity_rest <- GET(
+    entity_rest <- httr::GET(
       paste0(site, "/",entity_type, ".json"), 
-      add_headers(HTTP_X_CSRF_TOKEN = token),
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       query = inputs, 
       encode = "json"
     );
     message(entity_rest)
-    entity_cont <- content(entity_rest);
+    entity_cont <- httr::content(entity_rest);
     message(paste(site,"/dh_feature.json",sep=""))
     
     if (length(entity_cont$list) != 0) {
@@ -601,11 +601,11 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
 #' @seealso NA
 #' @export fn_search_properties
 #' @examples NA
-fn_search_properties <- function(config, properties_tmp, multiplicity = 'default') {
+fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default') {
   propvals = FALSE
   where_clause = ""
   number_cols = c("pid", "propvalue", "featureid")
-  propsql <- "select * from properties_tmp where "
+  propsql <- "select * from propvalues_tmp where "
   print(paste("Searching for ", config))
   if (!is.null(config$pid)) {
     if (!is.na(config$pid)) {
@@ -628,7 +628,7 @@ fn_search_properties <- function(config, properties_tmp, multiplicity = 'default
         message(paste("Skipping NA", i))
         next
       }
-      if (!(i %in% colnames(properties_tmp))) {
+      if (!(i %in% colnames(propvalues_tmp))) {
         message(paste0("Skipping ", i))
         next
       }
