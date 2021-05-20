@@ -74,19 +74,39 @@ RomDataSource <- R6Class(
     },
     # get properties
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-    #' @param return_type 'df' (data.frame) or 'object'
+    #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
-    get_props = function(config, return_type = 'df', force_refresh = FALSE) {
-      props <- fn_get_properties(config, self$site, private$token)
-      return(props)
+    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+      props = FALSE
+      propvalues <- fn_search_properties(config, self$propvalues)
+      
+      if (is.logical(propvalues)) {
+        # none exists locally, so query
+        force_refresh = TRUE
+      }
+      if (!is.null(self$site) & force_refresh) {
+        propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
+        if (!is.logical(propvalues)) {
+          if (nrow(propvalues) >= 1) {
+            prop <- as.list(propvalues[1,])
+          }
+        }
+      }
+      # return either the raw fn_get_timeseries/fn_search_propvalues 
+      # or a the first found item
+      if (return_type != 'data.frame') {
+        return(prop)
+      } else {
+        return(propvalues)
+      }
     },
     # need get_ts - get data frame of ts values matching criteria
     # load_object - load entity single object config
     # get_ts method description
     # this could actually live in the RomTS object
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-    #' @param return_type 'df' (data.frame) or 'object'
+    #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
@@ -154,6 +174,30 @@ RomDataSource <- R6Class(
         self$tsvalues[ts$ID] <- ts
       }
     },
+    #' @param prop = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @return nothing seprop internal private token
+    set_prop= function(prop) {
+      # check uniqueness
+      # search for existing based on uniqueness
+      # uniqueness is variable def related, not arbitrary 
+      print(prop)
+      prop_check = FALSE
+      if (!is.na(prop$pid)) {
+        if (prop$pid > 0) {
+          prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
+          #print(prop_check)
+        }
+      }
+      if (is.logical(prop_check)) {
+        # not found, so add
+        message("Storing prop")
+        self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
+      } else {
+        # update 
+        message("Found, trying to load")
+        self$propvalues[prop$ID] <- prop
+      }
+    },
     #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
     #' @return local df index?
     set_vardef = function(var_def) {
@@ -219,8 +263,8 @@ RomDataSource <- R6Class(
       #bundle=character(),
       stringsAsFactors=FALSE
     ),
-    #' @field props table of object properties (can be contained by objects)
-    props = data.frame(
+    #' @field propvalues table of object properties (can be contained by objects)
+    propvalues = data.frame(
       proptext=character(),
       pid=character(),
       propname=character(), 

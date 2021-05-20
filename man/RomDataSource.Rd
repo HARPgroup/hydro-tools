@@ -32,7 +32,7 @@ NA
 
 \item{\code{tsvalues}}{table of time series data}
 
-\item{\code{props}}{table of object properties (can be contained by objects)}
+\item{\code{propvalues}}{table of object properties (can be contained by objects)}
 
 \item{\code{features}}{table of physical features}
 
@@ -57,10 +57,11 @@ NA
 \item \href{#method-reset}{\code{RomDataSource$reset()}}
 \item \href{#method-get_token}{\code{RomDataSource$get_token()}}
 \item \href{#method-get_vardef}{\code{RomDataSource$get_vardef()}}
-\item \href{#method-get_props}{\code{RomDataSource$get_props()}}
+\item \href{#method-get_prop}{\code{RomDataSource$get_prop()}}
 \item \href{#method-get_ts}{\code{RomDataSource$get_ts()}}
 \item \href{#method-auth_read}{\code{RomDataSource$auth_read()}}
 \item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
+\item \href{#method-set_prop}{\code{RomDataSource$set_prop()}}
 \item \href{#method-set_vardef}{\code{RomDataSource$set_vardef()}}
 \item \href{#method-get}{\code{RomDataSource$get()}}
 \item \href{#method-post}{\code{RomDataSource$post()}}
@@ -143,11 +144,15 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_props"></a>}}
-\if{latex}{\out{\hypertarget{method-get_props}{}}}
-\subsection{Method \code{get_props()}}{
+\if{html}{\out{<a id="method-get_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-get_prop}{}}}
+\subsection{Method \code{get_prop()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_props(config, return_type = "df", force_refresh = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_prop(
+  config,
+  return_type = "data.frame",
+  force_refresh = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -155,7 +160,7 @@ nothing sets internal private token
 \describe{
 \item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
-\item{\code{return_type}}{'df' (data.frame) or 'object'}
+\item{\code{return_type}}{'data.frame' or 'list'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
 }
@@ -178,7 +183,7 @@ nothing sets internal private token
 \describe{
 \item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
-\item{\code{return_type}}{'df' (data.frame) or 'object'}
+\item{\code{return_type}}{'data.frame' or 'list'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
 }
@@ -235,6 +240,25 @@ result of web request
 }
 \subsection{Returns}{
 nothing sets internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-set_prop}{}}}
+\subsection{Method \code{set_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_prop(prop)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prop}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing seprop internal private token
 }
 }
 \if{html}{\out{<hr>}}
