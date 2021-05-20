@@ -355,8 +355,9 @@ fn_get_timeseries <- function(inputs, site, token){
 #' @param token for xhttp auth
 fn_post_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  
+  print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
+  message(paste("Called fn_post_rest(", entity_type, ",", pk, ", pkid=", pkid, ")"))
   
   for (j in 1:length(inputs)) {
     if (is.na(inputs[j])) {
@@ -588,6 +589,78 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
     }
   }
   return(tsvals)
+}
+
+
+#' Retrieve Property data from propvalues style data frame
+#'
+#' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+#' @param propvalues_tmp data frame to search
+#' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
+#' @return data frame of propvalue or FALSE
+#' @seealso NA
+#' @export fn_search_properties
+#' @examples NA
+fn_search_properties <- function(config, properties_tmp, multiplicity = 'default') {
+  propvals = FALSE
+  where_clause = ""
+  number_cols = c("pid", "propvalue", "featureid")
+  propsql <- "select * from properties_tmp where "
+  print(paste("Searching for ", config))
+  if (!is.null(config$pid)) {
+    if (!is.na(config$pid)) {
+      where_clause <- paste(
+        where_clause,
+        "pid = ", config$pid
+      )
+    }
+  } else {
+    wand = ""
+    wcols = c('propname', 'varid', 'featureid', 'startdate', 'enddate', 'entity_type', 'propcode')
+    # todo: handle other multiplicity modes
+    for (i in wcols) {
+      # check for null first since is.na will give an error if the column does not exist.
+      if (is.null(config[[i]])) {
+        message(paste("Skipping NULL", i))
+        next
+      }
+      if (is.na(config[[i]])) {
+        message(paste("Skipping NA", i))
+        next
+      }
+      if (!(i %in% colnames(properties_tmp))) {
+        message(paste0("Skipping ", i))
+        next
+      }
+      if (nchar(where_clause) > 1) {
+        wand = "AND"
+      }
+      if (!is.null(config[i])) {
+        where_clause <- paste(
+          where_clause, 
+          wand, i, "="
+        )
+        if (is.element(i, number_cols)) {
+          where_clause <- paste(
+            where_clause, config[i]
+          )
+        } else {
+          where_clause <- paste0(
+            where_clause, " '", config[i], "'"
+          )
+        }
+      } 
+    }
+  }
+  if (nchar(where_clause) > 0 ) {
+    propsql <- paste(propsql, where_clause)
+    message(propsql)
+    propvals <- sqldf(propsql)
+    if (!nrow(propvals)) {
+      propvals = FALSE
+    }
+  }
+  return(propvals)
 }
 
 fn_search_vardefs <- function(config, var_defs_tmp) {
