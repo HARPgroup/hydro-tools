@@ -10,7 +10,10 @@
 #' @export RomProperty
 RomProperty <- R6Class(
   "RomProperty",
+  inherit = RomEntity,
   public = list(
+    #' @field base_entity_type kind of entity
+    base_entity_type = 'dh_properties',
     #' @field pid unique ID in this RomDataSource
     pid = NA,
     #' @field featureid id of entity this is attached to
@@ -37,6 +40,10 @@ RomProperty <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field id of this entity alias to remote pkid, subclassed as function
+    id = function() {
+      return(self$pid)
+    },
     #' @param site URL of some RESTful repository
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
@@ -71,25 +78,25 @@ RomProperty <- R6Class(
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "pid") {
-          self$pid = config$pid
+          self$pid = as.integer(as.character(config$pid))
         } else if (i == "varid") {
-          self$varid = config$varid
+          self$varid = as.integer(as.character(config$varid))
         } else if (i == "entity_type") {
-          self$entity_type = config$entity_type
+          self$entity_type = as.character(config$entity_type)
         } else if (i == "featureid") {
-          self$featureid = config$featureid
+          self$featureid = as.integer(as.character(config$featureid))
         } else if (i == "propname") {
-          self$propname = config$propname
+          self$propname = as.character(config$propname)
         } else if (i == "startdate") {
-          self$startdate = config$startdate
+          self$startdate = as.integer(as.character(config$startdate))
         } else if (i == "enddate") {
-          self$enddate = config$enddate
+          self$enddate = as.integer(as.character(config$enddate))
         } else if (i == "propvalue") {
-          self$propvalue = config$propvalue
+          self$propvalue = as.numeric(as.character(config$propvalue))
         } else if (i == "propcode") {
-          self$propcode = config$propcode
+          self$propcode = as.character(config$propcode)
         } else if (i == "bundle") {
-          self$bundle = config$bundle
+          self$bundle = as.character(config$bundle)
         }
       }
     },

@@ -125,10 +125,13 @@ RomDataSource <- R6Class(
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
+        # todo: switch to generic get method if possible
         tsvalues <- fn_get_timeseries(config, self$site, private$token)
         if (!is.logical(tsvalues)) {
           if (nrow(tsvalues) >= 1) {
+            # stash the first one in case we only want a single
             ts <- as.list(tsvalues[1,])
+            # store all features in local db
           }
         }
       }
