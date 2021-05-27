@@ -14,6 +14,8 @@ RomProperty <- R6Class(
   public = list(
     #' @field base_entity_type kind of entity
     base_entity_type = 'dh_properties',
+    #' @field pk_name the name of this entity's pk column
+    pk_name = 'pid',
     #' @field pid unique ID in this RomDataSource
     pid = NA,
     #' @field featureid id of entity this is attached to

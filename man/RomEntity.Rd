@@ -23,7 +23,7 @@ NA
 \describe{
 \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{tsvalues}}{values for this entity}
+\item{\code{pk_name}}{the name of this entity's pk column}
 
 \item{\code{datasource}}{RomDataSource}
 }
@@ -34,6 +34,7 @@ NA
 \itemize{
 \item \href{#method-get_id}{\code{RomEntity$get_id()}}
 \item \href{#method-propvalues}{\code{RomEntity$propvalues()}}
+\item \href{#method-tsvalues}{\code{RomEntity$tsvalues()}}
 \item \href{#method-new}{\code{RomEntity$new()}}
 \item \href{#method-clone}{\code{RomEntity$clone()}}
 }
@@ -72,6 +73,29 @@ propvalues unique properties of this entity
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-tsvalues"></a>}}
+\if{latex}{\out{\hypertarget{method-tsvalues}{}}}
+\subsection{Method \code{tsvalues()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$tsvalues(varkey = NULL, tstime = NULL, tsendtime = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{varkey}}{option variable to filter}
+
+\item{\code{tstime}}{timespan begin}
+
+\item{\code{tsendtime}}{timespan end}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+tsvalues unique timeseries records for this entity
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
@@ -82,13 +106,11 @@ propvalues unique properties of this entity
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{datasource}}{optional RomDataSource for remote and local storage}
+\item{\code{datasource}}{RESTful repository (optional)}
 
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
 
 \item{\code{load_remote}}{automatically query REST data source for matches?}
-
-\item{\code{site}}{URL of some RESTful repository}
 }
 \if{html}{\out{</div>}}
 }
