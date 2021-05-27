@@ -579,7 +579,7 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
   if (nchar(where_clause) > 0 ) {
     tss <- paste(tss, where_clause)
     message(tss)
-    tsvals <- sqldf(tss)
+    tsvals <- sqldf::sqldf(tss)
     if (!nrow(tsvals)) {
       tsvals = FALSE
     }
@@ -651,7 +651,7 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   if (nchar(where_clause) > 0 ) {
     propsql <- paste(propsql, where_clause)
     message(propsql)
-    propvals <- sqldf(propsql)
+    propvals <- sqldf::sqldf(propsql)
     if (!nrow(propvals)) {
       propvals = FALSE
     }
