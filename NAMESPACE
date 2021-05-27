@@ -2,6 +2,7 @@
 
 export(CIA_data)
 export(RomDataSource)
+export(RomEntity)
 export(RomProperty)
 export(RomTS)
 export(fn_extract_basin)

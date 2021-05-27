@@ -13,15 +13,15 @@ RomEntity <- R6Class(
   public = list(
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
-    #' @field id of this entity alias to remote pkid, subclassed as function
-    id = function() {
+    #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
+    get_id = function() {
       return(NULL)
     },
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
     propvalues = function(propname = NULL, varid = NULL) {
-      ps <- self$datasource$get_prop(list(featureid = self$id(), entity_type=self$base_entity_type))
+      ps <- self$datasource$get_prop(list(featureid = self$get_id(), entity_type=self$base_entity_type))
       return(ps)
     },
     #' @field tsvalues values for this entity

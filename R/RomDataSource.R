@@ -42,7 +42,7 @@ RomDataSource <- R6Class(
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$site, rest_uname)
+      private$token <- om_vahydro_token(self$site, self$rest_uname)
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key

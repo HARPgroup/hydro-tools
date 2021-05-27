@@ -40,8 +40,8 @@ RomProperty <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
-    #' @field id of this entity alias to remote pkid, subclassed as function
-    id = function() {
+    #' @return get_id the id of this entity alias to remote pkid, subclassed as function
+    get_id = function() {
       return(self$pid)
     },
     #' @param site URL of some RESTful repository

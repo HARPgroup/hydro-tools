@@ -6,9 +6,11 @@ hid <- 74551
 
 map1 <- RomProperty$new(ds, list(propname="map1", entity_type="dh_feature",featureid=hid),TRUE)
 map1 <- RomProperty$new(ds, list(propname="extent", entity_type="dh_properties",featureid=map1$pid),TRUE)
+
+# Using old method (pre 5/27/2021)
 ds$get_prop(config = list(featureid = extent$pid, entity_type='dh_properties'))
 
-# If using new version 
+# Or, If using new version 
 extent$propvalues()
 extent$propvalues()[c('propname','propvalue')]
 
