@@ -440,8 +440,8 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     inputs$page = 0
     multipage = TRUE ; # do we support multiple pages if records exceed limit?
   }
-  message(inputs)
-  message(paste("pk= ", pkid))
+  #message(inputs)
+  #message(paste("pk= ", pkid))
   morepages = TRUE
   entities = FALSE
   ecols = FALSE
@@ -452,7 +452,7 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
       query = inputs, 
       encode = "json"
     );
-    message(entity_rest)
+    #message(entity_rest)
     entity_cont <- httr::content(entity_rest);
     message(paste(site,"/dh_feature.json",sep=""))
     
