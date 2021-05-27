@@ -2,7 +2,7 @@
 % Please edit documentation in R/om_vahydro_token.R
 \name{om_vahydro_token}
 \alias{om_vahydro_token}
-\title{Retrieve a token from vaydro REST service.  TBD: replace with object to store token and dn connection}
+\title{Retrieve a token from vahydro REST service.  TBD: replace with object to store token and dn connection}
 \usage{
 om_vahydro_token(base_url = "http://deq2.bse.vt.edu/d.dh", rest_uname = NULL)
 }
@@ -15,7 +15,7 @@ om_vahydro_token(base_url = "http://deq2.bse.vt.edu/d.dh", rest_uname = NULL)
 token character from VAHydro REST web service
 }
 \description{
-Retrieve a token from vaydro REST service.  TBD: replace with object to store token and dn connection
+Retrieve a token from vahydro REST service.  TBD: replace with object to store token and dn connection
 }
 \examples{
 NA

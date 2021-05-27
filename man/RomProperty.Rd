@@ -18,9 +18,14 @@ NA
 \seealso{
 NA
 }
+\section{Super class}{
+\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomProperty}
+}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{base_entity_type}}{kind of entity}
+
 \item{\code{pid}}{unique ID in this RomDataSource}
 
 \item{\code{featureid}}{id of entity this is attached to}
@@ -52,12 +57,32 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-get_id}{\code{RomProperty$get_id()}}
 \item \href{#method-new}{\code{RomProperty$new()}}
 \item \href{#method-from_list}{\code{RomProperty$from_list()}}
 \item \href{#method-to_list}{\code{RomProperty$to_list()}}
 \item \href{#method-set_prop}{\code{RomProperty$set_prop()}}
 \item \href{#method-save}{\code{RomProperty$save()}}
 \item \href{#method-clone}{\code{RomProperty$clone()}}
+}
+}
+\if{html}{
+\out{<details open ><summary>Inherited methods</summary>}
+\itemize{
+\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues">}\href{../../hydrotools/html/RomEntity.html#method-propvalues}{\code{hydrotools::RomEntity$propvalues()}}\out{</span>}
+}
+\out{</details>}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_id"></a>}}
+\if{latex}{\out{\hypertarget{method-get_id}{}}}
+\subsection{Method \code{get_id()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$get_id()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+get_id the id of this entity alias to remote pkid, subclassed as function
 }
 }
 \if{html}{\out{<hr>}}
