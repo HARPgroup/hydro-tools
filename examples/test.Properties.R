@@ -1,6 +1,6 @@
 # install_github("HARPGroup/hydro-tools", force=TRUE)
 library("hydrotools")
-ds <- RomDataSource$new("http://deq2.bse.vt.edu/d.dh", 'restws_admin')
+ds <- RomDataSource$new("http://deq1.bse.vt.edu/d.dh", 'restws_admin')
 ds$get_token()
 hid <- 74551 
 

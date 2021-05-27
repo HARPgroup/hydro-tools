@@ -18,9 +18,16 @@ NA
 \seealso{
 NA
 }
+\section{Super class}{
+\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomTS}
+}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{base_entity_type}}{kind of entity}
+
+\item{\code{pk_name}}{the name of this entity's pk column}
+
 \item{\code{tid}}{unique ID in this RomDataSource}
 
 \item{\code{featureid}}{id of entity this is attached to}
@@ -59,6 +66,15 @@ NA
 \item \href{#method-save}{\code{RomTS$save()}}
 \item \href{#method-clone}{\code{RomTS$clone()}}
 }
+}
+\if{html}{
+\out{<details open ><summary>Inherited methods</summary>}
+\itemize{
+\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_id">}\href{../../hydrotools/html/RomEntity.html#method-get_id}{\code{hydrotools::RomEntity$get_id()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues">}\href{../../hydrotools/html/RomEntity.html#method-propvalues}{\code{hydrotools::RomEntity$propvalues()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues">}\href{../../hydrotools/html/RomEntity.html#method-tsvalues}{\code{hydrotools::RomEntity$tsvalues()}}\out{</span>}
+}
+\out{</details>}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}

@@ -42,3 +42,16 @@ ts2 <- getTimeseries(
 ts$save()
 # Should work the same
 #ss <- postTimeseries(ts$to_list(), site,tt)
+
+
+ts2 <- getTimeseries(
+  list(
+    varkey="geologic_map", 
+    featureid=hid, 
+    entity_type="dh_feature", 
+    tsvalue=1.0, 
+    tscode="test" 
+  ), 
+  "http://deq2.bse.vt.edu/d.alpha",
+  t
+)

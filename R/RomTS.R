@@ -10,7 +10,12 @@
 #' @export RomTS
 RomTS <- R6Class(
   "RomTS",
+  inherit = RomEntity,
   public = list(
+    #' @field base_entity_type kind of entity
+    base_entity_type = 'dh_timeseries',
+    #' @field pk_name the name of this entity's pk column
+    pk_name = 'tid',
     #' @field tid unique ID in this RomDataSource
     tid = NA,
     #' @field featureid id of entity this is attached to

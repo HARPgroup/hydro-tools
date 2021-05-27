@@ -26,6 +26,8 @@ NA
 \describe{
 \item{\code{base_entity_type}}{kind of entity}
 
+\item{\code{pk_name}}{the name of this entity's pk column}
+
 \item{\code{pid}}{unique ID in this RomDataSource}
 
 \item{\code{featureid}}{id of entity this is attached to}
@@ -70,6 +72,7 @@ NA
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues">}\href{../../hydrotools/html/RomEntity.html#method-propvalues}{\code{hydrotools::RomEntity$propvalues()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues">}\href{../../hydrotools/html/RomEntity.html#method-tsvalues}{\code{hydrotools::RomEntity$tsvalues()}}\out{</span>}
 }
 \out{</details>}
 }
