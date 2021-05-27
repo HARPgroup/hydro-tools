@@ -21,7 +21,7 @@ RomEntity <- R6Class(
     #' @param propname optional name to filter
     #' @param varid option variable to filter
     propvalues = function(propname = NULL, varid = NULL) {
-      ps <- self$datasource$get_prop(list(featureid = self$get_id(), entity_type=self$base_entity_type))
+      ps <- self$datasource$get_prop(list(featureid = self$get_id(), propname = propname, varid = varid, entity_type=self$base_entity_type))
       return(ps)
     },
     #' @field tsvalues values for this entity

@@ -15,5 +15,7 @@ pvals[c('propname','propvalue')]
 extent$propvalues()[c('propname','propvalue')]
 # Show all:
 # extent$propvalues()
+# show only props named x1
+extent$propvalues('x1')[c('propname','propvalue')]
 
 
