@@ -3,9 +3,11 @@ library(ggsn)
 library(ggmap) #used for get_stamenmap, get_map
 library(ggspatial) #annotation_north_arrow()
 
+#FUNCTION DEFAULTS TO STATEWIDE EXTENTS
 base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6)),
                      plot_margin = c(-0.5,0.2,-0.5,0.1),
-                     plot_zoom = 9
+                     plot_zoom = 9,
+                     scale_bar = TRUE
                      ){
   
   # LOAD gg-ready MAP LAYERS FROM THE baselayers.gg LIST 
@@ -39,15 +41,15 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
         #ADD BORDER LAYER
         geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE)+
         
-        #ADD SCALE BAR
-        ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
-              
-                       transform = TRUE, model = 'WGS84',st.bottom=FALSE,
-                       st.size = 3.5, st.dist = 0.0285,
-                       anchor = c(
-                         x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
-                         y = extent$y[1]+(extent$y[1])*0.001
-                       ))+
+        # #ADD SCALE BAR
+        # ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
+        #       
+        #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+        #                st.size = 3.5, st.dist = 0.0285,
+        #                anchor = c(
+        #                  x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
+        #                  y = extent$y[1]+(extent$y[1])*0.001
+        #                ))+
         
         #ADD NORTH BAR
         annotation_north_arrow(which_north = "grid", location = "tr",
@@ -72,5 +74,21 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
               panel.background = element_blank(),
               panel.border = element_blank()) 
         
+  if (isTRUE(scale_bar)){
+    
+    map <- map +
+    
+    #ADD SCALE BAR
+    ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
+                   
+                   transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+                   st.size = 3.5, st.dist = 0.0285,
+                   anchor = c(
+                     x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
+                     y = extent$y[1]+(extent$y[1])*0.001
+                   ))
+  }
+  
+  
   return(map)
 }

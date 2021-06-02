@@ -5,7 +5,7 @@
 #' Dendritic Ploting Function
 #' @description Helps locate all upstream segments from the working segment
 #' @param riv_seg Downstream river segment that you wish to have no more tributaries below segment - cannot be any more downstream then segment entered into function
-#' @param AllSegList Data frame of cumulative impact data
+#' @param AllSegList List of all vahydro river segments
 #' @param runid1 Runid that corresponds to first metric in data frame
 #' @param runid2 Runid that corresponds to second metric in data frame
 #' @param flow_metric Flow metric that corresponds to data in data frame
@@ -65,8 +65,8 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
   p <- p +
     geom_point(data = riv_seg_og, aes(x = rmile, y = Metric_1)) +
     geom_text(data = cia_data_frame, aes(x = rmile, y = Metric_1, label = seglist, vjust = 1.0)) + 
-    scale_size_continuous(range = c(0.2, 3), name = "Percent Change") +
-    scale_colour_manual(values = c("blue", "grey", "brown"), name = "Percent Change") +
+    scale_size_continuous(range = c(0.2, 3), name = "PC Magnitude") +
+    scale_colour_gradientn(colours = c("blue", "grey"), values = c(-1, 1), name = "PC Sign", breaks = c(-1, 1)) +
     theme_bw() +
     ggtitle(paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2)) +
     xlab('River Mile [Mi]') +
