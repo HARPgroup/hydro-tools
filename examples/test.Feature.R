@@ -1,5 +1,5 @@
 library("hydrotools")
-ds <- RomDataSource$new("http://deq2.bse.vt.edu/d.alpha")
+ds <- RomDataSource$new("https://deq1.bse.vt.edu/d.dh", 'restws_admin')
 ds$get_token()
 
 feat <- RomFeature$new(ds,list(hydroid=62173),TRUE)
