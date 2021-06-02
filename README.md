@@ -8,6 +8,7 @@ The hydro-tools repository is currently undergoing maintenance in order to be co
 
 ``` r
 install.packages("devtools")
+library("devtools")
 install_github("HARPgroup/hydro-tools")
 
 # hydrotools uses IHA for some metrics.
