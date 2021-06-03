@@ -16,7 +16,7 @@ fn_plot_cia_dend(
 \arguments{
 \item{riv_seg}{Downstream river segment that you wish to have no more tributaries below segment - cannot be any more downstream then segment entered into function}
 
-\item{AllSegList}{Data frame of cumulative impact data}
+\item{AllSegList}{List of all vahydro river segments}
 
 \item{runid1}{Runid that corresponds to first metric in data frame}
 

@@ -42,6 +42,10 @@ RomTS <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @return get_id the id of this entity alias to remote pkid, subclassed as function
+    get_id = function() {
+      return(self$tid)
+    },
     #' @param site URL of some RESTful repository
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?

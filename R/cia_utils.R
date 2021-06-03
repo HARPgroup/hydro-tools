@@ -13,7 +13,7 @@
 #' @param AllSegList A list of all river segments
 #' @return data frame of river segments downstream and upstream of inputed segment
 #' @import sqldf
-#' @export cia_data
+#' @export CIA_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
   names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
@@ -86,7 +86,7 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
 #' @param cia_data_frame CIA data frame with specific columns
 #' @return data frame of river segments, and associated river miles
 #' @import sqldf
-#' @export cia_data
+#' @export fn_river_network
 fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   
   #Calculates Upstream River Segments
@@ -170,7 +170,7 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
 #' @param end_seg Desired end river segment - river segment that is most downstream
 #' @return Trimmed cumulative impact data frame
 #' @import sqldf
-#' @export basin_data
+#' @export fn_extract_basin
 fn_extract_basin <- function(cia_data_frame, end_seg){
   #calculating upstream segments
   upstream <- data.frame((fn_ALL.upstream(end_seg, AllSegList)))
@@ -200,11 +200,15 @@ fn_extract_basin <- function(cia_data_frame, end_seg){
 # AllSegList <- substring(RSeg.csv$hydrocode, 17)
 ############################################################################
 
-
+#' Find Upstream Segments
+#' @description Trims data frame to include only segments upstream of end segment
+#' @param riv.seg string ID of segment to fine
+#' @param AllSegList AllSegList data frame of all segments
+#' @return string next upstream segment ID
+#' @import stringr rapportools
+#' @export fn_upstream
 #fn_upstream() copy from cbp6_functions
 fn_upstream <- function(riv.seg, AllSegList) {
-  library(stringr)
-  library(rapportools)
   # Create dataframe for upstream and downstream segments based on code in string
   ModelSegments <- data.frame(matrix(nrow = length(AllSegList), ncol = 6))
   colnames(ModelSegments)<- c('RiverSeg', 'Middle', 'Last', 'AdditionalName', 'Downstream', 'Upstream')
@@ -291,10 +295,15 @@ fn_ALL.upstream <- function(riv.seg, AllSegList) {
 }
 
 
+#' Find Downstream Segment
+#' @description Trims data frame to include only segments upstream of end segment
+#' @param riv.seg string ID of segment to fine
+#' @param AllSegList AllSegList data frame of all segments
+#' @return string next upstream segment ID
+#' @import stringr rapportools
+#' @export fn_downstream
 #fn_downstream() copy from cbp6_functions
 fn_downstream <- function(riv.seg, AllSegList) {
-  library(stringr)
-  library(rapportools)
   # Create dataframe for upstream and downstream segments based on code in string
   ModelSegments <- data.frame(matrix(nrow = length(AllSegList), ncol = 6))
   colnames(ModelSegments)<- c('RiverSeg', 'Middle', 'Last', 'AdditionalName', 'Downstream', 'Upstream')

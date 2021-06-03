@@ -59,6 +59,7 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-get_id}{\code{RomTS$get_id()}}
 \item \href{#method-new}{\code{RomTS$new()}}
 \item \href{#method-from_list}{\code{RomTS$from_list()}}
 \item \href{#method-to_list}{\code{RomTS$to_list()}}
@@ -70,11 +71,22 @@ NA
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_id">}\href{../../hydrotools/html/RomEntity.html#method-get_id}{\code{hydrotools::RomEntity$get_id()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues">}\href{../../hydrotools/html/RomEntity.html#method-propvalues}{\code{hydrotools::RomEntity$propvalues()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues">}\href{../../hydrotools/html/RomEntity.html#method-tsvalues}{\code{hydrotools::RomEntity$tsvalues()}}\out{</span>}
 }
 \out{</details>}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_id"></a>}}
+\if{latex}{\out{\hypertarget{method-get_id}{}}}
+\subsection{Method \code{get_id()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomTS$get_id()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+get_id the id of this entity alias to remote pkid, subclassed as function
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
