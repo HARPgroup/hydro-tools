@@ -8,7 +8,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   MinorBasins.csv <- baselayers[[which(names(baselayers) == "MinorBasins.csv")]]
   #RSeg.csv <- baselayers[[which(names(baselayers) == "RSeg.csv")]]
   MajorRivers.csv <- baselayers[[which(names(baselayers) == "MajorRivers.csv")]]
-  # fips.csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
+  fips.csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
   WBDF <- baselayers[[which(names(baselayers) == "WBDF")]]
   
   
@@ -157,12 +157,12 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   # for (f in 1:length(fips_layer$fips_hydroid)) {
   #   fips_geom <- readWKT(fips_layer$fips_centroid[f])
   #   fips_geom_clip <- gIntersection(MB_geom, fips_geom) #SHOW ONLY FIPS NAMES WITHIN MINOR BASIN
-  #   
+  # 
   #   if (is.null(fips_geom_clip) == TRUE) {
-  #     # print("FIPS OUT OF MINOR BASIN EXTENT - SKIPPING") 
+  #     # print("FIPS OUT OF MINOR BASIN EXTENT - SKIPPING")
   #     next
   #   }
-  #   
+  # 
   #   fipsProjected <- SpatialPointsDataFrame(fips_geom_clip, data.frame('id'), match.ID = TRUE)
   #   fipsProjected@data$id <- as.character(fips_layer[f,]$id)
   #   fips.list[[f]] <- fipsProjected
@@ -181,16 +181,60 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   #   fips.df <- data.frame(fips)
   # } else {
   #   print("NO FIPS GEOMS WITHIN MINOR BASIN EXTENT")
-  #   
+  # 
   #   fips.df <- data.frame(id=c(1,2),
-  #                         fips_latitude =c(1,2), 
+  #                         fips_latitude =c(1,2),
   #                         fips_longitude =c(1,2),
   #                         fips_name = c(1,2),
-  #                         stringsAsFactors=FALSE) 
-  #   
-  # }
+  #                         stringsAsFactors=FALSE)
   # 
-  # #print(fips.df)
+  # }
+
+  
+  
+  ###########
+  #colnames(fips.csv)
+  fips_data <- fips.csv
+  #colnames(fips_data)
+  length(fips_data[,1])
+  fips_data$fips_name
+  
+  #EXCLUDE NC LOCALITIES
+  fips_data_sql <- paste('SELECT *
+              FROM fips_data
+              WHERE fips_code NOT LIKE "3%"',sep="")
+  fips_data <- sqldf(fips_data_sql)
+  
+  fips_data$id <- as.numeric(rownames(fips_data))
+  fips.list <- list()
+  
+  #f<-1
+  for (f in 1:length(fips_data$fips_hydroid)) {
+    fips_geom <- readWKT(fips_data$fips_geom[f])
+    fips_geom_clip <- gIntersection(bb, fips_geom)
+    
+    if (is.null(fips_geom_clip) == TRUE) {
+      # print("fips OUT OF MINOR BASIN EXTENT - SKIPPING") 
+      next
+    }
+    
+    fipsProjected <- SpatialPolygonsDataFrame(fips_geom_clip, data.frame('id'), match.ID = TRUE)
+    fipsProjected@data$id <- as.character(f)
+    fips.list[[f]] <- fipsProjected
+  }
+  
+  length(fips.list)
+  #REMOVE THOSE MINOR BASINS THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
+  fips.list <- fips.list[which(!sapply(fips.list, is.null))]
+  length(fips.list)
+  
+  fips <- do.call('rbind', fips.list)
+  fips@data <- merge(fips@data, fips_data, by = 'id')
+  fips@data <- fips@data[,-c(2:3)]
+  fips.df <- fortify(fips, region = 'id')
+  fips.df <- merge(fips.df, fips@data, by = 'id') 
+  
+  
   ######################################################################################################
   ### PROCESS MajorRivers.csv LAYER  ###################################################################
   ######################################################################################################
@@ -301,7 +345,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   baselayers.gg <- list("bb.gg" = bbDF, 
                     "states.gg" = state.df,
                     "mb.gg" = mb.df,
-                    #"fips.gg" = fips.df,
+                    "fips.gg" = fips.df,
                     "rivs.gg" = rivs.df,
                     "reservoirs.gg" = WBDF
                     #"ifim.gg" = ifim.df
@@ -368,7 +412,7 @@ load_MapLayers <- function(site,localpath = tempdir()){
   #DOWNLOAD RSEG LAYER DIRECT FROM VAHYDRO
   if(!exists("RSeg.csv")) {  
     print(paste("DOWNLOADING RSEG LAYER DIRECT FROM VAHYDRO...",sep=""))
-    RSeg.csv_item <- paste(site,"/vahydro_riversegs_export",sep="")
+    RSeg.csv_item <- paste(site,"vahydro_riversegs_export",sep="")
     RSeg.csv_filename <- "RSeg.csv"
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
     if (file.exists(paste(localpath, RSeg.csv_filename, sep = '/')) == FALSE) {
@@ -406,7 +450,7 @@ load_MapLayers <- function(site,localpath = tempdir()){
   #DOWNLOAD FIPS LAYER DIRECT FROM VAHYDRO
   if(!exists("fips.csv")) {  
     print(paste("DOWNLOADING FIPS LAYER DIRECT FROM VAHYDRO...",sep=""))
-    fips.csv_item <- paste(site,"/usafips_centroid_export",sep="")
+    fips.csv_item <- paste(site,"/usafips_geom_export",sep="")
     fips.csv_filename <- "fips.csv"
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
     if (file.exists(paste(localpath, fips.csv_filename, sep = '/')) == FALSE) {
@@ -423,10 +467,40 @@ load_MapLayers <- function(site,localpath = tempdir()){
   }
   
   #DOWNLOAD RESERVOIR LAYER FROM LOCAL REPO
-  if(!exists("WBDF")) { 
+  if(!exists("WBDF")) {
     print(paste("__LOADING RESERVOIR LAYER FROM LOCAL REPO...",sep=""))
     WBDF <- read.table(file=paste(github_location,"HARPArchive/GIS_layers","WBDF.csv",sep="/"), header=TRUE, sep=",")
   }
+  
+  #DOWNLOAD RESERVOIR LAYER FROM LOCAL REPO (AS .SHP)
+  print(paste("__LOADING RESERVOIR LAYER FROM LOCAL REPO (AS .SHP)...",sep=""))
+    localpath <- paste(github_location,"HARParchive/GIS_layers",sep="/")
+    epsg_code <- "4326" #WGS 84
+    shp_path <- "MajorReservoirs" #location of .shp
+    shp_layer_name <- "MajorReservoirs" #.shp file name (with ".shp" extension left off)
+    shp_layer_load <- suppressWarnings(readOGR(paste(localpath,shp_path,sep="/"),shp_layer_name))
+    shp_layer <-spTransform(shp_layer_load, CRS(paste("+init=epsg:",epsg_code,sep=""))) 
+    shp_layer_wkt <- writeWKT(shp_layer)
+    MajorReservoirs.csv <- data.frame("name"="all","geom"=shp_layer_wkt)
+ 
+  # #DOWNLOAD MAJOR RESERVOIRS LAYER DIRECT FROM GITHUB
+  # if(!exists("MajorReservoirs.csv")) {  
+  #   print(paste("DOWNLOADING MajorReservoirs LAYER DIRECT FROM GITHUB...",sep=""))
+  #   MajorReservoirs.csv_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MajorReservoirs.csv"
+  #   MajorReservoirs.csv_filename <- "MajorReservoirs.csv"
+  #   #file downloaded into local directory, as long as file exists it will not be re-downloaded
+  #   if (file.exists(paste(localpath, MajorReservoirs.csv_filename, sep = '/')) == FALSE) {
+  #     print(paste("__DOWNLOADING MajorReservoirs.csv LAYER", sep = ''))
+  #     destfile <- paste(localpath,MajorReservoirs.csv_filename,sep="\\")
+  #     download.file(MajorReservoirs.csv_item, destfile = destfile, method = "libcurl")
+  #   } else {
+  #     print(paste("__MajorReservoirs.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+  #   }
+  #   #read csv from local directory
+  #   print(paste("__LOADING MajorReservoirs.csv LAYER...", sep = ''))
+  #   MajorReservoirs.csv <- read.csv(file=paste(localpath,MajorReservoirs.csv_filename,sep="\\"), header=TRUE, sep=",")
+  #   print(paste("__COMPLETE!", sep = ''))  
+  # }
   
   #LOAD ANY ADDITIONL MAPPING FUNCTIONS
   source(paste(vahydro_location,"R/wsp/wsp2020/FoundationDataset/geo_summaries/mb.extent.R",sep = '/'))
@@ -436,7 +510,8 @@ load_MapLayers <- function(site,localpath = tempdir()){
                  "RSeg.csv" = RSeg.csv,
                  "MajorRivers.csv" = MajorRivers.csv,
                  "fips.csv" = fips.csv,
-                 "WBDF" = WBDF
+                 "WBDF" = WBDF,
+                 "MajorReservoirs.csv" = MajorReservoirs.csv
   )
   return(layers)
 }

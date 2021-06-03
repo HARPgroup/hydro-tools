@@ -35,7 +35,7 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
         # geom_point(data = WBDF, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
         # geom_path(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
         # geom_polygon(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
-     #   geom_point(data = reservoirs.gg, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
+       ###geom_point(data = reservoirs.gg, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
         #################################################################################
                     
         #ADD BORDER LAYER
@@ -58,9 +58,9 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                                )+
     
         #CUSTOMIZE THEME
-        theme(legend.justification=c(0,1), 
-              legend.position="none",
-              plot.margin = unit(plot_margin, "cm"),
+        # theme(legend.justification=c(0,1), 
+        #       legend.position="none",
+        theme(plot.margin = unit(plot_margin, "cm"),
               plot.title = element_text(size=12),
               plot.subtitle = element_text(size=10),
               axis.title.x=element_blank(),
