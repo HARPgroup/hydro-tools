@@ -6,7 +6,9 @@ library(raster) #bind()
 # USER INPUTS
 #####################################################################################
 #WKT_layer <- read.csv('C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/GIS_LAYERS/MinorBasins.csv')
-WKT_layer <- read.table(file = 'https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MinorBasins.csv', sep = ',', header = TRUE)
+
+#REPLACE WITH NWIS WATER QUANTITY WD EXPORT ANNUAL SECTION
+#WKT_layer <- read.table(file = 'https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MinorBasins.csv', sep = ',', header = TRUE)
 
 output_location <- "C:/Users/maf95834/Desktop/shp_output/"
 output_file <- "MinorBasins.shp"
