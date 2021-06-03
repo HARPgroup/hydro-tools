@@ -10,6 +10,8 @@ library(raster) #bind()
 #REPLACE WITH NWIS WATER QUANTITY WD EXPORT ANNUAL SECTION
 #WKT_layer <- read.table(file = 'https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MinorBasins.csv', sep = ',', header = TRUE)
 
+#CONVERT LAT/LON COLUMNS TO WKT COLUMN
+
 output_location <- "C:/Users/maf95834/Desktop/shp_output/"
 output_file <- "MinorBasins.shp"
 #####################################################################################
@@ -33,6 +35,7 @@ for (i in 1:length(WKT_layer$code)) {
   WKT_layerProjected@data$id <- as.character(i)
   WKT_layerProjected@data$name <- as.character(WKT_layer$name[i])
   WKT_layerProjected@data$code <- as.character(WKT_layer$code[i])
+  #EXPLICITLY SPECIFY ALL COLUMNS WE ARE KEEPING (MP NAME, FAC NAME, HYDROIDs, USE TYPE, LOCALITY, ETC)
   WKT_layer.list[[i]] <- WKT_layerProjected
 
 raster::shapefile(WKT_layerProjected, paste(output_location,"features/",WKT_layer_code,".shp",sep=""),overwrite=TRUE)
