@@ -5,7 +5,7 @@ library('httr')
 library('sqldf')
 library('dplyr')
 library('tidyr')
-
+library(maptools)
 #####################################################################################
 # USER INPUTS
 #####################################################################################
@@ -53,26 +53,25 @@ wd_ann <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facili
                 ORDER BY "Water.Use.MGY" DESC ')
 
 #rename columns & CONVERT LAT/LON COLUMNS TO WKT COLUMN
-wd_mgy <- sqldf('SELECT MP_hydroid,
-                          Hydrocode,
+wd_mgy <- sqldf('SELECT MP_hydroid AS MP_ID,
+                          Hydrocode AS Hcode,
                           "Source.Type" AS Source_Type,
                           "MP.Name" AS MP_Name,
-                          Facility_hydroid,
-                          Facility AS Facility_Name,
-                          "USE.Type" AS Use_Type,
-                          Year,
-                          "MGY" AS "Water Use Unit",
-                          "Water.Use.MGY" AS MGY,
+                          Facility_hydroid AS Fac_ID,
+                          Facility AS Fac_Name,
+                          "USE.Type" AS UseType,
+                          Year AS MGY,
+                          "Water.Use.MGY" AS USE_MGY,
                           "POINT "||"("||Longitude||" "||Latitude||")" AS geom,
-                          Latitude,
-                          Longitude,
-                          "FIPS.Code" AS FIPS_code
+                          Latitude AS Lat,
+                          Longitude AS Lon,
+                          "FIPS.Code" AS FIPS
                        FROM wd_ann
                        ORDER BY Year
                        ') 
 
 #place into export data frame
-wd_mgy_export <- spread(data = wd_mgy, key = Year, value = MGY,sep = "_")
+wd_mgy_export <- spread(data = wd_mgy, key = MGY, value = USE_MGY,sep = "_")
 
 #save file
 write.csv(wd_mgy_export,paste0(export_path,"withdrawal_annual.csv"), row.names = FALSE)
@@ -87,9 +86,9 @@ WKT_layer$id <- as.numeric(rownames(WKT_layer))
 WKT_layer.list <- list()
 
 #i <- 1
-for (i in 1:length(WKT_layer$MP_hydroid)) {
-  print(paste("i = ",i," of ",length(WKT_layer$MP_hydroid),sep=''))
-  print(as.character(WKT_layer$MP_hydroid[i]))
+for (i in 1:length(WKT_layer$MP_ID)) {
+  print(paste("i = ",i," of ",length(WKT_layer$MP_ID),sep=''))
+  print(as.character(WKT_layer$MP_ID[i]))
   if (WKT_layer$geom[i] == "") {
     WKT_layer_geom <- "NA"
   } else {
@@ -97,14 +96,23 @@ for (i in 1:length(WKT_layer$MP_hydroid)) {
     WKT_layerProjected <- SpatialPointsDataFrame(WKT_layer_geom, data.frame('id'), match.ID = TRUE)
   }
   #WKT_layer_name <- as.character(WKT_layer$name[i])
-  WKT_layer_MP_hydroid <- as.character(WKT_layer$MP_hydroid[i])
-  WKT_layerProjected@data$id <- as.character(i)
-  WKT_layerProjected@data$MP_Name <- as.character(WKT_layer$MP_Name[i])
-  WKT_layerProjected@data$MP_hydroid <- as.character(WKT_layer$MP_hydroid[i])
+  WKT_layer_MP_ID <- as.character(WKT_layer$MP_ID[i])
+  #WKT_layerProjected@data$id <- as.character(i)
+  #WKT_layerProjected@data$MP_Name <- as.character(WKT_layer$MP_Name[i])
+  #WKT_layerProjected@data$MP_ID <- as.character(WKT_layer$MP_ID[i])
+  
+  
+  for(y in 1:length(names(WKT_layer))) {                                   # Head of for-loop
+    WKT_layerProjected@data$newcol <- as.character(WKT_layer[i,y])
+    colnames(WKT_layerProjected@data)[ncol(WKT_layerProjected@data)] <- names(WKT_layer[y])  # Rename column name
+  }
+  
+  
   #EXPLICITLY SPECIFY ALL COLUMNS WE ARE KEEPING (MP NAME, FAC NAME, HYDROIDs, USE TYPE, LOCALITY, ETC)
   WKT_layer.list[[i]] <- WKT_layerProjected
 
-raster::shapefile(WKT_layerProjected, paste(output_location,"features/",i,"_",WKT_layer_MP_hydroid,".shp",sep=""),overwrite=TRUE)
+raster::shapefile(WKT_layerProjected, paste(output_location,"features/",i,"_",WKT_layer_MP_ID,".shp",sep=""),overwrite=TRUE)
+         
 }
 
 #-----------------------------------------------------------------
