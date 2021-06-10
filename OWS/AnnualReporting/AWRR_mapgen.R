@@ -1,6 +1,10 @@
 ###################################################################################################### 
 # LOAD FILES
 ######################################################################################################
+syear = 2016
+eyear = 2020
+color_list <- sort(colors())
+
 #site <- "http://deq2.bse.vt.edu/d.dh/"
 site <- "https://deq1.bse.vt.edu/d.dh/"
 
@@ -17,11 +21,7 @@ if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map 
 baselayers.gg <- base.layers(baselayers)
 basemap.obj <- base.map(baselayers.gg)
 #ggsave(plot = basemap.obj, file = paste0(export_path, "tables_maps/Xfigures/","basemap.png",sep = ""), width=6.5, height=4.95)
-####################################################################################
 
-######################################################################################################
-######################################################################################################
-# MONITORING STATIONS MAP
 
 #LOAD RIVERS AND RESERVOIRS LAYERS
 rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]
@@ -29,6 +29,14 @@ rivs.gg <- geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), colo
 res_csv <- baselayers[[which(names(baselayers) == "MajorReservoirs.csv")]]
 res.sf <- st_as_sf(res_csv, wkt = 'geom')
 res.gg <- geom_sf(data = res.sf,color="dodgerblue3",lwd=0.4, inherit.aes = FALSE, show.legend =FALSE)
+
+#LOAD FIPS LAYER
+fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
+
+####################################################################################
+
+######################################################################################################
+### MONITORING STATIONS MAP ##########################################################################
 
 #FROM VAHYDRO:
 sw_features <- read.csv(paste(site,"monitoring-stations-sw-export",sep=""))
@@ -64,20 +72,8 @@ monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
 ggsave(plot = monitoring_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","monitoring_map.png",sep = ""), width=6.5, height=4.95)
 
 ######################################################################################################
-######################################################################################################
-# DROUGHT REGIONS MAP
+### # DROUGHT REGIONS MAP ############################################################################
 
-#LOAD RIVERS AND RESERVOIRS LAYERS
-rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]
-rivs.gg <- geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4,na.rm=TRUE)
-res_csv <- baselayers[[which(names(baselayers) == "MajorReservoirs.csv")]]
-res.sf <- st_as_sf(res_csv, wkt = 'geom')
-res.gg <- geom_sf(data = res.sf,color="dodgerblue3",lwd=0.4, inherit.aes = FALSE, show.legend =FALSE)
-
-#LOAD FIPS LAYER
-fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
-
-color_list <- sort(colors())
 fips_df <-sqldf(paste('SELECT *,fips_geom AS geom,
                           CASE
                             WHEN fips_code IN (51191,51167,51169,51173,51520,51185,51720,51105,51027,51051,51195) THEN "',color_list[1],'"
@@ -124,4 +120,124 @@ drought_map_draw <- ggdraw(finalmap.obj)+deqlogo
 ggsave(plot = drought_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","finalmap.obj.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
+# GROUNDWATER WITHDRAWAL BY LOCALITY  #######################################################
+gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
+
+fips_df <-sqldf(paste('SELECT a.*, a.fips_geom AS geom, b."GW.Withdrawal",
+                          CASE
+                            WHEN b."GW.Withdrawal" < 1 THEN "',color_list[1],'"
+                            WHEN b."GW.Withdrawal" BETWEEN 1 AND 2.5 THEN "',color_list[2],'"
+                            WHEN b."GW.Withdrawal" BETWEEN 2.5 AND 5 THEN "',color_list[3],'"
+                            WHEN b."GW.Withdrawal" BETWEEN 5 AND 10 THEN "',color_list[4],'"
+                            WHEN b."GW.Withdrawal" > 10 THEN "',color_list[5],'"
+                            ELSE "white"
+                          END AS col
+                        FROM fips_csv AS a
+                        LEFT JOIN gw_locality AS b
+                        ON a.fips_code = b.FIPS_CODE
+                        WHERE a.fips_code NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+fips.sf <- st_as_sf(fips_df, wkt = 'geom')
+fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+
+finalmap.obj <- basemap.obj + fips.gg +
+  # ggtitle(paste0(eyear," Groundwater Withdrawal by Locality")) +
+  # theme(plot.title = element_text(vjust = - 10, hjust = .3)
+  theme(legend.position = c(0.20, 0.833),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=10),
+        aspect.ratio = 12.05/16
+  ) +
+  #guides(fill=guide_legend(ncol=2))+
+  scale_fill_manual(name = paste0(eyear," Groundwater Withdrawal (MGD)"),
+                    values = c("#FFFF80","#71EB2F","#3DB868","#216E9E","#0C1078","white"),
+                    labels = c("< 1.0","1.0 to 2.5","2.5 to 5.0","5.0 to 10.0","> 10.0","white")
+  ) +
+  rivs.gg +
+  res.gg
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
+ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_gw_locality.png",sep = ""), width=6.5, height=4.95)
+
 #############################################################################################
+# SURFACE WATER WITHDRAWAL BY LOCALITY  #######################################################
+gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
+
+fips_df <-sqldf(paste('SELECT a.*, a.fips_geom AS geom, b."SW.Withdrawal",
+                          CASE
+                            WHEN b."SW.Withdrawal" < 1 THEN "',color_list[1],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 1 AND 5 THEN "',color_list[2],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 5 AND 25 THEN "',color_list[3],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 25 AND 50 THEN "',color_list[4],'"
+                            WHEN b."SW.Withdrawal" > 50 THEN "',color_list[5],'"
+                            ELSE "white"
+                          END AS col
+                        FROM fips_csv AS a
+                        LEFT JOIN gw_locality AS b
+                        ON a.fips_code = b.FIPS_CODE
+                        WHERE a.fips_code NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+fips.sf <- st_as_sf(fips_df, wkt = 'geom')
+fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+
+finalmap.obj <- basemap.obj + fips.gg +
+  # ggtitle(paste0(eyear," Groundwater Withdrawal by Locality")) +
+  # theme(plot.title = element_text(vjust = - 10, hjust = .3)
+  theme(legend.position = c(0.206, 0.833),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=10),
+        aspect.ratio = 12.05/16
+  ) +
+  #guides(fill=guide_legend(ncol=2))+
+  scale_fill_manual(name = paste0(eyear," Surface Water Withdrawal (MGD)"),
+                    values = c("#FFFF80","#71EB2F","#3DB868","#216E9E","#0C1078","white"),
+                    labels = c("< 1.0","1.0 to 5.0","5.0 to 25.0","25.0 to 50.0","> 50.0","white")
+  ) +
+  rivs.gg +
+  res.gg
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
+ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_sw_locality.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# TOTAL WITHDRAWAL BY LOCALITY  #######################################################
+gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
+
+fips_df <-sqldf(paste('SELECT a.*, a.fips_geom AS geom, b."Total.Withdrawal",
+                          CASE
+                            WHEN b."Total.Withdrawal" < 1 THEN "',color_list[1],'"
+                            WHEN b."Total.Withdrawal" BETWEEN 1 AND 5 THEN "',color_list[2],'"
+                            WHEN b."Total.Withdrawal" BETWEEN 5 AND 25 THEN "',color_list[3],'"
+                            WHEN b."Total.Withdrawal" BETWEEN 25 AND 50 THEN "',color_list[4],'"
+                            WHEN b."Total.Withdrawal" > 50 THEN "',color_list[5],'"
+                            ELSE "white"
+                          END AS col
+                        FROM fips_csv AS a
+                        LEFT JOIN gw_locality AS b
+                        ON a.fips_code = b.FIPS_CODE
+                        WHERE a.fips_code NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+fips.sf <- st_as_sf(fips_df, wkt = 'geom')
+fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+
+finalmap.obj <- basemap.obj + fips.gg +
+  # ggtitle(paste0(eyear," Groundwater Withdrawal by Locality")) +
+  # theme(plot.title = element_text(vjust = - 10, hjust = .3)
+  theme(legend.position = c(0.16, 0.833),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=10),
+        aspect.ratio = 12.05/16
+  ) +
+  #guides(fill=guide_legend(ncol=2))+
+  scale_fill_manual(name = paste0(eyear," Total Withdrawal (MGD)"),
+                    values = c("#FFFF80","#71EB2F","#3DB868","#216E9E","#0C1078","white"),
+                    labels = c("< 1.0","1.0 to 5.0","5.0 to 25.0","25.0 to 50.0","> 50.0","white")
+  ) +
+  rivs.gg +
+  res.gg
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
+ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_total_locality.png",sep = ""), width=6.5, height=4.95)
