@@ -94,16 +94,14 @@ for (i in 1:length(WKT_layer$MP_ID)) {
   
   
   if (isTRUE(as.character(WKT_layer$geom[i]) == "")) {
-    WKT_layer_geom <- "NA"
-  } 
-  else if (is.na(as.character(WKT_layer$geom[i]))) {
-    WKT_layer_geom <- "NA"
-  } 
-  else {
+    WKT_layer_geom <- readWKT("POINT (-99 99)")
+  } else if (is.na(as.character(WKT_layer$geom[i]))) {
+    WKT_layer_geom <- readWKT("POINT (-99 99)")
+  } else {
     WKT_layer_geom <- readWKT(WKT_layer$geom[i])
-    WKT_layerProjected <- SpatialPointsDataFrame(WKT_layer_geom, data.frame('id'), match.ID = TRUE)
   }
-  
+  WKT_layer_geom
+  WKT_layerProjected <- SpatialPointsDataFrame(WKT_layer_geom, data.frame('id'), match.ID = TRUE)
   
   #WKT_layer_name <- as.character(WKT_layer$name[i])
   WKT_layer_MP_ID <- as.character(WKT_layer$MP_ID[i])
