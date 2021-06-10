@@ -73,6 +73,23 @@ all_fips_round <- paste('SELECT name AS Locality,
                  FROM "all_fips"'
                         ,sep='')
 all_fips_round <- sqldf(all_fips_round)
+all_fips_round <- sqldf('SELECT Locality, FIPS_CODE, CASE
+        WHEN "GW Withdrawal" IS NULL
+        THEN 0.00
+        ELSE "GW Withdrawal"
+        END AS "GW Withdrawal",
+        CASE
+        WHEN "SW Withdrawal" IS NULL
+        THEN 0.00
+        ELSE "SW Withdrawal"
+        END AS "SW Withdrawal",
+        CASE
+        WHEN "Total Withdrawal" IS NULL
+        THEN 0.00
+        ELSE "Total Withdrawal"
+        END AS "Total Withdrawal",
+        "% of Total Withdrawal"
+      FROM all_fips_round')
 write.csv(all_fips_round, paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""), row.names = F)
 
 # ROUND TABLE VALUES, WITHOUT FIPS_NUM COL 
