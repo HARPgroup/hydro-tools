@@ -161,16 +161,16 @@ gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo
 ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_gw_locality.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
-# GROUNDWATER WITHDRAWAL BY LOCALITY  #######################################################
+# SURFACE WATER WITHDRAWAL BY LOCALITY  #######################################################
 gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
 
 fips_df <-sqldf(paste('SELECT a.*, a.fips_geom AS geom, b."SW.Withdrawal",
                           CASE
                             WHEN b."SW.Withdrawal" < 1 THEN "',color_list[1],'"
-                            WHEN b."SW.Withdrawal" BETWEEN 1 AND 2.5 THEN "',color_list[2],'"
-                            WHEN b."SW.Withdrawal" BETWEEN 2.5 AND 5 THEN "',color_list[3],'"
-                            WHEN b."SW.Withdrawal" BETWEEN 5 AND 10 THEN "',color_list[4],'"
-                            WHEN b."SW.Withdrawal" > 10 THEN "',color_list[5],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 1 AND 5 THEN "',color_list[2],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 5 AND 25 THEN "',color_list[3],'"
+                            WHEN b."SW.Withdrawal" BETWEEN 25 AND 50 THEN "',color_list[4],'"
+                            WHEN b."SW.Withdrawal" > 50 THEN "',color_list[5],'"
                             ELSE "white"
                           END AS col
                         FROM fips_csv AS a
@@ -184,7 +184,7 @@ fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes =
 finalmap.obj <- basemap.obj + fips.gg +
   # ggtitle(paste0(eyear," Groundwater Withdrawal by Locality")) +
   # theme(plot.title = element_text(vjust = - 10, hjust = .3)
-  theme(legend.position = c(0.20, 0.833),
+  theme(legend.position = c(0.206, 0.833),
         legend.title=element_text(size=10),
         legend.text=element_text(size=10),
         aspect.ratio = 12.05/16
@@ -192,7 +192,7 @@ finalmap.obj <- basemap.obj + fips.gg +
   #guides(fill=guide_legend(ncol=2))+
   scale_fill_manual(name = paste0(eyear," Surface Water Withdrawal (MGD)"),
                     values = c("#FFFF80","#71EB2F","#3DB868","#216E9E","#0C1078","white"),
-                    labels = c("< 1.0","1.0 to 2.5","2.5 to 5.0","5.0 to 10.0","> 10.0","white")
+                    labels = c("< 1.0","1.0 to 5.0","5.0 to 25.0","25.0 to 50.0","> 50.0","white")
   ) +
   rivs.gg +
   res.gg
@@ -202,7 +202,7 @@ gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo
 ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_sw_locality.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
-# GROUNDWATER WITHDRAWAL BY LOCALITY  #######################################################
+# TOTAL WITHDRAWAL BY LOCALITY  #######################################################
 gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
 
 fips_df <-sqldf(paste('SELECT a.*, a.fips_geom AS geom, b."Total.Withdrawal",
@@ -225,7 +225,7 @@ fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes =
 finalmap.obj <- basemap.obj + fips.gg +
   # ggtitle(paste0(eyear," Groundwater Withdrawal by Locality")) +
   # theme(plot.title = element_text(vjust = - 10, hjust = .3)
-  theme(legend.position = c(0.20, 0.833),
+  theme(legend.position = c(0.16, 0.833),
         legend.title=element_text(size=10),
         legend.text=element_text(size=10),
         aspect.ratio = 12.05/16
