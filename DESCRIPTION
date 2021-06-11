@@ -18,4 +18,5 @@ Imports:
     utils,
     jsonlite,
     ggplot2,
-    httr
+    httr,
+    rapportools

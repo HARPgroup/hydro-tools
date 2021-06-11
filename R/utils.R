@@ -41,7 +41,7 @@ fn_get_rundata <- function(
     print(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
     datv<-as.vector(dat)  # stores the data as a vector     
     datv$thisdate <- as.POSIXct(datv$thisdate)
-    f3 <- zoo(datv[,paste(varname, runid, sep="_")], order.by = datv$thisdate)
+    f3 <- zoo::zoo(datv[,paste(varname, runid, sep="_")], order.by = datv$thisdate)
   }
   return(f3);
   
@@ -97,7 +97,7 @@ fn_get_runfile_info <- function(
 #' @param use_tz character pass in a custom timezone for zoo
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
-#' @export fn_get_runfile_info
+#' @export fn_get_runfile
 #' @examples NA
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
@@ -115,19 +115,25 @@ fn_get_runfile <- function(
 
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
-  if (!is.list(finfo)) {
-    return(FALSE);
-  }
   if (finfo$compressed == 1) {
     # If the host is not the same as site, and finfo$compressed == 1, then we need to 
     # Repeat this request on the other host
     host_site <- paste0('http://',finfo$host)
     if (host_site != site) {
-      print("Compressed file requested, repeating req1uest on model run host site")
-      finfo <- fn_get_runfile_info(elementid, runid, scenid, host_site)
+      finfo_save <- finfo
+      message("Compressed file requested, repeating request on model run host site")
+      finfo <- try(fn_get_runfile_info(elementid, runid, scenid, host_site))
+      if ((finfo == FALSE) | class(finfo)=='try-error') { 
+        message("host site retrieval failed, trying original site.")
+        finfo <- finfo_save
+      }
     }
   }
+  if (!is.list(finfo)) {
+    return(FALSE);
+  }
   filename = as.character(finfo$remote_url);
+  filename_alt = str_replace(filename,as.character(finfo$host),as.character(httr::parse_url(omsite)$hostname) );
   localname = basename(as.character(finfo$output_file));
   if (cached & file.exists(localname)) {
     linfo = file.info(localname)
@@ -135,7 +141,11 @@ fn_get_runfile <- function(
       # re-download if the remote is newer than the local
       if (finfo$compressed == 1) {
         print(paste("Downloading Compressed Run File ", filename));
-        download.file(filename,'tempfile',mode="wb", method = "libcurl");
+        drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
+        if ((drez == FALSE) | class(drez)=='try-error') { 
+          message(paste("Download for", filename, "failed. Trying: ", filename_alt))
+          download.file(filename_alt,'tempfile',mode="wb", method = "libcurl")
+        }
         filename <-  unzip ('tempfile');
       } else {
         print(paste("Downloading Un-compressed Run File ", filename));
@@ -148,14 +158,18 @@ fn_get_runfile <- function(
   } else {
     # does not exist locally
     print(paste("Downloading Run File ", filename));
-    download.file(filename,'tempfile',mode="wb", method = "libcurl");
+    drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
+    if ((drez == FALSE) | class(drez)=='try-error') { 
+      message(paste("Download for", filename, "failed. Trying: ", filename_alt))
+      download.file(filename_alt,'tempfile',mode="wb", method = "libcurl")
+    }
     if (finfo$compressed == 1) {
       print(paste("Unpacking Compressed Run File ", filename));
       filename <-  unzip ('tempfile');
     }
   }
   dat = try(read.table( filename, header = TRUE, sep = ",")) ;
-  if (class(dat)=='try-error') { 
+  if ((dat == FALSE) | class(dat)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: empty file ", filename))
     return (FALSE);
@@ -168,7 +182,7 @@ fn_get_runfile <- function(
     } else {
       datv$timestamp <- as.POSIXct(datv$timestamp,origin="1970-01-01", tz = use_tz)
     }
-    f3 <- zoo(datv, order.by = datv$timestamp)
+    f3 <- zoo::zoo(datv, order.by = datv$timestamp)
   }
   unlink('tempfile')
   if(outaszoo){
@@ -369,11 +383,14 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
     #remove this for saving if it is not null
     iix <- which(names(inputs) == pk)
     inputs  <- inputs[-iix]
-    message(paste("removed ", pk, " from inputs"))
+    # the reason we remove this is that the REST service bombs if we 
+    # send it a pk, like tid or pid, and this is unnecessary because 
+    # the pkid is part of the URL so no worries.
+    #message(paste("removed ", pk, " from inputs"))
   }
   if ( is.na(pkid) | is.null(pkid) ) {
     message(paste0("----- Creating ", entity_type, "..."))
-    this_result <- POST(
+    this_result <- httr::POST(
       paste0(site, "/",entity_type, "/"), 
       httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       body = inputs,
@@ -386,7 +403,7 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   } else {
     message(paste0("----- Updating ", entity_type, "..."))
     message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
-    this_result <- PUT(
+    this_result <- httr::PUT(
       paste0(site, "/",entity_type, "/", pkid), 
       httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       body = inputs,
