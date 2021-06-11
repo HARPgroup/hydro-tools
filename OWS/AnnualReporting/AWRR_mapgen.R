@@ -201,6 +201,7 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
 ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_sw_locality.png",sep = ""), width=6.5, height=4.95)
 
+
 #############################################################################################
 # TOTAL WITHDRAWAL BY LOCALITY  #######################################################
 gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
@@ -241,3 +242,26 @@ finalmap.obj <- basemap.obj + fips.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
 ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_total_locality.png",sep = ""), width=6.5, height=4.95)
+
+
+#############################################################################################
+# Agriculture (Non-Irrigation) Water Withdrawals by Withdrawal Point Location################
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv",sep=""))
+
+mp_df <-sqldf(paste('SELECT *,"POINT "||"("||Longitude||" "||Latitude||")" AS geom,
+                          CASE
+                            WHEN "X',eyear,'" < 1 THEN 1
+                            WHEN "X',eyear,'" BETWEEN 1 AND 2.5 THEN 2
+                            WHEN "X',eyear,'" BETWEEN 2.5 AND 5 THEN 3
+                            WHEN "X',eyear,'" BETWEEN 5 AND 10 THEN 4
+                            WHEN "X',eyear,'" > 10 THEN 5
+                            ELSE 0
+                          END AS size
+                        FROM mp_point AS a
+                        WHERE a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+fips.sf <- st_as_sf(fips_df, wkt = 'geom') 
+fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+
+aes(size = factor(size))
+
