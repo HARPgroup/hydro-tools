@@ -1,10 +1,12 @@
 library("hydrotools")
 library("httr")
 
-ds <- RomDataSource$new("http://deq1.bse.vt.edu/d.dh", 'restws_admin')
+ds <- RomDataSource$new("http://deq1.bse.vt.edu/d.dh", 'rest_uname')
 ds$get_token()
-
+# Load a feature (measuring point or facility or other)
 feat <- RomFeature$new(ds,list(hydroid=1096),TRUE)
+
+# Historic annual withdrawals
 ts <- feat$tsvalues(varkey='wd_mgy')[c('tstime', 'tsvalue')]
 tsz <- zoo::as.zoo(tsv$tsvalue, order.by = as.POSIXct(tsv$tstime, origin="1970-01-01"))
 barplot(tsz)
@@ -32,4 +34,4 @@ barplot(
   tsmon$tsvalue ~ tsmon$month,
   ylab = paste(ds$get_vardef('wd_mgm')[c('varname','varunits')]),
   xlab = "Month"
-  )
+)

@@ -41,7 +41,7 @@ fn_get_rundata <- function(
     print(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
     datv<-as.vector(dat)  # stores the data as a vector     
     datv$thisdate <- as.POSIXct(datv$thisdate)
-    f3 <- zoo(datv[,paste(varname, runid, sep="_")], order.by = datv$thisdate)
+    f3 <- zoo::zoo(datv[,paste(varname, runid, sep="_")], order.by = datv$thisdate)
   }
   return(f3);
   
