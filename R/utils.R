@@ -34,7 +34,7 @@ fn_get_rundata <- function(
   dat = try(read.table(filename, header = TRUE, sep = ",")) 
   if (class(dat)=='try-error') { 
     # what to do if file empty 
-    print(paste("Error: empty file ", filename))
+    print(paste("Error: problem reading file ", filename))
     return (FALSE);
   } else { 
     #dat<-read.table(filename, header = TRUE, sep = ",")   #  reads the csv-formatted data from the url	
@@ -133,7 +133,6 @@ fn_get_runfile <- function(
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
-  filename_alt = str_replace(filename,as.character(finfo$host),as.character(httr::parse_url(omsite)$hostname) );
   localname = basename(as.character(finfo$output_file));
   if (cached & file.exists(localname)) {
     linfo = file.info(localname)
@@ -143,8 +142,8 @@ fn_get_runfile <- function(
         print(paste("Downloading Compressed Run File ", filename));
         drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
         if ((drez == FALSE) | class(drez)=='try-error') { 
-          message(paste("Download for", filename, "failed. Trying: ", filename_alt))
-          download.file(filename_alt,'tempfile',mode="wb", method = "libcurl")
+          message(paste("Download for", filename, "failed. "))
+          return(FALSE)
         }
         filename <-  unzip ('tempfile');
       } else {
@@ -160,16 +159,17 @@ fn_get_runfile <- function(
     print(paste("Downloading Run File ", filename));
     drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
     if ((drez == FALSE) | class(drez)=='try-error') { 
-      message(paste("Download for", filename, "failed. Trying: ", filename_alt))
-      download.file(filename_alt,'tempfile',mode="wb", method = "libcurl")
+      message(paste("Download for", filename, "failed."))
+      return(FALSE)
     }
     if (finfo$compressed == 1) {
-      print(paste("Unpacking Compressed Run File ", filename));
+      print(paste("Unpacking Compressed Run File ", filename)) 
       filename <-  unzip ('tempfile');
     }
   }
-  dat = try(read.table( filename, header = TRUE, sep = ",")) ;
-  if ((dat == FALSE) | class(dat)=='try-error') { 
+  dat = try(read.table( filename, header = TRUE, sep = ",")) 
+  
+  if (is.logical(dat) | class(dat)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: empty file ", filename))
     return (FALSE);
