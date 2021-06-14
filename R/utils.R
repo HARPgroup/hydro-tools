@@ -123,7 +123,7 @@ fn_get_runfile <- function(
       finfo_save <- finfo
       message("Compressed file requested, repeating request on model run host site")
       finfo <- try(fn_get_runfile_info(elementid, runid, scenid, host_site))
-      if ((finfo == FALSE) | class(finfo)=='try-error') { 
+      if (is.logical(finfo) | class(finfo)=='try-error') { 
         message("host site retrieval failed, trying original site.")
         finfo <- finfo_save
       }
@@ -158,7 +158,7 @@ fn_get_runfile <- function(
     # does not exist locally
     print(paste("Downloading Run File ", filename));
     drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
-    if ((drez == FALSE) | class(drez)=='try-error') { 
+    if (is.logical(drez) | class(drez)=='try-error') { 
       message(paste("Download for", filename, "failed."))
       return(FALSE)
     }
@@ -168,7 +168,6 @@ fn_get_runfile <- function(
     }
   }
   dat = try(read.table( filename, header = TRUE, sep = ",")) 
-  
   if (is.logical(dat) | class(dat)=='try-error') { 
     # what to do if file empty 
     print(paste("Error: empty file ", filename))
