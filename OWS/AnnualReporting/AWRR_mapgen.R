@@ -262,26 +262,30 @@ mp_df <-sqldf(paste('SELECT *,
                         AND Use_Type = "agriculture"
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="aliceblue", shape=17, show.legend = TRUE)
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#216E9E", shape=21, show.legend = TRUE)
 
-ag_map <- basemap.obj + mp.gg + theme(legend.position = c(0.12, 0.9)) +
-  theme(legend.position = c(0.11, 0.905),
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + mp.gg +
+  theme(legend.position = c(0.179, 0.817),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         aspect.ratio = 12.05/16
   ) +
-  scale_color_manual("Legend", values=c("1","2","3","4","5","0"),
-                     labels=c("< 1.0","1.0 - 2.5","2.5 - 5.0","5.0 - 10.0","< 10")) +
-  guides(colour = guide_legend(override.aes = list(size = c(2, 2),
-                                                   shape = c(17, 19)))) +
+  scale_size_manual(name=paste0(eyear," Agriculture (Non-Irrigation) \n Water Withdrawals"), values=c(1,2,3,4,5,0),
+                     labels=c("< 1.0","1.0 - 2.5","2.5 - 5.0","5.0 - 10.0","> 10")) +
   rivs.gg +
   res.gg
+
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95)
-
-ggsave(plot = monitoring_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","monitoring_map.png",sep = ""), width=6.5, height=4.95)
 
 
