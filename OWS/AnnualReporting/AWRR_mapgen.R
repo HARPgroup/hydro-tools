@@ -253,11 +253,11 @@ mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_"
 #try natural breaks or size bins nex year
 mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "mgd" < 0.05 THEN 1
-                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 2
-                            WHEN "mgd" BETWEEN 0.5 AND 1 THEN 3
-                            WHEN "mgd" BETWEEN 1 AND 5 THEN 4
-                            WHEN "mgd" > 5 THEN 5
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 1 THEN 4
+                            WHEN "mgd" BETWEEN 1 AND 5 THEN 5
+                            WHEN "mgd" > 5 THEN 6
                             
                             
                             
@@ -275,7 +275,7 @@ mp_df <-sqldf(paste('SELECT *,
 # WHEN "mgd" > 1 THEN 4
 
 
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", shape=21, show.legend = TRUE)
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
 fips_df <- sqldf('SELECT *
                  FROM fips_csv
@@ -284,16 +284,15 @@ fips_df <- sqldf('SELECT *
 fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
 fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
 
-ag_map <- basemap.obj + fips.gg + mp.gg +
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
   theme(legend.position = c(0.179, 0.817),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         aspect.ratio = 12.05/16
   ) +
-  scale_size_manual(name=paste0(eyear," Agriculture (Non-Irrigation) \n Water Withdrawals (MGD)"), values=c(1,2,3,4,5,0),
-                     labels=c("< 1.0","1.0 - 2.5","2.5 - 5.0","5.0 - 10.0","> 10")) +
-  rivs.gg +
-  res.gg
+  scale_size_manual(name=paste0(eyear," Agriculture (Non-Irrigation) \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                     labels=c("< 0.05","0.05 - 0.5","0.5 - 1.0","1.0 - 5.0","> 5.0"))
+
 
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
