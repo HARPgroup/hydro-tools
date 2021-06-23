@@ -1,8 +1,4 @@
-
 run_text <- function (runid = "runid_600",site = "https://deq1.bse.vt.edu/d.dh",token = NULL) {
-
-library("rjson")
-library("hydrotools")
 
 # Create datasource
 #private = list(token = token)
@@ -20,22 +16,3 @@ run_text <- load_objects$variants[runid]
 
 return(run_text)
 }
-
-
-find_name <- function(haystack, needle) {
-  # this fn came from https://stackoverflow.com/questions/58400176/r-find-object-by-name-in-deeply-nested-list
-  if (hasName(haystack, needle)) {
-    haystack[[needle]]
-  } else if (is.list(haystack)) {
-    for (obj in haystack) {
-      ret <- Recall(obj, needle)
-      if (!is.null(ret)) return(ret)
-    }
-  } else {
-    NULL
-  }
-}
-
-
-
-
