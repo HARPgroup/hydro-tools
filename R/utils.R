@@ -145,7 +145,7 @@ fn_get_runfile <- function(
           message(paste("Download for", filename, "failed. "))
           return(FALSE)
         }
-        filename <-  unzip ('tempfile');
+        filename <-  utils::unzip ('tempfile');
       } else {
         print(paste("Downloading Un-compressed Run File ", filename));
       }
@@ -164,7 +164,7 @@ fn_get_runfile <- function(
     }
     if (finfo$compressed == 1) {
       print(paste("Unpacking Compressed Run File ", filename)) 
-      filename <-  unzip ('tempfile');
+      filename <-  utils::unzip ('tempfile');
     }
   }
   dat = try(read.table( filename, header = TRUE, sep = ",")) 
