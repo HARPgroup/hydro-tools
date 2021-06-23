@@ -1,3 +1,8 @@
+#' @param runid 
+#' @param site vhydro url
+#' @return run_text dataframe 
+#' @export run_text
+#' @examples NA
 run_text <- function (runid = "runid_600",site = "https://deq1.bse.vt.edu/d.dh",token = NULL) {
 
 # Create datasource

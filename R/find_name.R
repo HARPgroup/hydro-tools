@@ -1,3 +1,8 @@
+#' @param haystack 
+#' @param needle
+#' @return ret 
+#' @export find_name
+#' @examples NA
 find_name <- function(haystack, needle) {
   # this fn came from https://stackoverflow.com/questions/58400176/r-find-object-by-name-in-deeply-nested-list
   if (hasName(haystack, needle)) {
