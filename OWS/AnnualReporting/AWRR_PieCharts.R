@@ -7,7 +7,7 @@ basepath <- "/var/www/R/"
 source(paste(basepath,"config.local.private",sep = '/'))
 Table1 <- read.csv("U:/OWS/foundation_datasets/awrr/2021/Table1_2016-2020.csv")
 
-#############################################################################################
+# AWRR Groundwater Pie Charts ################################################################
 gw.sql <- paste('SELECT *,
                   CASE
                     WHEN "Category" = "Agricultural" THEN "dodgerblue4"
@@ -51,4 +51,9 @@ pie(gw.df$X2020, labels = paste(gw.df$year.percent,"%",sep=""),
 legend('bottom',legend.year,cex=1.0, fill=cols, inset=-0.3)
 #--------------------------------------------------------------------
 dev.off()
-#############################################################################################
+
+# AWRR Surface Water Pie Charts #############################################################
+
+
+
+# AWRR Total Pie Charts #####################################################################
