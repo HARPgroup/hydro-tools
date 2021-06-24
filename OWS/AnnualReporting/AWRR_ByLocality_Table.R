@@ -7,8 +7,8 @@ eyear = 2020
 mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv"))
 fips <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/fips_codes.csv")
 
-table_caption <- "Water Withdrawals Within Localities in 2020 (MGD)"
-table_label   <- "Water Withdrawals Within Localities in 2020 (MGD)"
+table_caption <- paste0("Water Withdrawals Within Localities in ",eyear," (MGD)")
+table_label   <- table_caption
 #########################################################################################
 GW <- paste('SELECT sum((X2020/365)) as "GW_Withdrawal", FIPS, b.name
                  FROM "mp_all" a
@@ -90,7 +90,7 @@ all_fips_round <- sqldf('SELECT Locality, FIPS_CODE, CASE
         END AS "Total Withdrawal",
         "% of Total Withdrawal"
       FROM all_fips_round')
-write.csv(all_fips_round, paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""), row.names = F)
+write.csv(all_fips_round, paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/ByLocality.csv",sep=""), row.names = F)
 
 # ROUND TABLE VALUES, WITHOUT FIPS_NUM COL 
 all_fips_round <- paste('SELECT name AS Locality, 
@@ -115,3 +115,46 @@ ktable <- kable(all_fips_round,
           kable_styling(latex_options = "striped")
 
   cat(ktable, file = paste("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/ByLocality.tex",sep = '')) #USED TO SAVE .tex FILE OF KABLE OUTPUT
+
+# BY LOCALITY BY USE TYPE #######################################################################  
+
+  GW <- paste('SELECT sum((X2020/365)) as "GW_Withdrawal", FIPS, b.name, a.Use_Type
+                 FROM "mp_all" a
+                 LEFT JOIN fips b
+                 ON a.FIPS = b.code
+                 WHERE Source_Type = "Groundwater"
+                 GROUP BY FIPS, Use_Type' 
+              ,sep='')
+  GW <- sqldf(GW)
+  
+  
+  SW <- paste('SELECT sum((X2020/365)) as "SW_Withdrawal", FIPS, b.name, a.Use_Type
+                 FROM "mp_all" a
+                 LEFT JOIN fips b
+                 ON a.FIPS = b.code
+                 WHERE Source_Type = "Surface Water"
+                 GROUP BY FIPS, Use_Type' 
+              ,sep='')
+  SW <- sqldf(SW)
+  
+  TOTAL <- paste('SELECT sum((X2020/365)) as "Total_Withdrawal", FIPS, b.name, a.Use_Type
+                 FROM "mp_all" a
+                 LEFT JOIN fips b
+                 ON a.FIPS = b.code
+                 GROUP BY FIPS, Use_Type' 
+                 ,sep='')
+  TOTAL <- sqldf(TOTAL)
+  #########################################################################################
+  VA_TOTAL <- sqldf('SELECT sum(Total_withdrawal) AS Total_Withdrawal
+                  FROM TOTAL') #VA total for calculating percent of total for each locality
+  
+  mp_all_fips <- sqldf('SELECT * FROM mp_all a LEFT OUTER JOIN fips b ON a.FIPS = b.code')
+  fips_use <- sqldf('SELECT FIPS AS FIPS_Code, code AS FIPS, name, Use_Type FROM mp_all_fips GROUP BY code, name, Use_type')
+  
+  
+  library(plyr)
+  a <- join_all(list(fips_use, GW, SW, TOTAL), by=c('FIPS', 'Use_Type', 'name'), type='left')
+aa <- sqldf('SELECT FIPS, name, Use_Type, GW_Withdrawal, SW_Withdrawal, Total_Withdrawal 
+            FROM a
+            ORDER BY name, Use_type')  
+write.csv(aa, "U:/OWS/foundation_datasets/awrr/2021/Bylocality_UseType_table.csv")
