@@ -42,15 +42,25 @@ png(filename=paste(export_path,filename,sep='/'),width=10,height=6,units="in",re
 par(mfrow=c(1,2),mai=c(1.4,0.5,0.4,0.4),oma = c(0,0,0,0),xpd=TRUE,cex = 1.0499)
 #--------------------------------------------------------------------
 # LEFT PIE
+if (source_type[s] == "Total") {
+  left_title_text <- paste0("(a) 2016-2020 Average Withdrawals")
+} else {
+  left_title_text <- paste0("(a) 2016-2020 Average ",source_type[s]," Withdrawals")
+}
 pie(wd.df$multi_yr_avg, labels = paste(wd.df$avg.percent,"%",sep=""), 
-    main=paste0("(a) 2016-2020 Average ",source_type[s]," Withdrawals"),
+    main= left_title_text,
     cex = 1.1,cex.main = 1.1,col=cols
 )
 legend('bottom',legend.avg,cex=1.0, fill=cols, inset=-0.3) 
 #--------------------------------------------------------------------
 # RIGHT PIE
+if (source_type[s] == "Total") {
+  right_title_text <- "(b) 2020 Total Withdrawals"
+} else {
+  right_title_text <- paste0("(b) 2020 Total ",source_type[s]," Withdrawals")
+}
 pie(wd.df$X2020, labels = paste(wd.df$year.percent,"%",sep=""), 
-    main=paste0("(b) 2020 Total ",source_type[s]," Withdrawals"),
+    main= right_title_text,
     cex = 1.1,cex.main = 1.1,col=cols
 )
 legend('bottom',legend.year,cex=1.0, fill=cols, inset=-0.3)
