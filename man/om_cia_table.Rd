@@ -13,8 +13,8 @@ om_cia_table(
   rseg.metric.list = c("Qout", "Qbaseline", "remaining_days_p0", "remaining_days_p10",
     "remaining_days_p50", "l30_Qout", "l90_Qout", "consumptive_use_frac",
     "wd_cumulative_mgd", "ps_cumulative_mgd"),
-  site = "http://deq1.bse.vt.edu/d.dh",
-  site_base = "http://deq1.bse.vt.edu"
+  site = "https://deq1.bse.vt.edu/d.dh",
+  site_base = "https://deq1.bse.vt.edu"
 )
 }
 \arguments{

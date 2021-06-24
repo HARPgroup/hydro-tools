@@ -18,8 +18,8 @@ om_cia_table <- function (
   fac.metric.list = c('wd_mgd','ps_mgd','unmet1_mgd','unmet7_mgd','unmet30_mgd','unmet90_mgd'),
   rseg.metric.list = c('Qout','Qbaseline','remaining_days_p0','remaining_days_p10','remaining_days_p50','l30_Qout',
                         'l90_Qout','consumptive_use_frac','wd_cumulative_mgd','ps_cumulative_mgd'),
-  site = "http://deq1.bse.vt.edu/d.dh",
-  site_base = "http://deq1.bse.vt.edu"
+  site = "https://deq1.bse.vt.edu/d.dh",
+  site_base = "https://deq1.bse.vt.edu"
 ) {
   ################################################################################################
   # RETRIEVE FAC & RSEG MODEL STATS
@@ -47,6 +47,12 @@ om_cia_table <- function (
     rseg.metrics.i <- data.frame('model_version' = c('vahydro-1.0'),'runid' = c(runid.i),'runlabel' = rseg.metric.list,'metric' = rseg.metric.list)
     rseg_summary.i <- om_vahydro_metric_grid(metric, rseg.metrics.i,base_url = paste(site,"/entity-model-prop-level-export",sep=""))
     rseg_summary.i <- sqldf(paste("SELECT * FROM 'rseg_summary.i' WHERE featureid = ",rseg.hydroid,sep=""))
+    
+    # ADD SCENARIO TEXT DESCRIPTIONS
+    scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
+    scenario <- scenario$reports$cia$scenario_name$value
+    rseg_summary.i <- cbind(scenario,rseg_summary.i)
+    
     if (nrow(rseg_summary.i) > 0) {
       rseg_summary.i <- cbind("runid" = run.i,"run_date" = rseg.info.i$run_date,"starttime" = str_remove(rseg.info.i$starttime," 00:00:00"),"endtime" = str_remove(rseg.info.i$endtime," 00:00:00"),rseg_summary.i)
       rseg_summary <- rbind(rseg_summary,rseg_summary.i)
@@ -56,14 +62,25 @@ om_cia_table <- function (
   ################################################################################################
   # JOIN FAC AND RSEG MODEL STATS INTO SINGLE TABLE
   ################################################################################################
+  # ROUND DATA TO 2 PLACES
+  fac_summary[,-(1:6)] <- round(fac_summary[,-(1:6)],2)
+  rseg_summary[,-(1:10)] <- round(rseg_summary[,-(1:10)],2)
+  
   rseg.met.list <- paste(rseg.metric.list, collapse = ",")
   fac.met.list <- paste(fac.metric.list, collapse = ",")
   fac_rseg_stats <- sqldf(
     paste(
-      "SELECT a.runid, a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list, 
+      "SELECT a.runid, a.scenario ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
       ",' ' AS Facility_Stats,",fac.met.list,
       " FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   )
+  
+  # fac_rseg_stats <- sqldf(
+  #   paste(
+  #     "SELECT a.runid ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list, 
+  #     ",' ' AS Facility_Stats,",fac.met.list,
+  #     " FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
+  # )
   
   #TRANSPOSE DATAFRAME, IF DESIRED
   fac_rseg_stats.T <- as.data.frame(t(fac_rseg_stats[,-1]))
