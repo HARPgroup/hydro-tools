@@ -38,4 +38,5 @@ find_name <- function(haystack, needle) {
 
 find_name(load_objects, 'reports')
 find_name(load_objects, 'cia')
+info_txt <- find_name(load_objects, 'runid_600')
 
