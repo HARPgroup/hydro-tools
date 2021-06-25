@@ -300,10 +300,9 @@ ag_map_draw <- ggdraw(ag_map)+deqlogo
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
-
 # Irrigation Water Withdrawals by Withdrawal Point Location################
 
-#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
 
 #try natural breaks or size bins next year
 mp_df <-sqldf(paste('SELECT *,
@@ -318,7 +317,6 @@ mp_df <-sqldf(paste('SELECT *,
                         FROM mp_point AS a
                         WHERE Year = ',eyear,'
                         AND Use_Type = "irrigation"
-                    AND a.Hydrocode NOT LIKE "robot_well_"
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE point with lat/lon in WV, AND NC LOCALITIES
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
@@ -344,11 +342,14 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp_3.png",sep = ""), width=6.5, height=4.95)
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
 # Commercial Water Withdrawals by Withdrawal Point Location################
 
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
 mp_df <-sqldf(paste('SELECT *,
                           CASE
                             WHEN "mgd" < 0.05 THEN 2
@@ -389,4 +390,163 @@ ag_map_draw <- ggdraw(ag_map)+deqlogo
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
+
 # Mining Water Withdrawals by Withdrawal Point Location################
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 1 THEN 4
+                            WHEN "mgd" BETWEEN 1 AND 5 THEN 5
+                            WHEN "mgd" > 5 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "mining"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Mining \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 1.0","1.0 - 5.0","> 5.0"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Manufacturing Water Withdrawals by Withdrawal Point Location################
+
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+#removing 84 instances of 0 MGD (out of 183 category 2's)
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" BETWEEN 0.00000000000001 AND 0.05 THEN 1
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 2
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 3
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 4
+                            WHEN "mgd" > 25 THEN 5
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "manufacturing"
+                    AND a.HydroID NOT LIKE "398760"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Manufacturing \n Water Withdrawals (MGD)"), values=c(1,2,3,4,5,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp_4.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Public Water Supply Water Withdrawals by Withdrawal Point Location################
+
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
+                            WHEN "mgd" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "municipal"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
+
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Public Water Supply \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Power Generation Water Withdrawals by Withdrawal Point Location################
+
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
+
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
+                            WHEN "mgd" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Use_Type = "fossilpower"
+                    AND a.fips NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
+#WHERE Year = ',eyear,'
+#AND a.X2020 NOT LIKE null
