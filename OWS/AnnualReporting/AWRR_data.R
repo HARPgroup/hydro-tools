@@ -551,9 +551,10 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
         axis.title.x=element_text(size=15),  # X axis title
         axis.title.y=element_text(size=15),
         axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
         plot.margin = unit(c(0,5,1,1), "lines"),
-        legend.text=element_text(size=10),
-        legend.title=element_text(size=11)) + # This widens the right margin
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
   coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
@@ -714,24 +715,33 @@ min_tex %>%
 mintable11 <- mintable11[-3,-8]
 colnames(mintable11)[colnames(mintable11)=="Source Type"] <- "Source"
 colnames(mintable11)[colnames(mintable11)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-mintable11 <- gather(mintable11,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+#mintable11 <- gather(mintable11,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+mintable11 <- pivot_longer(data = mintable11, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
 ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = mintable11$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(aes(yintercept = mintable11$Average, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
-        axis.title.x=element_text(size=14),  # X axis title
-        axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=16, vjust = 1)) +
-  scale_fill_brewer(palette = "Dark2", direction = -1) +
+        axis.title.x=element_text(size=15),  # X axis title
+        axis.title.y=element_text(size=15),
+        axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
+        plot.margin = unit(c(0,5,1,1), "lines"),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
+  coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -.75)
+            vjust = -.8) +
+  annotate("text", y=mintable11$Average, x=5.85, label = paste(mintable11$Average, " MGD")) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
+  
 #+ annotate("text", y=mintable11$Average-1.8, x=.79, label ="5 Year Avg.") 
 #+ annotate("text", y=mintable11$Average-3, x=.79, label = paste('=',mintable11$Average, " MGD"))
 
