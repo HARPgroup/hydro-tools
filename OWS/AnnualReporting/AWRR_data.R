@@ -6,6 +6,7 @@ library('stringr')
 library("kableExtra")
 library('stringr')
 library('ggplot2')
+library('sqldf')
 options(scipen = 999)
 
 #file_extension <- ".html"
@@ -735,7 +736,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=mintable11$Average-3, x=.79, label = paste('=',mintable11$Average, " MGD"))
 
 
-filename <- paste("Mining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
+filename <- paste("MMining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 
