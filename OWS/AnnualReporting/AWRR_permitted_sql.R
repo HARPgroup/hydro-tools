@@ -102,83 +102,79 @@ data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 
 data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
 
-##############################################################################################################
+## DEPRECATED - FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD) ################################
+# permit_srctype <- sqldf(
+#   "select Source_type, has_permit, 
+#   ROUND(sum(mgd),2) AS mgd, count(*) 
+#   from data_pi 
+#   group by Source_type, has_permit"
+# )
+# 
+# table2_bysrc <- sqldf('SELECT Source_Type AS "Source Type", CASE 
+#                     WHEN has_permit = 1 
+#                     THEN "Permitted"
+#                     WHEN has_permit = 0 
+#                     THEN "Unpermitted"
+#                     END AS "Withdrawal Type",
+#                     mgd AS "Withdrawal Amount"
+#                     FROM permit_srctype
+#                     ORDER BY Source_Type, has_permit desc
+#                     ')
+# gw_perm_pct <- round((table2_bysrc[1,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_bysrc
+#                                GROUP BY "Source Type"')[1,]) * 100,2)
+# gw_unperm_pct <- round((table2_bysrc[2,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_bysrc
+#                                GROUP BY "Source Type"')[1,]) * 100,2)
+# sw_perm_pct <- round((table2_bysrc[3,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_bysrc
+#                                GROUP BY "Source Type"')[2,]) * 100,2)
+# sw_unperm_pct <- round((table2_bysrc[4,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_bysrc
+#                                GROUP BY "Source Type"')[2,]) * 100,2)
+# 
+# table2_total <- sqldf('SELECT "Total" AS "Source Type", CASE 
+#                     WHEN has_permit = 1 
+#                     THEN "Permitted"
+#                     WHEN has_permit = 0 
+#                     THEN "Unpermitted"
+#                     END AS "Withdrawal Type",
+#                     sum(mgd) AS "Withdrawal Amount"
+#                       FROM permit_srctype
+#                       GROUP BY has_permit
+#                       ORDER BY Source_Type, has_permit desc')
+# tot_perm_pct <- round((table2_total[1,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_total')) * 100,2)
+# tot_unperm_pct <-  round((table2_total[2,3] / sqldf('SELECT sum("Withdrawal Amount")
+#                                FROM table2_total')) * 100,2)
+# 
+# pct <- rbind(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct)
+# table2 <- cbind(rbind(table2_bysrc,table2_total),pct)
+# 
+# #remove clutter 
+# rm(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct,table2_total,table2_bysrc,pct)
+# 
+# #KABLE
+# table2_latex <- kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
+#                       caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
+#                       label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
+#                       col.names = c( 'Withdrawal Type',
+#                                      paste(eyear,"Withdrawal Amount",sep = ' '),
+#                                      '% of Total')) %>%
+#   kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 12) %>%
+#   pack_rows("Groundwater", 1, 2, hline_before = T, hline_after = F) %>%
+#   pack_rows("Surface Water", 3, 4, hline_before = T, hline_after = F) %>%
+#   pack_rows("Total (GW + SW)", 5, 6, hline_before = T, hline_after = F)
+# 
+# #CUSTOM LATEX CHANGES
+# #insert hold position header
+# table2_tex <- gsub(pattern = "{table}[t]", 
+#                    repl    = "{table}[ht!]", 
+#                    x       = table2_latex, fixed = T )
+# table2_tex %>%
+#   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table2_",eyear,".tex",sep = ''))
 
-#FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD)
-permit_srctype <- sqldf(
-  "select Source_type, has_permit, 
-  ROUND(sum(mgd),2) AS mgd, count(*) 
-  from data_pi 
-  group by Source_type, has_permit"
-)
-
-table2_bysrc <- sqldf('SELECT Source_Type AS "Source Type", CASE 
-                    WHEN has_permit = 1 
-                    THEN "Permitted"
-                    WHEN has_permit = 0 
-                    THEN "Unpermitted"
-                    END AS "Withdrawal Type",
-                    mgd AS "Withdrawal Amount"
-                    FROM permit_srctype
-                    ORDER BY Source_Type, has_permit desc
-                    ')
-gw_perm_pct <- round((table2_bysrc[1,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_bysrc
-                               GROUP BY "Source Type"')[1,]) * 100,2)
-gw_unperm_pct <- round((table2_bysrc[2,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_bysrc
-                               GROUP BY "Source Type"')[1,]) * 100,2)
-sw_perm_pct <- round((table2_bysrc[3,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_bysrc
-                               GROUP BY "Source Type"')[2,]) * 100,2)
-sw_unperm_pct <- round((table2_bysrc[4,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_bysrc
-                               GROUP BY "Source Type"')[2,]) * 100,2)
-
-table2_total <- sqldf('SELECT "Total" AS "Source Type", CASE 
-                    WHEN has_permit = 1 
-                    THEN "Permitted"
-                    WHEN has_permit = 0 
-                    THEN "Unpermitted"
-                    END AS "Withdrawal Type",
-                    sum(mgd) AS "Withdrawal Amount"
-                      FROM permit_srctype
-                      GROUP BY has_permit
-                      ORDER BY Source_Type, has_permit desc')
-tot_perm_pct <- round((table2_total[1,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_total')) * 100,2)
-tot_unperm_pct <-  round((table2_total[2,3] / sqldf('SELECT sum("Withdrawal Amount")
-                               FROM table2_total')) * 100,2)
-
-pct <- rbind(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct)
-table2 <- cbind(rbind(table2_bysrc,table2_total),pct)
-
-#remove clutter 
-rm(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct,table2_total,table2_bysrc,pct)
-
-#KABLE
-table2_latex <- kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
-                      caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-                      label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-                      col.names = c( 'Withdrawal Type',
-                                     paste(eyear,"Withdrawal Amount",sep = ' '),
-                                     '% of Total')) %>%
-  kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 12) %>%
-  pack_rows("Groundwater", 1, 2, hline_before = T, hline_after = F) %>%
-  pack_rows("Surface Water", 3, 4, hline_before = T, hline_after = F) %>%
-  pack_rows("Total (GW + SW)", 5, 6, hline_before = T, hline_after = F)
-
-#CUSTOM LATEX CHANGES
-#insert hold position header
-table2_tex <- gsub(pattern = "{table}[t]", 
-                   repl    = "{table}[ht!]", 
-                   x       = table2_latex, fixed = T )
-table2_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table2_",eyear,".tex",sep = ''))
-
-######################################################################################################
-#FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)
-
+## DEPRECATED - FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD) ###############
 permit_src_use <- sqldf(
   "select Source_type, Use_Type, has_permit, ROUND(sum(mgd),2) AS mgd, count(*) 
   from data_pi 
@@ -234,42 +230,42 @@ table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 #remove clutter
 rm(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
-#KABLE
-table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
-                      caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
-                      label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
-                      col.names = c( 'Use Type',
-                                     'Withdrawal Type',
-                                     paste(eyear,"Withdrawal Amount",sep = ' '),
-                                     '% of Total')) %>%
-  kable_styling( full_width = F,position = "center", font_size = 10) %>%
-  pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
-  pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
-  #row_spec(13,bold = T, background = "gray!6") %>%
-  #row_spec(25,bold = T, background = "gray!6") %>%
-  collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
+# #KABLE
+# table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
+#                       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
+#                       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
+#                       col.names = c( 'Use Type',
+#                                      'Withdrawal Type',
+#                                      paste(eyear,"Withdrawal Amount",sep = ' '),
+#                                      '% of Total')) %>%
+#   kable_styling( full_width = F,position = "center", font_size = 10) %>%
+#   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
+#   pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
+#   #row_spec(13,bold = T, background = "gray!6") %>%
+#   #row_spec(25,bold = T, background = "gray!6") %>%
+#   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
+# 
+# #CUSTOM LATEX CHANGES
+# #insert hold position header
+# table3_tex <- gsub(pattern = "{table}[t]", 
+#                    repl    = "{table}[ht!]", 
+#                    x       = table3_latex, fixed = T )
+# 
+# #remove extra characters inserted by collapse_rows because of repeating lines
+# table3_tex <- gsub(pattern = "[t]{-2}{*}", 
+#                    repl    = "", 
+#                    x       = table3_tex, fixed= T)
+# 
+# #custom striping
+# table3_tex <- gsub(pattern = " & Unpermitted ", 
+#                    repl    = "\\rowcolor{gray!20}   & Unpermitted ", 
+#                    x       = table3_tex, fixed= T)
+# 
+# table3_tex %>%
+#   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table3_",eyear,".tex",sep = ''))
 
-#CUSTOM LATEX CHANGES
-#insert hold position header
-table3_tex <- gsub(pattern = "{table}[t]", 
-                   repl    = "{table}[ht!]", 
-                   x       = table3_latex, fixed = T )
 
-#remove extra characters inserted by collapse_rows because of repeating lines
-table3_tex <- gsub(pattern = "[t]{-2}{*}", 
-                   repl    = "", 
-                   x       = table3_tex, fixed= T)
-
-#custom striping
-table3_tex <- gsub(pattern = " & Unpermitted ", 
-                   repl    = "\\rowcolor{gray!20}   & Unpermitted ", 
-                   x       = table3_tex, fixed= T)
-
-table3_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table3_",eyear,".tex",sep = ''))
-
-
-### TABLE 3 - ALTERNATE FORMATTING ################################
+### TABLE 3 - NEW FORMATTING ################################
 table3_wide <- pivot_wider(data = table3, id_cols = c("Source_Type", "Use_Type"), names_from = "Withdrawal Type", names_sep = "_", values_from = c("Withdrawal Amount", "pct_of_total"))
 
 table3_gw_tot <- sqldf('SELECT "Total  Groundwater" AS Use_Type,
