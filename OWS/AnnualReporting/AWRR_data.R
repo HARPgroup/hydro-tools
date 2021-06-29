@@ -536,7 +536,6 @@ ag_tex %>%
 agtable5 <- agtable5[-3,-8]
 colnames(agtable5)[colnames(agtable5)=="Source Type"] <- "Source"
 colnames(agtable5)[colnames(agtable5)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-#agtable5 <- gather(agtable5,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 agtable5 <- pivot_longer(data = agtable5, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
@@ -559,14 +558,11 @@ ggplot(data=agtable5, aes(x=Year, y=MGD, fill = Source)) +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
             vjust = -.8) +
-  #annotate("text", y=agtable5$Average, x=5.85, label =paste((eyear-syear)+1,"Year Avg."))+
   annotate("text", y=agtable5$Average, x=5.85, label = paste(agtable5$Average, " MGD")) +
-  #scale_colour_manual(name = "5 Year Avg. (MGD)", values = c(2,3)) +
   scale_fill_brewer(palette = "Dark2", direction = -1) +
   scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
-# annotate("text", y=agtable5$Average[1:2]-1.8, x=.81, label =paste((eyear-syear)+1,"Year Avg.","=",agtable5$Average[1:2], " MGD"))
 
-filename <- paste("AAgriculture",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
+filename <- paste("Agriculture",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/overleaf",sep = " "), width=12, height=6)
 
 #### irrig ######################################################################################
@@ -601,26 +597,31 @@ irrig_tex %>%
 irrigtable7 <- irrigtable7[-3,-8]
 colnames(irrigtable7)[colnames(irrigtable7)=="Source Type"] <- "Source"
 colnames(irrigtable7)[colnames(irrigtable7)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-irrigtable7 <- gather(irrigtable7,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+irrigtable7 <- pivot_longer(data = irrigtable7, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
 ggplot(data=irrigtable7, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = irrigtable7$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(aes(yintercept = irrigtable7$Average, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
-        axis.title.x=element_text(size=14),  # X axis title
-        axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=16, vjust = 1)) +
-  scale_fill_brewer(palette = "Dark2", direction = -1) +
+        axis.title.x=element_text(size=15),  # X axis title
+        axis.title.y=element_text(size=15),
+        axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
+        plot.margin = unit(c(0,5,1,1), "lines"),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
+  coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -.88)
-#+ annotate("text", y=irrigtable7$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=irrigtable7$Average-3, x=.79, label = paste('=',irrigtable7$Average, " MGD"))
+            vjust = -.8) +
+  annotate("text", y=irrigtable7$Average, x=5.85, label = paste(irrigtable7$Average, " MGD")) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
 
 
 filename <- paste("Irrigation",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
@@ -657,26 +658,31 @@ comm_tex %>%
 commtable9 <- commtable9[-3,-8]
 colnames(commtable9)[colnames(commtable9)=="Source Type"] <- "Source"
 colnames(commtable9)[colnames(commtable9)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-commtable9 <- gather(commtable9,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+commtable9 <- pivot_longer(data = commtable9, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
 ggplot(data=commtable9, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = commtable9$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(aes(yintercept = commtable9$Average, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
-        axis.title.x=element_text(size=14),  # X axis title
-        axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=16, vjust = 1)) +
-  scale_fill_brewer(palette = "Dark2", direction = -1) +
+        axis.title.x=element_text(size=15),  # X axis title
+        axis.title.y=element_text(size=15),
+        axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
+        plot.margin = unit(c(0,5,1,1), "lines"),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
+  coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -.4)
-#+ annotate("text", y=commtable9$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=commtable9$Average-3, x=.79, label = paste('=',commtable9$Average, " MGD"))
+            vjust = -.8) +
+  annotate("text", y=commtable9$Average, x=5.85, label = paste(commtable9$Average, " MGD")) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
 
 
 filename <- paste("Commercial",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
@@ -715,7 +721,6 @@ min_tex %>%
 mintable11 <- mintable11[-3,-8]
 colnames(mintable11)[colnames(mintable11)=="Source Type"] <- "Source"
 colnames(mintable11)[colnames(mintable11)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-#mintable11 <- gather(mintable11,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 mintable11 <- pivot_longer(data = mintable11, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
@@ -746,7 +751,7 @@ ggplot(data=mintable11, aes(x=Year, y=MGD, fill = Source)) +
 #+ annotate("text", y=mintable11$Average-3, x=.79, label = paste('=',mintable11$Average, " MGD"))
 
 
-filename <- paste("MMining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
+filename <- paste("Mining",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf",sep = " "), width=12, height=6)
 
 
@@ -782,26 +787,31 @@ man_tex %>%
 mantable13 <- mantable13[-3,-8]
 colnames(mantable13)[colnames(mantable13)=="Source Type"] <- "Source"
 colnames(mantable13)[colnames(mantable13)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-mantable13 <- gather(mantable13,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+mantable13 <- pivot_longer(data = mantable13, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
 ggplot(data=mantable13, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = mantable13$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(aes(yintercept = mantable13$Average, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
-        axis.title.x=element_text(size=14),  # X axis title
-        axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=16, vjust = 1)) +
-  scale_fill_brewer(palette = "Dark2", direction = -1) +
+        axis.title.x=element_text(size=15),  # X axis title
+        axis.title.y=element_text(size=15),
+        axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
+        plot.margin = unit(c(0,5,1,1), "lines"),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
+  coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -1)
-#+ annotate("text", y=mantable13$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=mantable13$Average-3, x=.79, label = paste('=',mantable13$Average, " MGD"))
+            vjust = -.8) +
+  annotate("text", y=mantable13$Average, x=5.85, label = paste(mantable13$Average, " MGD")) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
 
 
 filename <- paste("Manufacturing",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
@@ -841,26 +851,31 @@ muni_tex %>%
 munitable16 <- munitable16[-3,-8]
 colnames(munitable16)[colnames(munitable16)=="Source Type"] <- "Source"
 colnames(munitable16)[colnames(munitable16)==paste((eyear-syear)+1,"Year Avg.")] <- "Average"
-munitable16 <- gather(munitable16,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
+munitable16 <- pivot_longer(data = munitable16, cols = paste0(syear):paste0(eyear), names_to = "Year", values_to = "MGD")
 
 #plot bar graph
 ggplot(data=munitable16, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  geom_hline(yintercept = munitable16$Average, size = .4, colour = "black",linetype = "dashed") +
+  geom_hline(aes(yintercept = munitable16$Average, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
         panel.grid.major.y = element_line(colour = "light gray", size=.3),
         legend.position="bottom", 
         legend.box = "horizontal",
-        axis.title.x=element_text(size=14),  # X axis title
-        axis.title.y=element_text(size=14),
-        axis.text.x = element_text(size=16, vjust = 1)) +
-  scale_fill_brewer(palette = "Dark2", direction = -1) +
+        axis.title.x=element_text(size=15),  # X axis title
+        axis.title.y=element_text(size=15),
+        axis.text.x = element_text(size=15, vjust = 1),
+        axis.text.y = element_text(size=12),
+        plot.margin = unit(c(0,5,1,1), "lines"),
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=12)) + # This widens the right margin
+  coord_cartesian(xlim = c(1,5), clip = "off") +
   geom_text(aes(label=MGD),
             position=position_dodge(width=0.9), 
-            vjust = -.2)
-#+ annotate("text", y=munitable16$Average-1.8, x=.79, label ="5 Year Avg.") 
-#+ annotate("text", y=munitable16$Average-3, x=.79, label = paste('=',munitable16$Average, " MGD"))
+            vjust = -.8) +
+  annotate("text", y=munitable16$Average, x=5.85, label = paste(munitable16$Average, " MGD")) +
+  scale_fill_brewer(palette = "Dark2", direction = -1) +
+  scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)")
 
 
 filename <- paste("Public Water Supply",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
