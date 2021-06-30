@@ -49,8 +49,20 @@ om_cia_table <- function (
     rseg_summary.i <- sqldf(paste("SELECT * FROM 'rseg_summary.i' WHERE featureid = ",rseg.hydroid,sep=""))
     
     # ADD SCENARIO TEXT DESCRIPTIONS
-    scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
-    scenario <- scenario$reports$cia$scenario_name$value
+    ## NEW METHOD (SLOW)
+    # scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
+    # scenario <- scenario$reports$cia$scenario_name$value
+    # rseg_summary.i <- cbind(scenario,rseg_summary.i)
+    
+    ## CONVENTIONAL METHOD (FASTER)
+    ds <- RomDataSource$new(site)
+    scen_var <- ds$get_vardef('om_scenario')
+    scen_config <- om_get_prop(site, scen_var$varid, entity_type = 'dh_variabledefinition',propname = 'variants')
+    scen.i <- om_get_prop(site, scen_config$pid, entity_type = 'dh_properties',propname = runid.i)
+    reports.i <- om_get_prop(site, scen.i$pid, entity_type = 'dh_properties',propname = 'reports')
+    cia.i <- om_get_prop(site, reports.i$pid, entity_type = 'dh_properties',propname = 'cia')
+    scenario_name.i <- om_get_prop(site, cia.i$pid, entity_type = 'dh_properties',propname = 'scenario_name')
+    scenario <- scenario_name.i$propcode
     rseg_summary.i <- cbind(scenario,rseg_summary.i)
     
     if (nrow(rseg_summary.i) > 0) {
@@ -77,7 +89,7 @@ om_cia_table <- function (
   
   # fac_rseg_stats <- sqldf(
   #   paste(
-  #     "SELECT a.runid ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list, 
+  #     "SELECT a.runid ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
   #     ",' ' AS Facility_Stats,",fac.met.list,
   #     " FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   # )
