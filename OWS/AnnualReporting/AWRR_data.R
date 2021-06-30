@@ -1110,13 +1110,10 @@ power <- gather(power,Year, MGD, paste(syear):paste(eyear), factor_key = TRUE)
 
 mean_mgd <- power[1:4,1:3]
 colnames(mean_mgd) <- c('Source', 'Power', 'MGD')
-mean_mgd_gw <- sqldf('SELECT * FROM mean_mgd WHERE Source LIKE "Groundwater"')
-mean_mgd_sw <- sqldf('SELECT * FROM mean_mgd WHERE Source LIKE "Surface Water"')
 
 #plot bar graph
 ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   geom_col(position=position_dodge(), colour = "gray") + 
-  #geom_hline(data = mean_mgd,aes(yintercept = MGD), size = .7, colour = "black",linetype = "dashed") +
   geom_segment(data = mean_mgd, x = .5, xend = 5.5, aes(y = MGD, yend = MGD, colour = Source), size = .8, linetype = "dashed") +
   labs( y="Million Gallons per Day", fill = "Source Type") +
   theme(panel.background = element_rect(fill = "white"),
@@ -1138,28 +1135,6 @@ ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
   scale_colour_brewer(palette = "Dark2", direction = -1, name = "5 Year Avg. (MGD)") +
   geom_text(data = mean_mgd, aes( y = MGD, label = paste0(MGD, " \n MGD")), x = 5.8) +
   facet_grid(Source~Power, scales = "free_y")
-
-
-
-# #plot bar graph
-# ggplot(data=power, aes(x=Year, y=MGD, fill = Source)) +
-#   geom_col(position=position_dodge(), colour = "gray") + 
-#   geom_hline(data = mean_mgd,aes(yintercept = MGD), size = .7, colour = "black",linetype = "dashed") +
-#   #geom_hline(yintercept = power$Average, size = .4, colour = "black",linetype = "dashed") +
-#   labs( y="Million Gallons per Day", fill = "Source Type") +
-#   theme(panel.background = element_rect(fill = "white"),
-#         panel.grid.major.y = element_line(colour = "light gray", 
-#                                           size=.3),
-#         legend.position="bottom", 
-#         legend.box = "horizontal",
-#         axis.title.x=element_text(size=14),  # X axis title
-#         axis.title.y=element_text(size=14),
-#         axis.text.x = element_text(size=11, vjust = 1)) +
-#   scale_fill_brewer(palette = "Dark2", direction = -1) +
-#   geom_text(aes(label=MGD),
-#             position = position_stack(vjust = .5), 
-#             vjust = -.2)+
-#   facet_grid(Source~Power, scales = "free_y") 
 
 filename <- paste("Power",paste(syear,"-",eyear, sep = ""),"Bar_Graph.pdf", sep="_")
 ggsave(file=filename, path = paste("U:/OWS/Report Development/Annual Water Resources Report/October",eyear+1,"Report/Overleaf/",sep = " "), width=12, height=6)
