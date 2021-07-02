@@ -5,6 +5,8 @@ syear = 2016
 eyear = 2020
 color_list <- sort(colors())
 
+options(scipen=9999)
+
 #site <- "http://deq2.bse.vt.edu/d.dh/"
 site <- "https://deq1.bse.vt.edu/d.dh/"
 
@@ -248,13 +250,16 @@ ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map
 # Agriculture (Non-Irrigation) Water Withdrawals by Withdrawal Point Location################
 mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
 
+#try natural breaks or size bins nex year
 mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "mgy" < 1 THEN 1
-                            WHEN "mgy" BETWEEN 1 AND 2.5 THEN 2
-                            WHEN "mgy" BETWEEN 2.5 AND 5 THEN 3
-                            WHEN "mgy" BETWEEN 5 AND 10 THEN 4
-                            WHEN "mgy" > 10 THEN 5
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 1 THEN 4
+                            WHEN "mgd" BETWEEN 1 AND 5 THEN 5
+                            WHEN "mgd" > 5 THEN 6
+                          
+  
                             ELSE 0
                           END AS point_size
                         FROM mp_point AS a
@@ -262,7 +267,14 @@ mp_df <-sqldf(paste('SELECT *,
                         AND Use_Type = "agriculture"
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#216E9E", shape=21, show.legend = TRUE)
+#option 2 for case statement bin breakup
+# WHEN "mgd" < 0.05 THEN 1
+# WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 2
+# WHEN "mgd" BETWEEN 0.5 AND 1 THEN 3
+# WHEN "mgd" > 1 THEN 4
+
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
 fips_df <- sqldf('SELECT *
                  FROM fips_csv
@@ -271,21 +283,360 @@ fips_df <- sqldf('SELECT *
 fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
 fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
 
-ag_map <- basemap.obj + fips.gg + mp.gg +
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
   theme(legend.position = c(0.179, 0.817),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         aspect.ratio = 12.05/16
   ) +
-  scale_size_manual(name=paste0(eyear," Agriculture (Non-Irrigation) \n Water Withdrawals"), values=c(1,2,3,4,5,0),
-                     labels=c("< 1.0","1.0 - 2.5","2.5 - 5.0","5.0 - 10.0","> 10")) +
-  rivs.gg +
-  res.gg
+  scale_size_manual(name=paste0(eyear," Agriculture (Non-Irrigation) \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                     labels=c("< 0.05","0.05 - 0.5","0.5 - 1.0","1.0 - 5.0","> 5.0"))
+
 
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Irrigation Water Withdrawals by Withdrawal Point Location################
+
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.10 THEN 3
+                            WHEN "mgd" BETWEEN 0.10 AND 0.25 THEN 4
+                            WHEN "mgd" BETWEEN 0.25 AND 0.50 THEN 5
+                            WHEN "mgd" > 0.50 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "irrigation"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE point with lat/lon in WV, AND NC LOCALITIES
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.153, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Irrigation (Agriculture) \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.10","0.10 - 0.25","0.25 - 0.50","> 0.50"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Commercial Water Withdrawals by Withdrawal Point Location################
+
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.10 THEN 3
+                            WHEN "mgd" BETWEEN 0.10 AND 0.25 THEN 4
+                            WHEN "mgd" BETWEEN 0.25 AND 0.50 THEN 5
+                            WHEN "mgd" > 0.50 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "commercial"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE point with lat/lon in WV, AND NC LOCALITIES
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Commerical \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.10","0.10 - 0.25","0.25 - 0.50","> 0.50"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Mining Water Withdrawals by Withdrawal Point Location################
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 1 THEN 4
+                            WHEN "mgd" BETWEEN 1 AND 5 THEN 5
+                            WHEN "mgd" > 5 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "mining"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Mining \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 1.0","1.0 - 5.0","> 5.0"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Manufacturing Water Withdrawals by Withdrawal Point Location################
+
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+#considered removing 84 instances of 0 MGD (out of 183 category 2's)
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
+                            WHEN "mgd" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "manufacturing"
+                    AND a.HydroID NOT LIKE "398760"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and 0 MGD in 2020
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Manufacturing \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp.png",sep = ""), width=6.5, height=4.95)
+
+
+#############################################################################################
+# Test Manufacturing Water Withdrawals by Withdrawal Point Location################
+
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+#Tried considered removing 84 instances of 0 MGD (out of 183 category 2's), but 0's still show up. Instead, the largest category (mgd>25) is lost. 
+#For an easy visual, see the point in the ocean, the Tyson well with HydroID 398760, because it has a 0 MGD and still plots with the case statement below
+#In other words, zero MGDs are getting categorized as size 0, and plotting as size 2, why?
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" BETWEEN 0.1 and 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
+                            WHEN "mgd" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "manufacturing"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
+#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and 0 MGD in 2020
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Manufacturing \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp_test.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Public Water Supply Water Withdrawals by Withdrawal Point Location################
+
+#mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+
+#try natural breaks or size bins next year
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "mgd" < 0.05 THEN 2
+                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
+                            WHEN "mgd" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Year = ',eyear,'
+                        AND Use_Type = "municipal"
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
+
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear," Public Water Supply \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.png",sep = ""), width=6.5, height=4.95)
+
+#############################################################################################
+# Power Generation Water Withdrawals by Withdrawal Point Location################
+
+#working with a test copy right now
+mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
+
+# Makes NA values into zeroes
+# Is this something we should do for power? Are the NA's actually reported zeroes, or true NAs?
+mp_point[is.na(mp_point)] <- 0
+
+#fossil_df <- sqldf('SELECT *
+#                 FROM mp_point
+#                 WHERE Use_Type = "fossilpower"') #select all fossilpower rows in mp_point, successfully picks up all 57
+#fossil_df[is.na(fossil_df)] <- 0
+
+#select all fossilpower rows in mp_point
+mp_df_f <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "X',eyear,'" < 0.05 THEN 2
+                            WHEN "X',eyear,'" BETWEEN 0.05 AND 0.5 THEN 3
+                            WHEN "X',eyear,'" BETWEEN 0.5 AND 5 THEN 4
+                            WHEN "X',eyear,'" BETWEEN 5 AND 25 THEN 5
+                            WHEN "X',eyear,'" > 25 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Use_Type = "fossilpower"
+                    AND a.fips NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
+mp_df <- mp_df_f
+#still need to adjust size classes
+#still need to make a mp_df_n
+#then add both to the map
+#but first, need lat/lon exported in the mp_all_wide_power csv
+
+mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+
+fips_df <- sqldf('SELECT *
+                 FROM fips_csv
+                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+  theme(legend.position = c(0.146, 0.817),
+        legend.title=element_text(size=10),
+        legend.text=element_text(size=8),
+        aspect.ratio = 12.05/16
+  ) +
+  scale_size_manual(name=paste0(eyear,"Power Generation \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+
+
+
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+ag_map_draw <- ggdraw(ag_map)+deqlogo
+
+ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95)
+
+
 
 
