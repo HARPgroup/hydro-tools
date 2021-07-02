@@ -65,6 +65,16 @@ om_cia_table <- function (
     scenario <- scenario_name.i$propcode
     rseg_summary.i <- cbind(scenario,rseg_summary.i)
     
+    
+    # ADD ELFGEN STATS TO TABLE -------------------------------------------------------------------------------------
+      runid_i_pid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties',propname = runid.i)$pid
+      elfgen_EDAS_huc8_i <- om_get_prop(site, runid_i_pid, entity_type = 'dh_properties',propname = 'elfgen_EDAS_huc8')
+      richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
+      richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
+      rseg_summary.i <- cbind(rseg_summary.i,richness_change_abs)
+      rseg_summary.i <- cbind(rseg_summary.i,richness_change_pct)
+    #----------------------------------------------------------------------------------------------------------------
+   
     if (nrow(rseg_summary.i) > 0) {
       rseg_summary.i <- cbind("runid" = run.i,"run_date" = rseg.info.i$run_date,"starttime" = str_remove(rseg.info.i$starttime," 00:00:00"),"endtime" = str_remove(rseg.info.i$endtime," 00:00:00"),rseg_summary.i)
       rseg_summary <- rbind(rseg_summary,rseg_summary.i)
@@ -83,15 +93,15 @@ om_cia_table <- function (
   fac_rseg_stats <- sqldf(
     paste(
       "SELECT a.runid, a.scenario ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
-      ",' ' AS Facility_Stats,",fac.met.list,
-      " FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
+      ",' ' AS Facility_Stats,",fac.met.list,", a.richness_change_abs, a.richness_change_pct 
+      FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   )
   
   # fac_rseg_stats <- sqldf(
   #   paste(
   #     "SELECT a.runid ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
-  #     ",' ' AS Facility_Stats,",fac.met.list,
-  #     " FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
+  #     ",' ' AS Facility_Stats,",fac.met.list,", a.richness_change_abs, a.richness_change_pct
+  #     FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   # )
   
   #TRANSPOSE DATAFRAME, IF DESIRED
