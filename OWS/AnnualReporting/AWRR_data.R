@@ -220,8 +220,23 @@ print(cat_table)
 #save the cat_table to use for data reference - we can refer to that csv when asked questions about the data
 write.csv(cat_table, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\Table1_",syear,"-",eyear,".csv",sep = ""), row.names = F)
 
+#Join in FIPS name to data
+fips <- read.csv(file = "C:\\Users\\maf95834\\Documents\\Github\\vahydro\\R\\wsp\\wsp2020\\FoundationDataset\\fips_codes.csv")
+
+multi_yr_data <- sqldf('SELECT a.*, b.name AS locality
+                  FROM multi_yr_data a
+                  LEFT OUTER JOIN fips b
+                  ON a.FIPS = b.code')
+
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
 write.csv(multi_yr_data, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_",syear,"-",eyear,".csv",sep = ""), row.names = F)
+
+#Facility version - save the multi_yr_data group by facility to use for data reference - we can refer to that csv when asked questions about the data
+fac_multi_yr_data <- sqldf('SELECT "Facility_HydroID", "Facility", "Use_Type", "Year", sum("mgy") as mgy, sum("mgd") as mgd, "FIPS", "locality"  
+                           FROM multi_yr_data
+                           GROUP BY Facility_HydroID, Year')
+
+write.csv(fac_multi_yr_data, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\fac_all_",syear,"-",eyear,".csv",sep = ""), row.names = F)
 
 
 ######################### IS THERE A STATIC TABLE? READ THAT IN AND BEGIN FROM HERE ###########
@@ -1083,7 +1098,7 @@ pow_tex %>%
 
 
 
-pow_wide <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, Facility_hydroid, Facility,Use_Type, fips), names_from = Year, values_from = mgy)
+pow_wide <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, lat, lon, Facility_hydroid, Facility,Use_Type, fips), names_from = Year, values_from = mgy)
 
 write.csv(x = pow_wide, file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_wide_power_",syear,"-",eyear,".csv"))
 
