@@ -69,8 +69,13 @@ om_cia_table <- function (
     # ADD ELFGEN STATS TO TABLE -------------------------------------------------------------------------------------
       runid_i_pid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties',propname = runid.i)$pid
       elfgen_EDAS_huc8_i <- om_get_prop(site, runid_i_pid, entity_type = 'dh_properties',propname = 'elfgen_EDAS_huc8')
-      richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
-      richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
+      if (!is.logical(elfgen_EDAS_huc8_i)) {
+        richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
+        richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
+      } else {
+        richness_change_abs <- 0.0
+        richness_change_pct <- 0.0
+      }
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_abs)
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_pct)
     #----------------------------------------------------------------------------------------------------------------
