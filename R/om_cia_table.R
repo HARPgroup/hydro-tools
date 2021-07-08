@@ -69,8 +69,15 @@ om_cia_table <- function (
     # ADD ELFGEN STATS TO TABLE -------------------------------------------------------------------------------------
       runid_i_pid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties',propname = runid.i)$pid
       elfgen_EDAS_huc8_i <- om_get_prop(site, runid_i_pid, entity_type = 'dh_properties',propname = 'elfgen_EDAS_huc8')
-      richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
-      richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
+    
+      if (!is.logical(elfgen_EDAS_huc8_i)) {
+        richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
+        richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
+      } else {
+        richness_change_abs <- 'No elfgen Available'
+        richness_change_pct <- 'No elfgen Available'
+      }
+      
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_abs)
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_pct)
     #----------------------------------------------------------------------------------------------------------------
@@ -85,8 +92,12 @@ om_cia_table <- function (
   # JOIN FAC AND RSEG MODEL STATS INTO SINGLE TABLE
   ################################################################################################
   # ROUND DATA TO 2 PLACES
-  fac_summary[,-(1:6)] <- round(fac_summary[,-(1:6)],2)
-  rseg_summary[,-(1:10)] <- round(rseg_summary[,-(1:10)],2)
+  #fac_summary[,-(1:6)] <- round(fac_summary[,-(1:6)],2)
+  #rseg_summary[,-(1:10)] <- round(rseg_summary[,-(1:10)],2)
+
+  #dplyr method of rounding only those columns that are numeric (facilitates elfgen message)
+  fac_summary <- fac_summary %>% mutate_if(is.numeric, round, digits=2)
+  rseg_summary <- rseg_summary %>% mutate_if(is.numeric, round, digits=2)
   
   rseg.met.list <- paste(rseg.metric.list, collapse = ",")
   fac.met.list <- paste(fac.metric.list, collapse = ",")
