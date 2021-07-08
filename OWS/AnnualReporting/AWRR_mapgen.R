@@ -581,38 +581,60 @@ ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.
 #############################################################################################
 # Power Generation Water Withdrawals by Withdrawal Point Location################
 
-#working with a test copy right now
+#five missing lat/lon in the mp_all_wide_power csv, all less than 0.02mgd, each with another mp that does show on map, so not adjusted this year
 mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
 
-# Makes NA values into zeroes
-# Is this something we should do for power? Are the NA's actually reported zeroes, or true NAs?
+# Convert NAs to zeros because NA means 0mgd was reported
 mp_point[is.na(mp_point)] <- 0
 
-#fossil_df <- sqldf('SELECT *
-#                 FROM mp_point
-#                 WHERE Use_Type = "fossilpower"') #select all fossilpower rows in mp_point, successfully picks up all 57
-#fossil_df[is.na(fossil_df)] <- 0
+#convert mgy values into mgd
+#mgy <- mp_point$X2020
+#mgd <- mgy/365
+#mp_point$mgd <- mgd
+#colnames(mp_point)[16] <- paste0(eyear,"mgd")
 
-#select all fossilpower rows in mp_point
+#convert mgy values into mgd using SQL
+mp_point <- sqldf(paste0('SELECT *, "X',eyear,'"/365 AS "',eyear,'mgd"
+                         FROM mp_point
+                         '))
+
+#ordered mgd column by descending size so larger mgd points appear behind smaller ones
+#select all fossilpower rows in mp_point. Syntax for 2020 column -> WHEN "X',eyear,'" <1 THEN _
 mp_df_f <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "X',eyear,'" < 0.05 THEN 2
-                            WHEN "X',eyear,'" BETWEEN 0.05 AND 0.5 THEN 3
-                            WHEN "X',eyear,'" BETWEEN 0.5 AND 5 THEN 4
-                            WHEN "X',eyear,'" BETWEEN 5 AND 25 THEN 5
-                            WHEN "X',eyear,'" > 25 THEN 6
+                            WHEN "',eyear,'mgd" < 0.5 THEN 2
+                            WHEN "',eyear,'mgd" BETWEEN 0.5 AND 5 THEN 3
+                            WHEN "',eyear,'mgd" BETWEEN 5 AND 50 THEN 4
+                            WHEN "',eyear,'mgd" BETWEEN 50 AND 500 THEN 5
+                            WHEN "',eyear,'mgd" > 500 THEN 6
                             ELSE 0
                           END AS point_size
                         FROM mp_point AS a
                         WHERE Use_Type = "fossilpower"
-                    AND a.fips NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
-mp_df <- mp_df_f
-#still need to adjust size classes
-#still need to make a mp_df_n
-#then add both to the map
-#but first, need lat/lon exported in the mp_all_wide_power csv
+                    AND a.fips NOT LIKE "3%"
+                      ORDER BY "',eyear,'mgd" DESC 
+                      ',sep="")) #EXCLUDE NC LOCALITIES
 
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+#select all nuclearpower rows in mp_point
+mp_df_n <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "',eyear,'mgd" < 0.5 THEN 2
+                            WHEN "',eyear,'mgd" BETWEEN 0.5 AND 5 THEN 3
+                            WHEN "',eyear,'mgd" BETWEEN 5 AND 50 THEN 4
+                            WHEN "',eyear,'mgd" BETWEEN 50 AND 500 THEN 5
+                            WHEN "',eyear,'mgd" > 500 THEN 6
+                            ELSE 0
+                          END AS point_size
+                        FROM mp_point AS a
+                        WHERE Use_Type = "nuclearpower"
+                    AND a.fips NOT LIKE "3%"
+                      ORDER BY "',eyear,'mgd" DESC 
+                      ',sep="")) #EXCLUDE, NC LOCALITIES
+
+#adding color category here so Fossil and Nuclear have a category that can show up in the legend
+mp_f.gg <- geom_point(data = mp_df_f,aes(x = lon, y = lat, size = factor(point_size), color = "Fossil Power"), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
+mp_n.gg <- geom_point(data = mp_df_n,aes(x = lon, y = lat, size = factor(point_size), color = "Nuclear Power"), fill="orange2", alpha=0.75, shape=21, show.legend = TRUE)
+
 
 fips_df <- sqldf('SELECT *
                  FROM fips_csv
@@ -621,14 +643,23 @@ fips_df <- sqldf('SELECT *
 fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
 fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
 
-ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
-  theme(legend.position = c(0.146, 0.817),
+
+
+ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg + 
+  theme(legend.position = c(0.146, 0.755),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
-        aspect.ratio = 12.05/16
+        aspect.ratio = 12.05/16,
+        legend.spacing.y = unit(0, "cm"),
   ) +
-  scale_size_manual(name=paste0(eyear,"Power Generation \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
-                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
+  guides(color = guide_legend(order = 1, override.aes = list(fill = c("#0C1078", "orange2"), size = 4)), #order=1 moves the fossil-nuclear ("color") legend to show first
+         size = guide_legend(order = 2, override.aes = list(shape=21, colour="black", fill=NA)) #override.aes overwrites size legend with new specifications
+         ) +
+  scale_color_manual(name=paste0(eyear," Power Generation \n Water Withdrawals (MGD)"), #show fossil and nuclear in legend using previously defined color categories
+                     values = c("black", "black"),
+                     breaks = c("Fossil Power", "Nuclear Power")) +
+  scale_size_manual(name=paste0(name=NULL), values=c(2,3,4,5,6,0),
+                    labels=c("< 0.5","0.5 - 5","5 - 50","50 - 500","> 500"))
 
 
 
@@ -636,7 +667,6 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95)
-
 
 
 
