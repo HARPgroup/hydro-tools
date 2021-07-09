@@ -646,8 +646,18 @@ ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.
 #############################################################################################
 # Surface Water Withdrawal Permitting Activities ############################################
 
-#Pull in MP POINTS
-mp_point <- read.csv(paste(folder,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+# #Pull in MP POINTS
+# mp_point <- read.csv(paste(folder,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+# mp_power <- read.csv(paste(folder,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
+
+# #GROUP BY Facility
+# fac_point <- sqldf('SELECT Facility_HydroID, lat, lon
+#                    FROM mp_point
+#                    GROUP BY Facility_HydroID')
+# fac_power <- sqldf('SELECT Facility_hydroid AS Facility_HydroID, lat, lon
+#                    FROM mp_power
+#                    GROUP BY Facility_hydroid')
+# fac_point <- rbind(fac_point, fac_power)
 
 # #DIRECTLY PULLING FROM VAHydro DOES NOT WORK BECAUSE PERMIT PROGRAM COLUMN IS HIDDEN (LIKE LOCALITY COLUMN)
 # mp_point <- read.csv(paste(site,"ows-list-permits-export",sep=""))
@@ -659,12 +669,10 @@ mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
 mp_permit$Permit.Start2 <- as.character(as.Date(mp_permit$Permit.Start, format = "%m/%d/%Y"))
 
 #filter for SW that are currently active or in admin continued status
-mp_point_sw <- sqldf('SELECT a.*, b.Facility_HydroID, b.lat, b.lon
+mp_point_sw <- sqldf('SELECT a.*
                      FROM mp_permit AS a
-                     LEFT OUTER JOIN mp_point AS b
-                     ON a."VA.Hydro.Facility.ID" = b.Facility_HydroID
-                     WHERE "Permit.Program" LIKE "%VWP%"
-                     AND "Status" IN ("active", "expired")')
+                     WHERE a."Permit.Program" LIKE "%VWP%"
+                     AND a."Status" IN ("active", "expired")')
 
 #filter for New Permit Issuances - bins for point color
 mp_df <-sqldf(paste('SELECT *,
@@ -672,29 +680,32 @@ mp_df <-sqldf(paste('SELECT *,
                             WHEN "Permit.Start2" >= "2020-01-01" THEN 3
                           ELSE 2
                           END AS point_size
-                        FROM mp_point_sw AS a',sep="")) 
+                        FROM mp_point_sw AS a
+                    ORDER BY "Permit.Start2" ASC',sep="")) 
 
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size), fill=point_size), alpha=0.9, shape=21, show.legend = TRUE)
-
-fips_df <- sqldf('SELECT *
-                 FROM fips_csv
-                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
-
-fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
-fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
-
-permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
-  theme(legend.position = c(0.28, 1),
-        legend.title=element_text(size=10),
-        legend.text=element_text(size=8),
-        aspect.ratio = 12.05/16
-  ) +
-  scale_size_manual(name=paste0(eyear," Surface Water Withdrawal Permitting Activities"), values=c(2,3),
-                    labels=c(paste0("Issued Since January ",eyear),"Active Surface Water Withdrawal Permits")) 
-
-
-
-deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
-permit_map_draw <- ggdraw(permit_map)+deqlogo
-
-ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","map_sw_permit_mp.png",sep = ""), width=6.5, height=4.95)
+  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
+  
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+  
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+  
+  permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.26, .85),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16) +
+    guides(size = guide_legend(override.aes = list(size = c(2,3))),
+           fill = guide_legend(override.aes = list(fill = c("#0C1078", "orange2")))) +
+      scale_size_manual(name=paste0(eyear," Surface Water Withdrawal Permitting Activities"), values=c(2,3), labels=c("Active Surface Water Withdrawal Permits", paste0("Issued Since January ",eyear))) +
+    scale_fill_manual(name=paste0(eyear," Surface Water Withdrawal Permitting Activities"), values=c("#0C1078", "orange2"),  labels=c("Active Surface Water Withdrawal Permits", paste0("Issued Since January ",eyear))) 
+  
+  # fill = guide_legend(override.aes = list(fill = c("#0C1078", "orange2"))),
+  # guides(size = guide_legend(override.aes = list(shape=21, colour="black"))) +
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_sw_permit_mp.png",sep = ""), width=6.5, height=4.95)
