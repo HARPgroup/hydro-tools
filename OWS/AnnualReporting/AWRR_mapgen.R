@@ -1,6 +1,7 @@
 ###################################################################################################### 
 # LOAD FILES
 ######################################################################################################
+library("ggpubr")
 syear = 2016
 eyear = 2020
 color_list <- sort(colors())
@@ -747,7 +748,10 @@ mp_df <-sqldf(paste('SELECT *,
   wsp_regions <- read.csv(paste(folder,"ows_wsp_regions_wkt.csv",sep=""))
   wsp_regions$region_name <- as.character(wsp_regions$region_name)
   
-    wsp_df <- wsp_regions 
+   wsp_df <- sqldf('SELECT *  
+         FROM wsp_regions
+         WHERE geom IS NOT NULL
+         AND "FIPS.Code" NOT LIKE "3%"')
   
   #assign color from color_list to each region
   wsp_df <-sqldf(paste('SELECT *,
@@ -788,4 +792,11 @@ mp_df <-sqldf(paste('SELECT *,
   
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_gw_permit_mp.png",sep = ""), width=6.5, height=4.95)
+  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_wsp_regions.png",sep = ""), width=6.5, height=4.95)
+  
+  # Extract the legend. Returns a gtable
+  wsp_legend <- get_legend(finalmap.obj)
+  
+  # Convert to a ggplot and print
+  as_ggplot(wsp_legend)
+  
