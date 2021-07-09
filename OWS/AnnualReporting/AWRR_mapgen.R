@@ -691,7 +691,7 @@ mp_df <-sqldf(paste('SELECT *,
   
   ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_sw_permit_mp.png",sep = ""), width=6.5, height=4.95)
   #############################################################################################
-  # Groundwater Withdrawal Permitting Activities ############################################
+  # Groundwater Withdrawal Permitting Activities #####@@#######################################
   
   #PULL IN OWS Permit List from local file
   mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
@@ -738,4 +738,54 @@ mp_df <-sqldf(paste('SELECT *,
   
   ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_gw_permit_mp.png",sep = ""), width=6.5, height=4.95)
   
+  #############################################################################################
+  # WSP Regions Map ###########################################################################
+  #PULL IN WSP Regions WKT from VAHydro
+  # wsp_regions <- read.csv(paste(site,"region-to-localities-fips-export/all",sep=""))
   
+  #PULL IN WSP Region List from local file
+  wsp_regions <- read.csv(paste(folder,"ows_wsp_regions_wkt.csv",sep=""))
+  wsp_regions$region_name <- as.character(wsp_regions$region_name)
+  
+    wsp_df <- wsp_regions 
+  
+  #assign color from color_list to each region
+  wsp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN fips_code IN (51191,51167,51169,51173,51520,51185,51720,51105,51027,51051,51195) THEN "',color_list[1],'"
+                            WHEN fips_code IN (51025,51081,51053,51620,51111,51135,51149,51175,51181,51183,51595) THEN "',color_list[2],'"
+                            WHEN fips_code IN (51131,51001) THEN "',color_list[3],'"
+                            WHEN fips_code IN (51049,51075,51085,51087,51009,51570,51125,51145,51147,51041,51670,51680,51730,51760,51007,51065,51003,51011,51029,51540) THEN "',color_list[4],'"
+                            WHEN fips_code IN (51021,51197,51035,51063,51071,51121,51155,51640,51077,51750) THEN "',color_list[5],'"
+                            WHEN fips_code IN (51057,51073,51099,51103,51097,51101,51133,51159,51115,51119,51033,51193) THEN "',color_list[6],'"
+                            WHEN fips_code IN (51047,51109,51113,51137,51157,51177,51179,51630,51079) THEN "',color_list[7],'"
+                            WHEN fips_code IN (51013,51059,51061,51610,51153,51600,51107,51683,51685,51510) THEN "',color_list[8],'"
+                            WHEN fips_code IN (51031,51037,51067,51083,51590,51089,51161,51690,51019,51770,51775,51143,51117,51515,51141) THEN "',color_list[9],'"
+                            WHEN fips_code IN (51820,51840,51171,51015,51043,51165,51660,51187,51790,51139,51069) THEN "',color_list[10],'"
+                            WHEN fips_code IN (51093,51550,51800,51810,51710,51740) THEN "',color_list[11],'"
+                            WHEN fips_code IN (51045,51163,51678,51530,51005,51091,51580,51023,51017) THEN "',color_list[12],'"
+                            WHEN fips_code IN (51830,51036,51095,51127,51650,51199,51735,51700) THEN "',color_list[13],'"
+                            ELSE "white"
+                          END AS col
+                        FROM wsp_regions',sep="")) #EXCLUDE NC LOCALITIES
+  
+  wsp.sf <- st_as_sf(wsp_df, wkt = 'geom')
+  wsp.gg <- geom_sf(data = wsp.sf,aes(fill = factor(region_featureid)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+  
+  finalmap.obj <- basemap.obj + wsp.gg +
+    theme(legend.position = c(0.23, 0.78),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16
+    ) +
+    guides(fill=guide_legend(ncol=2))+
+    scale_fill_manual(name = "Water Supply Planning Regions",
+                      values = c(color_list[1:49], "white"),
+                      labels = c(unique(wsp_df[c("region_name")]),"white")
+    )+
+    rivs.gg +
+    res.gg
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
+  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xmap_gw_permit_mp.png",sep = ""), width=6.5, height=4.95)
