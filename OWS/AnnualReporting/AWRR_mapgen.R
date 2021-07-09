@@ -693,7 +693,7 @@ mp_df <-sqldf(paste('SELECT *,
   fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
   
   permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
-    theme(legend.position = c(0.26, .85),
+    theme(legend.position = c(0.268, .9075),
           legend.title=element_text(size=10),
           legend.text=element_text(size=8),
           aspect.ratio = 12.05/16) +
