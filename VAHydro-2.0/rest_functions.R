@@ -351,7 +351,7 @@ postTimeseriesIFempty <- function(inputs, base_url, ts){
 }
 
 getProperty <- function(inputs, base_url, prop){
-  print(inputs)
+  #print(inputs)
   #Convert varkey to varid - needed for REST operations 
   if (!is.null(inputs$varkey)) {
     # this would use REST 
@@ -362,10 +362,10 @@ getProperty <- function(inputs, base_url, prop){
     # (line 736 of /var/www/html/d.dh/modules/entity/includes/entity.wrapper.inc).
     
     propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
-    print(paste("Trying", propdef_url))
+    message(paste("Trying", propdef_url))
     propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
     varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
-    print(paste("varid: ",varid,sep=""))
+    message(paste("varid: ",varid,sep=""))
     if (is.null(varid)) {
       # we sent a bad variable id so we should return FALSE
       return(FALSE)
@@ -415,7 +415,7 @@ getProperty <- function(inputs, base_url, prop){
   prop_cont <- content(prop);
   
   if (length(prop_cont$list) != 0) {
-    print(paste("Number of properties found: ",length(prop_cont$list),sep=""))
+    message(paste("Number of properties found: ",length(prop_cont$list),sep=""))
     
     prop <- data.frame(proptext=character(),
                        pid=character(),
@@ -468,7 +468,7 @@ getProperty <- function(inputs, base_url, prop){
       prop  <- rbind(prop, prop_i)
     }
   } else {
-    print("This property does not exist")
+    message("This property does not exist")
     return(FALSE)
   }
   prop <- prop
@@ -497,7 +497,7 @@ postProperty <- function(inputs,base_url,prop){
     propdef_url<- paste(base_url,"/?q=vardefs.tsv/",inputs$varkey,sep="")
     propdef_table <- read.table(propdef_url,header = TRUE, sep = "\t")    
     varid <- propdef_table[1][which(propdef_table$varkey == inputs$varkey),]
-    print(paste("varid: ",varid,sep=""))
+    message(paste("varid: ",varid,sep=""))
     if (is.null(varid)) {
       # we sent a bad variable id so we should return FALSE
       return(FALSE)
@@ -508,7 +508,7 @@ postProperty <- function(inputs,base_url,prop){
   }
   
   if (is.null(varid)) {
-    print("Variable IS is null - returning.")
+    message("Variable IS is null - returning.")
     return(FALSE)
   }
   
@@ -527,7 +527,7 @@ postProperty <- function(inputs,base_url,prop){
   );
   
   if (is.null(pid)){
-    print("Creating Property...")
+    message("Creating Property...")
     prop <- POST(paste(base_url,"/dh_properties/",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
                  body = pbody,
@@ -538,9 +538,9 @@ postProperty <- function(inputs,base_url,prop){
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Created Successfully",sep="")}
     
   } else if (length(dataframe$pid) == 1){
-    print("Single Property Exists, Updating...")
-    print(paste("Puting", pbody$varid )) 
-    print(pbody) 
+    message("Single Property Exists, Updating...")
+    message(paste("Putting", pbody$varid )) 
+    message(pbody) 
     #pbody$pid = pid
     prop <- PUT(paste(base_url,"/dh_properties/",pid,sep=""), 
                 add_headers(HTTP_X_CSRF_TOKEN = token),
@@ -551,7 +551,7 @@ postProperty <- function(inputs,base_url,prop){
     if (prop$status == 200){prop <- paste("Status ",prop$status,", Property Updated Successfully",sep="")
     } else {prop <- paste("Status ",prop$status,", Error: Property Not Updated Successfully",sep="")}
   } else {
-    prop <- print("Multiple Properties Exist, Execution Halted")
+    prop <- message("Multiple Properties Exist, Execution Halted")
   }
   
 }
