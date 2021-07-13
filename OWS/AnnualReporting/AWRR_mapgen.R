@@ -258,20 +258,12 @@ mp_df <-sqldf(paste('SELECT *,
                             WHEN "mgd" BETWEEN 0.5 AND 1 THEN 4
                             WHEN "mgd" BETWEEN 1 AND 5 THEN 5
                             WHEN "mgd" > 5 THEN 6
-                          
-  
                             ELSE 0
                           END AS point_size
                         FROM mp_point AS a
                         WHERE Year = ',eyear,'
                         AND Use_Type = "agriculture"
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
-
-#option 2 for case statement bin breakup
-# WHEN "mgd" < 0.05 THEN 1
-# WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 2
-# WHEN "mgd" BETWEEN 0.5 AND 1 THEN 3
-# WHEN "mgd" > 1 THEN 4
 
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
@@ -317,7 +309,7 @@ mp_df <-sqldf(paste('SELECT *,
                         FROM mp_point AS a
                         WHERE Year = ',eyear,'
                         AND Use_Type = "irrigation"
-                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE point with lat/lon in WV, AND NC LOCALITIES
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
@@ -362,7 +354,7 @@ mp_df <-sqldf(paste('SELECT *,
                         FROM mp_point AS a
                         WHERE Year = ',eyear,'
                         AND Use_Type = "commercial"
-                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE point with lat/lon in WV, AND NC LOCALITIES
+                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
@@ -391,6 +383,7 @@ ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.
 
 #############################################################################################
 # Mining Water Withdrawals by Withdrawal Point Location################
+
 #mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
 
 #try natural breaks or size bins next year
@@ -440,7 +433,7 @@ ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.
 mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
 
 #try natural breaks or size bins next year
-#considered removing 84 instances of 0 MGD (out of 183 category 2's)
+#plotting 0 MGD values because withdrawal points were still reported this year
 mp_df <-sqldf(paste('SELECT *,
                           CASE
                             WHEN "mgd" < 0.05 THEN 2
@@ -455,7 +448,7 @@ mp_df <-sqldf(paste('SELECT *,
                         AND Use_Type = "manufacturing"
                     AND a.HydroID NOT LIKE "398760"
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
-#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and 0 MGD in 2020
+#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and was 0 MGD in 2020 anyways
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
@@ -482,55 +475,6 @@ ag_map_draw <- ggdraw(ag_map)+deqlogo
 
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp.png",sep = ""), width=6.5, height=4.95)
 
-
-#############################################################################################
-# Test Manufacturing Water Withdrawals by Withdrawal Point Location################
-
-mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
-
-#try natural breaks or size bins next year
-#Tried considered removing 84 instances of 0 MGD (out of 183 category 2's), but 0's still show up. Instead, the largest category (mgd>25) is lost. 
-#For an easy visual, see the point in the ocean, the Tyson well with HydroID 398760, because it has a 0 MGD and still plots with the case statement below
-#In other words, zero MGDs are getting categorized as size 0, and plotting as size 2, why?
-mp_df <-sqldf(paste('SELECT *,
-                          CASE
-                            WHEN "mgd" BETWEEN 0.1 and 0.05 THEN 2
-                            WHEN "mgd" BETWEEN 0.05 AND 0.5 THEN 3
-                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 4
-                            WHEN "mgd" BETWEEN 5 AND 25 THEN 5
-                            WHEN "mgd" > 25 THEN 6
-                            ELSE 0
-                          END AS point_size
-                        FROM mp_point AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "manufacturing"
-                    AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
-#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and 0 MGD in 2020
-
-mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
-
-fips_df <- sqldf('SELECT *
-                 FROM fips_csv
-                 WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
-
-fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
-fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
-
-ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
-  theme(legend.position = c(0.146, 0.817),
-        legend.title=element_text(size=10),
-        legend.text=element_text(size=8),
-        aspect.ratio = 12.05/16
-  ) +
-  scale_size_manual(name=paste0(eyear," Manufacturing \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
-                    labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
-
-
-
-deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
-ag_map_draw <- ggdraw(ag_map)+deqlogo
-
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp_test.png",sep = ""), width=6.5, height=4.95)
 
 #############################################################################################
 # Public Water Supply Water Withdrawals by Withdrawal Point Location################
@@ -581,25 +525,18 @@ ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.
 #############################################################################################
 # Power Generation Water Withdrawals by Withdrawal Point Location################
 
-#five missing lat/lon in the mp_all_wide_power csv, all less than 0.02mgd, each with another mp that does show on map, so not adjusted this year
+#five MP with missing lat/lon in the mp_all_wide_power csv, each less than 0.02mgd, each with another facility mp that does show on map, so lat/lon was not corrected this year
 mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
 
-# Convert NAs to zeros because NA means 0mgd was reported
-mp_point[is.na(mp_point)] <- 0
 
-#convert mgy values into mgd
-#mgy <- mp_point$X2020
-#mgd <- mgy/365
-#mp_point$mgd <- mgd
-#colnames(mp_point)[16] <- paste0(eyear,"mgd")
+mp_point[is.na(mp_point)] <- 0 # Convert NAs to zeros because NA means 0mgd was reported
 
-#convert mgy values into mgd using SQL
 mp_point <- sqldf(paste0('SELECT *, "X',eyear,'"/365 AS "',eyear,'mgd"
                          FROM mp_point
-                         '))
+                         ')) #convert mgy values into mgd using SQL
 
-#ordered mgd column by descending size so larger mgd points appear behind smaller ones
-#select all fossilpower rows in mp_point. Syntax for 2020 column -> WHEN "X',eyear,'" <1 THEN _
+#Fossil Power
+#order mgd column by descending size so larger mgd points appear behind smaller ones
 mp_df_f <-sqldf(paste('SELECT *,
                           CASE
                             WHEN "',eyear,'mgd" < 0.5 THEN 2
@@ -615,7 +552,8 @@ mp_df_f <-sqldf(paste('SELECT *,
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE NC LOCALITIES
 
-#select all nuclearpower rows in mp_point
+#Nuclear Power
+#order mgd column by descending size so larger mgd points appear behind smaller ones
 mp_df_n <-sqldf(paste('SELECT *,
                           CASE
                             WHEN "',eyear,'mgd" < 0.5 THEN 2
@@ -631,7 +569,7 @@ mp_df_n <-sqldf(paste('SELECT *,
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE, NC LOCALITIES
 
-#adding color category here so Fossil and Nuclear have a category that can show up in the legend
+#adding color category here so fossil and nuclear have a category that can show up in the legend
 mp_f.gg <- geom_point(data = mp_df_f,aes(x = lon, y = lat, size = factor(point_size), color = "Fossil Power"), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 mp_n.gg <- geom_point(data = mp_df_n,aes(x = lon, y = lat, size = factor(point_size), color = "Nuclear Power"), fill="orange2", alpha=0.75, shape=21, show.legend = TRUE)
 
@@ -652,10 +590,10 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg +
         aspect.ratio = 12.05/16,
         legend.spacing.y = unit(0, "cm"),
   ) +
-  guides(color = guide_legend(order = 1, override.aes = list(fill = c("#0C1078", "orange2"), size = 4)), #order=1 moves the fossil-nuclear ("color") legend to show first
+  guides(color = guide_legend(order = 1, override.aes = list(fill = c("#0C1078", "orange2"), size = 4)), #order=1 moves the fossil-nuclear color legend to show first
          size = guide_legend(order = 2, override.aes = list(shape=21, colour="black", fill=NA)) #override.aes overwrites size legend with new specifications
          ) +
-  scale_color_manual(name=paste0(eyear," Power Generation \n Water Withdrawals (MGD)"), #show fossil and nuclear in legend using previously defined color categories
+  scale_color_manual(name=paste0(eyear," Power Generation \n Water Withdrawals (MGD)"), #show fossil and nuclear in legend using color categories
                      values = c("black", "black"),
                      breaks = c("Fossil Power", "Nuclear Power")) +
   scale_size_manual(name=paste0(name=NULL), values=c(2,3,4,5,6,0),
