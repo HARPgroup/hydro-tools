@@ -1,9 +1,6 @@
 ###################################################################################################### 
 # LOAD FILES
 ######################################################################################################
-#library("ggpubr")
-install.packages("gridExtra")
-library("gridExtra")
 syear = 2016
 eyear = 2020
 color_list <- sort(colors())
@@ -756,26 +753,6 @@ mp_df <-sqldf(paste('SELECT *,
          WHERE geom IS NOT NULL
          AND "FIPS.Code" NOT LIKE "3%"')
   
-  # #assign color from color_list to each region
-  # wsp_df <-sqldf(paste('SELECT *,
-  #                         CASE
-  #                           WHEN fips_code IN (51191,51167,51169,51173,51520,51185,51720,51105,51027,51051,51195) THEN "',color_list[1],'"
-  #                           WHEN fips_code IN (51025,51081,51053,51620,51111,51135,51149,51175,51181,51183,51595) THEN "',color_list[2],'"
-  #                           WHEN fips_code IN (51131,51001) THEN "',color_list[3],'"
-  #                           WHEN fips_code IN (51049,51075,51085,51087,51009,51570,51125,51145,51147,51041,51670,51680,51730,51760,51007,51065,51003,51011,51029,51540) THEN "',color_list[4],'"
-  #                           WHEN fips_code IN (51021,51197,51035,51063,51071,51121,51155,51640,51077,51750) THEN "',color_list[5],'"
-  #                           WHEN fips_code IN (51057,51073,51099,51103,51097,51101,51133,51159,51115,51119,51033,51193) THEN "',color_list[6],'"
-  #                           WHEN fips_code IN (51047,51109,51113,51137,51157,51177,51179,51630,51079) THEN "',color_list[7],'"
-  #                           WHEN fips_code IN (51013,51059,51061,51610,51153,51600,51107,51683,51685,51510) THEN "',color_list[8],'"
-  #                           WHEN fips_code IN (51031,51037,51067,51083,51590,51089,51161,51690,51019,51770,51775,51143,51117,51515,51141) THEN "',color_list[9],'"
-  #                           WHEN fips_code IN (51820,51840,51171,51015,51043,51165,51660,51187,51790,51139,51069) THEN "',color_list[10],'"
-  #                           WHEN fips_code IN (51093,51550,51800,51810,51710,51740) THEN "',color_list[11],'"
-  #                           WHEN fips_code IN (51045,51163,51678,51530,51005,51091,51580,51023,51017) THEN "',color_list[12],'"
-  #                           WHEN fips_code IN (51830,51036,51095,51127,51650,51199,51735,51700) THEN "',color_list[13],'"
-  #                           ELSE "white"
-  #                         END AS col
-  #                       FROM wsp_regions',sep="")) #EXCLUDE NC LOCALITIES
-  # 
   wsp.sf <- st_as_sf(wsp_df, wkt = 'geom')
   wsp.gg <- geom_sf(data = wsp.sf,aes(fill = factor(region_name)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
   
@@ -800,7 +777,7 @@ mp_df <-sqldf(paste('SELECT *,
                                  "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700",
                                  "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
                                  "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C"),
-                      #values = c(color_list[1:49], "white"),
+                      # values = c(color_rand),
                       labels = c(unique(wsp_df[c("region_name")]),"white")
     )+
     rivs.gg +
@@ -808,11 +785,12 @@ mp_df <-sqldf(paste('SELECT *,
   
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.401, y = -0.032) #LEFT BOTTOM LOGO
   wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","WSP_Planning_Regions_Map.pdf",sep = ""), width=10, height=15)
+  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15)
   
-  # # Extract the legend. Returns a gtable
-  # wsp_legend <- get_legend(finalmap.obj)
-  # 
-  # # Convert to a ggplot and print
-  # as_ggplot(wsp_legend)
-  
+  # install.packages("colorspace")
+  # library("colorspace")
+  # pal <- choose_palette()
+  # pal(49)
+  # set.seed(872436)           # Set seed
+  # color_rand <- sample(pal(49))        # Sample vector
+  # color_rand 
