@@ -1,6 +1,7 @@
 ###################################################################################################### 
 # LOAD FILES
 ######################################################################################################
+library("dataRetrieval")
 syear = 2016
 eyear = 2020
 color_list <- sort(colors())
@@ -41,38 +42,48 @@ fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
 ######################################################################################################
 ### MONITORING STATIONS MAP ##########################################################################
 
-#FROM VAHYDRO:
-sw_features <- read.csv(paste(site,"monitoring-stations-sw-export",sep=""))
-gw_features <- read.csv(paste(site,"monitoring-stations-gw-export",sep=""))
-
-sw.gg <- geom_point(data = sw_features,aes(x = longitude, y = latitude, color="aliceblue"),size=2, shape=17, show.legend = TRUE)
-gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
-
-#FROM NWIS:
-# sw_features <- whatNWISsites(stateCd = "VA", parameterCd = "00060")
-# sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
-# sw.gg <- geom_sf(data = sw.sf,color="aliceblue",size=2, shape=17, inherit.aes = FALSE, show.legend =TRUE)
+# ##FROM VAHYDRO:
+# sw_features <- read.csv(paste(site,"monitoring-stations-sw-export",sep=""))
+# gw_features <- read.csv(paste(site,"monitoring-stations-gw-export",sep=""))
 # 
-# gw_features <- whatNWISsites(stateCd = "VA", parameterCd = "72019")
-# gw.sf <- st_as_sf(gw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
-# gw.gg <- geom_sf(data = gw.sf,color="antiquewhite",size=2, inherit.aes = FALSE, show.legend =TRUE)
+# sw.gg <- geom_point(data = sw_features,aes(x = longitude, y = latitude, color="aliceblue"),size=2, shape=17, show.legend = TRUE)
+# gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
 
-monitoring_map <- basemap.obj + gw.gg + sw.gg + theme(legend.position = c(0.12, 0.9)) +
+##FROM NWIS:
+sw_features <- whatNWISsites(stateCd = "VA", parameterCd = "00060")
+sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
+sw.sf %>% st_transform(crs=4326)
+sw.sf$ms_type <- "SW"
+#sw.gg <- geom_sf(data = sw.sf,aes(color=site_tp_cd),size=2, shape=17, inherit.aes = FALSE, show.legend =TRUE)
+
+gw_features <- whatNWISsites(stateCd = "VA", parameterCd = "72019")
+gw.sf <- st_as_sf(gw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
+gw.sf %>% st_transform(crs=4326)
+gw.sf$ms_type <- "GW"
+#gw.gg <- geom_sf(data = gw.sf,aes(color=site_tp_cd),size=2, inherit.aes = FALSE, show.legend =TRUE)
+
+ms.sf <- rbind(sw.sf, gw.sf)
+ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1, inherit.aes = FALSE, show.legend =TRUE)
+
+monitoring_map <- basemap.obj + ms.gg + theme(legend.position = c(0.12, 0.9)) +
                   theme(legend.position = c(0.11, 0.905),
                         legend.title=element_text(size=10),
                         legend.text=element_text(size=8),
                         aspect.ratio = 12.05/16
                   ) +
-                  scale_color_manual("Legend", values=c("blue","brown4"),
+                  guides(colour = guide_legend(override.aes = list(size = c(3, 3)))) +
+                  scale_color_manual("Groundwater & Surface Water \n Monitoring Stations", values=c("blue","brown4"),
                                                labels=c("Streamflow Gage","Observation Well")) +
-                  guides(colour = guide_legend(override.aes = list(size = c(2, 2),
-                                                                   shape = c(17, 19)))) +
-                  rivs.gg +
-                  res.gg
+                  scale_shape_manual("Groundwater & Surface Water \n Monitoring Stations", labels=c("Streamflow Gage","Observation Well"),
+                                               values = c(17, 19))
+# +
+#                   rivs.gg +
+#                   res.gg
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
-ggsave(plot = monitoring_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","monitoring_map.png",sep = ""), width=6.5, height=4.95)
+ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","xMonitoring_Station_Map.png",sep = ""), width=6.5, height=4.95)
+
 
 ######################################################################################################
 ### # DROUGHT REGIONS MAP ############################################################################
