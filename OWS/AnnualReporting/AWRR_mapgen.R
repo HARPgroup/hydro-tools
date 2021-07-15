@@ -723,13 +723,13 @@ mp_df <-sqldf(paste('SELECT *,
   #filter for New Permit Issuances - bins for point color
   mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "Permit.Start2" >= "2020-01-01" THEN 3
-                          ELSE 2
+                            WHEN "Permit.Start2" >= "2020-01-01" THEN 4
+                          ELSE 3
                           END AS point_size
                         FROM mp_point_gw AS a
                     ORDER BY "Permit.Start2" ASC',sep="")) 
   
-  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
+  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, fill=factor(point_size)), alpha=0.9, size = 2, shape=21, show.legend = TRUE)
   
   fips_df <- sqldf('SELECT *
                    FROM fips_csv
@@ -741,23 +741,31 @@ mp_df <-sqldf(paste('SELECT *,
   #GWMA LAYER
   #PULL IN OWS Permit List from local file
   gwma_df <- read.csv(paste(folder,"GWMA_wkt.csv",sep=""))
+  gwma_df <- sqldf('SELECT *, CASE
+                    WHEN HydroID = 194537
+                    THEN 1
+                    WHEN HydroID = 441638
+                    THEN 2
+                    ELSE 0
+                    END AS fill_order
+                   FROM gwma_df')
   gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
-  gwma.gg <- geom_sf(data = gwma.sf,aes(fill = Feature.Name),colour = "black", lwd=0.4, inherit.aes = FALSE, show.legend = FALSE)
+  gwma.gg <- geom_sf(data = gwma.sf,aes(fill = as.factor(fill_order)),colour = "black", lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = TRUE)
   
   permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
-    theme(legend.position = c(0.268, .9075),
+    theme(legend.position = c(0.264, .8555),
           legend.title=element_text(size=10),
           legend.text=element_text(size=8),
           aspect.ratio = 12.05/16) +
-    guides(size = guide_legend(override.aes = list(size = c(2,3))),
-           fill = guide_legend(override.aes = list(fill = c("#0C1078", "orange2","pink","green")))) +
-    scale_size_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), values=c(2,3), labels=c("Active Groundwater Withdrawal Permits", paste0("Issued Since January ",eyear))) +
-    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), values=c("#0C1078", "orange2","pink","green"),  labels=c("Active Groundwater Withdrawal Permits", paste0("Issued Since January ",eyear),"gw","ma")) 
+    guides(size = guide_legend(override.aes = list(size = c(2,2,2,3))),
+           fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2")))) +
+    scale_size_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), values=c(2,2,2,3), labels=c("Eastern Virginia Groundwater Management Area","Eastern Shore Groundwater Management Area","Active Groundwater Withdrawal Permits", paste0("Issued Since January ",eyear))) +
+    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), values=c("pink","darkorchid2","#0C1078","orange2"), labels=c("Eastern Virginia Groundwater Management Area","Eastern Shore Groundwater Management Area","Active Groundwater Withdrawal Permits", paste0("Issued Since January ",eyear))) 
   
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xGWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
   
 #############################################################################################
 # WSP Regions Map ###########################################################################
