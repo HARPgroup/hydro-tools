@@ -50,7 +50,11 @@ fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
 # gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
 
 ##FROM NWIS:
+###DO THE CURRENT SURFACE WATER 
 sw_features <- whatNWISsites(stateCd = "VA", parameterCd = "00060")
+sw_features <- sqldf('SELECT *
+               FROM sw_features
+               WHERE site_tp_cd IN ("ST","ST-TS")')
 sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
 sw.sf %>% st_transform(crs=4326)
 sw.sf$ms_type <- "SW"
@@ -65,8 +69,8 @@ gw.sf$ms_type <- "GW"
 ms.sf <- rbind(sw.sf, gw.sf)
 ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1, inherit.aes = FALSE, show.legend =TRUE)
 
-monitoring_map <- basemap.obj + ms.gg + theme(legend.position = c(0.12, 0.9)) +
-                  theme(legend.position = c(0.11, 0.905),
+monitoring_map <- basemap.obj + ms.gg +
+                  theme(legend.position = c(0.167, 0.89),
                         legend.title=element_text(size=10),
                         legend.text=element_text(size=8),
                         aspect.ratio = 12.05/16
@@ -82,7 +86,7 @@ monitoring_map <- basemap.obj + ms.gg + theme(legend.position = c(0.12, 0.9)) +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
-ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","xMonitoring_Station_Map.png",sep = ""), width=6.5, height=4.95)
+ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","xxMonitoring_Station_Map.png",sep = ""), width=6.5, height=4.95)
 
 
 ######################################################################################################
