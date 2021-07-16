@@ -707,7 +707,7 @@ mp_df <-sqldf(paste('SELECT *,
   
   ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
 #############################################################################################
-# Groundwater Withdrawal Permitting Activities #####@@#######################################
+# Groundwater Withdrawal Permitting Activities ##############################################
   
   #PULL IN OWS Permit List from local file
   mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
@@ -819,7 +819,8 @@ mp_df <-sqldf(paste('SELECT *,
                                  "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700",
                                  "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
                                  "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C"),
-                      # values = c(color_rand),
+                      # Many color options for +10 color ramps - used the following suggestion: User Tatarize suggests in his blog: 5) A set of 64 maximally dissimilar colors:
+                      #https://graphicdesign.stackexchange.com/questions/3682/where-can-i-find-a-large-palette-set-of-contrasting-colors-for-coloring-many-d
                       labels = c(unique(wsp_df[c("region_name")]),"white")
     )+
     rivs.gg +
@@ -828,11 +829,3 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.401, y = -0.032) #LEFT BOTTOM LOGO
   wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
   ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15)
-  
-  # install.packages("colorspace")
-  # library("colorspace")
-  # pal <- choose_palette()
-  # pal(49)
-  # set.seed(872436)           # Set seed
-  # color_rand <- sample(pal(49))        # Sample vector
-  # color_rand 
