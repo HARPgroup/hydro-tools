@@ -740,7 +740,7 @@ mp_df <-sqldf(paste('SELECT *,
   fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
   
   #GWMA LAYER
-  #PULL IN OWS Permit List from local file
+  #PULL IN GWMA wkt from Search By HydroID page
   gwma_df <- read.csv(paste(folder,"GWMA_wkt.csv",sep=""))
   gwma_df <- sqldf('SELECT *, CASE
                     WHEN HydroID = 194537
@@ -753,6 +753,7 @@ mp_df <-sqldf(paste('SELECT *,
   gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
   gwma.gg <- geom_sf(data = gwma.sf,aes(fill = factor(fill_order)),colour = "black", shape = 22, lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = FALSE)
   
+  # MAP
   permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
     theme(legend.position = c(0.264, .8555),
           legend.title=element_text(size=10),
@@ -762,9 +763,6 @@ mp_df <-sqldf(paste('SELECT *,
                                                    alpha = c(.5,.5,1,1),
                                                    size = c(4,4,3,3),
                                                    shape = c(22,22,21,21)))) +
-    # guides(size = guide_legend(override.aes = list(size = c(2,2,2,3))),
-    #        fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2")))) +
-    # scale_size_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), values=c(2,2,2,3), labels=c("Eastern Virginia Groundwater Management Area","Eastern Shore Groundwater Management Area","Active Groundwater Withdrawal Permits", paste0("Issued Since January ",eyear))) +
     scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), 
                       values=c("pink",
                                "darkorchid2",
@@ -778,7 +776,7 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xGWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
   
 #############################################################################################
 # WSP Regions Map ###########################################################################
