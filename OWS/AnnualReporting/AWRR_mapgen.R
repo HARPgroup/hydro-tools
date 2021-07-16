@@ -803,7 +803,10 @@ mp_df <-sqldf(paste('SELECT *,
   basemap.obj <- base.map(baselayers.gg, 
                           extent = data.frame(
                             x = c(-77.7, -75),
-                            y = c(36, 40.6)))
+                            y = c(36, 40.6)),
+                          plot_margin = c(2.45,0,.5,0), #top, right, bottom, left
+                          #plot_margin = c(-0.5,0.2,0,0.1),
+                          plot_zoom = 8)
   ggsave(plot = basemap.obj, file = paste0(export_path, "/awrr/2021/","basemap.png",sep = ""), width=6.5, height=4.95)
   
   
