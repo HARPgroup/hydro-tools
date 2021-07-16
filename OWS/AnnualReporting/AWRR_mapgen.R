@@ -49,37 +49,40 @@ fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
 # sw.gg <- geom_point(data = sw_features,aes(x = longitude, y = latitude, color="aliceblue"),size=2, shape=17, show.legend = TRUE)
 # gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
 
-##FROM NWIS:
-###DO THE CURRENT SURFACE WATER 
-sw_features <- whatNWISsites(stateCd = "VA", parameterCd = "00060")
-sw_features <- sqldf('SELECT *
-               FROM sw_features
-               WHERE site_tp_cd IN ("ST","ST-TS")')
+###FROM NWIS:
+#CURRENT/ACTIVE SURFACE WATER GAGES (Stream, Tidal, Lake, Canal)
+sw_features <- whatNWISsites(stateCd = "VA", 
+                             parameterCd = "00060",
+                             siteType = c("ST","ST-TS","LK","ST-CA"),
+                             siteStatus = "active")
 sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
 sw.sf %>% st_transform(crs=4326)
 sw.sf$ms_type <- "SW"
 #sw.gg <- geom_sf(data = sw.sf,aes(color=site_tp_cd),size=2, shape=17, inherit.aes = FALSE, show.legend =TRUE)
 
-gw_features <- whatNWISsites(stateCd = "VA", parameterCd = "72019")
+gw_features <- whatNWISsites(stateCd = "VA", 
+                             parameterCd = "72019",
+                             siteStatus = "active")
 gw.sf <- st_as_sf(gw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
 gw.sf %>% st_transform(crs=4326)
 gw.sf$ms_type <- "GW"
 #gw.gg <- geom_sf(data = gw.sf,aes(color=site_tp_cd),size=2, inherit.aes = FALSE, show.legend =TRUE)
 
 ms.sf <- rbind(sw.sf, gw.sf)
-ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1, inherit.aes = FALSE, show.legend =TRUE)
+ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1.3, inherit.aes = FALSE, show.legend =TRUE)
 
 monitoring_map <- basemap.obj + ms.gg +
                   theme(legend.position = c(0.167, 0.89),
                         legend.title=element_text(size=10),
                         legend.text=element_text(size=8),
-                        aspect.ratio = 12.05/16
-                  ) +
+                        aspect.ratio = 12.05/16) +
                   guides(colour = guide_legend(override.aes = list(size = c(3, 3)))) +
-                  scale_color_manual("Groundwater & Surface Water \n Monitoring Stations", values=c("blue","brown4"),
-                                               labels=c("Streamflow Gage","Observation Well")) +
-                  scale_shape_manual("Groundwater & Surface Water \n Monitoring Stations", labels=c("Streamflow Gage","Observation Well"),
-                                               values = c(17, 19))
+                  scale_color_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
+                                     values=c("brown4", "blue"),
+                                     labels=c("Observation Well", "Streamflow Gage")) +
+                  scale_shape_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
+                                     labels=c("Observation Well", "Streamflow Gage"),
+                                     values = c(19, 17))
 # +
 #                   rivs.gg +
 #                   res.gg
