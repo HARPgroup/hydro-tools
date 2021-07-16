@@ -1,6 +1,7 @@
 ###################################################################################################### 
 # LOAD FILES
 ######################################################################################################
+library("dataRetrieval")
 syear = 2016
 eyear = 2020
 color_list <- sort(colors())
@@ -15,6 +16,7 @@ source(paste(basepath,"config.local.private",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.layers.R",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
+folder <- "U:/OWS/foundation_datasets/awrr/2021/"
 ###################################################################################################### 
 # GENERATE MAP
 ######################################################################################################
@@ -40,38 +42,53 @@ fips_csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
 ######################################################################################################
 ### MONITORING STATIONS MAP ##########################################################################
 
-#FROM VAHYDRO:
-sw_features <- read.csv(paste(site,"monitoring-stations-sw-export",sep=""))
-gw_features <- read.csv(paste(site,"monitoring-stations-gw-export",sep=""))
-
-sw.gg <- geom_point(data = sw_features,aes(x = longitude, y = latitude, color="aliceblue"),size=2, shape=17, show.legend = TRUE)
-gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
-
-#FROM NWIS:
-# sw_features <- whatNWISsites(stateCd = "VA", parameterCd = "00060")
-# sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
-# sw.gg <- geom_sf(data = sw.sf,color="aliceblue",size=2, shape=17, inherit.aes = FALSE, show.legend =TRUE)
+# ##FROM VAHYDRO:
+# sw_features <- read.csv(paste(site,"monitoring-stations-sw-export",sep=""))
+# gw_features <- read.csv(paste(site,"monitoring-stations-gw-export",sep=""))
 # 
-# gw_features <- whatNWISsites(stateCd = "VA", parameterCd = "72019")
-# gw.sf <- st_as_sf(gw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
-# gw.gg <- geom_sf(data = gw.sf,color="antiquewhite",size=2, inherit.aes = FALSE, show.legend =TRUE)
+# sw.gg <- geom_point(data = sw_features,aes(x = longitude, y = latitude, color="aliceblue"),size=2, shape=17, show.legend = TRUE)
+# gw.gg <- geom_point(data = gw_features,aes(x = longitude, y = latitude, color="antiquewhite"),size=2, show.legend = TRUE)
 
-monitoring_map <- basemap.obj + gw.gg + sw.gg + theme(legend.position = c(0.12, 0.9)) +
-                  theme(legend.position = c(0.11, 0.905),
+###FROM NWIS:
+#CURRENT/ACTIVE SURFACE WATER GAGES (Stream, Tidal, Lake, Canal)
+sw_features <- whatNWISsites(stateCd = "VA", 
+                             parameterCd = "00060",
+                             siteType = c("ST","ST-TS","LK","ST-CA"),
+                             siteStatus = "active")
+sw.sf <- st_as_sf(sw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
+sw.sf %>% st_transform(crs=4326)
+sw.sf$ms_type <- "SW"
+
+#CURRENT/ACTIVE GROUNDWATER WELLS
+gw_features <- whatNWISsites(stateCd = "VA", 
+                             parameterCd = "72019",
+                             siteStatus = "active")
+gw.sf <- st_as_sf(gw_features, coords = c("dec_long_va", "dec_lat_va"),crs = 4326)
+gw.sf %>% st_transform(crs=4326)
+gw.sf$ms_type <- "GW"
+
+#COMBINE GAGES AND WELLS INTO SINGLE LAYER
+ms.sf <- rbind(sw.sf, gw.sf)
+ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1.4, inherit.aes = FALSE, show.legend =TRUE)
+
+#MAP
+monitoring_map <- basemap.obj + ms.gg +
+                  theme(legend.position = c(0.167, 0.89),
                         legend.title=element_text(size=10),
                         legend.text=element_text(size=8),
-                        aspect.ratio = 12.05/16
-                  ) +
-                  scale_color_manual("Legend", values=c("blue","brown4"),
-                                               labels=c("Streamflow Gage","Observation Well")) +
-                  guides(colour = guide_legend(override.aes = list(size = c(2, 2),
-                                                                   shape = c(17, 19)))) +
-                  rivs.gg +
-                  res.gg
+                        aspect.ratio = 12.05/16) +
+                  guides(colour = guide_legend(override.aes = list(size = c(4, 3)))) +
+                  scale_color_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
+                                     values=c("brown4", "blue"),
+                                     labels=c("Observation Well", "Streamflow Gage")) +
+                  scale_shape_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
+                                     labels=c("Observation Well", "Streamflow Gage"),
+                                     values = c(19, 17))
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
-ggsave(plot = monitoring_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","monitoring_map.png",sep = ""), width=6.5, height=4.95)
+ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95)
+
 
 ######################################################################################################
 ### # DROUGHT REGIONS MAP ############################################################################
@@ -248,6 +265,7 @@ ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map
 
 #############################################################################################
 # Agriculture (Non-Irrigation) Water Withdrawals by Withdrawal Point Location################
+
 mp_point <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_",syear,"-",eyear,".csv",sep=""))
 
 #try natural breaks or size bins nex year
@@ -606,5 +624,171 @@ ag_map_draw <- ggdraw(ag_map)+deqlogo
 
 ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95)
 
+#############################################################################################
+# Surface Water Withdrawal Permitting Activities ############################################
 
+#PULL IN OWS Permit List from local file
+mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
 
+#must convert columns with date info to character data type so sqldf can recognize the date format
+mp_permit$Permit.Start2 <- as.character(as.Date(mp_permit$Permit.Start, format = "%m/%d/%Y"))
+
+#filter for SW that are currently active or in admin continued status
+mp_point_sw <- sqldf('SELECT a.*
+                     FROM mp_permit AS a
+                     WHERE a."Permit.Program" LIKE "%VWP%"
+                     AND a."Status" IN ("active", "expired")')
+
+#filter for New Permit Issuances - bins for point color
+mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "Permit.Start2" >= "2020-01-01" THEN 3
+                          ELSE 2
+                          END AS point_size
+                        FROM mp_point_sw AS a
+                    ORDER BY "Permit.Start2" ASC',sep="")) 
+
+  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
+  
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+  
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+  
+  permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.268, .9075),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16) +
+    guides(size = guide_legend(override.aes = list(size = c(2,3))),
+           fill = guide_legend(override.aes = list(fill = c("#0C1078", "orange2")))) +
+      scale_size_manual(name=paste0(eyear," Surface Water Withdrawal Permitting Activities"), values=c(2,3), labels=c("Active Surface Water Withdrawal Permits", paste0("Issued Since January ",eyear))) +
+    scale_fill_manual(name=paste0(eyear," Surface Water Withdrawal Permitting Activities"), values=c("#0C1078", "orange2"),  labels=c("Active Surface Water Withdrawal Permits", paste0("Issued Since January ",eyear))) 
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
+#############################################################################################
+# Groundwater Withdrawal Permitting Activities ##############################################
+  
+  #PULL IN OWS Permit List from local file
+  mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
+  
+  #must convert columns with date info to character data type so sqldf can recognize the date format
+  mp_permit$Permit.Start2 <- as.character(as.Date(mp_permit$Permit.Start, format = "%m/%d/%Y"))
+  
+  #filter for SW that are currently active or in admin continued status
+  mp_point_gw <- sqldf('SELECT a.*
+                     FROM mp_permit AS a
+                     WHERE a."Permit.Program" LIKE "%GWP%"
+                     AND a."Status" IN ("active", "expired")')
+  
+  #filter for New Permit Issuances - bins for point color
+  mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "Permit.Start2" >= "2020-01-01" THEN 4
+                          ELSE 3
+                          END AS point_size
+                        FROM mp_point_gw AS a
+                    ORDER BY "Permit.Start2" ASC',sep="")) 
+  
+  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, fill=factor(point_size)), alpha=0.9, size = 2, shape=21, inherit.aes = FALSE, show.legend = TRUE)
+  
+  #COUNTY LAYER
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+  
+  #GWMA LAYER
+  #PULL IN GWMA wkt from Search By HydroID page
+  gwma_df <- read.csv(paste(folder,"GWMA_wkt.csv",sep=""))
+  gwma_df <- sqldf('SELECT *, CASE
+                    WHEN HydroID = 194537
+                    THEN 1
+                    WHEN HydroID = 441638
+                    THEN 2
+                    ELSE 0
+                    END AS fill_order
+                   FROM gwma_df')
+  gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
+  gwma.gg <- geom_sf(data = gwma.sf,aes(fill = factor(fill_order)),colour = "black", shape = 22, lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = FALSE)
+  
+  # MAP
+  permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.264, .8555),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16) +
+    guides(fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2"),
+                                                   alpha = c(.5,.5,1,1),
+                                                   size = c(4,4,3,3),
+                                                   shape = c(22,22,21,21)))) +
+    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal Permitting Activities"), 
+                      values=c("pink",
+                               "darkorchid2",
+                               "#0C1078",
+                               "orange2"), 
+                      labels=c("Eastern Virginia Groundwater Management Area",
+                               "Eastern Shore Groundwater Management Area",
+                               "Active Groundwater Withdrawal Permits", 
+                               paste0("Issued Since January ",eyear))) 
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xGWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
+  
+#############################################################################################
+# WSP Regions Map ###########################################################################
+
+#PULL IN WSP Regions WKT from VAHydro
+# wsp_regions <- read.csv(paste(site,"region-to-localities-fips-export/all",sep=""))
+  
+  #PULL IN WSP Region List from local file
+  wsp_regions <- read.csv(paste(folder,"ows_wsp_regions_wkt.csv",sep=""))
+  wsp_regions$region_name <- as.character(wsp_regions$region_name)
+  
+   wsp_df <- sqldf('SELECT *  
+         FROM wsp_regions
+         WHERE geom IS NOT NULL
+         AND "FIPS.Code" NOT LIKE "3%"')
+  
+  wsp.sf <- st_as_sf(wsp_df, wkt = 'geom')
+  wsp.gg <- geom_sf(data = wsp.sf,aes(fill = factor(region_name)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
+  
+  finalmap.obj <- basemap.obj + wsp.gg +
+    theme(legend.position = "bottom",
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16
+    ) +
+    guides(fill=guide_legend(ncol=2))+
+    scale_fill_manual(name = NULL,
+                      values = c("#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
+                                 "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
+                                 "#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
+                                 "#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100",
+                                 "#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F",
+                                 "#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
+                                 "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66",
+                                 "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C",
+                                 "#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81",
+                                 "#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00",
+                                 "#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700",
+                                 "#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
+                                 "#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C"),
+                      # Many color options for +10 color ramps - used the following suggestion: User Tatarize suggests in his blog: 5) A set of 64 maximally dissimilar colors:
+                      #https://graphicdesign.stackexchange.com/questions/3682/where-can-i-find-a-large-palette-set-of-contrasting-colors-for-coloring-many-d
+                      labels = c(unique(wsp_df[c("region_name")]),"white")
+    )+
+    rivs.gg +
+    res.gg
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.401, y = -0.032) #LEFT BOTTOM LOGO
+  wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
+  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15)
