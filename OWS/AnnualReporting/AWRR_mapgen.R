@@ -69,7 +69,7 @@ gw.sf$ms_type <- "GW"
 
 #COMBINE GAGES AND WELLS INTO SINGLE LAYER
 ms.sf <- rbind(sw.sf, gw.sf)
-ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1.3, inherit.aes = FALSE, show.legend =TRUE)
+ms.gg <- geom_sf(data = ms.sf,aes(color=ms_type, shape = ms_type),size=1.4, inherit.aes = FALSE, show.legend =TRUE)
 
 #MAP
 monitoring_map <- basemap.obj + ms.gg +
@@ -77,7 +77,7 @@ monitoring_map <- basemap.obj + ms.gg +
                         legend.title=element_text(size=10),
                         legend.text=element_text(size=8),
                         aspect.ratio = 12.05/16) +
-                  guides(colour = guide_legend(override.aes = list(size = c(3, 3)))) +
+                  guides(colour = guide_legend(override.aes = list(size = c(4, 3)))) +
                   scale_color_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
                                      values=c("brown4", "blue"),
                                      labels=c("Observation Well", "Streamflow Gage")) +
