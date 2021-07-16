@@ -796,6 +796,11 @@ mp_df <-sqldf(paste('SELECT *,
 #############################################################################################
 # ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities ##############################################
   
+  #GWMA extent
+  extent = data.frame( 
+    x = c(-77.7, -75),
+    y = c(36, 40.6))
+  
   baselayers.gg <- base.layers(baselayers, 
                                extent = data.frame(
                                  x = c(-77.7, -75),
@@ -804,9 +809,10 @@ mp_df <-sqldf(paste('SELECT *,
                           extent = data.frame(
                             x = c(-77.7, -75),
                             y = c(36, 40.6)),
-                          plot_margin = c(2.45,0,.5,0), #top, right, bottom, left
-                          #plot_margin = c(-0.5,0.2,0,0.1),
-                          plot_zoom = 8)
+                          plot_margin = c(.25,0,.25,0), #top, right, bottom, left
+                          plot_zoom = 8,
+                          scale_bar = FALSE)
+  
   ggsave(plot = basemap.obj, file = paste0(export_path, "/awrr/2021/","basemap.png",sep = ""), width=6.5, height=4.95)
   
   
@@ -856,7 +862,7 @@ mp_df <-sqldf(paste('SELECT *,
   
   # MAP
   permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
-    theme(legend.position = c(0.275, .83),
+    theme(legend.position = c(0.31, .85),
           legend.title=element_text(size=7),
           legend.text=element_text(size=5)) +
     guides(fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2"),
@@ -871,9 +877,18 @@ mp_df <-sqldf(paste('SELECT *,
                       labels=c("Eastern Virginia GWMA",
                                "Eastern Shore GWMA",
                                "Active Groundwater Withdrawal Permits", 
-                               paste0("Issued Since January ",eyear))) 
+                               paste0("Issued Since January ",eyear))) +
+    #ADD SCALE BAR
+    ggsn::scalebar(bb.gg, location = 'bottomright', dist = 500, dist_unit = 'mi',
+                   
+                   transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+                   st.size = 2, st.dist = 0.0285,
+                   anchor = c(
+                     x =  -76.152998,
+                     y = 36.499674
+                   ))
   
-  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.1715, y = -0.46) #LEFT BOTTOM LOGO
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
   ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","test_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
