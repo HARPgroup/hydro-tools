@@ -811,10 +811,18 @@ mp_df <-sqldf(paste('SELECT *,
                             y = c(36, 40.6)),
                           plot_margin = c(.25,0,.25,0), #top, right, bottom, left
                           plot_zoom = 8,
-                          scale_bar = FALSE)
+                          scale_bar = F)
   
   ggsave(plot = basemap.obj, file = paste0(export_path, "/awrr/2021/","basemap.png",sep = ""), width=6.5, height=4.95)
   
+  # BOUNDING BOX
+  bb=readWKT(paste0("POLYGON((",extent$x[1]," ",extent$y[1],",",extent$x[2]," ",extent$y[1],",",extent$x[2]," ",extent$y[2],",",extent$x[1]," ",extent$y[2],",",extent$x[1]," ",extent$y[1],"))",sep=""))
+  bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
+  bbProjected@data$id <- rownames(bbProjected@data)
+  bbPoints <- fortify(bbProjected, region = "id")
+  bbDF <- merge(bbPoints, bbProjected@data, by = "id")
+  
+  bb.gg <- bbDF
   
   #PULL IN OWS Permit List from local file
   mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
@@ -860,6 +868,9 @@ mp_df <-sqldf(paste('SELECT *,
   gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
   gwma.gg <- geom_sf(data = gwma.sf,aes(fill = factor(fill_order)),colour = "black", shape = 22, lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = FALSE)
   
+  
+  library("ggspatial")
+  
   # MAP
   permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
     theme(legend.position = c(0.31, .85),
@@ -878,15 +889,16 @@ mp_df <-sqldf(paste('SELECT *,
                                "Eastern Shore GWMA",
                                "Active Groundwater Withdrawal Permits", 
                                paste0("Issued Since January ",eyear))) +
-    #ADD SCALE BAR
-    ggsn::scalebar(bb.gg, location = 'bottomright', dist = 500, dist_unit = 'mi',
-                   
-                   transform = TRUE, model = 'WGS84',st.bottom=FALSE,
-                   st.size = 2, st.dist = 0.0285,
-                   anchor = c(
-                     x =  -76.152998,
-                     y = 36.499674
-                   ))
+    annotation_scale(location = "br", plot_unit = "mi", width_hint = 0.3)
+    # #ADD SCALE BAR
+    # ggsn::scalebar(bbDF, location = 'bottomright', dist = 100, dist_unit = 'mi',
+    #                
+    #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+    #                st.size = 2.5, st.dist = 0.0285, height = 0.03,
+    #                anchor = c(
+    #                  x =  -76.152998,
+    #                  y = 36.499674
+    #                ))
   
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
