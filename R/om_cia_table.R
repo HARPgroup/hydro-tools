@@ -79,8 +79,6 @@ om_cia_table <- function (
       }
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_abs)
       rseg_summary.i <- cbind(rseg_summary.i,richness_change_pct)
-      
-      
     #----------------------------------------------------------------------------------------------------------------
    
     if (nrow(rseg_summary.i) > 0) {
@@ -105,7 +103,7 @@ om_cia_table <- function (
   fac_rseg_stats <- sqldf(
     paste(
       "SELECT a.runid, a.scenario ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
-      ",' ' AS Facility_Stats,",fac.met.list,", a.richness_change_abs, a.richness_change_pct 
+      ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,",fac.met.list," 
       FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   )
   
