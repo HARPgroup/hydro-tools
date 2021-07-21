@@ -889,19 +889,21 @@ mp_df <-sqldf(paste('SELECT *,
                                "Eastern Shore GWMA",
                                "Active Groundwater Withdrawal Permits", 
                                paste0("Issued Since January ",eyear))) +
-    annotation_scale(location = "br", plot_unit = "mi", width_hint = 0.3)
-    # #ADD SCALE BAR
-    # ggsn::scalebar(bbDF, location = 'bottomright', dist = 100, dist_unit = 'mi',
-    #                
-    #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
-    #                st.size = 2.5, st.dist = 0.0285, height = 0.03,
-    #                anchor = c(
-    #                  x =  -76.152998,
-    #                  y = 36.499674
-    #                ))
-  
+    #annotation_scale(location = "br", plot_unit = "mi", width_hint = 0.3)
+    #ADD SCALE BAR
+    ggsn::scalebar(bb.gg, location = 'bottomright',
+                   transform = TRUE, model = 'WGS84')
+  # #ADD SCALE BAR
+  # ggsn::scalebar(bb.gg, location = 'bottomright', dist = 100, dist_unit = 'mi',
+  #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+  #                st.size = 2.5, st.dist = 0.0285, height = 0.03,
+  #                anchor = c(
+  #                  x =  -76.152998,
+  #                  y = 36.499674
+  #                ))
+
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","test_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
   
