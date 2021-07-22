@@ -230,3 +230,70 @@ write.csv(wd_mgm_export,paste0(export_path,"withdrawal_monthly_",syear,"-",eyear
 
 output_location <- paste0(export_path,"shp_output/")
 output_file <- paste0("mp_wd_monthly_",syear,"-",eyear,".shp")
+
+#####################################################################################
+#####################################################################################
+wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"))
+WKT_layer <- wd_mgm_export
+WKT_layer$id <- as.numeric(rownames(WKT_layer))
+WKT_layer.list <- list()
+
+#i <- 1
+for (i in 1:length(WKT_layer$MP_ID)) {
+  #for (i in 1:5) {
+  print(paste("i = ",i," of ",length(WKT_layer$MP_ID),sep=''))
+  print(as.character(WKT_layer$MP_ID[i]))
+  
+  
+  if (isTRUE(as.character(WKT_layer$geom[i]) == "")) {
+    WKT_layer_geom <- readWKT("POINT (-99 99)")
+  } else if (is.na(as.character(WKT_layer$geom[i]))) {
+    WKT_layer_geom <- readWKT("POINT (-99 99)")
+  } else {
+    WKT_layer_geom <- readWKT(WKT_layer$geom[i])
+  }
+  WKT_layer_geom
+  WKT_layerProjected <- SpatialPointsDataFrame(WKT_layer_geom, data.frame('id'), match.ID = TRUE)
+  
+  #WKT_layer_name <- as.character(WKT_layer$name[i])
+  WKT_layer_MP_ID <- as.character(WKT_layer$MP_ID[i])
+  #WKT_layerProjected@data$id <- as.character(i)
+  #WKT_layerProjected@data$MP_Name <- as.character(WKT_layer$MP_Name[i])
+  #WKT_layerProjected@data$MP_ID <- as.character(WKT_layer$MP_ID[i])
+  
+  
+  #SPECIFY ALL COLUMNS WE ARE KEEPING
+  for(y in 1:length(names(WKT_layer))) {                                   # Head of for-loop
+    WKT_layerProjected@data$newcol <- as.character(WKT_layer[i,y])
+    colnames(WKT_layerProjected@data)[ncol(WKT_layerProjected@data)] <- names(WKT_layer[y])  # Rename column name
+  }
+  
+  
+  #WKT_layer.list[[i]] <- WKT_layerProjected
+  
+  suppressWarnings(raster::shapefile(WKT_layerProjected, paste(output_location,"features/",i,"_",WKT_layer_MP_ID,".shp",sep=""),overwrite=TRUE))
+  
+}
+
+#-----------------------------------------------------------------
+#IF MORE THAN ONE FEATURE-  BIND ALL shp files into single shp
+WKT_layer_MP_ID <- as.character(WKT_layer$MP_ID)
+WKT_feature.1 <- readOGR(paste(output_location,"features/","1_",WKT_layer_MP_ID[1],'.shp',sep='')) 
+WKT_feature.2 <- readOGR(paste(output_location,"features/","2_",WKT_layer_MP_ID[2],'.shp',sep='')) 
+WKT_BIND <- bind(WKT_feature.1,WKT_feature.2)
+
+#x <- 3
+for (x in 3:length(WKT_layer_MP_ID)){
+  print(paste("Joining shape ",x," of ",length(WKT_layer$MP_ID),sep=''))
+  WKT_layer_MP_ID_x <- WKT_layer_MP_ID[x]
+  WKT.shp <- readOGR(paste(output_location,"features/",WKT_layer$id[x],"_",WKT_layer_MP_ID_x,'.shp',sep='')) 
+  WKT_BIND <- bind(WKT_BIND,WKT.shp)
+}
+length(WKT_BIND)  
+
+raster::shapefile(WKT_BIND, paste(output_location,output_file,sep=""),overwrite=TRUE)
+
+
+#REMAINING STEPS IF GDB IS DESIRED
+# 1) Load resulting .shp file in arcmap 
+# 2) save as gdb
