@@ -6,6 +6,7 @@ library('sqldf')
 library('dplyr')
 library('tidyr')
 library(maptools)
+library("beepr")
 #####################################################################################
 # USER INPUTS
 #####################################################################################
@@ -222,7 +223,7 @@ wd_mgm <- sqldf('SELECT MP_hydroid AS MP_ID,
                        ') 
 
 #transform from long to wide table
-wd_mgm_export <- pivot_wider(data = wd_mgm, id_cols = c("MP_ID","Hcode", "Source_Type", "MP_Name", "Fac_ID", "Fac_Name","UseType","geom","Lat","Lon", "FIPS"), names_from = c("Year","Month2"), values_from = "USE_MGM")
+wd_mgm_export <- pivot_wider(data = wd_mgm, id_cols = c("MP_ID","Hcode", "Source_Type", "MP_Name", "Fac_ID", "Fac_Name","UseType","geom","Lat","Lon", "FIPS"), names_from = c("Month2", "Year"), values_from = "USE_MGM")
 
 
 #save file
@@ -263,6 +264,7 @@ for (i in 1:length(WKT_layer$MP_ID)) {
   
   
   #SPECIFY ALL COLUMNS WE ARE KEEPING
+  #Need to make sure the column is converted to the correct data type (All of the MGM columns need to be as.numeric) 
   for(y in 1:length(names(WKT_layer))) {                                   # Head of for-loop
     WKT_layerProjected@data$newcol <- as.character(WKT_layer[i,y])
     colnames(WKT_layerProjected@data)[ncol(WKT_layerProjected@data)] <- names(WKT_layer[y])  # Rename column name
@@ -274,6 +276,7 @@ for (i in 1:length(WKT_layer$MP_ID)) {
   suppressWarnings(raster::shapefile(WKT_layerProjected, paste(output_location,"features/",i,"_",WKT_layer_MP_ID,".shp",sep=""),overwrite=TRUE))
   
 }
+beep(2)
 
 #-----------------------------------------------------------------
 #IF MORE THAN ONE FEATURE-  BIND ALL shp files into single shp
@@ -292,6 +295,7 @@ for (x in 3:length(WKT_layer_MP_ID)){
 length(WKT_BIND)  
 
 raster::shapefile(WKT_BIND, paste(output_location,output_file,sep=""),overwrite=TRUE)
+beep(2)
 
 
 #REMAINING STEPS IF GDB IS DESIRED
