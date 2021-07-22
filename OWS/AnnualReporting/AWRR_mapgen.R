@@ -891,8 +891,8 @@ mp_df <-sqldf(paste('SELECT *,
                                paste0("Issued Since January ",eyear))) +
     #annotation_scale(location = "br", plot_unit = "mi", width_hint = 0.3)
     #ADD SCALE BAR
-    ggsn::scalebar(bb.gg, location = 'bottomright',
-                   transform = TRUE, model = 'WGS84')
+    # ggsn::scalebar(bb.gg, location = 'bottomright', dist_unit = 'mi', dist = 100,
+    #                transform = TRUE, model = 'WGS84')
   # #ADD SCALE BAR
   # ggsn::scalebar(bb.gg, location = 'bottomright', dist = 100, dist_unit = 'mi',
   #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
