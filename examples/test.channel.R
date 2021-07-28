@@ -45,6 +45,7 @@ channel_data <- om_vahydro_metric_grid(
 # 4 = Coastal Plain
 
 coeffs <- rbind(
+  # appalachian Plateau
   list(
     hc = 2.030,he = 0.2310,bfc = 12.175,bfe = 0.4711,bc = 5.389,be = 0.5349,n = 0.036
   ),
@@ -62,16 +63,26 @@ coeffs <- rbind(
   )
 )
 
-
-for (i in nrow(channel_data)) {
+channel_all = FALSE
+for (i in 1:nrow(channel_data)) {
   channel <- channel_data[i,]
   prov <- channel$province
   cco <- coeffs[prov,]
   channel_atts <- list(
+    name = channel_data$name,
+    riverseg = channel$riverseg,
+    province = prov,
+    da = channel$drainage_area,
     h = cco$hc * channel$drainage_area ^ cco$he,
     bf = cco$bfc * channel$drainage_area  ^ cco$bfe,
     b = cco$bc *channel$drainage_area ^ cco$be
   )
   channel_atts$z = 0.5 * (channel_atts$bf - channel_atts$b) / channel_atts$h
-  print(channel_atts)
+  print(i)
+  if (is.logical(channel_all)){
+    channel_all <- rbind(channel_atts)
+  } else {
+    channel_all <- rbind(channel_all, channel_atts)
+  }
 }
+channel_all <- as.data.frame(channel_all)
