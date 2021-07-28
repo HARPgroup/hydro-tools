@@ -27,12 +27,29 @@ om_cia_table <- function (
   rseg.model <- om_get_model(site, rseg.hydroid)
   rseg.elid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties','om_element_connection')$propvalue
   
+  fac.model <- om_get_model(site, fac.hydroid, model_varkey = 'om_water_system_element')
+  fac_obj_url <- paste(json_obj_url, fac.model$pid, sep="/")
+  fac_model_info <- om_auth_read(fac_obj_url, token,  "text/json", "")
+  fac_model_info <- fromJSON(fac_model_info)
+  
   fac_summary <- data.frame()
   rseg_summary <- data.frame()
-  #i <- 1
+  scenario_short_name_list <- data.frame()
+  
+  #i <- 2
   for (i in 1:length(runid.list)){
     runid.i <- runid.list[i]
     run.i <- sub("runid_", "", runid.i)
+    
+    # RETRIEVE SCENARIO "SHORT NAME"
+    run_info <- find_name(fac_model_info,runid.i)
+    if (is.null(run_info$reports)) {
+      scenario_short_name.i <- runid.i
+    } else {
+      ri <- run_info$reports
+      scenario_short_name.i <- ri$scenario_short_name$value
+    }
+    scenario_short_name_list <- rbind(scenario_short_name_list,scenario_short_name.i)
     
     # RETRIEVE FAC MODEL STATS 
     fac.metrics.i <- data.frame('model_version' = c('vahydro-1.0'),'runid' = c(runid.i),'runlabel' = fac.metric.list,'metric' = fac.metric.list)
@@ -48,23 +65,22 @@ om_cia_table <- function (
     rseg_summary.i <- om_vahydro_metric_grid(metric, rseg.metrics.i,base_url = paste(site,"/entity-model-prop-level-export",sep=""))
     rseg_summary.i <- sqldf(paste("SELECT * FROM 'rseg_summary.i' WHERE featureid = ",rseg.hydroid,sep=""))
     
-    # ADD SCENARIO TEXT DESCRIPTIONS
-    ## NEW METHOD (SLOW)
-    # scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
-    # scenario <- scenario$reports$cia$scenario_name$value
-    # rseg_summary.i <- cbind(scenario,rseg_summary.i)
-    
-    ## CONVENTIONAL METHOD (FASTER)
-    ds <- RomDataSource$new(site)
-    scen_var <- ds$get_vardef('om_scenario')
-    scen_config <- om_get_prop(site, scen_var$varid, entity_type = 'dh_variabledefinition',propname = 'variants')
-    scen.i <- om_get_prop(site, scen_config$pid, entity_type = 'dh_properties',propname = runid.i)
-    reports.i <- om_get_prop(site, scen.i$pid, entity_type = 'dh_properties',propname = 'reports')
-    cia.i <- om_get_prop(site, reports.i$pid, entity_type = 'dh_properties',propname = 'cia')
-    scenario_name.i <- om_get_prop(site, cia.i$pid, entity_type = 'dh_properties',propname = 'scenario_name')
-    scenario <- scenario_name.i$propcode
-    rseg_summary.i <- cbind(scenario,rseg_summary.i)
-    
+    # ADD SCENARIO TEXT DESCRIPTIONS (Replaced by scenario_short_name)
+        ## NEW METHOD (SLOW)
+        # scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
+        # scenario <- scenario$reports$cia$scenario_name$value
+        # rseg_summary.i <- cbind(scenario,rseg_summary.i)
+        
+        ## CONVENTIONAL METHOD (FASTER)
+        # ds <- RomDataSource$new(site)
+        # scen_var <- ds$get_vardef('om_scenario')
+        # scen_config <- om_get_prop(site, scen_var$varid, entity_type = 'dh_variabledefinition',propname = 'variants')
+        # scen.i <- om_get_prop(site, scen_config$pid, entity_type = 'dh_properties',propname = runid.i)
+        # reports.i <- om_get_prop(site, scen.i$pid, entity_type = 'dh_properties',propname = 'reports')
+        # cia.i <- om_get_prop(site, reports.i$pid, entity_type = 'dh_properties',propname = 'cia')
+        # scenario_name.i <- om_get_prop(site, cia.i$pid, entity_type = 'dh_properties',propname = 'scenario_name')
+        # scenario <- scenario_name.i$propcode
+        # rseg_summary.i <- cbind(scenario,rseg_summary.i)
     
     # ADD ELFGEN STATS TO TABLE -------------------------------------------------------------------------------------
       runid_i_pid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties',propname = runid.i)$pid
@@ -87,13 +103,12 @@ om_cia_table <- function (
     }
   }
   
+  #RENAME COLUMN IN scenario_short_name_list
+  colnames(scenario_short_name_list)<-c("Scenario")
+  
   ################################################################################################
   # JOIN FAC AND RSEG MODEL STATS INTO SINGLE TABLE
   ################################################################################################
-  # ROUND DATA TO 2 PLACES
-  #fac_summary[,-(1:6)] <- round(fac_summary[,-(1:6)],2)
-  #rseg_summary[,-(1:10)] <- round(rseg_summary[,-(1:10)],2)
-
   #dplyr method of rounding only those columns that are numeric (facilitates elfgen message)
   fac_summary <- fac_summary %>% mutate_if(is.numeric, round, digits=2)
   rseg_summary <- rseg_summary %>% mutate_if(is.numeric, round, digits=2)
@@ -102,19 +117,15 @@ om_cia_table <- function (
   fac.met.list <- paste(fac.metric.list, collapse = ",")
   fac_rseg_stats <- sqldf(
     paste(
-      "SELECT a.runid, a.scenario ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
+      "SELECT a.runid,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
       ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,",fac.met.list," 
       FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
   )
   
-  # fac_rseg_stats <- sqldf(
-  #   paste(
-  #     "SELECT a.runid ,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
-  #     ",' ' AS Facility_Stats,",fac.met.list,", a.richness_change_abs, a.richness_change_pct
-  #     FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
-  # )
+  #ADD "scenario_short_name" TO DATAFRAME
+  fac_rseg_stats <- cbind(scenario_short_name_list,fac_rseg_stats)
   
-  #TRANSPOSE DATAFRAME, IF DESIRED
+  #TRANSPOSE DATAFRAME
   fac_rseg_stats.T <- as.data.frame(t(fac_rseg_stats[,-1]))
   colnames(fac_rseg_stats.T) <- fac_rseg_stats[,1]
   #View(fac_rseg_stats.T)
