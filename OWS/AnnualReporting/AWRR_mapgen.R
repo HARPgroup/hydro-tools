@@ -792,3 +792,118 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.401, y = -0.032) #LEFT BOTTOM LOGO
   wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
   ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15)
+
+#############################################################################################
+# ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities ##############################################
+  
+  #GWMA extent
+  extent = data.frame( 
+    x = c(-77.7, -75),
+    y = c(36, 40.6))
+  
+  baselayers.gg <- base.layers(baselayers, 
+                               extent = data.frame(
+                                 x = c(-77.7, -75),
+                                 y = c(36, 40.6)))
+  basemap.obj <- base.map(baselayers.gg, 
+                          extent = data.frame(
+                            x = c(-77.7, -75),
+                            y = c(36, 40.6)),
+                          plot_margin = c(.25,0,.25,0), #top, right, bottom, left
+                          plot_zoom = 8,
+                          scale_bar = F)
+  
+  ggsave(plot = basemap.obj, file = paste0(export_path, "/awrr/2021/","basemap.png",sep = ""), width=6.5, height=4.95)
+  
+  # BOUNDING BOX
+  bb=readWKT(paste0("POLYGON((",extent$x[1]," ",extent$y[1],",",extent$x[2]," ",extent$y[1],",",extent$x[2]," ",extent$y[2],",",extent$x[1]," ",extent$y[2],",",extent$x[1]," ",extent$y[1],"))",sep=""))
+  bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
+  bbProjected@data$id <- rownames(bbProjected@data)
+  bbPoints <- fortify(bbProjected, region = "id")
+  bbDF <- merge(bbPoints, bbProjected@data, by = "id")
+  
+  bb.gg <- bbDF
+  
+  #PULL IN OWS Permit List from local file
+  mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
+  
+  #must convert columns with date info to character data type so sqldf can recognize the date format
+  mp_permit$Permit.Start2 <- as.character(as.Date(mp_permit$Permit.Start, format = "%m/%d/%Y"))
+  
+  #filter for SW that are currently active or in admin continued status
+  mp_point_gw <- sqldf('SELECT a.*
+                     FROM mp_permit AS a
+                     WHERE a."Permit.Program" LIKE "%GWP%"
+                     AND a."Status" IN ("active", "expired")')
+  
+  #filter for New Permit Issuances - bins for point color
+  mp_df <-sqldf(paste('SELECT *,
+                          CASE
+                            WHEN "Permit.Start2" >= "2020-01-01" THEN 4
+                          ELSE 3
+                          END AS point_size
+                        FROM mp_point_gw AS a
+                    ORDER BY "Permit.Start2" ASC',sep="")) 
+  
+  mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, fill=factor(point_size)), alpha=0.9, size = 2, shape=21, inherit.aes = FALSE, show.legend = TRUE)
+  
+  #COUNTY LAYER
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+  
+  #GWMA LAYER
+  #PULL IN GWMA wkt from Search By HydroID page
+  gwma_df <- read.csv(paste(folder,"GWMA_wkt.csv",sep=""))
+  gwma_df <- sqldf('SELECT *, CASE
+                    WHEN HydroID = 194537
+                    THEN 1
+                    WHEN HydroID = 441638
+                    THEN 2
+                    ELSE 0
+                    END AS fill_order
+                   FROM gwma_df')
+  gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
+  gwma.gg <- geom_sf(data = gwma.sf,aes(fill = factor(fill_order)),colour = "black", shape = 22, lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = FALSE)
+  
+  
+  library("ggspatial")
+  
+  # MAP
+  permit_map <- basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.31, .85),
+          legend.title=element_text(size=7),
+          legend.text=element_text(size=5)) +
+    guides(fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2"),
+                                                   alpha = c(.5,.5,1,1),
+                                                   size = c(3.5,3.5,2.5,2.5),
+                                                   shape = c(22,22,21,21)))) +
+    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal \n Permitting Activities"), 
+                      values=c("pink",
+                               "darkorchid2",
+                               "#0C1078",
+                               "orange2"), 
+                      labels=c("Eastern Virginia GWMA",
+                               "Eastern Shore GWMA",
+                               "Active Groundwater Withdrawal Permits", 
+                               paste0("Issued Since January ",eyear))) +
+    #annotation_scale(location = "br", plot_unit = "mi", width_hint = 0.3)
+    #ADD SCALE BAR
+    # ggsn::scalebar(bb.gg, location = 'bottomright', dist_unit = 'mi', dist = 100,
+    #                transform = TRUE, model = 'WGS84')
+  # #ADD SCALE BAR
+  # ggsn::scalebar(bb.gg, location = 'bottomright', dist = 100, dist_unit = 'mi',
+  #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+  #                st.size = 2.5, st.dist = 0.0285, height = 0.03,
+  #                anchor = c(
+  #                  x =  -76.152998,
+  #                  y = 36.499674
+  #                ))
+
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
+  
