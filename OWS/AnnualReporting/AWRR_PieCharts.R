@@ -8,7 +8,9 @@ source(paste(basepath,"config.local.private",sep = '/'))
 Table1 <- read.csv("U:/OWS/foundation_datasets/awrr/2021/Table1_2016-2020.csv")
 
 # AWRR Pie Charts ################################################################
-Table1$Source.Type <- recode(Table1$Source.Type, "Total (GW + SW)" = "Total") #Change for easier string substitution and clear pie chart labeling 
+Table1$Source.Type <- recode(Table1$Source.Type, "Total (GW + SW)" = "Total") #Change for easier string substitution and clear pie chart 
+Table1$Category <- recode(Table1$Category, "Municipal" = "Public Water Supply")
+#labeling 
 source_type <- c("Groundwater", "Surface Water", "Total")
 #s = 1
 for (s in 1:length(source_type)) {
@@ -20,7 +22,7 @@ wd.sql <- paste('SELECT *,
                     WHEN "Category" = "Irrigation" THEN "darkolivegreen3"
                     WHEN "Category" = "Manufacturing" THEN "blueviolet"
                     WHEN "Category" = "Mining" THEN "deepskyblue3" 
-                    WHEN "Category" = "Municipal" THEN "darkorange2" 
+                    WHEN "Category" = "Public Water Supply" THEN "darkorange2" 
                     ELSE "white"
                   END AS col
                  FROM Table1
