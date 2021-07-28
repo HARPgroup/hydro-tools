@@ -57,7 +57,7 @@ coeffs <- rbind(
     hc = 2.137,he = 0.2561,bfc = 14.135,bfe = 0.4111,bc = 6.393,be = 0.4604,n = 0.095
   ),
   # Coastal Plain
-  list(cco$bc *channel$drainage_area ^ cco$be
+  list(
     hc = 2.820, he = 0.2000, bfc = 15.791, bfe = 0.3758, bc = 6.440, be = 0.4442, n = 0.040
   )
 )
@@ -67,8 +67,11 @@ for (i in nrow(channel_data)) {
   channel <- channel_data[i,]
   prov <- channel$province
   cco <- coeffs[prov,]
-  h = cco$hc * channel$drainage_area ^ cco$he
-  bf = cco$bfc * channel$drainage_area  ^ cco$bfe
-  b = cco$bc *channel$drainage_area ^ cco$be
-  z = 0.5 * (bf - b) / h; 
+  channel_atts <- list(
+    h = cco$hc * channel$drainage_area ^ cco$he,
+    bf = cco$bfc * channel$drainage_area  ^ cco$bfe,
+    b = cco$bc *channel$drainage_area ^ cco$be
+  )
+  channel_atts$z = 0.5 * (channel_atts$bf - channel_atts$b) / channel_atts$h
+  print(channel_atts)
 }
