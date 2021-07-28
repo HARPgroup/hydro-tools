@@ -1,30 +1,10 @@
 # install_github("HARPGroup/hydro-tools", force=TRUE)
 library("hydrotools")
+
+# Gopal: ONLY NEED TO USE LINES 5-19 if you are connecting to VAHydro
+# Otherwise you can use the channel_all.csv that I sent 
 ds <- RomDataSource$new("http://deq1.bse.vt.edu/d.dh", 'restws_admin')
 ds$get_token()
-hid <- 68123 
-
-map1 <- RomProperty$new(
-  ds, list(
-    propcode="vahydro-1.0", 
-    entity_type="dh_feature",
-    featureid=hid
-  ),
-  TRUE
-)
-model <- ds$get_prop(
-  config = list(
-    featureid = 68123, 
-    entity_type='dh_feature', 
-    propcode = 'vahydro-1.0'
-  ),
-  return_type = 'object'
-)
-
-# use new json
-wshed_obj_url <- paste(json_obj_url, model$pid, sep="/")
-wshed_model_info <- om_auth_read(wshed_obj_url, token,  "text/json", "")
-
 # All channel data
 # use model parameter retrieval routine
 # Facility analysis
