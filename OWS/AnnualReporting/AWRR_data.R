@@ -253,6 +253,7 @@ kable(cat_table, booktabs = T) %>%
   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\May_QA\\summary_table_vahydro_",eyear+1,"_",Sys.Date(),".html",sep = ""))
 
 ################### TABLE 1 : Summary ##########################################
+cat_table$Category <- recode(cat_table$Category, "Municipal" = "Public Water Supply")
 table1_latex <- kable(cat_table[2:9],'latex', booktabs = T,
                       caption = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
                       label = paste("Summary of Virginia Water Withdrawals by Use Category and Source Type",syear,"-",eyear,"(MGD)",sep=" "),
