@@ -101,7 +101,7 @@ data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 #write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
 data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
-
+data_pi$Use_Type <- recode(data_pi$Use_Type, "Municipal" = "Public Water Supply")
 ## DEPRECATED - FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD) ################################
 # permit_srctype <- sqldf(
 #   "select Source_type, has_permit, 
@@ -318,7 +318,7 @@ table3w_tex <- gsub(pattern = "[t]{-2}{*}",
                     x       = table3w_tex, fixed= T)
 
 #custom striping
-use_stripe <- c("Municipal", "Manufacturing", "Commercial")
+use_stripe <- c("Public Water Supply", "Manufacturing", "Commercial")
 for (i in 1:length(use_stripe)) {
   table3w_tex <- gsub(pattern = paste0("\\hspace{1em}",use_stripe[i]),
                       repl    = paste0("\\rowcolor{gray!20}   \\hspace{1em}",use_stripe[i]),
