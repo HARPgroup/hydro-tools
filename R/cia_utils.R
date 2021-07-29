@@ -388,3 +388,36 @@ fn_ALL.downstream <- function(riv.seg, AllSegList) {
   }
   return(Alldownstream)
 }
+
+
+# diffs 2 timeseries for he same modle different scenario
+# use like:
+#  om_ts_diff(datsr400, datsr600, "Qout", "Qout", "<>")
+#  om_ts_diff(datjrva400, datjrva600, "Qout", "Qout", "> 10 + ")
+#  om_ts_diff(datjrva600, datjrva400, "wd_cumulative_mgd", "wd_cumulative_mgd", "> 1.1 * ")
+om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
+  # use "all" for op if just want the df
+  df1 <- as.data.frame(df1)
+  df2 <- as.data.frame(df2)
+  dsql <- paste0(
+    "select a.year,a.month,a.day, ",
+    "a.", col1, " as v1, b.", col2, " as v2",
+    " from df1 as a " ,
+    "left outer join df2 as b ",
+    " on ( ",
+    "a.year = b.year
+   and a.month = b.month 
+   and a.day = b.day
+  ) "
+  )
+  if (!(op == "all")) {
+    dsql <- paste0(
+      dsql, " where a.",col1," ", op, " b.", col2
+    )
+  }
+  message(dsql)
+  rets <- sqldf(
+    dsql
+  )
+  return(rets)
+}
