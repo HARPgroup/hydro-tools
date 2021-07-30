@@ -35,6 +35,7 @@ om_cia_table <- function (
   fac_summary <- data.frame()
   rseg_summary <- data.frame()
   scenario_short_name_list <- data.frame()
+  scenario_short_name_list <- FALSE
   
   #i <- 2
   for (i in 1:length(runid.list)){
@@ -49,7 +50,12 @@ om_cia_table <- function (
       ri <- run_info$reports
       scenario_short_name.i <- ri$scenario_short_name$value
     }
-    scenario_short_name_list <- rbind(scenario_short_name_list,scenario_short_name.i)
+    if (is.logical(scenario_short_name_list)) {
+      scenario_short_name_list <- data.frame(scenario = scenario_short_name.i)
+    } else {
+      scenario_short_name_list <- rbind(scenario_short_name_list, data.frame(scenario = scenario_short_name.i))
+    }
+    
     
     # RETRIEVE FAC MODEL STATS 
     fac.metrics.i <- data.frame('model_version' = c('vahydro-1.0'),'runid' = c(runid.i),'runlabel' = fac.metric.list,'metric' = fac.metric.list)
@@ -104,7 +110,7 @@ om_cia_table <- function (
   }
   
   #RENAME COLUMN IN scenario_short_name_list
-  colnames(scenario_short_name_list)<-c("Scenario")
+  #colnames(scenario_short_name_list)<-c("Scenario")
   
   ################################################################################################
   # JOIN FAC AND RSEG MODEL STATS INTO SINGLE TABLE
