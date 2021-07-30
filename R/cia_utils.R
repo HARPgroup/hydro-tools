@@ -395,6 +395,8 @@ fn_ALL.downstream <- function(riv.seg, AllSegList) {
 #  om_ts_diff(datsr400, datsr600, "Qout", "Qout", "<>")
 #  om_ts_diff(datjrva400, datjrva600, "Qout", "Qout", "> 10 + ")
 #  om_ts_diff(datjrva600, datjrva400, "wd_cumulative_mgd", "wd_cumulative_mgd", "> 1.1 * ")
+#  use "all" to just join on date and return all records
+#  om_ts_diff(datjrh400, datjrh600, "Qout", "Qout", "all")
 om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
   # use "all" for op if just want the df
   df1 <- as.data.frame(df1)
