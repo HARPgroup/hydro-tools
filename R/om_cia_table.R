@@ -12,42 +12,43 @@
 #' @export om_cia_table
 #' @examples NA
 om_cia_table <- function (
-  rseg.hydroid = 462757,
-  fac.hydroid = 72672,
-  runid.list = c('runid_201','runid_401'),
-  fac.metric.list = c('wd_mgd','ps_mgd','unmet1_mgd','unmet7_mgd','unmet30_mgd','unmet90_mgd'),
-  rseg.metric.list = c('Qout','Qbaseline','remaining_days_p0','remaining_days_p10','remaining_days_p50','l30_Qout',
-                        'l90_Qout','consumptive_use_frac','wd_cumulative_mgd','ps_cumulative_mgd'),
-  site = "https://deq1.bse.vt.edu/d.dh",
-  site_base = "https://deq1.bse.vt.edu"
+  fac_model_info = FALSE,
+  rseg_model_info = FALSE,
+  runid.list = c('runid_6011','runid_6012'),
+  fac.metric.list = c('wd_mgd','ps_mgd','unmet30_mgd'),
+  rseg.metric.list = c("Qout","Qbaseline","l30_Qout",
+                       "l90_Qout","consumptive_use_frac","wd_cumulative_mgd","ps_cumulative_mgd"),
+  site = "http://deq1.bse.vt.edu:81/d.dh",
+  site_base = "http://deq1.bse.vt.edu:81"
 ) {
-  ################################################################################################
-  # RETRIEVE FAC & RSEG MODEL STATS
-  ################################################################################################
-  rseg.model <- om_get_model(site, rseg.hydroid)
-  rseg.elid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties','om_element_connection')$propvalue
   
-  fac.model <- om_get_model(site, fac.hydroid, model_varkey = 'om_water_system_element')
-  fac_obj_url <- paste(json_obj_url, fac.model$pid, sep="/")
-  fac_model_info <- om_auth_read(fac_obj_url, token,  "text/json", "")
-  fac_model_info <- fromJSON(fac_model_info)
+  if (is.logical(fac_model_info)){
+    message("Must supply fac_model_info")
+  }
   
+  if (is.logical(rseg_model_info)){
+    message("Must supply rseg_model_info")
+  }
+  
+  ################################################################################################
+  # FORMAT FAC & RSEG MODEL STATS
+  ################################################################################################
   fac_summary <- data.frame()
   rseg_summary <- data.frame()
   scenario_short_name_list <- data.frame()
   scenario_short_name_list <- FALSE
   
-  #i <- 2
+  #i <- 1
   for (i in 1:length(runid.list)){
     runid.i <- runid.list[i]
     run.i <- sub("runid_", "", runid.i)
     
     # RETRIEVE SCENARIO "SHORT NAME"
-    run_info <- find_name(fac_model_info,runid.i)
-    if (is.null(run_info$reports)) {
+    run_info.fac <- find_name(fac_model_info,runid.i)
+    if (is.null(run_info.fac$reports)) {
       scenario_short_name.i <- runid.i
     } else {
-      ri <- run_info$reports
+      ri <- run_info.fac$reports
       scenario_short_name.i <- ri$scenario_short_name$value
     }
     if (is.logical(scenario_short_name_list)) {
@@ -56,76 +57,89 @@ om_cia_table <- function (
       scenario_short_name_list <- rbind(scenario_short_name_list, data.frame(scenario = scenario_short_name.i))
     }
     
-    
     # RETRIEVE FAC MODEL STATS 
-    fac.metrics.i <- data.frame('model_version' = c('vahydro-1.0'),'runid' = c(runid.i),'runlabel' = fac.metric.list,'metric' = fac.metric.list)
-    fac_summary.i <- om_vahydro_metric_grid(metric, 'bundle' = 'facility','ftype' = 'all',fac.metrics.i,base_url = paste(site,"/entity-model-prop-level-export",sep=""))
-    fac_summary.i <- sqldf(paste("SELECT '",run.i,"' AS runid, * FROM 'fac_summary.i' WHERE featureid = ",fac.hydroid,sep=""))
+    fac_summary.i <- as.data.frame(run_info.fac[fac.metric.list])[paste0(fac.metric.list,".value")]
+    names(fac_summary.i) <- fac.metric.list
+    
+    fac_summary.i[] <- sapply(fac_summary.i[],as.numeric) #MAKE ALL FIELDS NUMERIC
+    fac_summary.i <- fac_summary.i %>% mutate_if(is.numeric, round, digits=2) #ROUND ALL FIELDS  
+
     if (nrow(fac_summary.i) > 0) {
+      fac_summary.i <- cbind("runid" = run.i,"fac_model" = fac_model_info[[1]]$name,fac_summary.i)
       fac_summary <- rbind(fac_summary,fac_summary.i)
     }
     
     # RETRIEVE RSEG MODEL STATS
-    rseg.info.i <- fn_get_runfile_info(rseg.elid,run.i,site=site_base)
-    rseg.metrics.i <- data.frame('model_version' = c('vahydro-1.0'),'runid' = c(runid.i),'runlabel' = rseg.metric.list,'metric' = rseg.metric.list)
-    rseg_summary.i <- om_vahydro_metric_grid(metric, rseg.metrics.i,base_url = paste(site,"/entity-model-prop-level-export",sep=""))
-    rseg_summary.i <- sqldf(paste("SELECT * FROM 'rseg_summary.i' WHERE featureid = ",rseg.hydroid,sep=""))
-    
-    # ADD SCENARIO TEXT DESCRIPTIONS (Replaced by scenario_short_name)
-        ## NEW METHOD (SLOW)
-        # scenario <- withCallingHandlers(find_name(run_text(runid.i,site), runid.i))
-        # scenario <- scenario$reports$cia$scenario_name$value
-        # rseg_summary.i <- cbind(scenario,rseg_summary.i)
-        
-        ## CONVENTIONAL METHOD (FASTER)
-        # ds <- RomDataSource$new(site)
-        # scen_var <- ds$get_vardef('om_scenario')
-        # scen_config <- om_get_prop(site, scen_var$varid, entity_type = 'dh_variabledefinition',propname = 'variants')
-        # scen.i <- om_get_prop(site, scen_config$pid, entity_type = 'dh_properties',propname = runid.i)
-        # reports.i <- om_get_prop(site, scen.i$pid, entity_type = 'dh_properties',propname = 'reports')
-        # cia.i <- om_get_prop(site, reports.i$pid, entity_type = 'dh_properties',propname = 'cia')
-        # scenario_name.i <- om_get_prop(site, cia.i$pid, entity_type = 'dh_properties',propname = 'scenario_name')
-        # scenario <- scenario_name.i$propcode
-        # rseg_summary.i <- cbind(scenario,rseg_summary.i)
-    
-    # ADD ELFGEN STATS TO TABLE -------------------------------------------------------------------------------------
-      runid_i_pid <- om_get_prop(site, rseg.model$pid, entity_type = 'dh_properties',propname = runid.i)$pid
-      elfgen_EDAS_huc8_i <- om_get_prop(site, runid_i_pid, entity_type = 'dh_properties',propname = 'elfgen_EDAS_huc8')
+    default_info.rseg = list(
+      remaining_days_p0 = list(
+        "name" = "remaining_days_p0",
+        "value" = "NA"
+      ),
+      remaining_days_p10 = list(
+        "name" = "remaining_days_p10",
+        "value"  = "NA"
+      ),
+      remaining_days_p50 = list(
+        "name" = "remaining_days_p50",
+        "value"  = "NA"
+      )
+    )
 
-      if (!is.logical(elfgen_EDAS_huc8_i)) {
-        richness_change_abs <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_abs')$propvalue
-        richness_change_pct <- om_get_prop(site, elfgen_EDAS_huc8_i$pid, entity_type = 'dh_properties',propname = 'richness_change_pct')$propvalue
-      } else {
-        richness_change_abs <- 'No elfgen Available'
-        richness_change_pct <- 'No elfgen Available'
-      }
-      rseg_summary.i <- cbind(rseg_summary.i,richness_change_abs)
-      rseg_summary.i <- cbind(rseg_summary.i,richness_change_pct)
-    #----------------------------------------------------------------------------------------------------------------
-   
+    run_info.rseg <- find_name(rseg_model_info,runid.i)
+    run_info.rseg <- merge.list(run_info.rseg, default_info.rseg)
+    rseg_summary.i <- as.data.frame(run_info.rseg[rseg.metric.list])[paste0(rseg.metric.list,".value")]
+    names(rseg_summary.i) <- rseg.metric.list
+ 
+    rseg_summary.i[] <- sapply(rseg_summary.i[],as.numeric) #MAKE ALL FIELDS NUMERIC
+    rseg_summary.i <- rseg_summary.i %>% mutate_if(is.numeric, round, digits=2) #ROUND ALL FIELDS  
+    
+    # ADD ELFGEN STATS TO TABLE
+    default_info.elfgen = list(
+      richness_change_abs = list(
+        "name" = "richness_change_abs",
+        "value" = 'No elfgen Available'
+      ),
+      richness_change_pct = list(
+        "name" = "richness_change_pct",
+        "value" = 'No elfgen Available'
+      )
+    )
+    elfgen.metric.list <- c('richness_change_abs','richness_change_pct')
+    
+    run_info.elfgen <- find_name(run_info.rseg,'elfgen_EDAS_huc8')
+    run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
+    elfgen_summary.i <- as.data.frame(run_info.elfgen[elfgen.metric.list])[paste0(elfgen.metric.list,".value")]
+    names(elfgen_summary.i) <- elfgen.metric.list
+    
+    rseg_summary.i <- cbind(rseg_summary.i,elfgen_summary.i)
+
     if (nrow(rseg_summary.i) > 0) {
-      rseg_summary.i <- cbind("runid" = run.i,"run_date" = rseg.info.i$run_date,"starttime" = str_remove(rseg.info.i$starttime," 00:00:00"),"endtime" = str_remove(rseg.info.i$endtime," 00:00:00"),rseg_summary.i)
+      #rseg_summary.i <- cbind("runid" = run.i,"run_date" = rseg.info.i$run_date,"starttime" = str_remove(rseg.info.i$starttime," 00:00:00"),"endtime" = str_remove(rseg.info.i$endtime," 00:00:00"),rseg_summary.i)
+      rseg_summary.i <- cbind("runid" = run.i,"rseg_model" = rseg_model_info[[1]]$name,rseg_summary.i)
       rseg_summary <- rbind(rseg_summary,rseg_summary.i)
     }
   }
   
-  #RENAME COLUMN IN scenario_short_name_list
-  #colnames(scenario_short_name_list)<-c("Scenario")
-  
   ################################################################################################
   # JOIN FAC AND RSEG MODEL STATS INTO SINGLE TABLE
   ################################################################################################
-  #dplyr method of rounding only those columns that are numeric (facilitates elfgen message)
-  fac_summary <- fac_summary %>% mutate_if(is.numeric, round, digits=2)
-  rseg_summary <- rseg_summary %>% mutate_if(is.numeric, round, digits=2)
-  
   rseg.met.list <- paste(rseg.metric.list, collapse = ",")
   fac.met.list <- paste(fac.metric.list, collapse = ",")
+  # fac_rseg_stats <- sqldf(
+  #   paste(
+  #     "SELECT a.runid,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
+  #     ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,",fac.met.list," 
+  #     FROM rseg_summary AS a     
+  #     LEFT OUTER JOIN fac_summary AS b     
+  #     ON a.runid = b.runid")
+  # )
   fac_rseg_stats <- sqldf(
     paste(
-      "SELECT a.runid,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
-      ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,",fac.met.list," 
-      FROM rseg_summary AS a     LEFT OUTER JOIN fac_summary AS b     ON a.runid = b.runid")
+      "SELECT a.runid,' ' AS Rseg_Stats,a.rseg_model,", rseg.met.list,
+      ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,b.fac_model,",fac.met.list," 
+      FROM rseg_summary AS a     
+      LEFT OUTER JOIN fac_summary AS b     
+      ON a.runid = b.runid")
   )
   
   #ADD "scenario_short_name" TO DATAFRAME
