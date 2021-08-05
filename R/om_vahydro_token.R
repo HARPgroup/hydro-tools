@@ -5,12 +5,14 @@
 #' @seealso NA
 #' @export om_vahydro_token
 #' @examples NA
-om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh', rest_uname = NULL) {
+om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh', rest_uname = NULL, rest_pw = NULL) {
   if (is.null(rest_uname)) {
     # readline does *not* wait for input when run inside a fn but getPass does
     rest_uname <- getPass::getPass("REST User Name: ")
   }
-  rest_pw <- getPass::getPass("REST Password: ")
+  if (is.null(rest_pw)) {
+    rest_pw <- getPass::getPass("REST Password: ")
+  }
   message(paste("reading from", base_url))
   # do something
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)

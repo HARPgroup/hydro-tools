@@ -158,7 +158,7 @@ getTimeseries <- function(inputs, base_url, ts){
       
       i <- 1
       numrecs = length(ts_cont$list)
-      print(paste("----- Number of timeseries found: ",numrecs,sep=""))
+      message(paste("----- Number of timeseries found: ",numrecs,sep=""))
       for (i in 1:numrecs) {
         
         ts_i <- data.frame(  "tid" = if (is.null(ts_cont$list[[i]]$tid)){""} else {ts_cont$list[[i]]$tid},
@@ -589,10 +589,10 @@ getVarDef <- function(inputs, token, base_url, vardef){
     encode = "json"
   );
   vardef_cont <- content(vardef);
-  print(vardef)
+  message(vardef)
   
   if (length(vardef_cont$list) != 0) {
-    print(paste("Number of variables found: ",length(vardef_cont$list),sep=""))
+    message(paste("Number of variables found: ",length(vardef_cont$list),sep=""))
     
     vardef <- data.frame(
       hydroid=character(),
@@ -627,7 +627,7 @@ getVarDef <- function(inputs, token, base_url, vardef){
   return(vardef)
 }
 
-getFeature <- function(inputs, token, base_url, feature){
+getFeature <- function(inputs, token, base_url, feature, debug=FALSE){
   #inputs <-    conveyance_inputs 
   #base_url <- site
   #print(inputs)
@@ -658,6 +658,9 @@ getFeature <- function(inputs, token, base_url, feature){
     }
   }
 
+  if (debug) {
+    message(paste("trying: ", paste(base_url,"/dh_feature.json",sep="")))
+  }
   feature <- GET(
     paste(base_url,"/dh_feature.json",sep=""), 
     add_headers(HTTP_X_CSRF_TOKEN = token),
@@ -667,7 +670,7 @@ getFeature <- function(inputs, token, base_url, feature){
   feature_cont <- content(feature);
   
   if (length(feature_cont$list) != 0) {
-    print(paste("Number of features found: ",length(feature_cont$list),sep=""))
+    message(paste("Number of features found: ",length(feature_cont$list),sep=""))
     
     feat <- data.frame(hydroid = character(),
                        bundle = character(),
@@ -830,7 +833,7 @@ getAdminregFeature <- function(inputs, base_url, adminreg_feature){
   adminreg_feature_cont <- content(adminreg_feature);
   
   if (length(adminreg_feature_cont$list) != 0) {
-    print(paste("Number of adminreg features found: ",length(adminreg_feature_cont$list),sep=""))
+    message(paste("Number of adminreg features found: ",length(adminreg_feature_cont$list),sep=""))
     
     adminreg_feat <- data.frame(adminid = character(),
                        bundle = character(),
@@ -1101,7 +1104,7 @@ vahydro_auth_read <- function(uri, token, ctype = "text/csv", delim=',', enc="xm
   return(cdat)
 }
 
-om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', ftype = 'vahydro') {
+om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', ftype = 'vahydro', debug=FALSE) {
   inputs <- list (
     hydrocode = hydrocode,
     bundle = bundle,
@@ -1110,7 +1113,7 @@ om_get_feature <- function (base_url, hydrocode = FALSE, bundle = 'watershed', f
   
   #property dataframe returned
   feature = FALSE;
-  feature <- getFeature(inputs, token, base_url, feature)
+  feature <- getFeature(inputs, token, base_url, feature, debug)
   
   return(feature)
 }

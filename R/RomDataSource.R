@@ -38,11 +38,11 @@ RomDataSource <- R6Class(
       }
     },
     #' @return nothing sets internal private token
-    get_token = function() {
+    get_token = function(rest_pw = NULL) {
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$site, self$rest_uname)
+      private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key
