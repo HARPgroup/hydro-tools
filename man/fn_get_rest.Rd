@@ -20,3 +20,6 @@ fn_get_rest(entity_type, pk, inputs, site, token)
 \description{
 Get any entity from a RESTful web service
 }
+\examples{
+NA
+}
