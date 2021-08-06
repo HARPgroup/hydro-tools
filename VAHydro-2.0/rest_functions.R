@@ -1247,16 +1247,22 @@ om_create_model <- function(featureid, entity_type, model_name, model_version, m
 
 om_get_watershed_model_data <- function(
   data_source, riverseg_or_gage, runid, 
-  model_phase, model_scenario, start_date, end_date
+  model_phase, model_scenario, 
+  start_date, end_date, 
+  token, site = "http://deq1.bse.vt.edu:81/d.dh",
+  omsite = "http://deq1.bse.vt.edu"
 ) {
   # Get data set by type
+  message(paste("Using site", site))
+  message(paste("Looking for type",data_source, "with id",riverseg_or_gage))
   if (data_source == 'vahydro') {
-    message("Getting VAHydro data for source 1")
+    message(paste("Getting VAHydro data for source 1",riverseg_or_gage))
     data1 <- vahydro_import_data_cfs(riverseg_or_gage, runid, token, site, start_date, end_date)
   } else if (data_source == 'gage') {
     message("Getting USGS gage data for source 1")
     data1 <- gage_import_data_cfs(riverseg_or_gage, start_date, end_date)
   } else if (data_source == 'cbp_model') {
+    message(paste("Getting CBP data for source 1",riverseg_or_gage))
     data1 <- model_import_data_cfs(riverseg_or_gage, model_phase, model_scenario, start_date, end_date)
   }
   return(data1)

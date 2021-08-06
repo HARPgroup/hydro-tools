@@ -37,6 +37,7 @@ RomDataSource <- R6Class(
         }
       }
     },
+    #' @param rest_pw to use, if NULL will prompt
     #' @return nothing sets internal private token
     get_token = function(rest_pw = NULL) {
       if (!is.character(self$site) ) {

@@ -113,9 +113,16 @@ nothing clears data tables
 \if{latex}{\out{\hypertarget{method-get_token}{}}}
 \subsection{Method \code{get_token()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(rest_pw = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rest_pw}}{to use, if NULL will prompt}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 nothing sets internal private token
 }

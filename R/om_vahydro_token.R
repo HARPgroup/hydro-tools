@@ -1,6 +1,7 @@
 #' Retrieve a token from vahydro REST service.  TBD: replace with object to store token and dn connection
 #' @param base_url character deprecated to be replaced by global datasource
 #' @param rest_uname username to authenticate (if omitted will prompt)
+#' @param rest_pw password to authenticate (if omitted will prompt)
 #' @return token character from VAHydro REST web service
 #' @seealso NA
 #' @export om_vahydro_token

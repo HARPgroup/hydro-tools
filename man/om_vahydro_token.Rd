@@ -4,12 +4,18 @@
 \alias{om_vahydro_token}
 \title{Retrieve a token from vahydro REST service.  TBD: replace with object to store token and dn connection}
 \usage{
-om_vahydro_token(base_url = "http://deq2.bse.vt.edu/d.dh", rest_uname = NULL)
+om_vahydro_token(
+  base_url = "http://deq2.bse.vt.edu/d.dh",
+  rest_uname = NULL,
+  rest_pw = NULL
+)
 }
 \arguments{
 \item{base_url}{character deprecated to be replaced by global datasource}
 
 \item{rest_uname}{username to authenticate (if omitted will prompt)}
+
+\item{rest_pw}{password to authenticate (if omitted will prompt)}
 }
 \value{
 token character from VAHydro REST web service
