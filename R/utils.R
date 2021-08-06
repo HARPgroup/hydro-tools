@@ -439,6 +439,8 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
 #' @param inputs  contents of record to get in list(pid, propname, propvalue, ...)
 #' @param site URL of rest server
 #' @param token for xhttp auth
+#' @export fn_post_rest
+#' @examples NA
 fn_get_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   
