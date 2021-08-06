@@ -20,3 +20,9 @@ fn_post_rest(entity_type, pk, inputs, site, token)
 \description{
 Post any entity to a RESTful web service
 }
+\examples{
+NA
+}
+\seealso{
+NA
+}

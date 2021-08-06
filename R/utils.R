@@ -362,6 +362,9 @@ fn_get_timeseries <- function(inputs, site, token){
 #' @param inputs  contents of record to post in list(pid, propname, propvalue, ...)
 #' @param site URL of rest server
 #' @param token for xhttp auth
+#' @seealso NA
+#' @export fn_post_rest
+#' @examples NA
 fn_post_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   print(inputs)
@@ -675,6 +678,14 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   return(propvals)
 }
 
+#' Retrieve Property data from propvalues style data frame
+#'
+#' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+#' @param var_defs_tmp data frame to search
+#' @return data frame of propvalue or FALSE
+#' @seealso NA
+#' @export fn_search_vardefs
+#' @examples NA
 fn_search_vardefs <- function(config, var_defs_tmp) {
   # TBD, return false now, which means no local store, must retrieve
   return(FALSE)
