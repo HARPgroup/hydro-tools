@@ -475,7 +475,7 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     );
     message(entity_rest)
     entity_cont <- httr::content(entity_rest);
-    message(paste(site,"/dh_feature.json",sep=""))
+    message(paste0(site, "/",entity_type, ".json"))
     
     if (length(entity_cont$list) != 0) {
       numrecs <- length(entity_cont$list)
@@ -515,15 +515,13 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
       }
     } else {
       morepages = FALSE
-      #trecs = as.integer(count(ts))
-      trecs <- nrow(entities)
-      if (trecs == 0) {
-        print("----- This entity does not exist")
-        entities = FALSE
-      } else {
-        print(paste("Total =", trecs))
-      }
     }
+  }
+  if (is.logical(entities)) {
+    print("----- This entity does not exist")
+    entities = FALSE
+  } else {
+    print(paste("Total =", trecs))
   }
   return(entities)
 }

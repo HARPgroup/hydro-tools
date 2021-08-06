@@ -61,6 +61,8 @@ RomTS <- R6Class(
         if (!is.null(self$datasource)) {
           vardef = self$datasource$get_vardef(config$varkey)
           config$varid = vardef$varid
+          # eliminate this since if passed raw to reest will cause problems
+          config$varkey <- NULL
         }
       }
       # if requested, we try to load

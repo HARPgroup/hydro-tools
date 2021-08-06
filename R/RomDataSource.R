@@ -92,6 +92,8 @@ RomDataSource <- R6Class(
           if (nrow(propvalues) >= 1) {
             prop <- as.list(propvalues[1,])
           }
+        } else {
+          prop <- propvalues
         }
       }
       # return either the raw fn_get_timeseries/fn_search_propvalues 
