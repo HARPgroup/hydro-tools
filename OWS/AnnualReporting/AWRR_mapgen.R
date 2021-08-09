@@ -17,7 +17,6 @@ source(paste(hydro_tools,"GIS_functions/base.layers.R",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
 #FINAL MAP VERSIONS SAVE HERE
-folder <- "U:/OWS/foundation_datasets/awrr/2021/"
 folder <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/")
 export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/")
 
