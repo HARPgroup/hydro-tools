@@ -16,7 +16,11 @@ source(paste(basepath,"config.local.private",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.layers.R",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
+#FINAL MAP VERSIONS SAVE HERE
 folder <- "U:/OWS/foundation_datasets/awrr/2021/"
+folder <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/")
+export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/")
+
 ###################################################################################################### 
 # GENERATE MAP
 ######################################################################################################
@@ -87,7 +91,8 @@ monitoring_map <- basemap.obj + ms.gg +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
-ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
+ggsave(plot = drought_map_draw, file = paste0(export_path, "MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 
 ######################################################################################################
@@ -117,7 +122,7 @@ fips_df <-sqldf(paste('SELECT *,fips_geom AS geom,
  fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
 
  finalmap.obj <- basemap.obj + fips.gg +
-                 theme(legend.position = c(0.23, 0.78),
+                 theme(legend.position = c(0.23, 0.782),
                        legend.title=element_text(size=10),
                        legend.text=element_text(size=8),
                        aspect.ratio = 12.05/16
@@ -136,7 +141,8 @@ fips_df <-sqldf(paste('SELECT *,fips_geom AS geom,
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 drought_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-ggsave(plot = drought_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","finalmap.obj.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = drought_map_draw, file = paste0(export_path, "tables_maps/Xfigures/","finalmap.obj.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "DroughtRegions.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # GROUNDWATER WITHDRAWAL BY LOCALITY  #######################################################
@@ -177,8 +183,8 @@ finalmap.obj <- basemap.obj + fips.gg +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_gw_locality.png",sep = ""), width=6.5, height=4.95)
-
+#ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_gw_locality.png",sep = ""), width=6.5, height=4.95)  #Working map saves here
+ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "Locality_Groundwater_Map.png",sep = ""), width=6.5, height=4.95)  #FINAL MAP SAVES HERE
 #############################################################################################
 # SURFACE WATER WITHDRAWAL BY LOCALITY  #######################################################
 gw_locality <- read.csv(paste("U:/OWS/foundation_datasets/awrr/",eyear,"/ByLocality.csv",sep=""))
@@ -218,7 +224,8 @@ finalmap.obj <- basemap.obj + fips.gg +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_sw_locality.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_sw_locality.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Locality_SurfaceWater_Map.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 
 #############################################################################################
@@ -260,7 +267,8 @@ finalmap.obj <- basemap.obj + fips.gg +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 gw_locality_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_total_locality.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = gw_locality_map_draw, file = paste0(export_path, "awrr/2021/","map_total_locality.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Locality_Total_Map.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 
 #############################################################################################
@@ -307,7 +315,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Agriculture_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Irrigation Water Withdrawals by Withdrawal Point Location################
@@ -352,7 +361,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Irrigation_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Commercial Water Withdrawals by Withdrawal Point Location################
@@ -397,7 +407,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Commerical_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Mining Water Withdrawals by Withdrawal Point Location################
@@ -443,7 +454,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Mining_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Manufacturing Water Withdrawals by Withdrawal Point Location################
@@ -491,7 +503,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Manufacturing_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 
 #############################################################################################
@@ -538,7 +551,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "PublicWaterSupply_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Power Generation Water Withdrawals by Withdrawal Point Location################
@@ -622,7 +636,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95)
+#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = drought_map_draw, file = paste0(export_path, "Power_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Surface Water Withdrawal Permitting Activities ############################################
@@ -670,7 +685,8 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95)
+  #ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 #############################################################################################
 # Groundwater Withdrawal Permitting Activities ##############################################
   
@@ -741,7 +757,7 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xGWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xGWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95) #Working map saves here
   
 #############################################################################################
 # WSP Regions Map ###########################################################################
@@ -791,7 +807,8 @@ mp_df <-sqldf(paste('SELECT *,
   
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.401, y = -0.032) #LEFT BOTTOM LOGO
   wsp_map_draw <- ggdraw(finalmap.obj)+deqlogo 
-  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15)
+  #ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","xxWSP_Planning_Regions_Map.png",sep = ""), width=10, height=15) #Working map saves here
+  ggsave(plot = wsp_map_draw, file = paste0(export_path, "/awrr/2021/","WSP_Planning_Regions_Map.pdf",sep = ""), width=10, height=15) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities ##############################################
@@ -905,5 +922,6 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
   permit_map_draw <- ggdraw(permit_map)+deqlogo
   
-  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95)
+  #ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95) #Working map saves here
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
   
