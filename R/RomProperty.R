@@ -65,6 +65,9 @@ RomProperty <- R6Class(
           config$varkey <- NULL
         }
       }
+      if (is.element("bundle", config_cols)) {
+        config$bundle <- 'dh_properties'
+      }
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
