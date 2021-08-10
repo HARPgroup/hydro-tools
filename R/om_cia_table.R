@@ -1,7 +1,7 @@
 #' Generate a table of CIA model result summary statistsics for both Rseg and Facility models, comparing across scenarios
 #'
-#' @param rseg.hydroid riverseg dh_feature hydroid
-#' @param fac.hydroid facility dh_feature hydroid
+#' @param fac_model_info facility json list
+#' @param rseg_model_info riverseg json list
 #' @param runid.list list of runids of interest 
 #' @param fac.metric.list list of facility metrics of interest
 #' @param rseg.metric.list list of riverseg metrics of interest  

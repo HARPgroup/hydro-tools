@@ -5,22 +5,20 @@
 \title{Generate a table of CIA model result summary statistsics for both Rseg and Facility models, comparing across scenarios}
 \usage{
 om_cia_table(
-  rseg.hydroid = 462757,
-  fac.hydroid = 72672,
-  runid.list = c("runid_201", "runid_401"),
-  fac.metric.list = c("wd_mgd", "ps_mgd", "unmet1_mgd", "unmet7_mgd", "unmet30_mgd",
-    "unmet90_mgd"),
-  rseg.metric.list = c("Qout", "Qbaseline", "remaining_days_p0", "remaining_days_p10",
-    "remaining_days_p50", "l30_Qout", "l90_Qout", "consumptive_use_frac",
-    "wd_cumulative_mgd", "ps_cumulative_mgd"),
-  site = "https://deq1.bse.vt.edu/d.dh",
-  site_base = "https://deq1.bse.vt.edu"
+  fac_model_info = FALSE,
+  rseg_model_info = FALSE,
+  runid.list = c("runid_6011", "runid_6012"),
+  fac.metric.list = c("wd_mgd", "ps_mgd", "unmet30_mgd"),
+  rseg.metric.list = c("Qout", "Qbaseline", "l30_Qout", "l90_Qout",
+    "consumptive_use_frac", "wd_cumulative_mgd", "ps_cumulative_mgd"),
+  site = "http://deq1.bse.vt.edu:81/d.dh",
+  site_base = "http://deq1.bse.vt.edu:81"
 )
 }
 \arguments{
-\item{rseg.hydroid}{riverseg dh_feature hydroid}
+\item{fac_model_info}{facility json list}
 
-\item{fac.hydroid}{facility dh_feature hydroid}
+\item{rseg_model_info}{riverseg json list}
 
 \item{runid.list}{list of runids of interest}
 

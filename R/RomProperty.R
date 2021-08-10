@@ -65,7 +65,7 @@ RomProperty <- R6Class(
           config$varkey <- NULL
         }
       }
-      if (is.element("bundle", config_cols)) {
+      if (!is.element("bundle", config_cols)) {
         config$bundle <- 'dh_properties'
       }
       # if requested, we try to load
