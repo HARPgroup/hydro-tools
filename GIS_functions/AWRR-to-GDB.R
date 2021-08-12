@@ -349,5 +349,7 @@ writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
          paste0("test_mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
 #REMAINING STEPS IF GDB IS DESIRED
-# 1) Load resulting .shp file in arcmap 
-# 2) save as gdb
+# 1) In ArcMap - Load resulting .shp file in arcmap 
+# 2) Save as gdb
+# 3) Set the coordinate reference system in the  data layer's property page in ArcCatalog
+# 4) Import (multiple) the data layers to the gdb
