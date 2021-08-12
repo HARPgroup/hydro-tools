@@ -58,11 +58,14 @@ om_cia_table <- function (
     }
     
     # RETRIEVE FAC MODEL STATS 
-    fac_summary.i <- as.data.frame(run_info.fac[fac.metric.list])[paste0(fac.metric.list,".value")]
-    names(fac_summary.i) <- fac.metric.list
-    
-    fac_summary.i[] <- sapply(fac_summary.i[],as.numeric) #MAKE ALL FIELDS NUMERIC
-    fac_summary.i <- fac_summary.i %>% mutate_if(is.numeric, round, digits=2) #ROUND ALL FIELDS  
+    fac_summary.i <- list()
+    for (j in 1:length(fac.metric.list)) {
+      varname <- fac.metric.list[j]
+      varvalue <- find_name(run_info.fac,varname)$value
+      fac_summary.i[varname] <- as.numeric(varvalue)
+    }
+    fac_summary.i <- as.data.frame(fac_summary.i)
+    fac_summary.i <- round(fac_summary.i,2)
 
     if (nrow(fac_summary.i) > 0) {
       fac_summary.i <- cbind("runid" = run.i,"fac_model" = fac_model_info[[1]]$name,fac_summary.i)
@@ -87,11 +90,14 @@ om_cia_table <- function (
 
     run_info.rseg <- find_name(rseg_model_info,runid.i)
     run_info.rseg <- merge.list(run_info.rseg, default_info.rseg)
-    rseg_summary.i <- as.data.frame(run_info.rseg[rseg.metric.list])[paste0(rseg.metric.list,".value")]
-    names(rseg_summary.i) <- rseg.metric.list
- 
-    rseg_summary.i[] <- sapply(rseg_summary.i[],as.numeric) #MAKE ALL FIELDS NUMERIC
-    rseg_summary.i <- rseg_summary.i %>% mutate_if(is.numeric, round, digits=2) #ROUND ALL FIELDS  
+    rseg_summary.i <- list()
+    for (j in 1:length(rseg.metric.list)) {
+      varname <- rseg.metric.list[j]
+      varvalue <- find_name(run_info.rseg,varname)$value
+      rseg_summary.i[varname] <- as.numeric(varvalue)
+    }
+    rseg_summary.i <- as.data.frame(rseg_summary.i)
+    rseg_summary.i <- round(rseg_summary.i,2)
     
     # ADD ELFGEN STATS TO TABLE
     default_info.elfgen = list(
@@ -108,7 +114,15 @@ om_cia_table <- function (
     
     run_info.elfgen <- find_name(run_info.rseg,'elfgen_EDAS_huc8')
     run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
-    elfgen_summary.i <- as.data.frame(run_info.elfgen[elfgen.metric.list])[paste0(elfgen.metric.list,".value")]
+    
+    elfgen_summary.i <- list()
+    for (j in 1:length(elfgen.metric.list)) {
+      varname <- elfgen.metric.list[j]
+      varvalue <- find_name(run_info.rseg,varname)$value
+      elfgen_summary.i[varname] <- as.numeric(varvalue)
+    }
+    elfgen_summary.i <- as.data.frame(elfgen_summary.i)
+    elfgen_summary.i <- round(elfgen_summary.i,2)
     names(elfgen_summary.i) <- elfgen.metric.list
     
     rseg_summary.i <- cbind(rseg_summary.i,elfgen_summary.i)
