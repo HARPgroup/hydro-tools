@@ -13,8 +13,8 @@ library("beepr")
 #WKT_layer <- read.csv('C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/GIS_LAYERS/MinorBasins.csv')
 
 #load variables
-syear = 1982
-eyear = 1989
+syear = 1990
+eyear = 1999
 
 #####################################################################################
 #LOAD CONFIG FILE
@@ -23,7 +23,7 @@ localpath <- paste(github_location,"/USGS_Consumptive_Use", sep = "")
 
 #LOAD from_vahydro() FUNCTION
 source(paste(localpath,"/Code/VAHydro to NWIS/from_vahydro.R", sep = ""))
-datasite <- "http://deq1.bse.vt.edu/d.dh"
+datasite <- "http://deq1.bse.vt.edu:81/d.dh"
 
 ### RETRIEVE ANNUAL WITHDRAWAL DATA #################################################
 wd_annual_data <- list()
@@ -162,7 +162,7 @@ for (y in year_range) {
   
   #with power
   export_view <- paste0("ows-annual-report-map-exports-monthly-export/wd_mgm?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498")
-  output_filename <- "wd_mgy_export.csv"
+  output_filename <- "wd_mgm_export.csv"
   wd_monthly <- from_vahydro(datasite,export_view,localpath,output_filename)
   
   wd_monthly_data <- rbind(wd_monthly_data, wd_monthly)
@@ -175,6 +175,8 @@ wd_mon <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facili
                WHERE Facility != "DALECARLIA WTP"
                GROUP BY "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facility_hydroid", "Facility","Use.Type","Year","Month","Latitude","Longitude","Locality","FIPS.Code"
                 ORDER BY "Water.Use.MGM" DESC ')
+#save file
+write.csv(wd_mon,paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,"wd_mon.csv"), row.names = FALSE)
 
 #rename columns & CONVERT LAT/LON COLUMNS TO WKT COLUMN
 wd_mgm <- sqldf('SELECT MP_hydroid AS MP_ID,
@@ -237,8 +239,9 @@ output_file <- paste0("mp_wd_monthly_",syear,"-",eyear,".shp")
 wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"))
 WKT_layer <- wd_mgm_export
 WKT_layer$id <- as.numeric(rownames(WKT_layer))
-WKT_layer.list <- list()
 
+### OPTION 1 - WKT FOR LOOP --------------------------------------------------------------------------
+WKT_layer.list <- list()
 #i <- 1
 for (i in 1:length(WKT_layer$MP_ID)) {
   #for (i in 1:5) {
@@ -301,3 +304,46 @@ beep(2)
 #REMAINING STEPS IF GDB IS DESIRED
 # 1) Load resulting .shp file in arcmap 
 # 2) save as gdb
+
+### OPTION 2 - CSV TO SHAPEFILE --------------------------------------------------------------------------
+# Read the .csv file
+wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
+WKT_layer <- wd_mgm_export
+
+# look at the data structure
+str(WKT_layer)
+
+# view column names
+names(WKT_layer)
+
+
+# SpatialPointsDataFrame does not accept NA values in coordinate fields
+r <- sqldf('SELECT CASE
+              WHEN Lat = ""
+              THEN 99
+              WHEN Lat IS NULL
+              THEN 99
+              ELSE Lat
+              END AS Lat,
+              CASE
+              WHEN Lon = ""
+              THEN 99
+              WHEN Lon IS NULL
+              THEN 99
+              ELSE Lon
+              END AS Lon,*
+           FROM WKT_layer
+           ')
+
+# first, convert the data.frame to spdf
+coordinates(r) <- ~Lon+Lat
+
+# second, assign the CRS in one of two ways
+crs(r) <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs 
+                 +ellps=WGS84 +towgs84=0,0,0"
+plot(r, 
+     main=paste0("Map of Withdrawal Points: ",syear,"-",eyear))
+str(r)
+# write a shapefile
+writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
+         paste0("test_mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile")
