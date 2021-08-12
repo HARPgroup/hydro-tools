@@ -13,8 +13,8 @@ library("beepr")
 #WKT_layer <- read.csv('C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/GIS_LAYERS/MinorBasins.csv')
 
 #load variables
-syear = 1990
-eyear = 1999
+syear = 2020
+eyear = 2020
 
 #####################################################################################
 #LOAD CONFIG FILE
@@ -235,12 +235,11 @@ output_location <- paste0(export_path,"shp_output/")
 output_file <- paste0("mp_wd_monthly_",syear,"-",eyear,".shp")
 
 #####################################################################################
-#####################################################################################
-wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"))
-WKT_layer <- wd_mgm_export
-WKT_layer$id <- as.numeric(rownames(WKT_layer))
-
 # ### OPTION 1 - WKT FOR LOOP --------------------------------------------------------------------------
+# wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"))
+# WKT_layer <- wd_mgm_export
+# WKT_layer$id <- as.numeric(rownames(WKT_layer))
+
 # WKT_layer.list <- list()
 # #i <- 1
 # for (i in 1:length(WKT_layer$MP_ID)) {
@@ -307,8 +306,9 @@ WKT_layer$id <- as.numeric(rownames(WKT_layer))
 
 ### OPTION 2 - CSV TO SHAPEFILE --------------------------------------------------------------------------
 # Read the .csv file
-wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
+#wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
 WKT_layer <- wd_mgm_export
+WKT_layer$id <- as.numeric(rownames(WKT_layer))
 
 # look at the data structure
 str(WKT_layer)
@@ -346,7 +346,7 @@ plot(r,
 str(r)
 # write a shapefile
 writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
-         paste0("test_mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile")
+         paste0("test_mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
 #REMAINING STEPS IF GDB IS DESIRED
 # 1) Load resulting .shp file in arcmap 
