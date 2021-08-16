@@ -9,7 +9,7 @@ color_list <- sort(colors())
 options(scipen=9999)
 
 #site <- "http://deq2.bse.vt.edu/d.dh/"
-site <- "https://deq1.bse.vt.edu/d.dh/"
+site <- "http://deq1.bse.vt.edu:81/d.dh/"
 
 basepath <- "/var/www/R/"
 source(paste(basepath,"config.local.private",sep = '/'))
@@ -18,7 +18,7 @@ source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
 #FINAL MAP VERSIONS SAVE HERE
 folder <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/")
-export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/")
+#export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/")
 
 ###################################################################################################### 
 # GENERATE MAP
@@ -923,4 +923,176 @@ mp_df <-sqldf(paste('SELECT *,
   
   #ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95) #Working map saves here
   ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+  
+#############################################################################################
+# Unpermitted VS. Surface Water Withdrawal Permitting Activities ############################################
+  
+  #PULL IN OWS Permit List, all reporting MPs, all power MPs from local files
+  mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
+  mp_all <- read.csv(paste(folder,"mp_all_wide_2016-2020.csv",sep=""))
+  mp_power <- read.csv(paste(folder,"mp_all_wide_power_2016-2020.csv",sep=""))
+  
+  #PERMIT LAYER
+  #filter for SW that are currently active or in admin continued status
+  mp_permit_vwp <- sqldf('SELECT a.*
+                     FROM mp_permit AS a
+                     WHERE a."Permit.Program" LIKE "%VWP%"
+                     AND a."Status" IN ("active", "expired")')
+
+  
+  #MPs LAYER
+  #join/union the SW MPs into 1 layer
+  mp_all <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+                  FROM mp_all
+                  WHERE "Source_Type" LIKE "Surface Water"')
+  mp_power <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_hydroID" AS "Facility_HydroID","Facility","Use_Type", "fips" as "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+                  FROM mp_power
+                  WHERE "Source_Type" LIKE "Surface Water"')
+  mp <- sqldf('SELECT *
+              FROM mp_all
+              UNION all 
+              SELECT * 
+              FROM mp_power')
+  
+  #filter for MPs with and without Permits
+  mp_df <-sqldf(paste('SELECT a.*,b."Permit",b."Permit.ID", b."Permit.Program", b."Status"
+                        FROM mp AS a
+                      LEFT OUTER JOIN mp_permit_vwp AS b
+                      ON a."Facility_HydroID" = b."VA.Hydro.Facility.ID" ',sep="")) 
+  write.csv(mp_df, paste0(export_path, "/awrr/2021/","mp_unpermitted_vs_permitted_VWP.csv",sep = ""), row.names = F)
+  
+  mp_df <- sqldf('SELECT *, CASE
+                            WHEN "Permit.ID" IS NULL
+                            THEN 0
+                            WHEN "Permit.ID" IS NOT NULL
+                            THEN 1
+                            ELSE "Outlier"
+                            END AS has_permit
+                 FROM mp_df
+                 ORDER BY has_permit')
+  
+  mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, fill=factor(has_permit), size = factor(has_permit)), alpha=0.9, shape=21, show.legend = TRUE)
+  
+  #FIPS LAYER
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+  
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+  
+  permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.18, .9069),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16) +
+    guides(size = guide_legend(override.aes = list(size = c(2,3))),
+           fill = guide_legend(override.aes = list(fill = c("#0C1078", "yellow")))) +
+    scale_size_manual(name="Surface Water Withdrawal ", values=c(2,3), labels=c("Unpermitted Surface Water Intakes", "Permitted Surface Water Intakes")) +
+    scale_fill_manual(name="Surface Water Withdrawal ", 
+                      values=c("#0C1078", "yellow"), 
+                      labels=c("Unpermitted Surface Water Intakes", "Permitted Surface Water Intakes")) 
+  #permit_map
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","Unpermitted_vs_VWP.png",sep = ""), width=6.5, height=4.95) #Working map saves here
+  #ggsave(plot = permit_map_draw, file = paste0(export_path, "VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+#############################################################################################
+# Unpermitted VS. Groundwater Withdrawal Permitting Activities ##############################
+  
+  #PULL IN OWS Permit List, all reporting MPs, all power MPs from local files
+  mp_permit <- read.csv(paste(folder,"ows_permit_list.csv",sep=""))
+  mp_all <- read.csv(paste(folder,"mp_all_wide_2016-2020.csv",sep=""))
+  mp_power <- read.csv(paste(folder,"mp_all_wide_power_2016-2020.csv",sep=""))
+  
+  #PERMIT LAYER
+  #filter for SW that are currently active or in admin continued status
+  mp_permit_gwp <- sqldf('SELECT a.*
+                     FROM mp_permit AS a
+                     WHERE a."Permit.Program" LIKE "%GWP%"
+                     AND a."Status" IN ("active", "expired")')
+  
+  
+  #MPs LAYER
+  #join/union the SW MPs into 1 layer
+  mp_all <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+                  FROM mp_all
+                  WHERE "Source_Type" LIKE "Groundwater"')
+  mp_power <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_hydroID" AS "Facility_HydroID","Facility","Use_Type", "fips" as "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+                  FROM mp_power
+                  WHERE "Source_Type" LIKE "Groundwater"')
+  mp <- sqldf('SELECT *
+              FROM mp_all
+              UNION all 
+              SELECT * 
+              FROM mp_power')
+  
+  #filter for MPs with and without Permits
+  mp_df <-sqldf(paste('SELECT a.*,b."Permit",b."Permit.ID", b."Permit.Program", b."Status"
+                        FROM mp AS a
+                      LEFT OUTER JOIN mp_permit_gwp AS b
+                      ON a."Facility_HydroID" = b."VA.Hydro.Facility.ID" ',sep="")) 
+  write.csv(mp_df, paste0(export_path, "/awrr/2021/","mp_unpermitted_vs_permitted_GWP.csv",sep = ""), row.names = F)
+  
+  mp_df <- sqldf('SELECT *, CASE
+                            WHEN "Permit.ID" IS NULL
+                            THEN 0
+                            WHEN "Permit.ID" IS NOT NULL
+                            THEN 1
+                            ELSE "Outlier"
+                            END AS has_permit
+                 FROM mp_df
+                 ORDER BY has_permit')
+  
+  mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, fill=factor(has_permit)), alpha=0.9, shape=21, show.legend = TRUE)
+  
+  #FIPS LAYER
+  fips_df <- sqldf('SELECT *
+                   FROM fips_csv
+                   WHERE fips_code NOT LIKE "3%"') #select all in fips_csv and take out NC fips codes
+
+  fips.sf <- st_as_sf(fips_df, wkt = 'fips_geom')
+  fips.gg <- geom_sf(data = fips.sf,colour = "black",fill = NA, lwd=0.3, inherit.aes = FALSE, show.legend = FALSE)
+
+  #GWMA LAYER
+  #PULL IN GWMA wkt from Search By HydroID page
+  gwma_df <- read.csv(paste(folder,"GWMA_wkt.csv",sep=""))
+  gwma_df <- sqldf('SELECT *, CASE
+                    WHEN HydroID = 194537
+                    THEN 3
+                    WHEN HydroID = 441638
+                    THEN 4
+                    ELSE 0
+                    END AS fill_order
+                   FROM gwma_df')
+  gwma.sf <- st_as_sf(gwma_df, wkt = 'Geometry')
+  gwma.gg <- geom_sf(data = gwma.sf,aes(fill = factor(fill_order)),colour = "black", shape = 22, lwd=0.4, alpha = 0.5, inherit.aes = FALSE, show.legend = FALSE)
+
+  
+  permit_map <- basemap.obj + fips.gg + gwma.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.235, .854),
+          legend.title=element_text(size=10),
+          legend.text=element_text(size=8),
+          aspect.ratio = 12.05/16) +
+    guides(fill = guide_legend(override.aes = list(alpha = c(1,1,.5,.5),
+                                                   size = c(3,3,3,3),
+                                                   shape = c(21,21,22,22)))) +
+    # scale_size_manual(name="Groundwater Withdrawal ", 
+    #                   values=c(1,1,2,3), 
+    #                   labels=c("Unpermitted Groundwater Wells", "Permitted Surface Water Wells")) +
+    scale_fill_manual(name="Groundwater Withdrawal ", 
+                      values=c("#0C1078", "yellow","pink","darkorchid2"), 
+                      labels=c("Unpermitted Groundwater Wells",
+                               "Permitted Groundwater Wells",
+                               "Eastern Virginia Groundwater Management Area",
+                               "Eastern Shore Groundwater Management Area"
+                               )) 
+  #permit_map
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
+  permit_map_draw <- ggdraw(permit_map)+deqlogo
+  
+  ggsave(plot = permit_map_draw, file = paste0(export_path, "/awrr/2021/","Unpermitted_vs_GWP.png",sep = ""), width=6.5, height=4.95) #Working map saves here
+  #ggsave(plot = permit_map_draw, file = paste0(export_path, "GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+
   
