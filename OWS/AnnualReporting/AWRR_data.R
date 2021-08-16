@@ -287,7 +287,7 @@ fips <- read.csv(file = "C:\\Users\\maf95834\\Documents\\Github\\vahydro\\R\\wsp
 multi_yr_data$Use_Type <- str_to_title(multi_yr_data$Use_Type)
 multi_yr_data$Facility <- str_to_title(multi_yr_data$Facility)
 #transform from long to wide table
-data_all <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, Facility_HydroID, Facility,Use_Type, FIPS), names_from = Year, values_from = mgy)
+data_all <- pivot_wider(data = multi_yr_data, id_cols = c(HydroID, Source_Type, MP_Name, Facility_HydroID, Facility,Use_Type, FIPS, lat, lon), names_from = Year, values_from = mgy)
 
 data_all <- sqldf('SELECT a.*, b.name AS Locality
                   FROM data_all a
