@@ -111,6 +111,7 @@ om_cia_table <- function (
       )
     )
     elfgen.metric.list <- c('richness_change_abs','richness_change_pct')
+    run_info.elfgen <- find_name(run_info.rseg,'elfgen_EDAS_huc8')
     run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
     
     elfgen_summary.i <- list()
