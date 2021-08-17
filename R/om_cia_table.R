@@ -111,18 +111,19 @@ om_cia_table <- function (
       )
     )
     elfgen.metric.list <- c('richness_change_abs','richness_change_pct')
-    
-    run_info.elfgen <- find_name(run_info.rseg,'elfgen_EDAS_huc8')
     run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
     
     elfgen_summary.i <- list()
     for (j in 1:length(elfgen.metric.list)) {
       varname <- elfgen.metric.list[j]
-      varvalue <- find_name(run_info.rseg,varname)$value
-      elfgen_summary.i[varname] <- as.numeric(varvalue)
+      varvalue <- find_name(run_info.elfgen,varname)$value
+      elfgen_summary.i[varname] <- varvalue
+      if (is.numeric(elfgen_summary.i[varname])) {
+        elfgen_summary.i[varname] <- round(elfgen_summary.i[varname],2)
+      }
     }
     elfgen_summary.i <- as.data.frame(elfgen_summary.i)
-    elfgen_summary.i <- round(elfgen_summary.i,2)
+    
     names(elfgen_summary.i) <- elfgen.metric.list
     
     rseg_summary.i <- cbind(rseg_summary.i,elfgen_summary.i)
