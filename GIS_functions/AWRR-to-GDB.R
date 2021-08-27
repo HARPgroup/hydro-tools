@@ -13,9 +13,9 @@ library("beepr")
 #WKT_layer <- read.csv('C:/Users/nrf46657/Desktop/VAHydro Development/GitHub/hydro-tools/GIS_LAYERS/MinorBasins.csv')
 
 #load variables
-syear = 2020
+syear = 1982
 eyear = 2020
-
+five.year.range <- c(2016, 2017, 2018, 2019, 2020)
 #####################################################################################
 #LOAD CONFIG FILE
 source(paste("/var/www/R/config.local.private", sep = ""))
@@ -73,8 +73,12 @@ wd_mgy <- sqldf('SELECT MP_hydroid AS MP_ID,
 #place into export data frame
 wd_mgy_export <- spread(data = wd_mgy, key = MGY, value = USE_MGY,sep = "_")
 
+firstcol = which(colnames(wd_mgy_export)=="MGY_2016")
+lastcol = which(colnames(wd_mgy_export)=="MGY_2020")
+
+wd_mgy_export$multi_yr_avg <- round((rowMeans(wd_mgy_export[firstcol:lastcol], na.rm = TRUE, dims = 1)),2)
 #save file
-write.csv(wd_mgy_export,paste0(export_path,"withdrawal_annual.csv"), row.names = FALSE)
+write.csv(wd_mgy_export,paste0(export_path,"withdrawal_annual2.csv"), row.names = FALSE)
 
 
 output_location <- paste0(export_path,"shp_output/")
@@ -307,7 +311,7 @@ output_file <- paste0("mp_wd_monthly_",syear,"-",eyear,".shp")
 ### OPTION 2 - CSV TO SHAPEFILE --------------------------------------------------------------------------
 # Read the .csv file
 #wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
-WKT_layer <- wd_mgm_export
+WKT_layer <- wd_mgy_export
 WKT_layer$id <- as.numeric(rownames(WKT_layer))
 
 # look at the data structure
@@ -315,7 +319,6 @@ str(WKT_layer)
 
 # view column names
 names(WKT_layer)
-
 
 # SpatialPointsDataFrame does not accept NA values in coordinate fields
 r <- sqldf('SELECT CASE
@@ -331,7 +334,8 @@ r <- sqldf('SELECT CASE
               WHEN Lon IS NULL
               THEN 99
               ELSE Lon
-              END AS Lon,*
+              END AS Lon,
+              *
            FROM WKT_layer
            ')
 
@@ -346,10 +350,10 @@ plot(r,
 str(r)
 # write a shapefile
 writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
-         paste0("test_mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
+         paste0("x_mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
 #REMAINING STEPS IF GDB IS DESIRED
 # 1) In ArcMap - Load resulting .shp file in arcmap 
-# 2) Save as gdb
+# 2) Save as gdb - import multiple feature class files to .gdb 
 # 3) Set the coordinate reference system in the  data layer's property page in ArcCatalog
 # 4) Import (multiple) the data layers to the gdb
