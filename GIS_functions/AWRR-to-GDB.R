@@ -350,7 +350,7 @@ plot(r,
 str(r)
 # write a shapefile
 writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
-         paste0("x_mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
+         paste0("mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
 #REMAINING STEPS IF GDB IS DESIRED
 # 1) In ArcMap - Load resulting .shp file in arcmap 
