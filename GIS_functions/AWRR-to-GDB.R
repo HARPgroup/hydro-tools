@@ -131,8 +131,8 @@ writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
 #PART 2 - MONTHLY ####################################################################
 ### RETRIEVE MONTHLY WITHDRAWAL DATA #################################################
 #load variables
-syear = 1982
-eyear = 1989
+syear = 2020
+eyear = 2020
 wd_monthly_data <- list()
 
 ## year range
@@ -257,8 +257,8 @@ plot(r,
 str(r)
 # write a shapefile
 writeOGR(r, "C:/Users/maf95834/Documents/shp_output",
-         paste0("mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
-
+         paste0("mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
+print(paste0("PROCESS COMPLETE: ",syear," - ",eyear," MONTHLY GIS LAYER"))
 #REMAINING STEPS IF GDB IS DESIRED
 # 1) In ArcMap - Load resulting .shp file in arcmap 
 # 2) Save as gdb - import multiple feature class files to .gdb 
