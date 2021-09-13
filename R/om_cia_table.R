@@ -49,7 +49,7 @@ om_cia_table <- function (
       scenario_short_name.i <- runid.i
     } else {
       ri <- run_info.fac$reports
-      scenario_short_name.i <- ri$scenario_short_name$value
+      scenario_short_name.i <- om.as.character(ri$scenario_short_name$value)
     }
     if (is.logical(scenario_short_name_list)) {
       scenario_short_name_list <- data.frame(scenario = scenario_short_name.i)
@@ -61,11 +61,13 @@ om_cia_table <- function (
     fac_summary.i <- list()
     for (j in 1:length(fac.metric.list)) {
       varname <- fac.metric.list[j]
-      varvalue <- find_name(run_info.fac,varname)$value
-      fac_summary.i[varname] <- as.numeric(varvalue)
+      varvalue <- om.as.numeric(find_name(run_info.fac,varname)$value)
+      if (is.numeric(varvalue)) {
+        varvalue <- format(round(varvalue,2), big.mark=",")
+      }
+      fac_summary.i[varname] <- varvalue
     }
     fac_summary.i <- as.data.frame(fac_summary.i)
-    fac_summary.i <- round(fac_summary.i,2)
 
     if (nrow(fac_summary.i) > 0) {
       fac_summary.i <- cbind("runid" = run.i,"fac_model" = fac_model_info[[1]]$name,fac_summary.i)
@@ -93,11 +95,13 @@ om_cia_table <- function (
     rseg_summary.i <- list()
     for (j in 1:length(rseg.metric.list)) {
       varname <- rseg.metric.list[j]
-      varvalue <- find_name(run_info.rseg,varname)$value
-      rseg_summary.i[varname] <- as.numeric(varvalue)
+      varvalue <- om.as.numeric(find_name(run_info.rseg,varname)$value)
+      if (is.numeric(varvalue)) {
+        varvalue <- format(round(varvalue,2), big.mark=",")
+      }
+      rseg_summary.i[varname] <- varvalue
     }
     rseg_summary.i <- as.data.frame(rseg_summary.i)
-    rseg_summary.i <- round(rseg_summary.i,2)
     
     # ADD ELFGEN STATS TO TABLE
     default_info.elfgen = list(
@@ -117,11 +121,11 @@ om_cia_table <- function (
     elfgen_summary.i <- list()
     for (j in 1:length(elfgen.metric.list)) {
       varname <- elfgen.metric.list[j]
-      varvalue <- find_name(run_info.elfgen,varname)$value
-      elfgen_summary.i[varname] <- varvalue
-      if (is.numeric(elfgen_summary.i[varname])) {
-        elfgen_summary.i[varname] <- round(elfgen_summary.i[varname],2)
+      varvalue <- om.as.numeric(find_name(run_info.elfgen,varname)$value)
+      if (is.numeric(varvalue)) {
+        varvalue <- format(round(varvalue,2), big.mark=",")
       }
+      elfgen_summary.i[varname] <- varvalue
     }
     elfgen_summary.i <- as.data.frame(elfgen_summary.i)
     
@@ -169,4 +173,18 @@ om_cia_table <- function (
   
   stats.df <- fac_rseg_stats.T
   return(stats.df)
+}
+
+om.as.character <- function(x, default = NA) {
+  if (length(x) == 0) {
+    return(as.character(default))
+  }
+  return(as.character(x))
+}
+
+om.as.numeric <- function(x, default = NA) {
+  if (length(x) == 0) {
+    return(as.numeric(default))
+  }
+  return(as.numeric(x))
 }
