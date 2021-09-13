@@ -8,7 +8,7 @@ feat <- RomFeature$new(ds,list(hydroid=1096),TRUE)
 
 # Historic annual withdrawals
 ts <- feat$tsvalues(varkey='wd_mgy')[c('tstime', 'tsvalue')]
-tsz <- zoo::as.zoo(tsv$tsvalue, order.by = as.POSIXct(tsv$tstime, origin="1970-01-01"))
+tsz <- zoo::as.zoo(ts$tsvalue, order.by = as.POSIXct(ts$tstime, origin="1970-01-01"))
 barplot(tsz)
 
 # Historic monthly withdrawals
@@ -17,7 +17,7 @@ tsz <- zoo::as.zoo(ts$tsvalue, order.by = as.POSIXct(ts$tstime, origin="1970-01-
 barplot(tsz)
 
 # box plot of monthly variation in withdrawal
-boxplot(ts$tsvalue ~ months(ts$tstime))
+boxplot(ts$tsvalue ~ months(as.POSIXct(ts$tstime, origin="1970-01-01")))
 
 # cross tab months - old school VWUDS format
 ts$year <- format(strptime(ts$tstime,'%s'), '%Y')
