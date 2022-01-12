@@ -8,7 +8,8 @@ ds$get_token(rest_pw)
 
 
 facmap <- function (facility_hydroid = 475973, 
-                    scaler = 0.06, 
+                    scaler = 0.06,
+                    plot_zoom = 13,
                     site = "http://deq1.bse.vt.edu:81/d.dh/",
                     export_path = "C:/Users/jklei/Desktop/GitHub/mapper/"
                     ) {
@@ -43,7 +44,7 @@ extent = data.frame(x = c(fac_lon-scaler, fac_lon+scaler),
 baselayers.gg <- base.layers(baselayers,extent=extent)
 basemap.obj <- base.map(baselayers.gg,extent=extent,
                         plot_margin = c(0.16,0.2,0.16,-3.9), #top, right, bottom, left
-                        plot_zoom = 13,
+                        plot_zoom = plot_zoom,
                         scale_bar = FALSE)
 
 ######################################################################################################
@@ -97,7 +98,7 @@ if (length(intakes[,1]) > 0){
     intake_i <- intakes[i,]
     
     intake_i_sf <- st_as_sf(intake_i, wkt = 'geom')
-    intake_i_geom <- geom_sf(data = intake_i_sf,aes(geometry = geom,colour = color_list[2]), inherit.aes = FALSE,size=2)
+    intake_i_geom <- geom_sf(data = intake_i_sf,aes(geometry = geom,colour = color_list[2]), inherit.aes = FALSE,size=3)
     intake_i_bbox <- st_bbox(intake_i_sf)
     intake_i_bbox <- data.frame(x = intake_i_bbox$xmin, y = intake_i_bbox$ymin)
     intake_i_label <- geom_label_repel(data = intake_i_bbox, aes(x = x, y = y, group = 1, label = intakes$name),size = 2,fill="white",box.padding =1,max.iter=20000)
@@ -245,19 +246,22 @@ if (nrow(conveyances) > 0){map <- map + conveyance_geom_list}
 
 
 if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0){
-  leg_values = c("gray30","black","orange","gray40")
+  #leg_values = c("gray30","black","orange","gray40")
+  leg_values = c("gray30","darkorchid3","orange","gray40")
   leg_labels = c("River Segments","Intake","Well","Transfer")
   leg_linetype = c("solid","blank","blank","dotted")
   leg_alpha = c(1,1,1,1)
   leg_shape = c(NA,16,15,NA)
 } else if (length(intakes[,1]) > 0 & length(wells[,1]) > 0){
-  leg_values = c("gray30","black","orange")
+  #leg_values = c("gray30","black","orange")
+  leg_values = c("gray30","darkorchid3","orange")
   leg_labels = c("River Segments","Intake","Well")
   leg_linetype = c("solid","blank","blank")
   leg_alpha = c(1,1,1)
   leg_shape = c(NA,16,15)
 } else if (length(intakes[,1]) > 0){
-  leg_values = c("gray30","black")
+  #leg_values = c("gray30","black")
+  leg_values = c("gray30","darkorchid3")
   leg_labels = c("River Segments","Intake")
   leg_linetype = c("solid","blank")
   leg_alpha = c(1,1)
