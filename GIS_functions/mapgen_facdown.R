@@ -2,17 +2,31 @@
 #  Please note that rgdal will be retired by the end of 2023,
 #  plan transition to sf/stars/terra functions using GDAL and PROJ
 #  at your earliest convenience.
-#library('rgeos') #required for writeWKT()
-#library('hydrotools') #required for RomDataSource
+library('rgeos') #required for writeWKT()
+library('hydrotools') #required for RomDataSource
 basepath<-'/var/www/R'
 source('/var/www/R/config.R')
 ds <- RomDataSource$new(site, rest_uname)
 ds$get_token(rest_pw)
 
+#################################################################
+# RUN SALEM MAP:
+map_out <- facmap(facility_hydroid = 73112, 
+                  map_zoom = 0.18, #Larger value = more zoomed out
+                  basemap_resolution = 12, #Larger value = higher resolution
+                  scalebar_dist = 4, #Scale bar distance in miles
+                  scalebar_nudge = 0.11,  #Scale bar placement "nudge"
+                  site = "http://deq1.bse.vt.edu:81/d.dh/", 
+                  export_path = "C:/Users/nrf46657/Desktop/GitHub/plots/")
+
+#################################################################
+
 
 facmap <- function (facility_hydroid = 475973, 
-                    scaler = 0.06,
-                    plot_zoom = 13,
+                    map_zoom = 0.06,
+                    basemap_resolution = 13,
+                    scalebar_dist = 1, 
+                    scalebar_nudge = 0.045,
                     site = "http://deq1.bse.vt.edu:81/d.dh/",
                     export_path = "C:/Users/jklei/Desktop/GitHub/mapper/"
                     ) {
@@ -38,8 +52,8 @@ fac_bbox <- st_bbox(fac_sf)
 fac_lat <- fac_bbox$ymin 
 fac_lon <- fac_bbox$xmin
 
-extent = data.frame(x = c(fac_lon-scaler, fac_lon+scaler),
-                    y = c(fac_lat-scaler, fac_lat+scaler))
+extent = data.frame(x = c(fac_lon-map_zoom, fac_lon+map_zoom),
+                    y = c(fac_lat-map_zoom, fac_lat+map_zoom))
 
 ######################################################################################################
 ### BASEMAP OBJECT
@@ -47,7 +61,7 @@ extent = data.frame(x = c(fac_lon-scaler, fac_lon+scaler),
 baselayers.gg <- base.layers(baselayers,extent=extent)
 basemap.obj <- base.map(baselayers.gg,extent=extent,
                         plot_margin = c(0.16,0.2,0.16,-3.9), #top, right, bottom, left
-                        plot_zoom = plot_zoom,
+                        plot_zoom = basemap_resolution,
                         scale_bar = FALSE)
 
 ######################################################################################################
@@ -61,7 +75,7 @@ RSeg_valid_geoms <- paste("SELECT * FROM 'RSeg.csv'WHERE geom != ''") # REMOVE A
 RSeg_layer <- sqldf(RSeg_valid_geoms)
 RSeg_layer_sf <- st_as_sf(RSeg_layer, wkt = 'geom')
 RSeg_layer_geom <- geom_sf(data = RSeg_layer_sf,aes(geometry = geom,colour = color_list[1]),
-                           lwd=2,alpha=0, inherit.aes = FALSE,show.legend = "line")
+                           lwd=1.5,alpha=0, inherit.aes = FALSE,show.legend = "line")
 
 #---------------------------------------------------------------------------------------------------
 # #PROCESS NHDPlus FLOWLINES
@@ -185,6 +199,35 @@ if (nrow(conveyances) > 0){
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------------------------------
+# DISCHARGE
+outfall_geom_list <- list()
+outfalls <- data.frame(geom='POINT(-79.91236 37.263578)')
+outfall_sf <- st_as_sf(outfalls, wkt = 'geom')
+outfall_geom <- geom_sf(data = outfall_sf,aes(geometry = geom,colour = color_list[5]), inherit.aes = FALSE,size=2)
+outfall_geom_list <-  append(outfall_geom_list, outfall_geom) 
+#---------------------------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------------------------
+# USGS GAGES
+# https://waterdata.usgs.gov/nwis/uv?site_no=02054530
+# https://waterdata.usgs.gov/nwis/uv?site_no=02055000
+gages <- data.frame(name=c('ROANOKE RIVER AT GLENVAR, VA','ROANOKE RIVER AT ROANOKE, VA'),
+                    geom=c('POINT(-80.139722 37.267778)','POINT(-79.938889 37.258333)'))
+if (nrow(gages) > 0){
+  gage_geom_list <- list()
+  for (g in 1:length(gages[,1])) {
+    gage_g <- gages[g,]
+    gage_sf <- st_as_sf(gage_g, wkt = 'geom')
+    gage_geom <- geom_sf(data = gage_sf,aes(geometry = geom,colour = color_list[6]), inherit.aes = FALSE,size=3,shape=17)
+    gage_geom_list <-  append(gage_geom_list, gage_geom) 
+    
+  }
+}
+#---------------------------------------------------------------------------------------------------
+
+
+
 # LOAD bounding box (needed for scalebar)
 bb.gg <- baselayers.gg[[which(names(baselayers.gg) == "bb.gg")]]
 
@@ -235,20 +278,35 @@ bb.gg <- baselayers.gg[[which(names(baselayers.gg) == "bb.gg")]]
 #######################
 map <- basemap.obj + 
   #minorbasin_layer + 
-  RSeg_layer_geom + 
+  RSeg_layer_geom +
     theme(legend.position = c(1.16, 0.833),
           legend.title=element_text(size=10),
           legend.text=element_text(size=10)) +
-  ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 1, dist_unit = 'mi',transform = TRUE, model = 'WGS84',
-                 st.bottom=FALSE,st.size = 3.5, st.dist = 0.0285,anchor = c(x = extent$x[1]+0.045,y = extent$y[1]+0.002))
+  ggsn::scalebar(bb.gg, location = 'bottomleft', dist = scalebar_dist, dist_unit = 'mi',transform = TRUE, model = 'WGS84',
+                 st.bottom=FALSE,st.size = 3.5, st.dist = 0.0285,anchor = c(x = extent$x[1]+scalebar_nudge,y = extent$y[1]+0.002))
 
 
 if (length(wells[,1]) > 0){map <- map + well_geom_list}
 if (length(intakes[,1]) > 0){map <- map + intake_geom_list}
 if (nrow(conveyances) > 0){map <- map + conveyance_geom_list}
+if (nrow(outfalls) > 0){map <- map + outfall_geom_list}
+if (nrow(gages) > 0){map <- map + gage_geom_list}
 
-
-if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0){
+if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0 & nrow(outfalls) > 0 & nrow(gages) > 0){
+  #leg_values = c("gray30","black","orange","gray40")
+  leg_values = c("gray30","darkorchid3","orange","gray40","black","blue")
+  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA Outfall","USGS Gage")
+  leg_linetype = c("solid","blank","blank","dotted","blank","blank")
+  leg_alpha = c(1,1,1,1,1,1)
+  leg_shape = c(NA,16,15,NA,16,17)
+} else if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0 & nrow(outfalls) > 0){
+  #leg_values = c("gray30","black","orange","gray40")
+  leg_values = c("gray30","darkorchid3","orange","gray40","black")
+  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA Outfall")
+  leg_linetype = c("solid","blank","blank","dotted","blank")
+  leg_alpha = c(1,1,1,1,1)
+  leg_shape = c(NA,16,15,NA,16)
+} else if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0){
   #leg_values = c("gray30","black","orange","gray40")
   leg_values = c("gray30","darkorchid3","orange","gray40")
   leg_labels = c("River Segments","Intake","Well","Transfer")
@@ -283,3 +341,6 @@ ggsave(plot = map, file = paste0(export_path,gsub(" ","_",fac_name),"_location_m
 ######################################################################################################
 
 } #close facmap function
+
+
+#
