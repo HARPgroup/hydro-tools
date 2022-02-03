@@ -295,14 +295,14 @@ if (nrow(gages) > 0){map <- map + gage_geom_list}
 if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0 & nrow(outfalls) > 0 & nrow(gages) > 0){
   #leg_values = c("gray30","black","orange","gray40")
   leg_values = c("gray30","darkorchid3","orange","gray40","black","blue")
-  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA Outfall","USGS Gage")
+  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA WWTP","USGS Gage")
   leg_linetype = c("solid","blank","blank","dotted","blank","blank")
   leg_alpha = c(1,1,1,1,1,1)
   leg_shape = c(NA,16,15,NA,16,17)
 } else if (length(intakes[,1]) > 0 & length(wells[,1]) > 0 & nrow(conveyances) > 0 & nrow(outfalls) > 0){
   #leg_values = c("gray30","black","orange","gray40")
   leg_values = c("gray30","darkorchid3","orange","gray40","black")
-  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA Outfall")
+  leg_labels = c("River Segments","Intake","Well","Transfer","WVWA WWTP")
   leg_linetype = c("solid","blank","blank","dotted","blank")
   leg_alpha = c(1,1,1,1,1)
   leg_shape = c(NA,16,15,NA,16)
