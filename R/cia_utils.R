@@ -268,6 +268,33 @@ fn_upstream <- function(riv.seg, AllSegList) {
 }
 
 
+fn_cbp_upstream <- function(riverseg, seg_list, seg_col = "riverseg", debug = FALSE) {
+  node_id <- substr(riverseg,5,8)
+  up_sql <- paste0(
+    "select * from seg_list ",
+    "where substring(", seg_col, ",10,4) = '", node_id, "'",
+    " and length(riverseg) = 13"
+  )
+  if (debug) {
+    message(up_sql)
+  }
+  up_list <- sqldf(up_sql)
+  # handle non-conforming subwatersheds
+  trib_sql <- paste0(
+    "select * from seg_list ",
+    "where substring(", seg_col, ",1,13) = '", riverseg, "'",
+    " and length(riverseg) > 13"
+  )
+  if (debug) {
+    message(trib_sql)
+  }
+  trib_list <- sqldf(trib_sql)
+  if (nrow(trib_list) > 0) {
+    up_list <- rbind(up_list, trib_list)
+  }
+  return(up_list)
+}
+
 #fn_ALL.upstream() copy from cbp6_functions
 fn_ALL.upstream <- function(riv.seg, AllSegList) {
   UpstreamSeg <- fn_upstream(riv.seg, AllSegList)
@@ -422,4 +449,73 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
     dsql
   )
   return(rets)
+}
+
+
+#' Find Downstream Segment
+#' @description returns given data frame with added from_node and to_node columns, does not currently handle non-conforming subwatershed naming as used in vahydro
+#' @param seglist data frame of all segments in cbp riverseg format
+#' @param segcol name of riverseg column
+#' @return data.frame
+#' @export fn_cbp_format_from_node
+fn_cbp_format_from_node <- function(seglist, segcol = "riverseg") {
+  node_sql <- paste(
+    "select substring(", segcol, ",5,4) as from_node, ",
+    "  substring(", segcol, ",10,4) as to_node, ",
+    segcol, " as riverseg",
+    "from seglist "
+  )
+  message(node_sql)
+  ft_node <- sqldf::sqldf(
+    node_sql
+  )
+  return(ft_node)
+}
+
+
+#' Check for violations in mass balance for 2 columns in a network from_node/to_node list
+#' @description gives message about violations above the point, does not currently handle non-conforming subwatershed naming as used in vahydro
+#' @param outlet name of riverseg column
+#' @param seglist data frame of all segments in cbp riverseg format
+#' @param wd_col local quantity column
+#' @param wdc_col cumulative quantity column
+#' @return logical
+#' @export fn_check_cumulative
+fn_check_cumulative <- function(outlet, seglist, wd_col, wdc_col, precision = 2) {
+  
+  riverseg <- as.character(outlet$riverseg)
+  #if (str_length(riverseg) > 13) {
+  #  message(paste("Can not handle non-conforming riverseg ", riverseg))
+  #  return(FALSE)
+  #}
+  outlet_wdc_mgd <- as.numeric(outlet[wdc_col])
+  outlet_wd_mgd <- as.numeric(outlet[wd_col])
+  upstream_segments <- fn_cbp_upstream(riverseg, seglist)
+  sum_ups <- as.numeric(
+    sqldf(
+      paste("select sum(", wdc_col, ") as sum_ups from upstream_segments" )
+    )$sum_ups
+  )
+  if (!is.na(sum_ups)) {
+    lhs <- round(outlet_wdc_mgd,precision)
+    rhs <- round(outlet_wd_mgd + sum_ups,precision)
+    if (lhs != rhs) {
+      message(paste("Problem with sums on ",riverseg))
+      message(
+        paste(
+          "Outlet", wdc_col, "(", lhs,")
+      = upstream", wdc_col, "(  ", sum_ups, " )
+      + local ", wd_col, " (", outlet_wd_mgd,")",
+          " = ", rhs
+        )
+      )
+      return(FALSE)
+    } else {
+      message(paste(riverseg, "OK", lhs,"=",rhs))
+      return(TRUE)
+    }
+  } else {
+    #message(paste(riverseg, "is a headwater"))
+    return(TRUE)
+  }
 }

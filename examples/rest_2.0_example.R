@@ -3,7 +3,7 @@ library(httr);
 library(zoo);
 library(hydrotools);
 
-site <- "http://deq1.bse.vt.edu/d.alpha"    #Specify the site of interest, either d.bet OR d.dh
+site <- "http://deq1.bse.vt.edu:81/d.alpha"    #Specify the site of interest, either d.bet OR d.dh
 omsite = site
 
 # Load Libraries
