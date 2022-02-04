@@ -17,9 +17,9 @@ test <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 #load all facilities with report status since 2015 to current
 facility_report_status <- test
 #transform long table to wide table with column for each year - order by 5 year avg
-data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Report_Status", values_fn = length)
+data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
 
-write.csv(data_all, paste0(export_path,"xannual_reporter_submission_status.csv"), row.names = F)
+write.csv(data_all, paste0(export_path,"xxannual_reporter_submission_status.csv"), row.names = F)
 
 
 #save script here = ~\Github\hydro-tools\OWS\AnnualReporting\annual_reporter_submission_status.R
