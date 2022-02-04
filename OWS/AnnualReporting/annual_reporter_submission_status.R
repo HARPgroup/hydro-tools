@@ -12,10 +12,9 @@ tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?r
 ds <- RomDataSource$new(site)
 ds$get_token()
 
-test <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
-
 #load all facilities with report status since 2015 to current
-facility_report_status <- test
+facility_report_status <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
+
 #transform long table to wide table with column for each year - order by 5 year avg
 data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
 
