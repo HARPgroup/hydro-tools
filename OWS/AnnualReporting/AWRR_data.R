@@ -56,7 +56,7 @@ for (y in year.range) {
   localpath <- tempdir()
   filename <- paste("data.all_",y,".csv",sep="")
   destfile <- paste(localpath,filename,sep="\\")  
-  download.file(paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
+  download.file(paste(site ,"ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
   data.year <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
   
   #has 3 issuing authorities, does not include power
@@ -218,7 +218,8 @@ cat_table$Category <- str_to_title(cat_table$Category)
 print(cat_table)
 
 #save the cat_table to use for data reference - we can refer to that csv when asked questions about the data
-write.csv(cat_table, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\Table1_",syear,"-",eyear,".csv",sep = ""), row.names = F)
+#write.csv(cat_table, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\Table1_",syear,"-",eyear,".csv",sep = ""), row.names = F)
+write.csv(cat_table, paste("C:\\Users\\maf95834\\Documents\\awrr\\",eyear+1,"\\testTable1_",syear,"-",eyear,".csv",sep = ""), row.names = F)
 
 #Join in FIPS name to data
 fips <- read.csv(file = "C:\\Users\\maf95834\\Documents\\Github\\vahydro\\R\\wsp\\wsp2020\\FoundationDataset\\fips_codes.csv")
