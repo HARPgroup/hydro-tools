@@ -2,6 +2,7 @@
 
 library("hydrotools")
 library("tidyr")
+options(scipen = 999)
 
 #Generate REST token for authentication
 rest_uname = FALSE
@@ -16,7 +17,10 @@ ds$get_token()
 facility_report_status <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #transform long table to wide table with column for each year - order by 5 year avg
-data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
+data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Locality"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
+
+#load in watershed consumptive use fractions
+cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
 
 write.csv(data_all, paste0(export_path,"annual_reporter_submission_status.csv"), row.names = F)
 
