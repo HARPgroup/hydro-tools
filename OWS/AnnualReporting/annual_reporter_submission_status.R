@@ -14,15 +14,30 @@ ds <- RomDataSource$new(site)
 ds$get_token()
 
 #load all facilities with report status since 2015 to current
-facility_report_status <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
+facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #transform long table to wide table with column for each year - order by 5 year avg
-data_all <- pivot_wider(data = facility_report_status, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Locality"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Locality", "fips_code"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
+
+
+write.csv(facility_report_status, paste0(export_path,"xannual_reporter_submission_status.csv"), row.names = F)
+
+##### MUST BE ON VPN AFTER THIS LINE
+
+##### run spatial containment FOUNDATION3_CONTAINING_POLYGONS.R
 
 #load in watershed consumptive use fractions
 cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
 
-write.csv(data_all, paste0(export_path,"annual_reporter_submission_status.csv"), row.names = F)
+xdata_sp_cont <- sqldf('SELECT *, substr(VAHydro_RSeg_Code, 17)"riverseg" 
+                       FROM data_sp_cont')
 
+#Append CU Frac column
+data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Frac"
+                         FROM xdata_sp_cont as a
+                         LEFT OUTER JOIN cu as b
+                         ON a.riverseg = b.riverseg') 
+
+write.csv(data_sp_cont_cu, paste0(export_path,"annual_reporter_submission_status.csv"), row.names = F)
 
 #save script here = ~\Github\hydro-tools\OWS\AnnualReporting\annual_reporter_submission_status.R
