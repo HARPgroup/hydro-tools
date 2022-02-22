@@ -1,5 +1,5 @@
-#Annual Reporting - Check Submission Status
-
+# Annual Reporting - Check Submission Status
+# MUST BE ON VPN
 library("hydrotools")
 library("tidyr")
 options(scipen = 999)
@@ -9,25 +9,44 @@ rest_uname = FALSE
 rest_pw = FALSE
 basepath ='/var/www/R'
 source(paste0(basepath,'/config.R'))
-tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
 ds <- RomDataSource$new(site)
 ds$get_token()
 
+##### LOAD DATA -------------------------------------------------------------------------------------------------
 #load all facilities with report status since 2015 to current
+tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
+
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
-
-#transform long table to wide table with column for each year - order by 5 year avg
-facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Locality", "fips_code"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE)
-
-
-write.csv(facility_report_status, paste0(export_path,"xannual_reporter_submission_status.csv"), row.names = F)
-
-##### MUST BE ON VPN AFTER THIS LINE
-
-##### run spatial containment FOUNDATION3_CONTAINING_POLYGONS.R
 
 #load in watershed consumptive use fractions
 cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
+
+#load in MGY from Annual Map Exports view
+tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
+
+mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
+
+##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
+#transform long report status table to wide table with column for each year
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+
+#group by fac, sum the MGY 
+facility_group <- sqldf('SELECT "Facility_hydroid", "Facility" AS "Fac_Name", "Use Type","FIPS Code", "Locality", "Year", SUM("Water Use MGY") AS "MGY"
+                        FROM mp_MGY
+                        GROUP BY "Facility_hydroid", "Year"')
+
+#transform long table to wide table
+facility_MGY <- pivot_wider(data = facility_group, id_cols = c("Facility_hydroid", "Fac_Name", "Use Type" ,"FIPS Code", "Locality"), names_from = "Year", values_from = "MGY", names_sort = TRUE, names_prefix = "MGY_")
+
+#join MGY to report status table
+facility_status_MGY <- sqldf('SELECT *
+                             FROM facility_MGY as b
+                             LEFT OUTER JOIN facility_report_status as a
+                             ON a.Facility = b.Facility_hydroid')
+
+write.csv(facility_status_MGY, paste0(export_path,"xannual_reporter_submission_status.csv"), row.names = F)
+
+##### run spatial containment FOUNDATION3_CONTAINING_POLYGONS.R --------------------------------------------------
 
 xdata_sp_cont <- sqldf('SELECT *, substr(VAHydro_RSeg_Code, 17)"riverseg" 
                        FROM data_sp_cont')
@@ -38,6 +57,18 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
                          LEFT OUTER JOIN cu as b
                          ON a.riverseg = b.riverseg') 
 
-write.csv(data_sp_cont_cu, paste0(export_path,"annual_reporter_submission_status.csv"), row.names = F)
+#Only show necessary columns
+data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "FIPS.Code", "Locality", 
+"MGY_2014", "MGY_2015", "MGY_2016", "MGY_2017", "MGY_2018", "MGY_2019", 
+"MGY_2020", "MGY_2021", "Facility", "Facility_Name", "Facility.Use.Type", 
+"Latitude", "Longitude", "UserName", "UserEmail",
+"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "Submittal_2014.01.01", 
+"Submittal_2015.01.01", "Submittal_2016.01.01", "Submittal_2017.01.01", 
+"Submittal_2018.01.01", "Submittal_2019.01.01", "Submittal_2020.01.01", 
+"Submittal_2021.01.01", "fips_name", "corrected_latitude", "corrected_longitude", 
+"MinorBasin_Name", "VAHydro_RSeg_Name", 
+"riverseg", "Current Consumptive Use Frac"
+                         FROM data_sp_cont_cu') 
 
-#save script here = ~\Github\hydro-tools\OWS\AnnualReporting\annual_reporter_submission_status.R
+
+write.csv(data_sp_cont_cu, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
