@@ -58,17 +58,22 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
                          ON a.riverseg = b.riverseg') 
 
 #Only show necessary columns
-data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "FIPS.Code", "Locality", 
-"MGY_2014", "MGY_2015", "MGY_2016", "MGY_2017", "MGY_2018", "MGY_2019", 
-"MGY_2020", "MGY_2021", "Facility", "Facility_Name", "Facility.Use.Type", 
-"Latitude", "Longitude", "UserName", "UserEmail",
-"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "Submittal_2014.01.01", 
-"Submittal_2015.01.01", "Submittal_2016.01.01", "Submittal_2017.01.01", 
-"Submittal_2018.01.01", "Submittal_2019.01.01", "Submittal_2020.01.01", 
-"Submittal_2021.01.01", "fips_name", "corrected_latitude", "corrected_longitude", 
+data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", 
+"MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
+"MGY_2015",  a."Submittal_2015.01.01" AS "Submittal_2015", 
+"MGY_2016",  a."Submittal_2016.01.01" AS "Submittal_2016", 
+"MGY_2017",  a."Submittal_2017.01.01" AS "Submittal_2017", 
+"MGY_2018",  a."Submittal_2018.01.01" AS "Submittal_2018", 
+"MGY_2019",  a."Submittal_2019.01.01" AS "Submittal_2019", 
+"MGY_2020",  a."Submittal_2020.01.01" AS "Submittal_2020", 
+"MGY_2021",  a."Submittal_2021.01.01" AS "Submittal_2021", 
+"FIPS.Code", "Locality", 
+"Facility", "Facility_Name", "Latitude", "Longitude", "UserName", "UserEmail",
+"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "corrected_latitude", "corrected_longitude", 
 "MinorBasin_Name", "VAHydro_RSeg_Name", 
 "riverseg", "Current Consumptive Use Frac"
-                         FROM data_sp_cont_cu') 
+                         FROM data_sp_cont_cu AS a
+                         ORDER BY "MGY_2021" DESC', method = data.frame) 
 
 
 write.csv(data_sp_cont_cu, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
