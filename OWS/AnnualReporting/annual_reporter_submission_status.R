@@ -57,6 +57,8 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
                          LEFT OUTER JOIN cu as b
                          ON a.riverseg = b.riverseg') 
 
+#dput(names(data_sp_cont_cu))  #print df names in a comma separated list
+
 #Only show necessary columns
 data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", 
 "MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
