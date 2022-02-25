@@ -2,6 +2,7 @@
 # MUST BE ON VPN
 library("hydrotools")
 library("tidyr")
+library("dplyr")
 options(scipen = 999)
 
 #Generate REST token for authentication
@@ -28,15 +29,20 @@ mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
-facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+
+a <- mp_MGY %>% 
+  dplyr::group_by(MP_hydroid, Year) %>% 
+  dplyr::mutate(dupe = n()>1) %>%
+  dplyr::filter(dupe == T)
 
 #group by fac, sum the MGY 
-facility_group <- sqldf('SELECT "Facility_hydroid", "Facility" AS "Fac_Name", "Use Type","FIPS Code", "Locality", "Year", SUM("Water Use MGY") AS "MGY"
+facility_group <- sqldf('SELECT "Facility_hydroid", "Facility" AS "Fac_Name", "Use Type","FIPS Code", "Locality", "Year", SUM("Water Use MGY") AS "MGY", "OWS Planner"
                         FROM mp_MGY
                         GROUP BY "Facility_hydroid", "Year"')
 
 #transform long table to wide table
-facility_MGY <- pivot_wider(data = facility_group, id_cols = c("Facility_hydroid", "Fac_Name", "Use Type" ,"FIPS Code", "Locality"), names_from = "Year", values_from = "MGY", names_sort = TRUE, names_prefix = "MGY_")
+facility_MGY <- pivot_wider(data = facility_group, id_cols = c("Facility_hydroid", "Fac_Name", "Use Type" ,"FIPS Code", "Locality", "OWS Planner"), names_from = "Year", values_from = "MGY", names_sort = TRUE, names_prefix = "MGY_")
 
 #join MGY to report status table
 facility_status_MGY <- sqldf('SELECT *
@@ -44,7 +50,7 @@ facility_status_MGY <- sqldf('SELECT *
                              LEFT OUTER JOIN facility_report_status as a
                              ON a.Facility = b.Facility_hydroid')
 
-write.csv(facility_status_MGY, paste0(export_path,"xannual_reporter_submission_status.csv"), row.names = F)
+write.csv(facility_status_MGY, paste0(export_path,"xxannual_reporter_submission_status.csv"), row.names = F)
 
 ##### run spatial containment FOUNDATION3_CONTAINING_POLYGONS.R --------------------------------------------------
 
