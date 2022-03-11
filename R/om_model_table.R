@@ -43,7 +43,7 @@ om_model_table <- function (
       scenario_short_name.i <- runid.i
     } else {
       ri <- run_info.fac$reports
-      scenario_short_name.i <- om.as.character(ri$scenario_short_name$value)
+      scenario_short_name.i <- as.character(ri$scenario_short_name$value)
     }
     if (is.logical(scenario_short_name_list)) {
       scenario_short_name_list <- data.frame(scenario = scenario_short_name.i)
@@ -117,6 +117,9 @@ om_model_table <- function (
     }
   }
   
+  #ADD "scenario_short_name" TO DATAFRAME
+  model_summary <- cbind(scenario_short_name_list,model_summary)
+  
   #TRANSPOSE DATAFRAME
   model_summary.T <- as.data.frame(t(model_summary[,-1]))
   colnames(model_summary.T) <- model_summary[,1]
@@ -138,4 +141,3 @@ om.as.numeric <- function(x, default = NA) {
   }
   return(as.numeric(x))
 }
-
