@@ -3,9 +3,13 @@ library(dplyr)
 #site <- "http://deq2.bse.vt.edu/d.dh/"
 site <- "https://deq1.bse.vt.edu/d.dh/"
 
+syear <- 2017
+eyear <- 2021
+#remember to change legend year in figure setup section
+
 basepath <- "/var/www/R/"
 source(paste(basepath,"config.local.private",sep = '/'))
-Table1 <- read.csv("U:/OWS/foundation_datasets/awrr/2021/Table1_2016-2020.csv")
+Table1 <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Table1_",syear,"-",eyear,".csv"))
 
 # AWRR Pie Charts ################################################################
 Table1$Source.Type <- recode(Table1$Source.Type, "Total (GW + SW)" = "Total") #Change for easier string substitution and clear pie chart 
@@ -17,7 +21,7 @@ for (s in 1:length(source_type)) {
 
 wd.sql <- paste('SELECT *,
                   CASE
-                    WHEN "Category" = "Agricultural" THEN "dodgerblue4"
+                    WHEN "Category" = "Agriculture" THEN "dodgerblue4"
                     WHEN "Category" = "Commercial" THEN "firebrick4"
                     WHEN "Category" = "Irrigation" THEN "darkolivegreen3"
                     WHEN "Category" = "Manufacturing" THEN "blueviolet"
@@ -32,12 +36,13 @@ wd.df <- sqldf(wd.sql)
 # FIVE YEAR AVERAGE:
 wd.df  ["avg.percent"] <- round((100*(wd.df$multi_yr_avg/sum(wd.df$multi_yr_avg))),digits=2)
 # MOST RECENT YEAR:
-wd.df  ["year.percent"] <- round((100*(wd.df$X2020/sum(wd.df$X2020))),digits=2)
+wd.df  ["year.percent"] <- round((100*(wd.df[paste0("X",eyear)]/sum(wd.df[paste0("X",eyear)]))),digits=2)
+
 #############################################################################################
 # FIGURE SETUP
 cols <- wd.df$col
 legend.avg <-paste(wd.df$Category," (",wd.df$multi_yr_avg," MGD)",sep="")
-legend.year <-paste(wd.df$Category," (",wd.df$X2020," MGD)",sep="")
+legend.year <-paste(wd.df$Category," (",wd.df$X2021," MGD)",sep="")  #update to eyear
 
 filename <- paste("AWRR",source_type[s],"Withdrawals_Pie.png", sep="_")
 png(filename=paste(export_path,filename,sep='/'),width=10,height=6,units="in",res=1000)
@@ -45,9 +50,9 @@ par(mfrow=c(1,2),mai=c(1.4,0.5,0.4,0.4),oma = c(0,0,0,0),xpd=TRUE,cex = 1.0499)
 #--------------------------------------------------------------------
 # LEFT PIE
 if (source_type[s] == "Total") {
-  left_title_text <- paste0("(a) 2016-2020 Average Withdrawals")
+  left_title_text <- paste0("(a) ",syear,"-",eyear," Average Withdrawals")
 } else {
-  left_title_text <- paste0("(a) 2016-2020 Average ",source_type[s]," Withdrawals")
+  left_title_text <- paste0("(a) ",syear,"-",eyear," Average ",source_type[s]," Withdrawals")
 }
 pie(wd.df$multi_yr_avg, labels = paste(wd.df$avg.percent,"%",sep=""), 
     main= left_title_text,
@@ -57,9 +62,9 @@ legend('bottom',legend.avg,cex=1.0, fill=cols, inset=-0.3)
 #--------------------------------------------------------------------
 # RIGHT PIE
 if (source_type[s] == "Total") {
-  right_title_text <- "(b) 2020 Total Withdrawals"
+  right_title_text <- paste0("(b) ",eyear," Total Withdrawals")
 } else {
-  right_title_text <- paste0("(b) 2020 Total ",source_type[s]," Withdrawals")
+  right_title_text <- paste0("(b) ",eyear," Total ",source_type[s]," Withdrawals")
 }
 pie(wd.df$X2020, labels = paste(wd.df$year.percent,"%",sep=""), 
     main= right_title_text,
