@@ -2,39 +2,42 @@ options(scipen=999) #turn off scientific notation
 library(sqldf)
 library("kableExtra")
 
-syear = 2016
-eyear = 2020
-mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv"))
-fips <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/fips_codes.csv")
+syear = 2017
+eyear = 2021
+#mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv")) #syntax not working for some reason
+mp_all <- read.csv("U:/OWS/foundation_datasets/awrr/2022/mp_all_mgy_2017-2021.csv")
+fips <- read.csv(file = "U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv") #GM correct FIPS names
 
 table_caption <- paste0("Water Withdrawals Within Localities in ",eyear," (MGD)")
 table_label   <- table_caption
 #########################################################################################
-GW <- paste('SELECT sum((X2020/365)) as "GW_Withdrawal", FIPS, b.name
+colnames(mp_all)[colnames(mp_all)=="FIPS.Code"] <- "FIPS" #GM addition
+colnames(mp_all)[colnames(mp_all)=="Source.Type"] <- "Source_Type" #GM addition
+yearcol <- paste0("X",eyear) #GM method to replace hard-coded X2020 with current year automatically
+
+
+GW <- paste('SELECT sum((',yearcol,'/365)) as "GW_Withdrawal", FIPS, b.name
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
                  WHERE Source_Type = "Groundwater"
-                 GROUP BY FIPS' 
-            ,sep='')
+                 GROUP BY FIPS',sep='')
 GW <- sqldf(GW)
 
 
-SW <- paste('SELECT sum((X2020/365)) as "SW_Withdrawal", FIPS, b.name
+SW <- paste('SELECT sum((',yearcol,'/365)) as "SW_Withdrawal", FIPS, b.name
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
                  WHERE Source_Type = "Surface Water"
-                 GROUP BY FIPS' 
-            ,sep='')
+                 GROUP BY FIPS',sep='')
 SW <- sqldf(SW)
 
-TOTAL <- paste('SELECT sum((X2020/365)) as "Total_Withdrawal", FIPS, b.name
+TOTAL <- paste('SELECT sum((',yearcol,'/365)) as "Total_Withdrawal", FIPS, b.name
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
-                 GROUP BY FIPS' 
-               ,sep='')
+                 GROUP BY FIPS',sep='')
 TOTAL <- sqldf(TOTAL)
 #########################################################################################
 VA_TOTAL <- sqldf('SELECT sum(Total_withdrawal) AS Total_Withdrawal
@@ -97,9 +100,8 @@ all_fips_round <- paste('SELECT name AS Locality,
                                 round(GW_Withdrawal,2) AS "GW Withdrawal",
                                 round(SW_Withdrawal,2) AS "SW Withdrawal",
                                 round(Total_Withdrawal,2) AS "GW + SW Total",
-                                round(Percent_of_Total_Withdrawal,2) AS "% of Total Withdrawal"
-                 FROM "all_fips"' 
-                        ,sep='')
+                                round(Percent_of_Total_Withdrawal,2) AS "Percent of Total Withdrawal"
+                 FROM "all_fips"',sep='') #GM edited "% of Total" -> "Percent of Total" to fix error in sqldf() next line 
 all_fips_round <- sqldf(all_fips_round)
 options(knitr.kable.NA = "0.00")
 #OUTPUT KABLE LATEX TABLE
@@ -117,27 +119,27 @@ ktable <- kable(all_fips_round,
   cat(ktable, file = paste("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/ByLocality.tex",sep = '')) #USED TO SAVE .tex FILE OF KABLE OUTPUT
 
 # BY LOCALITY BY USE TYPE #######################################################################  
-
-  GW <- paste('SELECT sum((X2020/365)) as "GW_Withdrawal", FIPS, b.name, a.Use_Type
+  #GM fix X2020 -> X2021. and Use_Type to Use.Type 
+  colnames(mp_all)[colnames(mp_all)== "Use.Type"] <- "Use_Type"
+  
+  GW <- paste('SELECT sum((',yearcol,'/365)) as "GW_Withdrawal", FIPS, b.name, a.Use_Type
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
                  WHERE Source_Type = "Groundwater"
-                 GROUP BY FIPS, Use_Type' 
-              ,sep='')
+                 GROUP BY FIPS, Use_Type',sep='')
   GW <- sqldf(GW)
   
   
-  SW <- paste('SELECT sum((X2020/365)) as "SW_Withdrawal", FIPS, b.name, a.Use_Type
+  SW <- paste('SELECT sum((',yearcol,'/365)) as "SW_Withdrawal", FIPS, b.name, a.Use_Type
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
                  WHERE Source_Type = "Surface Water"
-                 GROUP BY FIPS, Use_Type' 
-              ,sep='')
+                 GROUP BY FIPS, Use_Type',sep='')
   SW <- sqldf(SW)
   
-  TOTAL <- paste('SELECT sum((X2020/365)) as "Total_Withdrawal", FIPS, b.name, a.Use_Type
+  TOTAL <- paste('SELECT sum((',yearcol,'/365)) as "Total_Withdrawal", FIPS, b.name, a.Use_Type
                  FROM "mp_all" a
                  LEFT JOIN fips b
                  ON a.FIPS = b.code
@@ -157,4 +159,5 @@ ktable <- kable(all_fips_round,
 aa <- sqldf('SELECT FIPS, name, Use_Type, GW_Withdrawal, SW_Withdrawal, Total_Withdrawal 
             FROM a
             ORDER BY name, Use_type')  
-write.csv(aa, "U:/OWS/foundation_datasets/awrr/2021/Bylocality_UseType_table.csv")
+#GM fix 2021->eyear+1 in paste0 statement
+write.csv(aa, paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Bylocality_UseType_table3.csv"))
