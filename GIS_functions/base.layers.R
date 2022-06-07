@@ -20,7 +20,8 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
   bbProjected@data$id <- rownames(bbProjected@data)
   bbPoints <- fortify(bbProjected, region = "id")
-  bbDF <- merge(bbPoints, bbProjected@data, by = "id")
+  # bbDF <- merge(bbPoints, bbProjected@data, by = "id")
+  bbDF <- merge(bbProjected, bbProjected@data, by = "id")
   
   ######################################################################################################
   ### PROCESS STATES LAYER  ############################################################################
@@ -55,7 +56,8 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   state@data <- merge(state@data, STATES, by = 'id')
   state@data <- state@data[,-c(2:3)]
   state.df <- fortify(state, region = 'id')
-  state.df <- merge(state.df, state@data, by = 'id') 
+  # state.df <- merge(state.df, state@data, by = 'id') 
+  state.df <- merge(state, state@data, by = 'id') 
   ######################################################################################################
   ### PROCESS Minor Basin LAYER  #######################################################################
   ######################################################################################################
@@ -86,8 +88,9 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   mb <- do.call('rbind', mb.list)
   mb@data <- merge(mb@data, mb_data, by = 'id')
   mb@data <- mb@data[,-c(2:3)]
-  mb.df <- fortify(mb, region = 'id')
-  mb.df <- merge(mb.df, mb@data, by = 'id') 
+  # mb.df <- fortify(mb, region = 'id')
+  # mb.df <- merge(mb.df, mb@data, by = 'id')
+  mb.df <- merge(mb, mb@data, by = 'id')
   
   #MB.df <- mb.df
   
@@ -231,8 +234,9 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   fips <- do.call('rbind', fips.list)
   fips@data <- merge(fips@data, fips_data, by = 'id')
   fips@data <- fips@data[,-c(2:3)]
-  fips.df <- fortify(fips, region = 'id')
-  fips.df <- merge(fips.df, fips@data, by = 'id') 
+  # fips.df <- fortify(fips, region = 'id')
+  # fips.df <- merge(fips.df, fips@data, by = 'id') 
+  fips.df <- merge(data, fips@data, by = 'id') 
   
   
   ######################################################################################################
