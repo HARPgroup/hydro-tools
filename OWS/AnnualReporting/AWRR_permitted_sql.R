@@ -3,6 +3,8 @@ library('dplyr')
 library('httr')
 library('sqldf')
 library('stringr')
+library("tidyr") # GM add library needed for pivot_wider
+library("kableExtra") # GM add library needed for latex
 
 y <- 2020
 eyear <- y
@@ -16,22 +18,23 @@ destfile <- paste(localpath,filename,sep="\\")
 download.file(paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
 data.all <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
 
-data <- data.all
+data1 <- data.all #GM edit data -> data1 throughout so we done use a reserved word
 
 #remove duplicates (keeps one row)
-data <- distinct(data, MP_hydroid, Year, .keep_all = TRUE)
+data1 <- distinct(data1, MP_hydroid, Year, .keep_all = TRUE)
 #exclude dalecarlia
-data <- data[-which(data$Facility=='DALECARLIA WTP'),]
+data1 <- data1[-which(data1$Facility=='DALECARLIA WTP'),]
 
-if (length(which(data$Use.Type=='facility')) > 0) {
-  data <- data[-which(data$Use.Type=='facility'),]
+if (length(which(data1$Use.Type=='facility')) > 0) {
+  data1 <- data1[-which(data1$Use.Type=='facility'),]
 }
 #rename columns
-# colnames(data) <- c('HydroID', 'Hydrocode', 'Source_Type',
+# colnames(data1) <- c('HydroID', 'Hydrocode', 'Source_Type',
 #                     'MP_Name', 'Facility', 'Use_Type', 'Year',
 #                     'mgy', 'mgd', 'lat', 'lon', 'locality')
 
-colnames(data) <- c('HydroID',
+#GM edit to add 'Planner' title to OWS planner column, and use names() instead of colnames()
+names(data1) <- c('HydroID',
                     'Hydrocode',
                     'Source_Type',
                     'MP_Name',
@@ -44,23 +47,25 @@ colnames(data) <- c('HydroID',
                     'lat',
                     'lon',
                     'FIPS',
-                    'locality')
+                    'locality',
+                    'Planner')
 
-data$mgd <- data$mgy/365
-sum(data$mgy)
+data1$mgd <- data1$mgy/365
+sum(data1$mgy)
 #make use type values lowercase
-data$Use_Type <- str_to_lower(data$Use_Type)
+data1$Use_Type <- str_to_lower(data1$Use_Type)
 #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
-levels(data$Source_Type) <- c(levels(data$Source_Type), "Groundwater", "Surface Water")
-data$Source_Type[data$Source_Type == 'Well'] <- 'Groundwater'
-data$Source_Type[data$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
+#GM if we can do this without levels, that would be better for future
+levels(data1$Source_Type) <- c(levels(data1$Source_Type), "Groundwater", "Surface Water")
+data1$Source_Type[data1$Source_Type == 'Well'] <- 'Groundwater'
+data1$Source_Type[data1$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
 
 
-data$Use_Type[data$Use_Type == 'industrial'] <- 'manufacturing'
+data1$Use_Type[data1$Use_Type == 'industrial'] <- 'manufacturing'
 
 ##################################################################
-data <- sqldf(paste0('SELECT *
-                FROM multi_yr_data
+data1 <- sqldf(paste0('SELECT *
+                FROM multi_yr_data1
                 WHERE Year = ',eyear,''))
 
 
@@ -77,7 +82,7 @@ datap <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facilit
                 ORDER BY "Water.Use.MGY" DESC ')
 
 qpi = "SELECT a.*, CASE WHEN b.MP_hydroid is not NULL THEN 1 ELSE 0 END as has_permit
-  from data as a left outer join datap as b
+  from data1 as a left outer join datap as b
   on a.HydroID = b.MP_hydroid "
 
 data_pi = sqldf(
@@ -99,6 +104,7 @@ data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
 #write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
+#GM uncomment when run 2021 ^
 
 data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
 data_pi$Use_Type <- recode(data_pi$Use_Type, "Municipal" = "Public Water Supply")
