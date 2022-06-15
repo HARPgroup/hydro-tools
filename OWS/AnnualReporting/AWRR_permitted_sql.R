@@ -65,8 +65,9 @@ data1$Use_Type[data1$Use_Type == 'industrial'] <- 'manufacturing'
 
 ##################################################################
 data1 <- sqldf(paste0('SELECT *
-                FROM multi_yr_data1
+                FROM data1
                 WHERE Year = ',eyear,''))
+#GM data1 not multi_yr_data
 
 
 #PULL IN PERMITTED MPs (NO VWUDS) 
