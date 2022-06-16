@@ -69,7 +69,7 @@ data1$Source_Type[data1$Source_Type == 'Surface Water Intake'] <- 'Surface Water
 
 
 data1$Use_Type[data1$Use_Type == 'industrial'] <- 'manufacturing'
-data1$Use_Type[data1$Use_Type == 'agriculture (non-irrigation) '] <- 'agriculture' #GM needed for faclity hydroid 482522 and 482536
+data1$Use_Type[data1$Use_Type == 'agriculture (non-irrigation) '] <- 'agriculture' #GM needed for facility hydroid 482522 and 482536
 data1$Use_Type[data1$Use_Type == 'municipal'] <- 'public water supply' #GM edit
 
 ##################################################################
@@ -321,11 +321,12 @@ table3w_latex <- kable(table3_wide,'latex', booktabs = T, align =  c('l','l','l'
   kable_styling( full_width = F,position = "center", font_size = 10) %>%
   pack_rows("Groundwater", 1, 7, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 8, 14, hline_before = T, hline_after = F)  %>%
-  add_header_above(c(" ", "Annual Withdrawal Amount" = 2, '% of Total' = 2)) %>%
+  add_header_above(c(" ", "Annual Withdrawal Amount" = 2, '% of Total' = 2), bold=TRUE) %>%
+  row_spec(0, bold = T) %>%
   row_spec(7,bold = T) %>%
   row_spec(14,bold = T) %>%
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
-
+#GM add bold to headers as we had them last year
 
 #CUSTOM LATEX CHANGES
 #insert hold position header
@@ -348,4 +349,4 @@ for (i in 1:length(use_stripe)) {
 }
 table3w_tex
 table3w_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = '')) #GM add export
