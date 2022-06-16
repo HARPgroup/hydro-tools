@@ -6,7 +6,7 @@ library('stringr')
 library("tidyr") # GM add library needed for pivot_wider
 library("kableExtra") # GM add library needed for latex
 
-y <- 2020
+y <- 2021
 eyear <- y
 print(y)
 startdate <- paste(y, "-01-01",sep='')
@@ -21,7 +21,12 @@ data.all <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep
 data1 <- data.all #GM edit data -> data1 throughout so we done use a reserved word
 
 #remove duplicates (keeps one row)
-data1 <- distinct(data1, MP_hydroid, Year, .keep_all = TRUE)
+#data1 <- distinct(data1, MP_hydroid, Year, .keep_all = TRUE)
+#GM replace dplyr with sql, also removes duplicates
+data1 <- sqldf('SELECT * FROM data1
+               GROUP BY "MP_hydroid", "Hydrocode", "Source.Type", "MP.Name", "Facility_hydroid", "Facility", "Use.Type", "Year", "Water.Use.MGY", "Water.Use..MGD.", "Latitude", "Longitude", "FIPS.Code", "Locality", "OWS.Planner"')
+
+
 #exclude dalecarlia
 data1 <- data1[-which(data1$Facility=='DALECARLIA WTP'),]
 
@@ -48,20 +53,24 @@ names(data1) <- c('HydroID',
                     'lon',
                     'FIPS',
                     'locality',
-                    'Planner')
+                    'OWS_Planner')
 
 data1$mgd <- data1$mgy/365
 sum(data1$mgy)
 #make use type values lowercase
 data1$Use_Type <- str_to_lower(data1$Use_Type)
+
 #change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
-#GM if we can do this without levels, that would be better for future
+#GM if we can do this with sql instead of with levels, that would be better for future
+#data1 <- sqldf('SELECT * FROM data1 GROUP BY Source_Type') #dont use this as is
 levels(data1$Source_Type) <- c(levels(data1$Source_Type), "Groundwater", "Surface Water")
 data1$Source_Type[data1$Source_Type == 'Well'] <- 'Groundwater'
 data1$Source_Type[data1$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
 
 
 data1$Use_Type[data1$Use_Type == 'industrial'] <- 'manufacturing'
+data1$Use_Type[data1$Use_Type == 'agriculture (non-irrigation) '] <- 'agriculture' #GM needed for faclity hydroid 482522 and 482536
+data1$Use_Type[data1$Use_Type == 'municipal'] <- 'public water supply' #GM edit
 
 ##################################################################
 data1 <- sqldf(paste0('SELECT *
@@ -70,11 +79,17 @@ data1 <- sqldf(paste0('SELECT *
 #GM data1 not multi_yr_data
 
 
+
 #PULL IN PERMITTED MPs (NO VWUDS) 
 download.file(paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200",sep=""), destfile = destfile, method = "libcurl")  
 datap <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
 
 sqldf("select count(*) from datap")
+
+#GM rename now so the join keeps the right names
+datap$Use.Type[datap$Use.Type == 'industrial'] <- 'manufacturing'
+datap$Use.Type[datap$Use.Type == 'agriculture (non-irrigation) '] <- 'agriculture'
+datap$Use.Type[datap$Use.Type == 'municipal'] <- 'public water supply'
 
 # #remove duplicates (keeps one row for each year)
 datap <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facility_hydroid","Facility","Use.Type","Month","Year",max("Water.Use.MGY") AS "Water.Use.MGM","Latitude","Longitude","Locality","FIPS.Code" 
@@ -104,11 +119,10 @@ data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
 ########## STATIC DATA #######################################################################################
 
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
-#write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
-#GM uncomment when run 2021 ^
+write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
 data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
-data_pi$Use_Type <- recode(data_pi$Use_Type, "Municipal" = "Public Water Supply")
+#data_pi$Use_Type <- recode(data_pi$Use_Type, "Municipal" = "Public Water Supply")
 ## DEPRECATED - FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD) ################################
 # permit_srctype <- sqldf(
 #   "select Source_type, has_permit, 
@@ -237,7 +251,7 @@ table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 #remove clutter
 rm(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
-# #KABLE
+# #KABLE ####
 # table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
 #                       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
 #                       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
@@ -307,7 +321,7 @@ table3w_latex <- kable(table3_wide,'latex', booktabs = T, align =  c('l','l','l'
   kable_styling( full_width = F,position = "center", font_size = 10) %>%
   pack_rows("Groundwater", 1, 7, hline_before = T, hline_after = F) %>%
   pack_rows("Surface Water", 8, 14, hline_before = T, hline_after = F)  %>%
-  add_header_above(c(" ", "2020 Withdrawal Amount" = 2, '% of Total' = 2)) %>%
+  add_header_above(c(" ", "Annual Withdrawal Amount" = 2, '% of Total' = 2)) %>%
   row_spec(7,bold = T) %>%
   row_spec(14,bold = T) %>%
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
@@ -333,3 +347,5 @@ for (i in 1:length(use_stripe)) {
   
 }
 table3w_tex
+table3w_tex %>%
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
