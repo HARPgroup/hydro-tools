@@ -20,8 +20,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   bbProjected <- SpatialPolygonsDataFrame(bb,data.frame("id"), match.ID = FALSE)
   bbProjected@data$id <- rownames(bbProjected@data)
   bbPoints <- fortify(bbProjected, region = "id")
-  # bbDF <- merge(bbPoints, bbProjected@data, by = "id")
-  bbDF <- merge(bbProjected, bbProjected@data, by = "id")
+  bbDF <- merge(bbPoints, bbProjected@data, by = "id")
   
   ######################################################################################################
   ### PROCESS STATES LAYER  ############################################################################
@@ -56,8 +55,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   state@data <- merge(state@data, STATES, by = 'id')
   state@data <- state@data[,-c(2:3)]
   state.df <- fortify(state, region = 'id')
-  # state.df <- merge(state.df, state@data, by = 'id') 
-  state.df <- merge(state, state@data, by = 'id') 
+  state.df <- merge(state.df, state@data, by = 'id') 
   ######################################################################################################
   ### PROCESS Minor Basin LAYER  #######################################################################
   ######################################################################################################
@@ -88,9 +86,8 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   mb <- do.call('rbind', mb.list)
   mb@data <- merge(mb@data, mb_data, by = 'id')
   mb@data <- mb@data[,-c(2:3)]
-  # mb.df <- fortify(mb, region = 'id')
-  # mb.df <- merge(mb.df, mb@data, by = 'id')
-  mb.df <- merge(mb, mb@data, by = 'id')
+  mb.df <- fortify(mb, region = 'id')
+  mb.df <- merge(mb.df, mb@data, by = 'id') 
   
   #MB.df <- mb.df
   
@@ -192,7 +189,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   #                         stringsAsFactors=FALSE)
   # 
   # }
-
+  
   
   
   ###########
@@ -234,9 +231,8 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   fips <- do.call('rbind', fips.list)
   fips@data <- merge(fips@data, fips_data, by = 'id')
   fips@data <- fips@data[,-c(2:3)]
-  # fips.df <- fortify(fips, region = 'id')
-  # fips.df <- merge(fips.df, fips@data, by = 'id') 
-  fips.df <- merge(data, fips@data, by = 'id') 
+  fips.df <- fortify(fips, region = 'id')
+  fips.df <- merge(fips.df, fips@data, by = 'id') 
   
   
   ######################################################################################################
@@ -342,17 +338,17 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   #                         stringsAsFactors=FALSE) 
   #   
   # }
-
- 
-
-    
+  
+  
+  
+  
   baselayers.gg <- list("bb.gg" = bbDF, 
-                    "states.gg" = state.df,
-                    "mb.gg" = mb.df,
-                    "fips.gg" = fips.df,
-                    "rivs.gg" = rivs.df,
-                    "reservoirs.gg" = WBDF
-                    #"ifim.gg" = ifim.df
+                        "states.gg" = state.df,
+                        "mb.gg" = mb.df,
+                        "fips.gg" = fips.df,
+                        "rivs.gg" = rivs.df,
+                        "reservoirs.gg" = WBDF
+                        #"ifim.gg" = ifim.df
   )
   return(baselayers.gg)
   
@@ -478,15 +474,15 @@ load_MapLayers <- function(site,localpath = tempdir()){
   
   #DOWNLOAD RESERVOIR LAYER FROM LOCAL REPO (AS .SHP)
   print(paste("__LOADING RESERVOIR LAYER FROM LOCAL REPO (AS .SHP)...",sep=""))
-    localpath <- paste(github_location,"HARParchive/GIS_layers",sep="/")
-    epsg_code <- "4326" #WGS 84
-    shp_path <- "MajorReservoirs" #location of .shp
-    shp_layer_name <- "MajorReservoirs" #.shp file name (with ".shp" extension left off)
-    shp_layer_load <- suppressWarnings(readOGR(paste(localpath,shp_path,sep="/"),shp_layer_name))
-    shp_layer <-spTransform(shp_layer_load, CRS(paste("+init=epsg:",epsg_code,sep=""))) 
-    shp_layer_wkt <- writeWKT(shp_layer)
-    MajorReservoirs.csv <- data.frame("name"="all","geom"=shp_layer_wkt)
- 
+  localpath <- paste(github_location,"HARParchive/GIS_layers",sep="/")
+  epsg_code <- "4326" #WGS 84
+  shp_path <- "MajorReservoirs" #location of .shp
+  shp_layer_name <- "MajorReservoirs" #.shp file name (with ".shp" extension left off)
+  shp_layer_load <- suppressWarnings(readOGR(paste(localpath,shp_path,sep="/"),shp_layer_name))
+  shp_layer <-spTransform(shp_layer_load, CRS(paste("+init=epsg:",epsg_code,sep=""))) 
+  shp_layer_wkt <- writeWKT(shp_layer)
+  MajorReservoirs.csv <- data.frame("name"="all","geom"=shp_layer_wkt)
+  
   # #DOWNLOAD MAJOR RESERVOIRS LAYER DIRECT FROM GITHUB
   # if(!exists("MajorReservoirs.csv")) {  
   #   print(paste("DOWNLOADING MajorReservoirs LAYER DIRECT FROM GITHUB...",sep=""))
