@@ -258,11 +258,13 @@ map.obj <- basemap.obj + fips.gg +
   #                    ) +
   scale_color_manual("Drought Indicator",
                      labels = c("Surface Water", "Groundwater", "Reservoir"),
+                     values = c("black", "black", "black")) +
+  scale_fill_manual("Drought Indicator",
+                     labels = c("Surface Water", "Groundwater", "Reservoir"),
                      values = c("blue", "palegreen4", "black")) +
   scale_shape_manual("Drought Indicator",
                      labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c(17, 19, NA)) +
-                     # values = c(24, 21, NA)) +
+                     values = c(24, 21, NA)) +
   scale_linetype_manual("Drought Indicator",
                         labels = c("Surface Water", "Groundwater", "Reservoir"),
                         values = c("blank", "blank", "solid")) +

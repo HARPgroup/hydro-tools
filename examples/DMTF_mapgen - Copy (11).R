@@ -151,7 +151,7 @@ fips_df <-sqldf(paste('SELECT *,fips_geom AS geom,
                         WHERE fips_code NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 fips.sf <- st_as_sf(fips_df, wkt = 'geom')
-fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, alpha=0.5, color='black', inherit.aes = FALSE, show.legend =TRUE)
+fips.gg <- geom_sf(data = fips.sf,aes(fill = factor(col)),lwd=0.4, alpha=0.5, inherit.aes = FALSE, show.legend =TRUE)
 
 
 
@@ -258,11 +258,10 @@ map.obj <- basemap.obj + fips.gg +
   #                    ) +
   scale_color_manual("Drought Indicator",
                      labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c("blue", "palegreen4", "black")) +
+                     values = c("brown4", "blue", "black")) +
   scale_shape_manual("Drought Indicator",
                      labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c(17, 19, NA)) +
-                     # values = c(24, 21, NA)) +
+                     values = c(19, 17, NA)) +
   scale_linetype_manual("Drought Indicator",
                         labels = c("Surface Water", "Groundwater", "Reservoir"),
                         values = c("blank", "blank", "solid")) +
