@@ -168,7 +168,7 @@ for (w in 1:length(gages[,1])) {
   gage_w <- gages[w,]
   
   gage_w_sf <- st_as_sf(gage_w, wkt = 'geom')
-  gage_w_geom <- geom_sf(data = gage_w_sf,aes(geometry = geom,colour = color_list[1], shape=color_list[1], linetype=color_list[1]), inherit.aes = FALSE,size=3)
+  gage_w_geom <- geom_sf(data = gage_w_sf,aes(geometry = geom,colour = color_list[1], shape=color_list[1]), inherit.aes = FALSE,size=3)
   gage_w_bbox <- st_bbox(gage_w_sf)
   gage_w_bbox <- data.frame(x = gage_w_bbox$xmin, y = gage_w_bbox$ymin)
   gage_w_label <- geom_label_repel(data = gage_w_bbox, aes(x = x, y = y, group = 1, label = intakes$name),size = 3,fill="white",box.padding =1,max.iter=20000)
@@ -188,7 +188,7 @@ for (w in 1:length(wells[,1])) {
   well_w <- wells[w,]
   
   well_w_sf <- st_as_sf(well_w, wkt = 'geom')
-  well_w_geom <- geom_sf(data = well_w_sf,aes(geometry = geom,colour = color_list[2], shape=color_list[2], linetype=color_list[2]), inherit.aes = FALSE,size=3)
+  well_w_geom <- geom_sf(data = well_w_sf,aes(geometry = geom,colour = color_list[2], shape=color_list[2]), inherit.aes = FALSE,size=3)
   well_w_bbox <- st_bbox(well_w_sf)
   well_w_bbox <- data.frame(x = well_w_bbox$xmin, y = well_w_bbox$ymin)
   well_w_label <- geom_label_repel(data = well_w_bbox, aes(x = x, y = y, group = 1, label = intakes$name),size = 3,fill="white",box.padding =1,max.iter=20000)
@@ -206,21 +206,21 @@ for (w in 1:length(wells[,1])) {
 
 LakeMoomaw <- om_get_feature(site, hydrocode = "nhdplus_120053459", bundle = 'waterbody', ftype = 'nhd_plus')
 LakeMoomaw_sf <- st_as_sf(LakeMoomaw, wkt = 'geom')
-LakeMoomaw_geom <- geom_sf(data = LakeMoomaw_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3], linetype=color_list[3]), inherit.aes = FALSE,size=1.25)
+LakeMoomaw_geom <- geom_sf(data = LakeMoomaw_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3]), inherit.aes = FALSE,size=1.25)
 
 # gage_w_geom <- geom_sf(data = gage_w_sf,aes(geometry = geom,colour = color_list[1]), shape=19, inherit.aes = FALSE,size=3)
 
 SmithMountainLake <- om_get_feature(site, hydrocode = "nhdplus_120053465", bundle = 'waterbody', ftype = 'nhd_plus')
 SmithMountainLake_sf <- st_as_sf(SmithMountainLake, wkt = 'geom')
-SmithMountainLake_geom <- geom_sf(data = SmithMountainLake_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3], linetype=color_list[3]), inherit.aes = FALSE,size=1.25)
+SmithMountainLake_geom <- geom_sf(data = SmithMountainLake_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3]), inherit.aes = FALSE,size=1.25)
 
 LakeAnna <- om_get_feature(site, hydrocode = "nhdplus_120053458", bundle = 'waterbody', ftype = 'nhd_plus')
 LakeAnna_sf <- st_as_sf(LakeAnna, wkt = 'geom')
-LakeAnna_geom <- geom_sf(data = LakeAnna_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3], linetype=color_list[3]), inherit.aes = FALSE,size=1.25)
+LakeAnna_geom <- geom_sf(data = LakeAnna_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3]), inherit.aes = FALSE,size=1.25)
 
 KerrReservoir <- om_get_feature(site, hydrocode = "nhdplus_167496465", bundle = 'waterbody', ftype = 'nhd_plus')
 KerrReservoir_sf <- st_as_sf(KerrReservoir, wkt = 'geom')
-KerrReservoir_geom <- geom_sf(data = KerrReservoir_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3], linetype=color_list[3]), inherit.aes = FALSE,size=1.25) #,linetype = "11"
+KerrReservoir_geom <- geom_sf(data = KerrReservoir_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3]), inherit.aes = FALSE,size=1.25) #,linetype = "11"
 
 
 # reservoir_geom_list <-  append(reservoir_geom_list, LakeMoomaw_geom) 
@@ -261,10 +261,8 @@ map.obj <- basemap.obj + fips.gg +
                      values = c("brown4", "blue", "black")) +
   scale_shape_manual("Drought Indicator",
                      labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c(19, 17, NA)) +
-  scale_linetype_manual("Drought Indicator",
-                        labels = c("Surface Water", "Groundwater", "Reservoir"),
-                        values = c("blank", "blank", "solid")) +
+                     values = c(19, 17, 0)) +
+  # scale_size_manual(values=c(2,5,4)) +
   theme(legend.position = c(0.34, 0.782),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
