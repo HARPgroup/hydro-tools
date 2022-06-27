@@ -19,15 +19,15 @@ export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/O
 
 ###################################################################################################### 
 # LOAD ALL FOUNDATION DATA
-syear = 2016
-eyear = 2020
+syear = 2017
+eyear = 2021
 source_directory <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
-mp_all <- read.csv(paste(source_directory,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+mp_all <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep=""))
 mp_all_wide <- read.csv(paste(source_directory,"/mp_all_wide_",syear,"-",eyear,".csv",sep=""))
 mp_all_wide_power <- read.csv(paste(source_directory,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
-ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep=""))
+ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep="")) #GM - from https://deq1.bse.vt.edu/d.dh/ows-permit-list, filter by active and expired permits, do manual check for incorrect cells 
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
 ###################################################################################################### 
 
@@ -118,6 +118,7 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
 #ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
 ggsave(plot = monitoring_map_draw, file = paste0(export_path, "MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+
 
 
 ######################################################################################################
