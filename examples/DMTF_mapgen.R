@@ -231,6 +231,12 @@ reservoir_geom_list <-  list(LakeMoomaw_geom,
 # states.gg <- baselayers.gg[[which(names(baselayers.gg) == "states.gg")]]
 # colnames(states.gg)
 # states <- read.table(paste(github_location,"HARParchive/GIS_layers/STATES.tsv",sep = '/'),sep = '\t')
+
+# precip_geom <- geom_sf(data = KerrReservoir_sf,aes(geometry = geom,colour = color_list[3], shape=color_list[3], linetype=color_list[3]), inherit.aes = FALSE,size=1.25) #,linetype = "11"
+va <- om_get_feature(site, hydrocode = "0400000US51", bundle = 'landunit', ftype = 'usastate_00')
+va_sf <- st_as_sf(va, wkt = 'geom')
+precip_geom <- geom_sf(data = va_sf,aes(geometry = geom,colour = color_list[4], shape=color_list[4], linetype=color_list[4]), fill = NA, inherit.aes = FALSE,size=1.25)
+
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 
@@ -251,21 +257,24 @@ map.obj <- basemap.obj + fips.gg +
   reservoir_geom_list +
   gage_geom_list +
   well_geom_list + 
+  precip_geom +
   # reservoir_geom_list + 
   # scale_color_manual("Drought Indicator",
   #                    values = c("brown4", "blue", "black"),
   #                    labels = c("Surface Water", "Groundwater", "Reservoir")
   #                    ) +
-  scale_color_manual("Drought Indicator",
-                     labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c("blue", "palegreen4", "black")) +
-  scale_shape_manual("Drought Indicator",
-                     labels = c("Surface Water", "Groundwater", "Reservoir"),
-                     values = c(17, 19, NA)) +
+  scale_color_manual("Drought Indicators",
+                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                     # values = c("blue", "palegreen4", "black")) +
+                     values = c("black", "black", "black", "black"),
+                     guide = guide_legend(ncol = 2)) +
+  scale_shape_manual("Drought Indicators",
+                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                     values = c(17, 19, NA, NA)) +
                      # values = c(24, 21, NA)) +
-  scale_linetype_manual("Drought Indicator",
-                        labels = c("Surface Water", "Groundwater", "Reservoir"),
-                        values = c("blank", "blank", "solid")) +
+  scale_linetype_manual("Drought Indicators",
+                        labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                        values = c("blank", "blank", "solid", "blank")) +
   theme(legend.position = c(0.34, 0.782),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
@@ -273,7 +282,7 @@ map.obj <- basemap.obj + fips.gg +
         legend.direction = "vertical",
         legend.box = "horizontal"
   )
-
+#expression(italic("Precipitation (*region wide)"))
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 drought_map_draw <- ggdraw(map.obj)+deqlogo 
