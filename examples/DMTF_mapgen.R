@@ -264,24 +264,25 @@ map.obj <- basemap.obj + fips.gg +
   #                    labels = c("Surface Water", "Groundwater", "Reservoir")
   #                    ) +
   scale_color_manual("Drought Indicators",
-                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation*"),
                      # values = c("blue", "palegreen4", "black")) +
                      values = c("black", "black", "black", "black"),
                      guide = guide_legend(ncol = 2)) +
   scale_shape_manual("Drought Indicators",
-                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                     labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation*"),
                      values = c(17, 19, NA, NA)) +
                      # values = c(24, 21, NA)) +
   scale_linetype_manual("Drought Indicators",
-                        labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation (*region-wide)"),
+                        labels = c("Surface Water", "Groundwater", "Reservoir", "Precipitation*"),
                         values = c("blank", "blank", "solid", "blank")) +
-  theme(legend.position = c(0.34, 0.782),
+  theme(legend.position = c(0.415, 0.782),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         aspect.ratio = 12.05/16,
         legend.direction = "vertical",
         legend.box = "horizontal"
-  )
+  ) + 
+  annotate("text", x=0.6, y=0.782, label= "boat") + 
 #expression(italic("Precipitation (*region wide)"))
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
