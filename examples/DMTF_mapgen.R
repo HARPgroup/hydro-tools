@@ -281,8 +281,8 @@ map.obj <- basemap.obj + fips.gg +
         aspect.ratio = 12.05/16,
         legend.direction = "vertical",
         legend.box = "horizontal"
-  ) + 
-  annotate("text", x=0.6, y=0.782, label= "boat") + 
+  ) #+
+  # annotate("text", x = 1.5, y = 2.2, label = "Text No. 1")
 #expression(italic("Precipitation (*region wide)"))
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
