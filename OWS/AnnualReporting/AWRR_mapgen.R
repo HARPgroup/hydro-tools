@@ -13,22 +13,30 @@ source(paste(hydro_tools,"GIS_functions/base.layers.R",sep = '/'))
 source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
 if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
 
-#MAP OUTPUT LOCATION
-export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/") #FINAL LOCATION
-# export_path <- paste0("C:/Users/nrf46657/Desktop/GitHub/hydro-tools/OWS/AnnualReporting/TEST_MAPS/") #FOR TESTING
-
 ###################################################################################################### 
 # LOAD ALL FOUNDATION DATA
-syear = 2016
-eyear = 2020
+syear = 2017
+eyear = 2021
 source_directory <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
-mp_all <- read.csv(paste(source_directory,"/mp_all_",syear,"-",eyear,".csv",sep=""))
+mp_all_mgy <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #GM this is mp_all_mgy now
 mp_all_wide <- read.csv(paste(source_directory,"/mp_all_wide_",syear,"-",eyear,".csv",sep=""))
 mp_all_wide_power <- read.csv(paste(source_directory,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
-ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep=""))
+ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep="")) #GM - from https://deq1.bse.vt.edu/d.dh/ows-permit-list, filter by active and expired permits, do manual check for incorrect cells 
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
+
+#MAP OUTPUT LOCATION
+export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/") 
+# export_path <- paste0("C:/Users/nrf46657/Desktop/GitHub/hydro-tools/OWS/AnnualReporting/TEST_MAPS/") #FOR TESTING
+working_path <- "C:/Users/rnv55934/Documents/Docs/AnnualReport/2022/" #FOR TESTING
+
+#GM SET UP MP_ALL FOR MAPGEN
+mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source.Type" as Source_Type, "MP.Name" as MP_Name, "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use.Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS.Code" as FIPS, (X',eyear,') as  (X',eyear,'),
+                       (X',eyear,')/365 as mgd
+                       FROM mp_all_mgy'))
+# removed   WHERE Year = ',eyear,'  from each point map, add AND WHERE mgd IS NOT NULL
+
 ###################################################################################################### 
 
 
@@ -118,6 +126,7 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
 #ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
 ggsave(plot = monitoring_map_draw, file = paste0(export_path, "MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+
 
 
 ######################################################################################################
@@ -296,6 +305,8 @@ ggsave(plot = total_locality_map_draw, file = paste0(export_path, "Locality_Tota
 #############################################################################################
 # Agriculture (Non-Irrigation) Water Withdrawals by Withdrawal Point Location################
 
+#NOTE - may need to reset size bins and legend.position if data changes (GM)
+
 #try natural breaks or size bins next year
 mp_df <-sqldf(paste('SELECT *,
                           CASE
@@ -307,8 +318,8 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "agriculture"
+                        WHERE Use_Type = "agriculture"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 
@@ -335,7 +346,8 @@ ag_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
 
-#ggsave(plot = ag_map_draw, file = paste0(export_path, "/awrr/2021/","map_ag_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+
+#ggsave(plot = ag_map_draw, file = paste0(working_path,"map_ag_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here
 ggsave(plot = ag_map_draw, file = paste0(export_path, "Agriculture_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -352,8 +364,8 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "irrigation"
+                        WHERE Use_Type = "irrigation"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
@@ -379,7 +391,7 @@ irr_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 irr_map_draw <- ggdraw(irr_map)+deqlogo
 
-#ggsave(plot = irr_map_draw, file = paste0(export_path, "/awrr/2021/","map_irr_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = irr_map_draw, file = paste0(working_path,"map_irr_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = irr_map_draw, file = paste0(export_path, "Irrigation_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -396,8 +408,8 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "commercial"
+                        WHERE Use_Type = "commercial"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
@@ -422,7 +434,7 @@ comm_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 comm_map_draw <- ggdraw(comm_map)+deqlogo
 
-#ggsave(plot = comm_map_draw, file = paste0(export_path, "/awrr/2021/","map_com_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = comm_map_draw, file = paste0(working_path,"map_com_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = comm_map_draw, file = paste0(export_path, "Commerical_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -439,8 +451,8 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "mining"
+                        WHERE Use_Type = "mining"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
 
 
@@ -467,7 +479,7 @@ min_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 min_map_draw <- ggdraw(min_map)+deqlogo
 
-#ggsave(plot = min_map_draw, file = paste0(export_path, "/awrr/2021/","map_min_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = min_map_draw, file = paste0(working_path,"map_min_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = min_map_draw, file = paste0(export_path, "Mining_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -485,11 +497,10 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "manufacturing"
-                    AND a.HydroID NOT LIKE "398760"
+                        WHERE Use_Type = "manufacturing"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE NC LOCALITIES
-#Point that was excluded is a permitted Tyson well with HydroID 398760 because Point appears in the ocean, and was 0 MGD in 2020 anyways
+#Including Tyson well hydroid 398760 that was excluded last year because lat/lon is now on land 
 
 mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)), fill="#0C1078", alpha=0.9, shape=21, show.legend = TRUE)
 
@@ -514,7 +525,7 @@ man_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 man_map_draw <- ggdraw(man_map)+deqlogo
 
-#ggsave(plot = man_map_draw, file = paste0(export_path, "/awrr/2021/","map_man_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = man_map_draw, file = paste0(working_path,"map_man_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = man_map_draw, file = paste0(export_path, "Manufacturing_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 
@@ -532,8 +543,8 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Year = ',eyear,'
-                        AND Use_Type = "municipal"
+                        WHERE Use_Type = "municipal"
+                        AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
 
 
@@ -560,7 +571,7 @@ pws_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pws_map_draw <- ggdraw(pws_map)+deqlogo
 
-#ggsave(plot = pws_map_draw, file = paste0(export_path, "/awrr/2021/","map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = pws_map_draw, file = paste0(working_path,"map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pws_map_draw, file = paste0(export_path, "PublicWaterSupply_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -642,7 +653,7 @@ pow_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pow_map_draw <- ggdraw(pow_map)+deqlogo
 
-#ggsave(plot = pow_map_draw, file = paste0(export_path, "/awrr/2021/","map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = pow_map_draw, file = paste0(working_path,"map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pow_map_draw, file = paste0(export_path, "Power_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
