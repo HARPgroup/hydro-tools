@@ -32,8 +32,9 @@ export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/O
 working_path <- "C:/Users/rnv55934/Documents/Docs/AnnualReport/2022/" #FOR TESTING
 
 #GM SET UP MP_ALL FOR MAPGEN
-mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source.Type" as Source_Type, "MP.Name" as MP_Name, "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use.Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS.Code" as FIPS, (X',eyear,') as  (X',eyear,'),
-                       (X',eyear,')/365 as mgd
+eyearX <- paste0("X",eyear)
+mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source.Type" as Source_Type, "MP.Name" as MP_Name, "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use.Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS.Code" as FIPS, ',eyearX,' as ',eyearX,',
+                       (',eyearX,')/365 as mgd
                        FROM mp_all_mgy'))
 # removed   WHERE Year = ',eyear,'  from each point map, add AND WHERE mgd IS NOT NULL
 
@@ -130,7 +131,7 @@ ggsave(plot = monitoring_map_draw, file = paste0(export_path, "MonitoringStation
 
 
 ######################################################################################################
-### # DROUGHT REGIONS MAP ############################################################################
+### # DROUGHT REGIONS MAP - STATIC - DONT NEED TO RERUN ############################################################################
 
 fips_df <-sqldf(paste('SELECT *,fips_geom AS geom,
                           CASE
@@ -563,7 +564,7 @@ pws_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
         legend.text=element_text(size=8),
         aspect.ratio = 12.05/16
   ) +
-  scale_size_manual(name=paste0(eyear," Public Water Supply \n Water Withdrawals (MGD)"), values=c(2,3,4,5,6,0),
+  scale_size_manual(name=paste0(eyear," Public Water Supply \n Water Withdrawals (MGD)"), values=c(1,2,3,4,5,0), #GM smaller point sizes for pws so individual points can be discerned
                     labels=c("< 0.05","0.05 - 0.5","0.5 - 5","5 - 25","> 25"))
 
 
@@ -571,7 +572,7 @@ pws_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pws_map_draw <- ggdraw(pws_map)+deqlogo
 
-#ggsave(plot = pws_map_draw, file = paste0(working_path,"map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = pws_map_draw, file = paste0(working_path,"map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pws_map_draw, file = paste0(export_path, "PublicWaterSupply_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -653,7 +654,7 @@ pow_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pow_map_draw <- ggdraw(pow_map)+deqlogo
 
-#ggsave(plot = pow_map_draw, file = paste0(working_path,"map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+ggsave(plot = pow_map_draw, file = paste0(working_path,"map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pow_map_draw, file = paste0(export_path, "Power_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -668,11 +669,12 @@ mp_point_sw <- sqldf('SELECT a.*
 #filter for New Permit Issuances - bins for point color
 mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "Permit.Start2" >= "2020-01-01" THEN 3
+                            WHEN "Permit.Start2" >= "',eyear,'-01-01" THEN 3
                           ELSE 2
                           END AS point_size
                         FROM mp_point_sw AS a
                     ORDER BY "Permit.Start2" ASC',sep="")) 
+#GM update for eyear
 
   mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
   
@@ -696,10 +698,10 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   sw_permit_map_draw <- ggdraw(sw_permit_map)+deqlogo
   
-  #ggsave(plot = sw_permit_map_draw, file = paste0(export_path, "/awrr/2021/","VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
-  ggsave(plot = sw_permit_map_draw, file = paste0(export_path, "VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+  ggsave(plot = sw_permit_map_draw, file = paste0(working_path,"VWPermits_AWRR.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here #GM update filenames 
+  ggsave(plot = sw_permit_map_draw, file = paste0(export_path, "VWPermits_AWRR.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 #############################################################################################
-# Groundwater Withdrawal Permitting Activities ##############################################
+# Groundwater Withdrawal Permitting Activities - RUN This as Precursor ##############################################
   
   #filter for SW that are currently active or in admin continued status
   mp_point_gw <- sqldf('SELECT a.*
@@ -710,7 +712,7 @@ mp_df <-sqldf(paste('SELECT *,
   #filter for New Permit Issuances - bins for point color
   mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "Permit.Start2" >= "2020-01-01" THEN 4
+                            WHEN "Permit.Start2" >= "',eyear,'-01-01" THEN 4
                           ELSE 3
                           END AS point_size
                         FROM mp_point_gw AS a
@@ -760,10 +762,52 @@ mp_df <-sqldf(paste('SELECT *,
   deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
   gw_permit_map_draw <- ggdraw(gw_permit_map)+deqlogo
   
-  ggsave(plot = gw_permit_map_draw, file = paste0(export_path, "GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95) #Working map saves here
+  ggsave(plot = gw_permit_map_draw, file = paste0(working_path, "GWPermits_AWRR.png",sep = ""), width=6.5, height=4.95) #Working map saves here
  
 #############################################################################################
-# WSP Regions Map ###########################################################################
+  # ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities - USE THIS Version in Annual Report ##############################################
+  
+  #GWMA extent
+  GWMA.extent = data.frame( 
+    x = c(-77.7, -75),
+    y = c(36, 40.6))
+  
+  GWMA.baselayers.gg <- base.layers(baselayers, 
+                                    extent = GWMA.extent)
+  GWMA.basemap.obj <- base.map(GWMA.baselayers.gg, 
+                               extent = GWMA.extent,
+                               plot_margin = c(.25,0,.25,0), #top, right, bottom, left
+                               plot_zoom = 8,
+                               scale_bar = F)
+  # ggsave(plot = GWMA.basemap.obj, file = paste0(export_path,"GWMA.basemap.png",sep = ""), width=6.5, height=4.95)
+  
+  # MAP
+  gw_permit_map_zoom <- GWMA.basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
+    theme(legend.position = c(0.31, .85),
+          legend.title=element_text(size=7),
+          legend.text=element_text(size=5)) +
+    guides(fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2"),
+                                                   alpha = c(.5,.5,1,1),
+                                                   size = c(3.5,3.5,2.5,2.5),
+                                                   shape = c(22,22,21,21)))) +
+    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal \n Permitting Activities"), 
+                      values=c("pink",
+                               "darkorchid2",
+                               "#0C1078",
+                               "orange2"), 
+                      labels=c("Eastern Virginia GWMA",
+                               "Eastern Shore GWMA",
+                               "Active Groundwater Withdrawal Permits", 
+                               paste0("Issued Since January ",eyear)))
+  
+  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
+  gw_permit_map_zoom_draw <- ggdraw(gw_permit_map_zoom)+deqlogo
+  
+  ggsave(plot = gw_permit_map_zoom_draw, file = paste0(working_path,"xtest_GWPermits_AWRR.png",sep = ""), width=6.5, height=4.95) #Working map saves here
+  ggsave(plot = gw_permit_map_zoom_draw, file = paste0(export_path, "GWPermits_AWRR.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+
+#############################################################################################
+# WSP Regions Map - STATIC - DONT NEED TO RERUN ###########################################################################
   
    ows_wsp_regions_wkt$region_name <- as.character(ows_wsp_regions_wkt$region_name)
   
@@ -809,49 +853,11 @@ mp_df <-sqldf(paste('SELECT *,
   ggsave(plot = wsp_map_draw, file = paste0(export_path, "WSP_Planning_Regions_Map.pdf",sep = ""), width=10, height=15) #FINAL MAP SAVES HERE
 
 #############################################################################################
-# ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities ##############################################
-  
-  #GWMA extent
-  GWMA.extent = data.frame( 
-    x = c(-77.7, -75),
-    y = c(36, 40.6))
-  
-  GWMA.baselayers.gg <- base.layers(baselayers, 
-                               extent = GWMA.extent)
-  GWMA.basemap.obj <- base.map(GWMA.baselayers.gg, 
-                          extent = GWMA.extent,
-                          plot_margin = c(.25,0,.25,0), #top, right, bottom, left
-                          plot_zoom = 8,
-                          scale_bar = F)
-  # ggsave(plot = GWMA.basemap.obj, file = paste0(export_path,"GWMA.basemap.png",sep = ""), width=6.5, height=4.95)
-  
-  # MAP
-  gw_permit_map_zoom <- GWMA.basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
-    theme(legend.position = c(0.31, .85),
-          legend.title=element_text(size=7),
-          legend.text=element_text(size=5)) +
-    guides(fill = guide_legend(override.aes = list(fill = c("pink","darkorchid2","#0C1078","orange2"),
-                                                   alpha = c(.5,.5,1,1),
-                                                   size = c(3.5,3.5,2.5,2.5),
-                                                   shape = c(22,22,21,21)))) +
-    scale_fill_manual(name=paste0(eyear," Groundwater Withdrawal \n Permitting Activities"), 
-                      values=c("pink",
-                               "darkorchid2",
-                               "#0C1078",
-                               "orange2"), 
-                      labels=c("Eastern Virginia GWMA",
-                               "Eastern Shore GWMA",
-                               "Active Groundwater Withdrawal Permits", 
-                               paste0("Issued Since January ",eyear)))
 
-  deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
-  gw_permit_map_zoom_draw <- ggdraw(gw_permit_map_zoom)+deqlogo
-  
-  #ggsave(plot = gw_permit_map_zoom_draw, file = paste0(export_path, "/awrr/2021/","xtest_GWPermits_AWRR_2020.png",sep = ""), width=6.5, height=4.95) #Working map saves here
-  ggsave(plot = gw_permit_map_zoom_draw, file = paste0(export_path, "GWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+# End of Figures in Annual Report ################
   
 #############################################################################################
-# Unpermitted VS. Surface Water Withdrawal Permitting Activities ############################################
+# Unpermitted VS. Surface Water Withdrawal Permitting Activities - NOT IN AR ############################################
 
   #PERMIT LAYER
   #filter for SW that are currently active or in admin continued status
@@ -922,7 +928,7 @@ mp_df <-sqldf(paste('SELECT *,
   
   #ggsave(plot = permit_swvs_map_draw, file = paste0(export_path, "VWPermits_AWRR_2020.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 #############################################################################################
-# Unpermitted VS. Groundwater Withdrawal Permitting Activities ##############################
+# Unpermitted VS. Groundwater Withdrawal Permitting Activities - NOT IN AR ##############################
   
   #PERMIT LAYER
   #filter for SW that are currently active or in admin continued status
