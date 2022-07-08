@@ -1,221 +1,205 @@
-#library("readxl")
+# This script generates the Permitted & Unpermitted Withdrawal Table in the Annual Report
+# It is an update to avoid counting unpermitted surface water intakes from facilities with GWPs as permitted SW withdrawals 
 library('dplyr')
 library('httr')
 library('sqldf')
 library('stringr')
-library("tidyr") # GM add library needed for pivot_wider
-library("kableExtra") # GM add library needed for latex
+library("tidyr")
+library("kableExtra")
 
-y <- 2021
-eyear <- y
-print(y)
-startdate <- paste(y, "-01-01",sep='')
-enddate <- paste(y, "-12-31", sep='')
+#Set current year
+eyear <- 2021
+eyearX <- paste0("X",eyear)
+Xyears <- array()
+five <- 5:1
+for (y in five) { Xyears[y] = paste0("X",2022-five[y]) }
 
-localpath <- tempdir()
-filename <- paste("data.all_",y,".csv",sep="")
-destfile <- paste(localpath,filename,sep="\\")  
-download.file(paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498",sep=""), destfile = destfile, method = "libcurl")  
-data.all <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
+#load foundation data
+#permit only data from https://deq1.bse.vt.edu/d.dh/ows-permit-list
+ows_permit_list <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
+#mp_all_mgy generated from AWRR_data.R is all MPs without power, without Dalecarlia, source type and use type names mostly already corrected
+mp_all_mgy <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_mgy_",eyear-4,"-",eyear,".csv"))
 
-data1 <- data.all #GM edit data -> data1 throughout so we done use a reserved word
+
+#Process mp_all ##################################################
 
 #remove duplicates (keeps one row)
-#data1 <- distinct(data1, MP_hydroid, Year, .keep_all = TRUE)
-#GM replace dplyr with sql, also removes duplicates
-data1 <- sqldf('SELECT * FROM data1
-               GROUP BY "MP_hydroid", "Hydrocode", "Source.Type", "MP.Name", "Facility_hydroid", "Facility", "Use.Type", "Year", "Water.Use.MGY", "Water.Use..MGD.", "Latitude", "Longitude", "FIPS.Code", "Locality", "OWS.Planner"')
+data_all <- sqldf(paste('SELECT * FROM mp_all_mgy
+               GROUP BY "MP_hydroid", "Hydrocode", "Source.Type", "MP.Name", "Facility_hydroid", "Facility", "Use.Type", "Latitude", "Longitude", "FIPS.Code", "Locality", "OWS.Planner",',Xyears,'',sep=''))
+
+# retaining this line in case it's still needed
+if (length(which(data_all$Use.Type=='facility')) > 0) {
+  data_all <- data_all[-which(data_all$Use.Type=='facility'),]
+} 
+
+#rename columns and remove prior year withdrawal values
+mp_all <- sqldf(paste('SELECT MP_hydroid AS "MP_hydroid",
+    Hydrocode AS "Hydrocode",
+    "Source.Type" AS "Source_Type",
+    "MP.Name" AS "MP_Name",
+    Facility_hydroid AS "Facility_hydroid",
+    Facility AS "Facility",
+    "Use.Type" AS "Use_Type",
+    Latitude AS "lat",
+    Longitude AS "lon",
+    "FIPS.Code" AS "FIPS",
+    Locality AS "locality",
+    ',eyearX,' AS mgy,
+    (',eyearX,')/365 AS mgd
+  FROM data_all',sep=''))
+
+## should not need this unless we need a 5 year average column, then do this and pivot_longer
+# names(mp_all) <- c('HydroID',
+#                     'Hydrocode',
+#                     'Source_Type',
+#                     'MP_Name',
+#                     'Facility_HydroID', 
+#                     'Facility',
+#                     'Use_Type', 
+#                     'lat',
+#                     'lon',
+#                     'FIPS',
+#                     'locality',
+#                     'OWS_Planner',
+#                     paste0(Xyears[1]),
+#                     paste0(Xyears[2]),
+#                     paste0(Xyears[3]),
+#                     paste0(Xyears[4]),
+#                     paste0(Xyears[5]))
 
 
-#exclude dalecarlia
-data1 <- data1[-which(data1$Facility=='DALECARLIA WTP'),]
-
-if (length(which(data1$Use.Type=='facility')) > 0) {
-  data1 <- data1[-which(data1$Use.Type=='facility'),]
-}
-#rename columns
-# colnames(data1) <- c('HydroID', 'Hydrocode', 'Source_Type',
-#                     'MP_Name', 'Facility', 'Use_Type', 'Year',
-#                     'mgy', 'mgd', 'lat', 'lon', 'locality')
-
-#GM edit to add 'Planner' title to OWS planner column, and use names() instead of colnames()
-names(data1) <- c('HydroID',
-                    'Hydrocode',
-                    'Source_Type',
-                    'MP_Name',
-                    'Facility_HydroID', 
-                    'Facility',
-                    'Use_Type', 
-                    'Year',
-                    'mgy',
-                    'mgd',
-                    'lat',
-                    'lon',
-                    'FIPS',
-                    'locality',
-                    'OWS_Planner')
-
-data1$mgd <- data1$mgy/365
-sum(data1$mgy)
 #make use type values lowercase
-data1$Use_Type <- str_to_lower(data1$Use_Type)
+mp_all$Use_Type <- str_to_lower(mp_all$Use_Type)
 
-#change 'Well' and 'Surface Water Intake' values in source_type column to match report headers
-#GM if we can do this with sql instead of with levels, that would be better for future
-#data1 <- sqldf('SELECT * FROM data1 GROUP BY Source_Type') #dont use this as is
-levels(data1$Source_Type) <- c(levels(data1$Source_Type), "Groundwater", "Surface Water")
-data1$Source_Type[data1$Source_Type == 'Well'] <- 'Groundwater'
-data1$Source_Type[data1$Source_Type == 'Surface Water Intake'] <- 'Surface Water'
-
-
-data1$Use_Type[data1$Use_Type == 'industrial'] <- 'manufacturing'
-data1$Use_Type[data1$Use_Type == 'agriculture (non-irrigation) '] <- 'agriculture' #GM needed for facility hydroid 482522 and 482536
-data1$Use_Type[data1$Use_Type == 'municipal'] <- 'public water supply' #GM edit
-
-##################################################################
-data1 <- sqldf(paste0('SELECT *
-                FROM data1
-                WHERE Year = ',eyear,''))
-#GM data1 not multi_yr_data
+mp_all$Use_Type[mp_all$Use_Type == 'municipal'] <- 'public water supply'
 
 
 
-#PULL IN PERMITTED MPs (NO VWUDS) 
-download.file(paste("https://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=not&ftype=power&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200",sep=""), destfile = destfile, method = "libcurl")  
-datap <- read.csv(file=paste(localpath , filename,sep="\\"), header=TRUE, sep=",")
+#Process ows_permit_list ##################################################
 
-sqldf("select count(*) from datap")
+permit_all <- ows_permit_list
 
-#GM rename now so the join keeps the right names
-datap$Use.Type[datap$Use.Type == 'industrial'] <- 'manufacturing'
-datap$Use.Type[datap$Use.Type == 'agriculture (non-irrigation) '] <- 'agriculture'
-datap$Use.Type[datap$Use.Type == 'municipal'] <- 'public water supply'
+# remove duplicates (keeps one row)
+permit_all <- sqldf('SELECT * FROM permit_all
+               GROUP BY "Owner", "Permit", "Permit.ID","VA.Hydro.Facility.ID", "Facility","Status","Use.Type", "Locality", "Facility.Latitude","Facility.Longitude" ,"Permit.Start","Permit.Expiration","Permit.Program","Permit.Staff","GWP.Annual.Limit","GWP.Monthly.Limit","VWP.Annual.Limit","VWP.Monthly.Limit","VWP.Daily.Limit"')
 
-# #remove duplicates (keeps one row for each year)
-datap <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facility_hydroid","Facility","Use.Type","Month","Year",max("Water.Use.MGY") AS "Water.Use.MGM","Latitude","Longitude","Locality","FIPS.Code" 
-               FROM datap
-               GROUP BY "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facility_hydroid","Facility","Use.Type","Month","Year","Latitude","Longitude","Locality","FIPS.Code"
-                ORDER BY "Water.Use.MGY" DESC ')
+# cleanup names
+permit_all$Use.Type[permit_all$Use.Type == 'industrial'] <- 'manufacturing'
+permit_all$Use.Type[permit_all$Use.Type == 'municipal'] <- 'public water supply'
 
-qpi = "SELECT a.*, CASE WHEN b.MP_hydroid is not NULL THEN 1 ELSE 0 END as has_permit
-  from data1 as a left outer join datap as b
-  on a.HydroID = b.MP_hydroid "
+colnames(permit_all)[colnames(permit_all)=="Permit.Program"] <- "Permit_Program"
+colnames(permit_all)[colnames(permit_all)=="VA.Hydro.Facility.ID"] <- "Facility_HydroID"
 
-data_pi = sqldf(
-  qpi
-)
 
-sqldf("select has_permit, ROUND(sum(mgd),2) AS mgd, count(*) from data_pi group by has_permit")
-sqldf(
-  "select Source_type, Use_Type, 
-  ROUND(sum(mgd),2) AS mgd, count(*) 
-  from data_pi 
-  group by Source_type, Use_Type"
-)
+## Mark permitted facilities with unpermitted and permitted status #####################################
 
-data_pi$Use_Type <- str_to_title(data_pi$Use_Type)
+#mark GWP and VWPs in the permitted data
+permit_has <- sqldf('SELECT *, 
+                CASE WHEN Permit_Program = "Virginia Groundwater Permit Program (GWPermit)"
+                 OR Permit_Program = "Virginia Groundwater Permit Program (GWPermit), Virginia Department of Environmental Quality Water Use Database (VWUDS)"
+                 THEN 1 ELSE 0
+                 END AS has_GWP,
+                CASE WHEN Permit_Program = "Virginia Water Protection Permit Program (VWP)"
+                 OR Permit_Program = "Virginia Water Protection Permit Program (VWP), Virginia Department of Environmental Quality Water Use Database (VWUDS)"
+                 THEN 1 ELSE 0
+                 END AS has_VWP
+               FROM permit_all')
+sqldf('select has_GWP, has_VWP, count(*) from permit_has group by has_GWP, has_VWP')
 
+#filter for facilities that have a GW or SW permit
+permit_gw <- sqldf('SELECT * FROM permit_has WHERE has_GWP = 1')
+permit_sw <- sqldf('SELECT * FROM permit_has WHERE has_VWP = 1')
+
+# QUESTION - should I just take active and expired permits? If not, Just skip this step and have per_gw_fac pull from permit_gw directly. If yes, can add this step to the sql before this
+per_gw_act <- sqldf('SELECT * FROM permit_gw
+                      WHERE Status = "expired"
+                      OR Status = "active"')
+per_sw_act <- sqldf('SELECT * FROM permit_sw
+                      WHERE Status = "expired"
+                      OR Status = "active"')
+# NOTE Any filtering of permit row values must happen before this Group By otherwise values may not be selected when rows are collapsed
+per_gw_fac <- sqldf('SELECT * FROM per_gw_act
+                      GROUP BY Facility_HydroID')
+per_sw_fac <- sqldf('SELECT * FROM per_sw_act
+                      GROUP BY Facility_HydroID')
+
+##########################################################################
+#Join all facilities with marked permitted facilities #####################
+
+#join main data with marked permitted data using facility hydroid, keep gw and sw separate for separate sums
+join_all <- sqldf('SELECT a.*, b.has_GWP, c.has_VWP
+                  FROM mp_all AS a
+                  LEFT OUTER JOIN per_gw_fac AS b
+                   ON a.Facility_hydroid = b.Facility_HydroID
+                  LEFT OUTER JOIN per_sw_fac AS c
+                   ON a.Facility_hydroid = c.Facility_HydroID')
+#check there is no duplication of MPs by the join, should result in 0 obs.
+QAjoin <- sqldf('select * from join_all group by MP_hydroid HAVING count(*) >1')
+
+#in case total count is needed later in code, if not can delete this
+# doens't work anyway maybe bc it's a WHERE on two separate columns
+# join_all <- sqldf('SELECT *, 
+#                   CASE WHERE has_GWP = 1
+#                    OR has_VWP = 1
+#                    THEN 1 ELSE 0 END AS has_permit
+#                   FROM join_all')
+
+join_all$Use_Type <- str_to_title(join_all$Use_Type)
+
+#------------------ now sum by gwp and vwp individually. Should work because count the GWP from pemrit_gw and the groundwater without gwp from main data as unpermitted
+
+#sum MPs withdrawals from mp_all to create facility level table, because permit list only has facility hydroids to join on
+# fac_all <- sqldf('SELECT Source_Type, Facility_hydroid, Facility, Use_Type, FIPS, sum(mgy) AS mgy, sum(mgd) as mgd
+#                    FROM mp_all
+#                    GROUP BY Facility_hydroid') # DONT DO THIS, LOSE USE TYPE
+
+# # this shows why we need to group by facility on the permit list as well
+# testp <- permit_all
+# testp_active <- sqldf('SELECT * FROM testp
+#                       WHERE Status = "active"
+#                       OR Status = "expired"')
+# testp_active <- sqldf('SELECT * FROM testp_active
+#                       GROUP BY Facility_HydroID
+#                       HAVING count(*) > 1')
+# rm(testp,testp_active)
+# #   just active results in 1 extra row, probably because there are two duplicate hydoids. One is lake kilby accounting for that extra row, and the other is a fossilpower that wont join bc mp_all doesnt have power
+# #   just expired results in 0 extra rows 
+# #   active or expired results in 12 extra rows, that's likely because the same hydroid can have both statuses 
+
+
+#-----------
 
 ########## STATIC DATA #######################################################################################
 
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
-write.csv(data_pi, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
+# NOTE that csv output will show has_GWP for all MPs in a facility that has a single permitted GW MP, and has_VWP for all MPs in a facility that has a permitted SW MP, because we only had permit status by facility level
+write.csv(join_all, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
-data_pi <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
-#data_pi$Use_Type <- recode(data_pi$Use_Type, "Municipal" = "Public Water Supply")
-## DEPRECATED - FORMAT Table 2: 20XX Permitted and Unpermitted (Excluded) Withdrawals (MGD) ################################
-# permit_srctype <- sqldf(
-#   "select Source_type, has_permit, 
-#   ROUND(sum(mgd),2) AS mgd, count(*) 
-#   from data_pi 
-#   group by Source_type, has_permit"
-# )
-# 
-# table2_bysrc <- sqldf('SELECT Source_Type AS "Source Type", CASE 
-#                     WHEN has_permit = 1 
-#                     THEN "Permitted"
-#                     WHEN has_permit = 0 
-#                     THEN "Unpermitted"
-#                     END AS "Withdrawal Type",
-#                     mgd AS "Withdrawal Amount"
-#                     FROM permit_srctype
-#                     ORDER BY Source_Type, has_permit desc
-#                     ')
-# gw_perm_pct <- round((table2_bysrc[1,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_bysrc
-#                                GROUP BY "Source Type"')[1,]) * 100,2)
-# gw_unperm_pct <- round((table2_bysrc[2,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_bysrc
-#                                GROUP BY "Source Type"')[1,]) * 100,2)
-# sw_perm_pct <- round((table2_bysrc[3,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_bysrc
-#                                GROUP BY "Source Type"')[2,]) * 100,2)
-# sw_unperm_pct <- round((table2_bysrc[4,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_bysrc
-#                                GROUP BY "Source Type"')[2,]) * 100,2)
-# 
-# table2_total <- sqldf('SELECT "Total" AS "Source Type", CASE 
-#                     WHEN has_permit = 1 
-#                     THEN "Permitted"
-#                     WHEN has_permit = 0 
-#                     THEN "Unpermitted"
-#                     END AS "Withdrawal Type",
-#                     sum(mgd) AS "Withdrawal Amount"
-#                       FROM permit_srctype
-#                       GROUP BY has_permit
-#                       ORDER BY Source_Type, has_permit desc')
-# tot_perm_pct <- round((table2_total[1,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_total')) * 100,2)
-# tot_unperm_pct <-  round((table2_total[2,3] / sqldf('SELECT sum("Withdrawal Amount")
-#                                FROM table2_total')) * 100,2)
-# 
-# pct <- rbind(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct)
-# table2 <- cbind(rbind(table2_bysrc,table2_total),pct)
-# 
-# #remove clutter 
-# rm(gw_perm_pct,gw_unperm_pct,sw_perm_pct,sw_unperm_pct,tot_perm_pct,tot_unperm_pct,table2_total,table2_bysrc,pct)
-# 
-# #KABLE
-# table2_latex <- kable(table2[2:4],'latex', booktabs = T, align =  c('l','c','c'),
-#                       caption = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-#                       label = paste(eyear, "Permitted and Unpermitted (Excluded) Withdrawals (MGD)",sep=" "),
-#                       col.names = c( 'Withdrawal Type',
-#                                      paste(eyear,"Withdrawal Amount",sep = ' '),
-#                                      '% of Total')) %>%
-#   kable_styling(latex_options = c("striped"), full_width = F,position = "center", font_size = 12) %>%
-#   pack_rows("Groundwater", 1, 2, hline_before = T, hline_after = F) %>%
-#   pack_rows("Surface Water", 3, 4, hline_before = T, hline_after = F) %>%
-#   pack_rows("Total (GW + SW)", 5, 6, hline_before = T, hline_after = F)
-# 
-# #CUSTOM LATEX CHANGES
-# #insert hold position header
-# table2_tex <- gsub(pattern = "{table}[t]", 
-#                    repl    = "{table}[ht!]", 
-#                    x       = table2_latex, fixed = T )
-# table2_tex %>%
-#   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table2_",eyear,".tex",sep = ''))
+join_all <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
 
-## DEPRECATED - FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD) ###############
-permit_src_use <- sqldf(
-  "select Source_type, Use_Type, has_permit, ROUND(sum(mgd),2) AS mgd, count(*) 
-  from data_pi 
-  group by Source_type, Use_Type, has_permit"
-)
+## FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD) ###############
+
+#Sum groundwater
+
+gw_src_use <- sqldf(
+  'SELECT Source_type, Use_Type, has_GWP, ROUND(sum(mgd),2) AS mgd, count(*) 
+  FROM join_all
+  WHERE Source_type = "Groundwater"
+  GROUP BY Source_type, Use_Type, has_GWP')
 
 table3_gw <- sqldf('SELECT Source_Type, Use_Type, CASE 
-                    WHEN has_permit = 1 
+                    WHEN has_GWP = 1 
                     THEN "Permitted"
-                    WHEN has_permit = 0 
+                    WHEN has_GWP IS NULL 
                     THEN "Unpermitted"
                     END AS "Withdrawal Type",
                     mgd AS "Withdrawal Amount",
                     round((mgd / 
                     (SELECT sum(a.mgd)
-                    FROM permit_src_use a
+                    FROM gw_src_use a
                     WHERE a.Source_Type = "Groundwater")) * 100,2)
                     AS "pct_of_total"
-                   FROM permit_src_use
-                   WHERE Source_Type = "Groundwater"')
+                   FROM gw_src_use')
 
 table3_gw_tot <- sqldf('SELECT "Total Groundwater" AS Source_Type, 
               "Total Groundwater" AS Use_Type,
@@ -224,20 +208,32 @@ table3_gw_tot <- sqldf('SELECT "Total Groundwater" AS Source_Type,
               round(sum(pct_of_total),1) AS pct_of_total
       FROM table3_gw')
 
+#Sum surface water
+
+# #check that MP 60555 and 67045 are showing as has_VWP = NA even though has_GWP = 1, confirmed!
+# QAsw <- sqldf( 'SELECT MP_hydroid, MP_Name, FAcility_hydroid, Facility, Source_type, Use_Type, mgy, has_VWP 
+#   FROM join_all
+#   WHERE Source_type = "Surface Water"')
+
+sw_src_use <- sqldf(
+  'SELECT Source_type, Use_Type, has_VWP, ROUND(sum(mgd),2) AS mgd, count(*) 
+  FROM join_all
+  WHERE Source_type = "Surface Water"
+  GROUP BY Source_type, Use_Type, has_VWP')
+
 table3_sw <- sqldf('SELECT Source_Type, Use_Type, CASE 
-                    WHEN has_permit = 1 
+                    WHEN has_VWP = 1 
                     THEN "Permitted"
-                    WHEN has_permit = 0 
+                    WHEN has_VWP IS NULL 
                     THEN "Unpermitted"
                     END AS "Withdrawal Type",
                     mgd AS "Withdrawal Amount",
                     round((mgd / 
                     (SELECT sum(a.mgd)
-                    FROM permit_src_use a
+                    FROM sw_src_use a
                     WHERE a.Source_Type = "Surface Water")) * 100,2)
                     AS "pct_of_total"
-                   FROM permit_src_use
-                   WHERE Source_Type = "Surface Water"')
+                   FROM sw_src_use')
 
 table3_sw_tot <- sqldf('SELECT "Total Surface Water" AS Source_Type, 
               "Total Surface Water" AS Use_Type,
@@ -251,43 +247,10 @@ table3 <- rbind(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 #remove clutter
 rm(table3_gw,table3_gw_tot,table3_sw,table3_sw_tot)
 
-# #KABLE ####
-# table3_latex <- kable(table3[2:5],'latex', booktabs = T, align =  c('l','l','c','c'),
-#                       caption = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
-#                       label = paste(eyear, "Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD)",sep=" "),
-#                       col.names = c( 'Use Type',
-#                                      'Withdrawal Type',
-#                                      paste(eyear,"Withdrawal Amount",sep = ' '),
-#                                      '% of Total')) %>%
-#   kable_styling( full_width = F,position = "center", font_size = 10) %>%
-#   pack_rows("Groundwater", 1, 13, hline_before = T, hline_after = F) %>%
-#   pack_rows("Surface Water", 14, 26, hline_before = T, hline_after = F)  %>%
-#   #row_spec(13,bold = T, background = "gray!6") %>%
-#   #row_spec(25,bold = T, background = "gray!6") %>%
-#   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
-# 
-# #CUSTOM LATEX CHANGES
-# #insert hold position header
-# table3_tex <- gsub(pattern = "{table}[t]", 
-#                    repl    = "{table}[ht!]", 
-#                    x       = table3_latex, fixed = T )
-# 
-# #remove extra characters inserted by collapse_rows because of repeating lines
-# table3_tex <- gsub(pattern = "[t]{-2}{*}", 
-#                    repl    = "", 
-#                    x       = table3_tex, fixed= T)
-# 
-# #custom striping
-# table3_tex <- gsub(pattern = " & Unpermitted ", 
-#                    repl    = "\\rowcolor{gray!20}   & Unpermitted ", 
-#                    x       = table3_tex, fixed= T)
-# 
-# table3_tex %>%
-#   cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table3_",eyear,".tex",sep = ''))
-
 
 ### TABLE 3 - NEW FORMATTING ################################
 table3_wide <- pivot_wider(data = table3, id_cols = c("Source_Type", "Use_Type"), names_from = "Withdrawal Type", names_sep = "_", values_from = c("Withdrawal Amount", "pct_of_total"))
+
 
 table3_gw_tot <- sqldf('SELECT "Total  Groundwater" AS Use_Type,
               round(sum("Withdrawal Amount_Unpermitted"),2) AS "Withdrawal Amount_Unpermitted",
@@ -307,7 +270,11 @@ table3_sw_tot <- sqldf('SELECT  "Total  Surface Water" AS Use_Type,
 
 table3_wide <- sqldf('SELECT "Use_Type", "Withdrawal Amount_Unpermitted", "Withdrawal Amount_Permitted", "pct_of_total_Unpermitted", "pct_of_total_Permitted" 
                      FROM table3_wide')
+
 table3_wide <- rbind(table3_wide[1:6,], table3_gw_tot, table3_wide[8:13,], table3_sw_tot)
+
+table3_wide[is.na(table3_wide)] = 0 #GM add for mining and manufacturing
+#write.csv(table3_wide, paste("C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\table3b.csv"), row.names = F)
 
 #KABLE
 table3w_latex <- kable(table3_wide,'latex', booktabs = T, align =  c('l','l','l','l','l'),
