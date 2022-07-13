@@ -104,24 +104,54 @@ permit_has <- sqldf('SELECT *,
                  THEN 1 ELSE 0
                  END AS has_VWP
                FROM permit_all')
+#visual check
 sqldf('select has_GWP, has_VWP, count(*) from permit_has group by has_GWP, has_VWP')
 
 #filter for facilities that have a GW or SW permit
 permit_gw <- sqldf('SELECT * FROM permit_has WHERE has_GWP = 1')
 permit_sw <- sqldf('SELECT * FROM permit_has WHERE has_VWP = 1')
 
-# QUESTION - should I just take active and expired permits? If not, Just skip this step and have per_gw_fac pull from permit_gw directly. If yes, can add this step to the sql before this
+#Just count permits that are active, expired (which are current but past permit term), and under application
 per_gw_act <- sqldf('SELECT * FROM permit_gw
-                      WHERE Status = "expired"
-                      OR Status = "active"')
+                      WHERE Status = "active"
+                      OR Status = "expired"
+                      OR Status = "application"')
 per_sw_act <- sqldf('SELECT * FROM permit_sw
-                      WHERE Status = "expired"
-                      OR Status = "active"')
+                      WHERE Status = "active"
+                      OR Status = "expired"
+                      OR Status = "application"')
 # NOTE Any filtering of permit row values must happen before this Group By otherwise values may not be selected when rows are collapsed
 per_gw_fac <- sqldf('SELECT * FROM per_gw_act
                       GROUP BY Facility_HydroID')
 per_sw_fac <- sqldf('SELECT * FROM per_sw_act
                       GROUP BY Facility_HydroID')
+
+### application status #####
+#Check this the first time, then skip if just rerunning a table
+#This section checks that we are not duplicating facility hydroids when including the 'application' permit status 
+temp_gw_act <- sqldf('SELECT * FROM permit_gw
+                      WHERE Status = "active"
+                      OR Status = "expired"')
+temp_sw_act <- sqldf('SELECT * FROM permit_sw
+                      WHERE Status = "active"
+                      OR Status = "expired"')
+temp_gw_fac <- sqldf('SELECT * FROM per_gw_act
+                      GROUP BY Facility_HydroID')
+temp_sw_fac <- sqldf('SELECT * FROM per_sw_act
+                      GROUP BY Facility_HydroID')
+apps_sw <- sqldf('SELECT a.*, b.Facility_HydroID as compare
+                  FROM per_sw_fac AS a
+                  LEFT OUTER JOIN temp_sw_fac AS b
+                   ON a.Facility_hydroid = b.Facility_HydroID')
+#contains an 'application' permit status
+#apps_sw_status <- sqldf('select * from apps_sw where status = "application" ')
+#these are the facilities added by including the 'application' permit status
+apps_sw_added <- sqldf('select * from apps_sw where compare is null') . 
+#If 0 obs, we are not duplicating faciilty hydroids
+apps_sw_QA <- sqldf('select * from apps_sw group by Facility_hydroid HAVING count(*) >1') 
+#remove clutter
+rm(temp_gw_act,temp_sw_act,temp_gw_fac,temp_sw_fac,apps_sw,apps_sw_status,apps_sw_added,apps_sw_QA)
+##################################
 
 ##########################################################################
 #Join all facilities with marked permitted facilities #####################
@@ -136,17 +166,10 @@ join_all <- sqldf('SELECT a.*, b.has_GWP, c.has_VWP
 #check there is no duplication of MPs by the join, should result in 0 obs.
 QAjoin <- sqldf('select * from join_all group by MP_hydroid HAVING count(*) >1')
 
-#in case total count is needed later in code, if not can delete this
-# doens't work anyway maybe bc it's a WHERE on two separate columns
-# join_all <- sqldf('SELECT *, 
-#                   CASE WHERE has_GWP = 1
-#                    OR has_VWP = 1
-#                    THEN 1 ELSE 0 END AS has_permit
-#                   FROM join_all')
-
 join_all$Use_Type <- str_to_title(join_all$Use_Type)
 
-#------------------ now sum by gwp and vwp individually. Should work because count the GWP from pemrit_gw and the groundwater without gwp from main data as unpermitted
+#------------------ testing when to group by facility
+#now sum by gwp and vwp individually. Should work because count the GWP from pemrit_gw and the groundwater without gwp from main data as unpermitted
 
 #sum MPs withdrawals from mp_all to create facility level table, because permit list only has facility hydroids to join on
 # fac_all <- sqldf('SELECT Source_Type, Facility_hydroid, Facility, Use_Type, FIPS, sum(mgy) AS mgy, sum(mgd) as mgd
@@ -166,16 +189,23 @@ join_all$Use_Type <- str_to_title(join_all$Use_Type)
 # #   just expired results in 0 extra rows 
 # #   active or expired results in 12 extra rows, that's likely because the same hydroid can have both statuses 
 
-
 #-----------
 
 ########## STATIC DATA #######################################################################################
 
 #save the multi_yr_data to use for data reference - we can refer to that csv when asked questions about the data
-# NOTE that csv output will show has_GWP for all MPs in a facility that has a single permitted GW MP, and has_VWP for all MPs in a facility that has a permitted SW MP, because we only had permit status by facility level
+# NOTE that csv output will show has_GWP for all MPs in a facility that has a single permitted GW MP, and has_VWP for all MPs in a facility that has a permitted SW MP, because we only had permit status by facility level. Make export name clear
+colnames(join_all)[colnames(join_all)=="has_GWP"] <- "facility_contains_a_GWP"
+colnames(join_all)[colnames(join_all)=="has_VWP"] <- "facility_contains_a_VWP"
+
 write.csv(join_all, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
+#read static data in
 join_all <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
+
+#and undo name change
+colnames(join_all)[colnames(join_all)=="facility_contains_a_GWP"] <- "has_GWP"
+colnames(join_all)[colnames(join_all)=="facility_contains_a_VWP"] <- "has_VWP"
 
 ## FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD) ###############
 
@@ -274,7 +304,7 @@ table3_wide <- sqldf('SELECT "Use_Type", "Withdrawal Amount_Unpermitted", "Withd
 table3_wide <- rbind(table3_wide[1:6,], table3_gw_tot, table3_wide[8:13,], table3_sw_tot)
 
 table3_wide[is.na(table3_wide)] = 0 #GM add for mining and manufacturing
-#write.csv(table3_wide, paste("C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\table3b.csv"), row.names = F)
+write.csv(table3_wide, paste("C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\table3b.csv"), row.names = F)
 
 #KABLE
 table3w_latex <- kable(table3_wide,'latex', booktabs = T, align =  c('l','l','l','l','l'),
@@ -293,7 +323,7 @@ table3w_latex <- kable(table3_wide,'latex', booktabs = T, align =  c('l','l','l'
   row_spec(7,bold = T) %>%
   row_spec(14,bold = T) %>%
   collapse_rows(columns = 1, valign = "top",latex_hline = 'none')
-#GM add bold to headers as we had them last year
+
 
 #CUSTOM LATEX CHANGES
 #insert hold position header
@@ -316,4 +346,4 @@ for (i in 1:length(use_stripe)) {
 }
 table3w_tex
 table3w_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = '')) #GM add export
+  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
