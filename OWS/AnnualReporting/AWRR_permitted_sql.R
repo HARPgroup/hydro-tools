@@ -16,6 +16,7 @@ for (y in five) { Xyears[y] = paste0("X",2022-five[y]) }
 
 #load foundation data
 #permit only data from https://deq1.bse.vt.edu/d.dh/ows-permit-list
+
 ows_permit_list <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
 #mp_all_mgy generated from AWRR_data.R is all MPs without power, without Dalecarlia, source type and use type names mostly already corrected
 mp_all_mgy <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_mgy_",eyear-4,"-",eyear,".csv"))
@@ -47,26 +48,6 @@ mp_all <- sqldf(paste('SELECT MP_hydroid AS "MP_hydroid",
     ',eyearX,' AS mgy,
     (',eyearX,')/365 AS mgd
   FROM data_all',sep=''))
-
-## should not need this unless we need a 5 year average column, then do this and pivot_longer
-# names(mp_all) <- c('HydroID',
-#                     'Hydrocode',
-#                     'Source_Type',
-#                     'MP_Name',
-#                     'Facility_HydroID', 
-#                     'Facility',
-#                     'Use_Type', 
-#                     'lat',
-#                     'lon',
-#                     'FIPS',
-#                     'locality',
-#                     'OWS_Planner',
-#                     paste0(Xyears[1]),
-#                     paste0(Xyears[2]),
-#                     paste0(Xyears[3]),
-#                     paste0(Xyears[4]),
-#                     paste0(Xyears[5]))
-
 
 #make use type values lowercase
 mp_all$Use_Type <- str_to_lower(mp_all$Use_Type)
@@ -126,7 +107,7 @@ per_gw_fac <- sqldf('SELECT * FROM per_gw_act
 per_sw_fac <- sqldf('SELECT * FROM per_sw_act
                       GROUP BY Facility_HydroID')
 
-### application status #####
+### application status ########################################
 #Check this the first time, then skip if just rerunning a table
 #This section checks that we are not duplicating facility hydroids when including the 'application' permit status 
 temp_gw_act <- sqldf('SELECT * FROM permit_gw
@@ -135,22 +116,31 @@ temp_gw_act <- sqldf('SELECT * FROM permit_gw
 temp_sw_act <- sqldf('SELECT * FROM permit_sw
                       WHERE Status = "active"
                       OR Status = "expired"')
-temp_gw_fac <- sqldf('SELECT * FROM per_gw_act
+temp_gw_fac <- sqldf('SELECT * FROM temp_gw_act
                       GROUP BY Facility_HydroID')
-temp_sw_fac <- sqldf('SELECT * FROM per_sw_act
+temp_sw_fac <- sqldf('SELECT * FROM temp_sw_act
                       GROUP BY Facility_HydroID')
 apps_sw <- sqldf('SELECT a.*, b.Facility_HydroID as compare
                   FROM per_sw_fac AS a
                   LEFT OUTER JOIN temp_sw_fac AS b
                    ON a.Facility_hydroid = b.Facility_HydroID')
+apps_gw <- sqldf('SELECT a.*, b.Facility_HydroID as compare
+                  FROM per_gw_fac AS a
+                  LEFT OUTER JOIN temp_gw_fac AS b
+                   ON a.Facility_hydroid = b.Facility_HydroID')
 #contains an 'application' permit status
-#apps_sw_status <- sqldf('select * from apps_sw where status = "application" ')
+#apps_sw_status <- sqldf('select * from apps_sw where status = "application" ') #this can still have duplicate hydroids so it's less helpful than the step below
 #these are the facilities added by including the 'application' permit status
-apps_sw_added <- sqldf('select * from apps_sw where compare is null') . 
+apps_sw_added <- sqldf('select * from apps_sw where compare is null')
+apps_gw_added <- sqldf('select * from apps_gw where compare is null')
 #If 0 obs, we are not duplicating faciilty hydroids
 apps_sw_QA <- sqldf('select * from apps_sw group by Facility_hydroid HAVING count(*) >1') 
+apps_gw_QA <- sqldf('select * from apps_gw group by Facility_hydroid HAVING count(*) >1')
+#print to do manual check of application facility names that have different facility names in VAHydro
+write.csv(apps_sw_added, "C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\apps_sw_added.csv")
+write.csv(apps_gw_added, "C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\apps_gw_added.csv")
 #remove clutter
-rm(temp_gw_act,temp_sw_act,temp_gw_fac,temp_sw_fac,apps_sw,apps_sw_status,apps_sw_added,apps_sw_QA)
+rm(temp_gw_act,temp_sw_act,temp_gw_fac,temp_sw_fac,apps_sw,apps_gw, apps_sw_status,apps_sw_added,apps_gw_added, apps_sw_QA, apps_gw_QA)
 ##################################
 
 ##########################################################################
