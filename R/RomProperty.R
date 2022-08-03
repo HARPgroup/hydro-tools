@@ -32,6 +32,8 @@ RomProperty <- R6Class(
     propvalue = NA,
     #' @field propcode alphanumeric value
     propcode = NA,
+    #' @field proptext alphanumeric value
+    proptext = NA,
     #' @field varid variable ID from RomDataSource
     varid = NA,
     #' @field bundle (for future use)
@@ -102,6 +104,9 @@ RomProperty <- R6Class(
           self$propvalue = as.numeric(as.character(config$propvalue))
         } else if (i == "propcode") {
           self$propcode = as.character(config$propcode)
+        } else if (i == "proptext") {
+          # adding proptext support now.
+          self$proptext = as.character(config$proptext)
         } else if (i == "bundle") {
           self$bundle = as.character(config$bundle)
         }
@@ -121,6 +126,7 @@ RomProperty <- R6Class(
         startdate = as.character(self$startdate),
         enddate = as.character(self$enddate),
         propvalue = as.numeric(as.character(self$propvalue)),
+        proptext = as.character(self$proptext),
         propcode = as.character(self$propcode)
         # todo
         #modified = self$modified,
