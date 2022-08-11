@@ -19,6 +19,8 @@ RomDataSource <- R6Class(
   public = list(
     #' @field site URL of some RESTful repository
     site = NULL,
+    #' @field json_obj_url URL for retrieving full objects
+    json_obj_url = NULL,
     #' @field rest_uname username to connect to RESTful repository
     rest_uname = NULL,
     #' @param site URL of some RESTful repository
@@ -247,6 +249,19 @@ RomDataSource <- R6Class(
       return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
       return(return_id)
     },
+    #' @param pid = object pid
+    #' @return unserialized json as list, with object stored in ds$prop_json_cache
+    get_json_prop = function(pid) {
+      model_obj_url <- paste(self$json_obj_url, pid, sep="/")
+      model_info <- self$auth_read(model_obj_url, "text/json", "")
+      if (!is.logical(model_info)) {
+        model <- jsonlite::fromJSON(model_info)[[1]]
+        self$prop_json_cache[[pid]] <- model
+        return(model)
+      } else {
+        return(FALSE)
+      }
+    },
     #' @field timeline for default time series data
     timeline = NULL,
     # todo: these should be defined in the RomTS object so that there is one and only one 
@@ -315,6 +330,8 @@ RomDataSource <- R6Class(
     ),
     #' @field admin_features table of adminreg features
     admin_features = data.frame(),
+    #' @field prop_json_cache list of json objects retrieved, keyed by ID
+    prop_json_cache = NULL,
     #' @field ts_cache list of ts objects instantiated
     ts_cache = list(),
     #' @field feature_cache list of feature objects instantiated
