@@ -137,7 +137,7 @@ plot(r,
      main=paste0("Map of Withdrawal Points: ",syear,"-",eyear))
 str(r)
 # write a shapefile
-writeOGR(r, "C:/Users/rnv55934/Documents/ArcGIS/shp_output",
+writeOGR(r, export_path,
          paste0("mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
 
@@ -279,7 +279,7 @@ plot(r,
      main=paste0("Map of Withdrawal Points: ",syear,"-",eyear))
 str(r)
 # write a shapefile
-writeOGR(r, "C:/Users/rnv55934/Documents/ArcGIS/shp_output",
+writeOGR(r, export_path,
          paste0("mp_wd_monthly_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 print(paste0("PROCESS COMPLETE: ",syear," - ",eyear," MONTHLY GIS LAYER"))
 #Return to beginning of Part 2 until 5 shapefiles are generated for each of the 5 decade blocks
