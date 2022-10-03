@@ -298,8 +298,10 @@ print(paste0("PROCESS COMPLETE: ",syear," - ",eyear," MONTHLY GIS LAYER"))
 # 2) Save as gdb - import multiple feature class files to .gdb 
 # 3) Set the coordinate reference system in the  data layer's property page in ArcCatalog
 # 4) Export Data Table to .gdb for all layers
-# 5) Clip the layers to the VA extent
+# 5) Define projection as WGS_84 for each layer 
+# 6) Clip the layers to the VA extent
 # Final .gdb should have 6 clipped layers and 6 complete data tables
+# Note: in 2022, aka data through 2021, there were only 6 clipped layers and no separate data tables
 
 #PART 2 - Static ############################################################## 
 ## 2015 WSP Areas to Shapefile ################################################
