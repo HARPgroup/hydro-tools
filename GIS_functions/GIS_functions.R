@@ -16,10 +16,10 @@ sp_contain <- function(poly_path,poly_layer_name,HUC6_code,point_df,epsg_code = 
   poly_layer_load <- readOGR(poly_path,layer=poly_layer_name)
   poly_layer <-spTransform(poly_layer_load, CRS(paste("+init=epsg:",epsg_code,sep="")))
   
-  if (HUC6_code != 'all') {
-     poly_layer <- poly_layer[poly_layer$HUC6 == HUC6_code,]
-  }
-  plot(poly_layer)
+  # if (HUC6_code != 'all') {
+  #    poly_layer <- poly_layer[poly_layer$HUC6 == HUC6_code,]
+  # }
+  # plot(poly_layer)
   
   # tell R that point_df coordinates are in the same lat/lon reference system
   # as the poly_layer data 
