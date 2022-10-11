@@ -7,7 +7,8 @@ library("rgdal")
 #        4) HUC6_code code of interest example: '020700' or 'all' for all
 #        5) epsg code of interest, default to 4326
 # Function returns a Large SpatialPointsDataFrame
-sp_contain <- function(poly_path,poly_layer_name,HUC6_code,point_df,epsg_code = "4326"){
+# sp_contain <- function(poly_path,poly_layer_name,HUC6_code,point_df,epsg_code = "4326"){
+sp_contain <- function(poly_path,poly_layer_name,point_df,epsg_code = "4326"){
   
   start_time <- Sys.time()
   print(paste("Start time: ",start_time,sep=""))
