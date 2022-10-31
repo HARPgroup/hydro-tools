@@ -1055,8 +1055,8 @@ vahydro_prop_matrix <- function (featureid, entity_type='dh_feature',varkey, dat
     }
     
   }
-  library(jsonlite) #required for transforming json data to dataframe format 
-  library(dplyr) #required for renaming dataframe columns 
+  suppressPackageStartupMessages(library(jsonlite)) #required for transforming json data to dataframe format 
+  suppressPackageStartupMessages(library(dplyr)) #required for renaming dataframe columns 
   
   #featureid <- '397299'
   #varkey <- 'ifim_habitat_table'

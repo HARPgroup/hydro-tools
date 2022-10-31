@@ -1,9 +1,9 @@
 ### CREATE IMAGE FILES of AUGUST LOW FLOW - FLOW DURATION PLOT for ALL USGS GAGES
 rm(list = ls()) # clear variables
 ## Load necessary libraries
-library('zoo')
-library('IHA')
-library("stringr")
+suppressPackageStartupMessages(library('zoo'))
+suppressPackageStartupMessages(library('IHA'))
+suppressPackageStartupMessages(library("stringr"))
 
 #update to file location of config.local.private
 config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
