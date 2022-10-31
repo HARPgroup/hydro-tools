@@ -1,7 +1,7 @@
-library(httr);
-library(stringr);
-library(RCurl); #required for limiting connection timeout in vahydro_fe_data_icthy()
-library(plyr); #needed for count()
+suppressPackageStartupMessages(library(httr))
+suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(RCurl)); #required for limiting connection timeout in vahydro_fe_data_icthy()
+suppressPackageStartupMessages(library(plyr)); #needed for count()
 
 rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
   

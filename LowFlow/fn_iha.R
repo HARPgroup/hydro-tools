@@ -1,8 +1,8 @@
 # Automating August Low Flows
 
-library('zoo')
-library('IHA')
-library(PearsonDS)
+suppressPackageStartupMessages(library('zoo'))
+suppressPackageStartupMessages(library('IHA'))
+suppressPackageStartupMessages(library(PearsonDS))
 
 fn_iha_7q10 <- function(zoots) {
   g2 <- group2(zoots) 
