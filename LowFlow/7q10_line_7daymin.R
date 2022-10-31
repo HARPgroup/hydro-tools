@@ -1,13 +1,13 @@
 ## Graph of how 7 day minimums change over time
 rm(list = ls())   # clear variables
 # Load necessary libraries
-library('lubridate')
-library('zoo')
-library('IHA')
-library('stringr')
-library('PearsonDS')
-library('plyr')
-library('ggplot2')
+suppressPackageStartupMessages(library('lubridate'))
+suppressPackageStartupMessages(library('zoo'))
+suppressPackageStartupMessages(library('IHA'))
+suppressPackageStartupMessages(library('stringr'))
+suppressPackageStartupMessages(library('PearsonDS'))
+suppressPackageStartupMessages(library('plyr'))
+suppressPackageStartupMessages(library('ggplot2'))
 
 #update to file location of config.local.private
 config_file <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools\\"
