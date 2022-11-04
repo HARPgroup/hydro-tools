@@ -138,7 +138,7 @@ fn_get_runfile <- function(
   } else { 
     #dat<-read.table(filename, header = TRUE, sep = ",")   #  reads the csv-formatted data from the url	
     print(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
-    datv<-as.vector(dat)  # stores the data as a vector     
+    datv <- dat  # copy the data  
     if (is.logical(use_tz)) {
       datv$timestamp <- as.POSIXct(datv$timestamp,origin="1970-01-01")
     } else {
