@@ -250,13 +250,21 @@ RomDataSource <- R6Class(
       return(return_id)
     },
     #' @param pid = object pid
+    #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
-    get_json_prop = function(pid) {
-      model_obj_url <- paste(self$json_obj_url, pid, sep="/")
-      model_info <- self$auth_read(model_obj_url, "text/json", "")
-      if (!is.logical(model_info)) {
-        model <- jsonlite::fromJSON(model_info)[[1]]
-        self$prop_json_cache[[pid]] <- model
+    get_json_prop = function(pid, force_refresh = TRUE) {
+      cache_model = self$prop_json_cache[[pid]]
+      if (is.null(cache_model[[1]]) || force_refresh ) {
+        model_obj_url <- paste(self$json_obj_url, pid, sep="/")
+        model_info <- self$auth_read(model_obj_url, "text/json", "")
+        if (!is.logical(model_info)) {
+          model <- jsonlite::fromJSON(model_info)[[1]]
+          self$prop_json_cache[[pid]] <- model
+        }
+      }
+      # now we retrieve from cache regardless
+      model = self$prop_json_cache[[pid]]
+      if (!is.null(model[[1]])) {
         return(model)
       } else {
         return(FALSE)
