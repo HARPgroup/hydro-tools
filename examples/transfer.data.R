@@ -20,7 +20,7 @@ ts1 <- ds1$get_ts(tsinfo, 'data.frame')
 #ts1_old <- getTimeseries(tsinfo, "http://deq2.bse.vt.edu/d.alpha")
 
 ## Now set up the destination 
-ds2 <- RomDataSource$new("http://deq2.bse.vt.edu/d.dh", rest_uname)
+ds2 <- RomDataSource$new("http://deq1.bse.vt.edu/d.dh", rest_uname)
 ds2$get_token()
 
 hid2 <- 473590

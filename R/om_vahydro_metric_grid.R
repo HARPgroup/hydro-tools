@@ -20,7 +20,8 @@ om_vahydro_metric_grid <- function (
   bundle = 'watershed',
   ftype = 'vahydro',
   model_version = 'vahydro-1.0',
-  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export"
+  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export",
+  ds = FALSE
 ) {
   alldata = NULL
   mv_base = NULL
@@ -51,12 +52,20 @@ om_vahydro_metric_grid <- function (
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
     print(paste("retrieving ", url))
-    rawdat <- httr::GET(
-      url,
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      encode = "xml", httr::content_type("text/csv")
-    );
-    dat <- content(rawdat)
+    if (is.logical(ds)) {
+      # using old method with global expected token.
+      # warn that this is deprecated.
+      message("om_vahydro_metric_grid() called without RomDataSource ")
+      message("Global token is deprecated, please call with parameter ds = [RomDataSource]")
+      rawdat <- httr::GET(
+        url,
+        httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+        encode = "xml", httr::content_type("text/csv")
+      );
+      dat <- content(rawdat)
+    } else {
+      dat <- vahydro_auth_read(url, token, ctype = "text/csv", delim=',')
+    }
     rawdata <- as.data.frame(dat)
     if (is.null(alldata) ) {
       alldata = sqldf(
