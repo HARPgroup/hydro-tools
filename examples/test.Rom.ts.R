@@ -7,7 +7,7 @@ hid <- 72575
 ts <- RomTS$new(
   ds, 
   list(
-    varkey="geologic_map", 
+    varkey="max_daily_wd_mgd", 
     featureid=hid, 
     entity_type="dh_feature", 
     tsvalue=1.0, 
@@ -18,12 +18,11 @@ ts <- RomTS$new(
 
 # which returns the exact same object as
 ts1 <- ds$get_ts(list(
-  varkey="geologic_map", 
+  varkey="max_daily_wd_mgd", 
   featureid=hid, 
-  entity_type="dh_feature", 
-  tsvalue=1.0, 
-  tscode="test" 
-), 'object', TRUE)
+  entity_type="dh_feature"
+), 'data.frame', TRUE)
+max(ts1$tsvalue)
 
 
 # both should work roughly the same as 
