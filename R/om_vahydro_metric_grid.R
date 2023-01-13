@@ -64,7 +64,7 @@ om_vahydro_metric_grid <- function (
       );
       dat <- content(rawdat)
     } else {
-      dat <- vahydro_auth_read(url, token, ctype = "text/csv", delim=',')
+      dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
     }
     rawdata <- as.data.frame(dat)
     if (is.null(alldata) ) {
