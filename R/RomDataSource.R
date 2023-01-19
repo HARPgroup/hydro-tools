@@ -164,12 +164,12 @@ RomDataSource <- R6Class(
       # check uniqueness
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
-      print(ts)
+      #message(ts)
       ts_check = FALSE
       if (!is.na(ts$tid)) {
         if (ts$tid > 0) {
           ts_check = fn_search_tsvalues(list(tid = ts$tid), self$tsvalues)
-          #print(ts_check)
+          #message(ts_check)
         }
       }
       if (is.logical(ts_check)) {
@@ -188,12 +188,12 @@ RomDataSource <- R6Class(
       # check uniqueness
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
-      print(prop)
+      #message(prop)
       prop_check = FALSE
       if (!is.na(prop$pid)) {
         if (prop$pid > 0) {
           prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
-          #print(prop_check)
+          #message(prop_check)
         }
       }
       if (is.logical(prop_check)) {
@@ -214,12 +214,12 @@ RomDataSource <- R6Class(
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
       return(TRUE)
-      print(var_def)
+      #message(var_def)
       ts_check = FALSE
       if (!is.na(var_def$varid)) {
         if (var_def$varid > 0) {
           var_check = fn_search_vardefs(list(varid = var_def$varid), self$var_defs)
-          #print(ts_check)
+          #message(ts_check)
         }
       }
       if (is.logical(var_check)) {
