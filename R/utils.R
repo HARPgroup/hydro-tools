@@ -27,18 +27,18 @@ fn_get_rundata <- function(
   # Set up query for batch of model objects
   # Internal variable to construct the query
   urlbase<- paste(site, "om/remote/get_modelData.php?elementid=", sep='/');
-  print(paste("Getting data for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
+  message(paste("Getting data for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&variables=", varname, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
-  print(paste("From ", filename));
+  message(paste("From ", filename));
   
   dat = try(read.table(filename, header = TRUE, sep = ",")) 
   if (class(dat)=='try-error') { 
     # what to do if file empty 
-    print(paste("Error: problem reading file ", filename))
+    message(paste("Error: problem reading file ", filename))
     return (FALSE);
   } else { 
     #dat<-read.table(filename, header = TRUE, sep = ",")   #  reads the csv-formatted data from the url	
-    print(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
+    message(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
     datv<-as.vector(dat)  # stores the data as a vector     
     datv$thisdate <- as.POSIXct(datv$thisdate)
     f3 <- zoo::zoo(datv[,paste(varname, runid, sep="_")], order.by = datv$thisdate)
@@ -72,16 +72,16 @@ fn_get_runfile_info <- function(
   
   # just get the run file
   urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
-  print(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
+  message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
-  print(paste("From ", filename))
+  message(paste("From ", filename))
   finfo = try(read.csv(filename, header = TRUE, sep = "\t")) ;
   if (class(finfo)=='try-error') { 
     # what to do if file empty 
-    print(paste("Error: retrieving ", filename))
+    message(paste("Error: retrieving ", filename))
     return (FALSE);
   }
-  print("Returning file Info")
+  message("Returning file Info")
   return(finfo);
   
 }
@@ -139,7 +139,7 @@ fn_get_runfile <- function(
     if (as.Date(finfo$run_date) > as.Date(linfo$mtime)) {
       # re-download if the remote is newer than the local
       if (finfo$compressed == 1) {
-        print(paste("Downloading Compressed Run File ", filename));
+        message(paste("Downloading Compressed Run File ", filename));
         drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
         if ((drez == FALSE) | class(drez)=='try-error') { 
           message(paste("Download for", filename, "failed. "))
@@ -147,34 +147,34 @@ fn_get_runfile <- function(
         }
         filename <-  utils::unzip ('tempfile');
       } else {
-        print(paste("Downloading Un-compressed Run File ", filename));
+        message(paste("Downloading Un-compressed Run File ", filename));
       }
     } else {
       # not new, so just use the local copy
-      print(paste("Remote file date ", as.Date(finfo$run_date), " <= run date ", as.Date(linfo$mtime), "Using cached copy "));
+      message(paste("Remote file date ", as.Date(finfo$run_date), " <= run date ", as.Date(linfo$mtime), "Using cached copy "));
       filename = localname
     }
   } else {
     # does not exist locally
-    print(paste("Downloading Run File ", filename));
+    message(paste("Downloading Run File ", filename));
     drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
     if (is.logical(drez) | class(drez)=='try-error') { 
       message(paste("Download for", filename, "failed."))
       return(FALSE)
     }
     if (finfo$compressed == 1) {
-      print(paste("Unpacking Compressed Run File ", filename)) 
+      message(paste("Unpacking Compressed Run File ", filename)) 
       filename <-  utils::unzip ('tempfile');
     }
   }
   dat = try(read.table( filename, header = TRUE, sep = ",")) 
   if (is.logical(dat) | class(dat)=='try-error') { 
     # what to do if file empty 
-    print(paste("Error: empty file ", filename))
+    message(paste("Error: empty file ", filename))
     return (FALSE);
   } else { 
     #dat<-read.table(filename, header = TRUE, sep = ",")   #  reads the csv-formatted data from the url	
-    print(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
+    message(paste("Data obtained, found ", length(dat[,1]), " lines - formatting for IHA analysis"))
     datv <- dat  # copy the data  
     if (is.logical(use_tz)) {
       datv$timestamp <- as.POSIXct(datv$timestamp,origin="1970-01-01")
@@ -305,7 +305,7 @@ fn_get_timeseries <- function(inputs, site, token){
       
       i <- 1
       numrecs = length(ts_cont$list)
-      print(paste("----- Number of timeseries found: ",numrecs,sep=""))
+      message(paste("----- Number of timeseries found: ",numrecs,sep=""))
       for (i in 1:numrecs) {
         
         ts_i <- as.data.frame( 
@@ -329,10 +329,10 @@ fn_get_timeseries <- function(inputs, site, token){
       
       
       trecs <- length(ts[,1])
-      #print(trecs)
+      #message(trecs)
       # trecs = as.integer(count(ts))
       # pbody$limit <- 1
-      # print(pbody$limit)
+      # message(pbody$limit)
       
       if ( (pbody$limit > 0) & (trecs >= pbody$limit) ) {
         morepages = FALSE
@@ -345,10 +345,10 @@ fn_get_timeseries <- function(inputs, site, token){
       #trecs = as.integer(count(ts))
       trecs <- length(ts[,1])
       if (trecs == 0) {
-        print("----- This timeseries does not exist")
+        message("----- This timeseries does not exist")
         ts = FALSE
       } else {
-        print(paste("Total =", trecs))
+        message(paste("Total =", trecs))
       }
     }
   }
@@ -367,7 +367,7 @@ fn_get_timeseries <- function(inputs, site, token){
 #' @examples NA
 fn_post_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  print(inputs)
+  #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
   message(paste("Called fn_post_rest(", entity_type, ",", pk, ", pkid=", pkid, ")"))
   
@@ -376,8 +376,8 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
       inputs[j] <- NULL
     }
   }
-  message(inputs)
-  message(paste("pk= ", pkid))
+  #message(inputs)
+  #message(paste("pk= ", pkid))
   this_result <- list(
     status = FALSE
   )
@@ -400,11 +400,11 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
     )
     # need to harvest the id col since this is an insert
     rest_parts = httr::content(this_result)
-    print(paste("Parts:", rest_parts))
+    #print(paste("Parts:", rest_parts))
     pkid = as.integer(rest_parts$id)
   } else {
     message(paste0("----- Updating ", entity_type, "..."))
-    message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
+    #message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
     this_result <- httr::PUT(
       paste0(site, "/",entity_type, "/", pkid), 
       httr::add_headers(HTTP_X_CSRF_TOKEN = token),
@@ -473,7 +473,7 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
       query = inputs, 
       encode = "json"
     );
-    message(entity_rest)
+    #message(entity_rest)
     entity_cont <- httr::content(entity_rest);
     message(paste0(site, "/",entity_type, ".json"))
     
@@ -518,10 +518,10 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     }
   }
   if (is.logical(entities)) {
-    print("----- This entity does not exist")
+    message("----- This entity does not exist")
     entities = FALSE
   } else {
-    print(paste("Total =", trecs))
+    message(paste("Total =", trecs))
   }
   return(entities)
 }
@@ -529,11 +529,11 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
 fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   # NOT FINISHED - JUST PASTED CODE
   url <- paste(site,"om/remote/setModelData.php?hash=", sep='/');
-  print (paste("Setting 7Q10 for element ", id, " run id ", rid, " to ", x7q10 , sep = "") )
+  message (paste("Setting 7Q10 for element ", id, " run id ", rid, " to ", x7q10 , sep = "") )
   # building the correct url
   ins_url <- paste(url, hash, "&username=", username, "&elementid=", id, "&runid=", rid, "&dataname=7q10&reporting_frequency=single&dataval=", x7q10, "&starttime=1984-10-01&endtime=2005-09-30&temporal_res=water_year", sep = "")  
   #shell.exec(alf_url)  # opening the webpage
-  print(ins_url);
+  #message(ins_url);
   readLines(ins_url)
 }
 
@@ -551,7 +551,7 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
   where_clause = ""
   number_cols = c("tid", "tsvalue", "featureid")
   tss <- "select * from tsvalues_tmp where "
-  print(paste("Searching for ", config))
+  #print(paste("Searching for ", config))
   if (!is.null(config$tid)) {
     if (!is.na(config$tid)) {
       where_clause <- paste(
@@ -621,7 +621,7 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   where_clause = ""
   number_cols = c("pid", "propvalue", "featureid")
   propsql <- "select * from propvalues_tmp where "
-  print(paste("Searching for ", config))
+  #print(paste("Searching for ", config))
   if (!is.null(config$pid)) {
     if (!is.na(config$pid)) {
       where_clause <- paste(
