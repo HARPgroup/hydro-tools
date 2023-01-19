@@ -18,17 +18,17 @@ om_vahydro_token <- function(base_url='http://deq2.bse.vt.edu/d.dh', rest_uname 
   # do something
   #Cross-site Request Forgery Protection (Token required for POST and PUT operations)
   csrf_url <- paste(base_url,"restws/session/token/",sep="/");
-  print(paste("REST AUTH INFO HAS BEEN SUPPLIED",sep=""))
-  print(paste("RETRIEVING REST TOKEN",sep=""))
+  #message(paste("REST AUTH INFO HAS BEEN SUPPLIED",sep=""))
+  message(paste("RETRIEVING REST TOKEN",sep=""))
   csrf <- httr::GET(url=csrf_url,httr::authenticate(rest_uname,rest_pw));
-  #print(csrf)
+  #message(csrf)
   token <- httr::content(csrf);
   
   if (length(token)==1){
-    print("Login attempt successful")
-    print(paste("token = ",token,sep=""))
+    message("Login attempt successful")
+    #message(paste("token = ",token,sep=""))
   } else {
-    print("Login attempt unsuccessful")
+    message("Login attempt unsuccessful")
   }
   return(token)
 }

@@ -28,8 +28,8 @@ om_vahydro_metric_grid <- function (
   for (i in 1:nrow(runids)) {
     runinfo = runids[i,]
     if (is.data.frame((runinfo))) {
-      print("Found info")
-      print(runinfo)
+      message("Found info")
+      message(runinfo)
       # user is passing in other params in data frame format
       runid = as.character(runinfo$runid)
       if (!is.null(runinfo$model_version)) model_version = as.character(runinfo$model_version)
@@ -51,7 +51,7 @@ om_vahydro_metric_grid <- function (
     runlabel <- stringr::str_replace_all(runlabel, ' ', '_')
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
-    print(paste("retrieving ", url))
+    message(paste("retrieving ", url))
     if (is.logical(ds)) {
       # using old method with global expected token.
       # warn that this is deprecated.
