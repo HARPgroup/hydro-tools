@@ -20,7 +20,7 @@ om_vahydro_metric_grid <- function (
   bundle = 'watershed',
   ftype = 'vahydro',
   model_version = 'vahydro-1.0',
-  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export",
+  base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
   ds = FALSE
 ) {
   alldata = NULL
