@@ -1,3 +1,12 @@
+library("hydrotools")
+library("data.table")
+library("sp")
+basepath='/var/www/R';
+source(paste(basepath,'config.R',sep='/'))
+ds = RomDataSource$new(site, rest_uname)
+ds$get_token(rest_pw)
+source(paste(hydro_tools_location,'/R/om_vahydro_metric_grid.R', sep = ''));
+
 # function to retrieve & format model segment metric & geometry data
 model_geoprocessor <- function(scenario,segswhere) {
   
