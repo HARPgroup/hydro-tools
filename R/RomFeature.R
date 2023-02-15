@@ -33,6 +33,8 @@ RomFeature <- R6Class(
     description = NA,
     #' @field mps linked features
     mps = NA,
+    #' @field geom feature geometry WKT
+    geom = NA,
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
@@ -56,7 +58,8 @@ RomFeature <- R6Class(
         hydrocode = self$hydrocode,
         ftype = self$ftype,
         fstatus = self$fstatus,
-        bundle = self$bundle
+        bundle = self$bundle,
+        geom = self$geom
       )
       return(t_list)
     },
@@ -76,6 +79,8 @@ RomFeature <- R6Class(
           self$bundle = as.character(config$bundle)
         } else if (i == "fstatus") {
           self$fstatus = as.character(config$fstatus)
+        } else if (i == "dh_geofield") {
+          self$geom = as.character(config$dh_geofield)
         }
       }
     },
