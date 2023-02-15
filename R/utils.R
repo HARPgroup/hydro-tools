@@ -690,3 +690,77 @@ fn_search_vardefs <- function(config, var_defs_tmp) {
   # TBD, return false now, which means no local store, must retrieve
   return(FALSE)
 }
+
+
+
+
+#' Retrieve Property data from propvalues style data frame
+#'
+#' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+#' @param propvalues_tmp data frame to search
+#' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
+#' @return data frame of propvalue or FALSE
+#' @seealso NA
+#' @export fn_search_properties
+#' @examples NA
+fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
+  features = FALSE
+  where_clause = ""
+  number_cols = c("hydroid")
+  tmp_sql <- "select * from features_tmp where "
+  #print(paste("Searching for ", config))
+  if (!is.null(config$hydroid)) {
+    if (!is.na(config$hydroid)) {
+      where_clause <- paste(
+        where_clause,
+        "hydroid = ", config$hydroid
+      )
+    }
+  } else {
+    wand = ""
+    wcols = c('name', 'hydrocode', 'bundle', 'ftype')
+    # todo: handle other multiplicity modes
+    for (i in wcols) {
+      # check for null first since is.na will give an error if the column does not exist.
+      if (is.null(config[[i]])) {
+        message(paste("Skipping NULL", i))
+        next
+      }
+      if (is.na(config[[i]])) {
+        message(paste("Skipping NA", i))
+        next
+      }
+      if (!(i %in% colnames(features_tmp))) {
+        message(paste0("Skipping ", i))
+        next
+      }
+      if (nchar(where_clause) > 1) {
+        wand = "AND"
+      }
+      if (!is.null(config[i])) {
+        where_clause <- paste(
+          where_clause, 
+          wand, i, "="
+        )
+        if (is.element(i, number_cols)) {
+          where_clause <- paste(
+            where_clause, config[i]
+          )
+        } else {
+          where_clause <- paste0(
+            where_clause, " '", config[i], "'"
+          )
+        }
+      } 
+    }
+  }
+  if (nchar(where_clause) > 0 ) {
+    tmp_sql <- paste(tmp_sql, where_clause)
+    message(tmp_sql)
+    features <- sqldf::sqldf(tmp_sql)
+    if (!nrow(features)) {
+      features = FALSE
+    }
+  }
+  return(features)
+}

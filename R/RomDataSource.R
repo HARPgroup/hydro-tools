@@ -232,12 +232,52 @@ RomDataSource <- R6Class(
         self$var_defs[var_def$ID] <- var_def
       }
     },
+    #' @param feature = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @return nothing seprop internal private token
+    store_features = function(features) {
+      # prototype.  Testing, does it work for multiple features and single features retrieved?
+      if (nrow(features) > 0) {
+        for (i in 1:nrow(features)) {
+          feature = features[i,]
+          self$set_feature(feature)
+        }
+      }
+    },
+    #' @param feature = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @return nothing seprop internal private token
+    set_feature = function(feature) {
+      # check uniqueness
+      # search for existing based on uniqueness
+      # uniqueness is variable def related, not arbitrary 
+      #message(feature)
+      feature_check = FALSE
+      if (!is.na(feature$hydroid)) {
+        if (feature$hydroid > 0) {
+          feature_check = fn_search_features(list(hydroid = feature$hydroid), self$features)
+          #message(feature_check)
+        }
+      }
+      if (is.logical(feature_check)) {
+        # not found, so add
+        message("Storing feature")
+        self$features <- rbind(self$features, as.data.frame(feature))
+      } else {
+        # update 
+        message("Found, trying to load")
+        self$features[feature$ID] <- feature
+      }
+    },
     #' @param entity_type = dh_feature, dh_properties, ...
     #' @param pk = primary key column name, e.g. hydroid, pid, ...
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
     #' @return local df index?
     get = function(entity_type, pk, config) {
-      fn_get_rest(entity_type, pk, config, self$site, private$token)
+      retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
+      if (entity_type == 'dh_feature') {
+        # experimental support for automatic local caching
+        self$store_features(retvals)
+      }
+      return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
     #' @param pk = primary key column name, e.g. hydroid, pid, ...
@@ -306,7 +346,15 @@ RomDataSource <- R6Class(
       stringsAsFactors=FALSE
     ),
     #' @field features table of physical features
-    features = data.frame(),
+    features = data.frame(
+      hydroid = integer(),
+      name = character(),
+      hydrocode = character(),
+      ftype = character(),
+      fstatus = character(),
+      bundle = character(),
+      geom = character()
+    ),
     #' @field var_defs table of variable definitions
     var_defs = data.frame(
       varid = integer(),
