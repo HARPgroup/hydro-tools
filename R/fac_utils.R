@@ -1,5 +1,5 @@
 # Facility Utilities
-om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month") {
+om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1) {
   # Expects a data frame, df2sum with Qout, month columns
   if (is.zoo(df2sum)) {
     df2sum <- as.data.frame(df2sum)
@@ -21,12 +21,12 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month") {
     q_mean <- mean(drows[,q_col])
     newline = data.frame(
       "Month" = moname,
-      'Min' = round(as.numeric(q_drows["0%"]),1),
-      '5%' = round(as.numeric(q_drows["5%"]),1),
-      '10%' = round(as.numeric(q_drows["10%"]),1),
-      '25%' = round(as.numeric(q_drows["25%"]),1), 
-      '30%' = round(as.numeric(q_drows["30%"]),1),
-      '50%' = round(as.numeric(q_drows["50%"]),1),
+      'Min' = round(as.numeric(q_drows["0%"]),rdigits),
+      '5%' = round(as.numeric(q_drows["5%"]),rdigits),
+      '10%' = round(as.numeric(q_drows["10%"]),rdigits),
+      '25%' = round(as.numeric(q_drows["25%"]),rdigits), 
+      '30%' = round(as.numeric(q_drows["30%"]),rdigits),
+      '50%' = round(as.numeric(q_drows["50%"]),rdigits),
       'Mean' = round(q_mean,1),
       stringsAsFactors = FALSE
     )
