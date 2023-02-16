@@ -273,10 +273,6 @@ RomDataSource <- R6Class(
     #' @return local df index?
     get = function(entity_type, pk, config) {
       retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
-      if (entity_type == 'dh_feature') {
-        # experimental support for automatic local caching
-        self$store_features(retvals)
-      }
       return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
