@@ -8,7 +8,10 @@ library(ggspatial)
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/GIS_functions/model_geoprocessor.R")
 
 # function to generate map gg object
-mapgen <- function(start_point,points,gageid,segswhere) {
+mapgen <- function(start_point = data.frame(lat = 37, lon = -77, label = "Intake"),
+                   points = data.frame(lat=double(),lon=double(),label=character()),
+                   gageid = "02036500",
+                   segswhere = "hydrocode NOT LIKE '%0000_0000'") {
   # process usgs gage layer
   gageinfo <- dataRetrieval::readNWISsite(gageid)
   points <- rbind(data.frame(lat = gageinfo$dec_lat_va, lon = gageinfo$dec_long_va, label = paste("USGS",gageinfo$site_no)),points)
@@ -16,10 +19,12 @@ mapgen <- function(start_point,points,gageid,segswhere) {
   
   ######################################################################
   # process points layer
-  for (i in 2:length(points[,1])) {
-    point <- points[i,]
-    point = st_point(c(point$lon[1], point$lat[1]))
-    point_layer = c(point_layer, point)
+  if (length(points[,1]) > 1) {
+    for (i in 2:length(points[,1])) {
+      point <- points[i,]
+      point = st_point(c(point$lon[1], point$lat[1]))
+      point_layer = c(point_layer, point)
+    }
   }
   point_layer = st_sfc(point_layer)
   st_crs(point_layer) <- 4326
