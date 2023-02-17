@@ -44,9 +44,12 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
         if ( as.numeric(cu_table[r,c]) <= cu_threshold[2]) {
           qcu_colors[rn,cn] = "orange"
         } 
+        if ( as.numeric(cu_table[r,c]) <= cu_threshold[3]) {
+          qcu_colors[rn,cn] = "red"
+        } 
         # qcu_table[r,c] <- paste0( qo_table[r,c], " (", cu_table[r,c],"%)")
-        qcu_table[r,c] <- paste0( qo_table[r,c], "\n(", cu_table[r,c],"%)")
       }
+      qcu_table[r,c] <- paste0( qo_table[r,c], "\n(", cu_table[r,c],"%)")
     }
   }
   
