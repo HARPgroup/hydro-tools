@@ -1,0 +1,22 @@
+,Source Type,Category,2016,2017,2018,2019,2020,multi_yr_avg,% Change 2020 to Avg.
+1,Groundwater,agricultural,0.67,0.7,0.8,1.22,1.32,0.94,40.4
+2,Groundwater,commercial,5.01,4.96,3.9,4.52,3.62,4.4,-17.7
+3,Groundwater,irrigation,1.86,1.65,1.74,2.01,1.93,1.84,4.9
+4,Groundwater,manufacturing,56.1,57.54,60.57,57.76,58.02,58,0
+5,Groundwater,mining,17.34,15.54,18.04,17.57,19.62,17.62,11.4
+6,Groundwater,municipal,53.42,54.79,55.26,55.12,55.83,54.88,1.7
+7,Surface Water,agricultural,33.64,30.59,32.7,30.98,29.73,31.53,-5.7
+8,Surface Water,commercial,10.41,9.52,7.98,9.94,6.38,8.85,-27.9
+9,Surface Water,irrigation,18.65,18.59,12.89,20.12,15.78,17.21,-8.3
+10,Surface Water,manufacturing,312.23,324.45,304.17,293.49,301.92,307.25,-1.7
+11,Surface Water,mining,15.5,13.67,16.84,13.74,15.62,15.07,3.6
+12,Surface Water,municipal,717.54,719.22,727.72,727.44,671.65,712.71,-5.8
+13,Total (GW + SW),agricultural,34.31,31.29,33.5,32.2,31.05,32.47,-4.4
+14,Total (GW + SW),commercial,15.42,14.48,11.88,14.46,10,13.25,-24.5
+15,Total (GW + SW),irrigation,20.51,20.24,14.63,22.13,17.71,19.04,-7
+16,Total (GW + SW),manufacturing,368.33,381.99,364.74,351.25,359.94,365.25,-1.5
+17,Total (GW + SW),mining,32.84,29.21,34.88,31.31,35.24,32.7,7.8
+18,Total (GW + SW),municipal,770.96,774.01,782.98,782.56,727.48,767.6,-5.2
+19,,Total Groundwater,134.4,135.18,140.31,138.2,140.34,137.68,1.9
+20,,Total Surface Water,1107.97,1116.04,1102.3,1095.71,1041.08,1092.62,-4.7
+21,,Total (GW + SW),1242.37,1251.22,1242.61,1233.91,1181.42,1230.306,-4
