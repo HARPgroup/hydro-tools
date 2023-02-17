@@ -8,7 +8,7 @@ ds$get_token(rest_pw)
 source(paste(hydro_tools_location,'/R/om_vahydro_metric_grid.R', sep = ''));
 
 # function to retrieve & format model segment metric & geometry data
-model_geoprocessor <- function(ds,scenario,segswhere) {
+model_geoprocessor <- function(scenario,segswhere) {
   
   model_version <- scenario[1]
   runid <- scenario[2]
@@ -29,9 +29,8 @@ model_geoprocessor <- function(ds,scenario,segswhere) {
   "))
   #####################################################################
   # retrieve & format geometry data
-  vahydro_export <- paste(site,"watershed-features-wkt","vahydro",watersheds$hydrocode[1],sep="/")
-  watershed_feature <-data.table::fread(vahydro_export, header = T)
-  watershed_wkt <- watershed_feature$wkt
+  watershed_feature <- RomFeature$new(ds, list(hydroid = watersheds$featureid[1]), TRUE)
+  watershed_wkt <- watershed_feature$geom
   polygons_sp <- sp::SpatialPolygonsDataFrame(readWKT(watershed_wkt), data=data.frame(hydrocode=watersheds$hydrocode[1]))
   
   if (length(watersheds[,1]) > 1){
