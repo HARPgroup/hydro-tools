@@ -1,4 +1,5 @@
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/GIS_functions/mapgen.R")
+# source("C:/Users/nrf46657/Desktop/GitHub/hydro-tools/GIS_functions/mapgen.R")
 
 ######################################################################
 ######################################################################
@@ -22,8 +23,14 @@ segswhere <- "hydrocode LIKE 'vahydrosw_wshed_J%'"
 ######################################################################
 ######################################################################
 
+# generate map gg object (simple example, using defaults)
+map_gg <- mapgen()
+
 # generate map gg object
-map_gg <- mapgen(start_point,points,gageid,segswhere)
+map_gg <- mapgen(start_point=start_point,
+                 points=points,
+                 gageid=gageid,
+                 segswhere=segswhere)
 
 # output map as png file
 png(file=paste(export_path,filename,sep="/"), width=1500, height=1500)
