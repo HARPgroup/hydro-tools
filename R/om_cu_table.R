@@ -27,7 +27,7 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
   )
   cu_table <- replace(cu_table, is.na(cu_table), "n/a")
   cu_table <- replace(cu_table, (qi_table < cu_min_valid), "n/a")
-  
+  # for a multidtude of R named colors, see here: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf
   qcu_table = qo_table
   qcu_colors = matrix(nrow = nrow(qo_table), ncol = ncol(qo_table))
   rn = 0
