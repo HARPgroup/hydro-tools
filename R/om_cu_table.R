@@ -49,10 +49,10 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
         } 
         # consider augmentation to be similar to depletion percentiles.
         if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[2]) {
-          qcu_colors[rn,cn] = "lightblue"
+          qcu_colors[rn,cn] = "lightblue1"
         } 
         if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[3]) {
-          qcu_colors[rn,cn] = "blue"
+          qcu_colors[rn,cn] = "lightblue2"
         } 
         # qcu_table[r,c] <- paste0( qo_table[r,c], " (", cu_table[r,c],"%)")
       }
