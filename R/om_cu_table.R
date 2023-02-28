@@ -18,7 +18,7 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
   pr_data$cu_daily <- 100.0 * (
     (pr_data[,cu_post_var] - pr_data[,cu_pre_var]) / pr_data[,cu_pre_var]
   )
-  qi_table = om_flow_table(pr_data, cu_pre_var, 'month', cu_decimals)
+  qi_table = om_flow_table(pr_data, q_col = cu_pre_var, mo_col = 'month', rdigits = cu_decimals)
   qo_table = om_flow_table(pr_data, cu_post_var, 'month', cu_decimals)
   cu_table = qi_table # make a copy formatted with months and labels
   cu_table[,2:ncol(cu_table)] <- round(
