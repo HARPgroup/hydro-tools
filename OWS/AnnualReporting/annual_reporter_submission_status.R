@@ -10,10 +10,13 @@ rest_uname = FALSE
 rest_pw = FALSE
 basepath ='/var/www/R'
 source(paste0(basepath,'/config.R'))
-ds <- RomDataSource$new(site)
-ds$get_token()
+ds <- RomDataSource$new(site, rest_uname)
+ds$get_token(rest_pw)
+
 
 ##### LOAD DATA -------------------------------------------------------------------------------------------------
+#Note: the :81/d.dh is the modeling version of the site but accesses the same database data as the d.dh, so leaving as is
+
 #load all facilities with report status since 2015 to current
 tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
 
@@ -38,7 +41,7 @@ mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
-facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Reporting_Method"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
 
 a <- mp_MGY %>% 
   dplyr::group_by(MP_hydroid, Year) %>% 
@@ -86,7 +89,7 @@ data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type",
 "MGY_2021",  a."Submittal_2021.01.01" AS "Submittal_2021", 
 "FIPS.Code", "Locality", 
 "Facility", "Facility_Name", "Latitude", "Longitude", "UserName", "UserEmail",
-"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "corrected_latitude", "corrected_longitude", 
+"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method", "corrected_latitude", "corrected_longitude", 
 "MinorBasin_Name", "VAHydro_RSeg_Name", 
 "riverseg", "Current Consumptive Use Frac"
                          FROM data_sp_cont_cu AS a
