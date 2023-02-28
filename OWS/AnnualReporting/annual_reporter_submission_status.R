@@ -20,6 +20,11 @@ ds$get_token(rest_pw)
 #load all facilities with report status since 2015 to current
 tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
 
+#w/email only as above "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
+
+#w/o email only "https://deq1.bse.vt.edu/d.dh/vwuds-eblast-export/not-submitted?rid%5B%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=%3D&startdate%5Bvalue%5D=&startdate%5Bmin%5D=&startdate%5Bmax%5D=&name_op=%3D&name="
+
+
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #load in watershed consumptive use fractions
