@@ -18,7 +18,7 @@ om_multi_image_list <- function(ds,model_pids, scenarios, image_names, column_de
         model = ds$prop_json_cache[model_pids[[m]]]
         if (is.null(model[[1]])) {
           # try to retrieve?
-          model <- list(name=paste("Unknown Model (note: you must run ds$get_json_prop() to retrieve models before running this function).", model_pids[[i]]))
+          model <- list(name=paste("Unknown Model (note: you must run ds$get_json_prop() to retrieve models before running this function).", model_pids[[m]]))
         } else {
           model = model[[1]]
         }
@@ -60,6 +60,12 @@ om_rmd_img_table <- function(image_info, col_max=2, num_prefix="", num_delim="."
       paste0("![](",image_path,")","{width=",img_pct,"%}"),
       sep="\n"
     )
+    # can as_image(), from flextable, be used to re-size?
+    # do we need to know the page width, since these 
+    # height and width are in inches, cm or mm?
+    #width_in = img_pct * 6.5 / 100.0
+    #height_in = img_pct * 9.0 / 100.0
+    #img_markdown <- as_paragraph(as_image(image_path, width = width_in, height = height_in, guess_size = FALSE))
     if (thiscol > col_max) {
       thiscol = 1
       thisrow <- thisrow + 1
