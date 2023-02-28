@@ -27,9 +27,18 @@ tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/ows-awrr-map-export/wd_mgy?ftype_op
 
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
+#trial, dont need
+#tsdef_url <- "http://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
+#mp_MGY2 <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
+
+#getOption('timeout')
+#options(timeout=100000)
+##"ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
+##"ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=1982-01-01&tstime%5Bmax%5D=",eyear,"-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake")
+
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
-facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
 
 a <- mp_MGY %>% 
   dplyr::group_by(MP_hydroid, Year) %>% 
@@ -37,12 +46,12 @@ a <- mp_MGY %>%
   dplyr::filter(dupe == T)
 
 #group by fac, sum the MGY 
-facility_group <- sqldf('SELECT "Facility_hydroid", "Facility" AS "Fac_Name", "Use Type","FIPS Code", "Locality", "Year", SUM("Water Use MGY") AS "MGY", "OWS Planner"
+facility_group <- sqldf('SELECT "Facility_hydroid", "Facility" AS "Fac_Name", "Use Type","FIPS Code", "Locality", "Year", SUM("Water Use MGY") AS "MGY", "OWS Planner" as "OWS Planner2"
                         FROM mp_MGY
                         GROUP BY "Facility_hydroid", "Year"')
 
 #transform long table to wide table
-facility_MGY <- pivot_wider(data = facility_group, id_cols = c("Facility_hydroid", "Fac_Name", "Use Type" ,"FIPS Code", "Locality", "OWS Planner"), names_from = "Year", values_from = "MGY", names_sort = TRUE, names_prefix = "MGY_")
+facility_MGY <- pivot_wider(data = facility_group, id_cols = c("Facility_hydroid", "Fac_Name", "Use Type" ,"FIPS Code", "Locality", "OWS Planner2"), names_from = "Year", values_from = "MGY", names_sort = TRUE, names_prefix = "MGY_")
 
 #join MGY to report status table
 facility_status_MGY <- sqldf('SELECT *
