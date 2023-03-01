@@ -1,4 +1,4 @@
-# Annual Reporting - Check Submission Status
+# Annual Reporting - Missing Reporters - Check Submission Status
 # MUST BE ON VPN
 library("hydrotools")
 library("tidyr")
@@ -15,15 +15,11 @@ ds$get_token(rest_pw)
 
 
 ##### LOAD DATA -------------------------------------------------------------------------------------------------
-#Note: the :81/d.dh is the modeling version of the site but accesses the same database data as the d.dh, so leaving as is
+#Note: the :81/d.dh is the modeling version of the site but accesses the same database data as the d.dh
 
 #load all facilities with report status since 2015 to current
-tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
-
-#w/email only as above "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=email&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=null.email&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2021-01-01&name_op=%3D&name="
-
-#w/o email only "https://deq1.bse.vt.edu/d.dh/vwuds-eblast-export/not-submitted?rid%5B%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=%3D&startdate%5Bvalue%5D=&startdate%5Bmin%5D=&startdate%5Bmax%5D=&name_op=%3D&name="
-
+#each new reporting cycle, update startdate max year in this url
+tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2022-01-01&name_op=%3D&name="
 
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
@@ -31,18 +27,11 @@ facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv"
 cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
 
 #load in MGY from Annual Map Exports view
-tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
+#each new reporting cycle, update tstime max year in this url
+tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2022-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
 
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
-#trial, dont need
-#tsdef_url <- "http://deq1.bse.vt.edu/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
-#mp_MGY2 <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
-
-#getOption('timeout')
-#options(timeout=100000)
-##"ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2021-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
-##"ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=1982-01-01&tstime%5Bmax%5D=",eyear,"-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake")
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
@@ -83,7 +72,8 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
 #dput(names(data_sp_cont_cu))  #print df names in a comma separated list
 
 #Only show necessary columns
-data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", 
+#each reporting cycle, add reporting year columns in this sqldf
+data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method",
 "MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
 "MGY_2015",  a."Submittal_2015.01.01" AS "Submittal_2015", 
 "MGY_2016",  a."Submittal_2016.01.01" AS "Submittal_2016", 
@@ -92,13 +82,14 @@ data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type",
 "MGY_2019",  a."Submittal_2019.01.01" AS "Submittal_2019", 
 "MGY_2020",  a."Submittal_2020.01.01" AS "Submittal_2020", 
 "MGY_2021",  a."Submittal_2021.01.01" AS "Submittal_2021", 
+"MGY_2022",  a."Submittal_2022.01.01" AS "Submittal_2022", 
 "FIPS.Code", "Locality", 
-"Facility", "Facility_Name", "Latitude", "Longitude", "UserName", "UserEmail",
-"Firstname", "Lastname", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method", "corrected_latitude", "corrected_longitude", 
+"Latitude", "Longitude", "UserName", "UserEmail",
+"Firstname", "Lastname", "corrected_latitude", "corrected_longitude", 
 "MinorBasin_Name", "VAHydro_RSeg_Name", 
 "riverseg", "Current Consumptive Use Frac"
                          FROM data_sp_cont_cu AS a
-                         ORDER BY "MGY_2021" DESC', method = data.frame) 
+                         ORDER BY "MGY_2022" DESC', method = data.frame) 
 
 
 write.csv(data_sp_cont_cu, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
