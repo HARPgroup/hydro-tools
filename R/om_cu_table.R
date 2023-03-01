@@ -70,15 +70,6 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
     }
   }
   
-  fqcu_caption <- paste(
-    "Modeled monthly consumptive use statistics in the in cubic feet per second (cfs). Columns show the modeled non-exceedance flow percentiles and the consumptive user % due to cumulative demands for", 
-    run_info$reports$scenario_name$value, 
-    ". Simulated demands include all up-stream demands and demands at ", 
-    fac_feature$name, fac_report_info$intake_name$value, 
-    ") and cumulative return flows.  ", 
-    "Fields that are marked as 'n/a' indicate that the baseline flow for that time period/percentile was below the model accuracy threshold of ", cu_min_valid,"cfs."
-  )
-  fqcu_table$caption_text <- fqcu_caption
   #fqcu_table <- set_caption(
   #  fqcu_table,
   #  caption = fqcu_caption, # this doesn't format very nicely and doesn't auto-number
