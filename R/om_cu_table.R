@@ -62,7 +62,7 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
   }
   
   fqcu_table <- flextable::flextable(qcu_table)
-  fqcu_table <- bg(fqcu_table, bg = "#EFEFEF", part = "header")
+  fqcu_table <- flextable::bg(fqcu_table, bg = "#EFEFEF", part = "header")
   
   for (i in 1:nrow(qcu_colors)) {
     for (j in 1:ncol(qcu_colors)) {
