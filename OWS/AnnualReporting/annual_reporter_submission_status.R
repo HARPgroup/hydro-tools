@@ -74,7 +74,7 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
 #Only show necessary columns
 #note for next reporting cycle add columns: "MGY_2023",  a."Submittal_2023.01.01" AS "Submittal_2023"
 #note for next reporting  cycle, ORDER BY MGY_2023
-data_sp_cont_cu2 <- sqldf(paste0('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method",
+data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method",
 "MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
 "MGY_2015",  a."Submittal_2015.01.01" AS "Submittal_2015", 
 "MGY_2016",  a."Submittal_2016.01.01" AS "Submittal_2016", 
@@ -90,7 +90,7 @@ data_sp_cont_cu2 <- sqldf(paste0('SELECT "Facility_hydroid", "Fac_Name", "Use.Ty
 "MinorBasin_Name", "VAHydro_RSeg_Name", 
 "riverseg", "Current Consumptive Use Frac"
                          FROM data_sp_cont_cu AS a
-                         ORDER BY "MGY_2022" DESC'), method = data.frame) 
+                         ORDER BY "MGY_2022" DESC', method = data.frame) 
 
 
 write.csv(data_sp_cont_cu, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
