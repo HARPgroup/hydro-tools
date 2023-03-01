@@ -66,7 +66,7 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
   
   for (i in 1:nrow(qcu_colors)) {
     for (j in 1:ncol(qcu_colors)) {
-      fqcu_table <- bg(fqcu_table, i, j, bg = qcu_colors[i,j])
+      fqcu_table <- flextable::bg(fqcu_table, i, j, bg = qcu_colors[i,j])
     }
   }
   
