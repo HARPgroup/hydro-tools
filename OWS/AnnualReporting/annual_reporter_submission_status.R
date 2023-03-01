@@ -13,13 +13,14 @@ source(paste0(basepath,'/config.R'))
 ds <- RomDataSource$new(site, rest_uname)
 ds$get_token(rest_pw)
 
+#set reporting year
+ryear <- 2022
 
 ##### LOAD DATA -------------------------------------------------------------------------------------------------
 #Note: the :81/d.dh is the modeling version of the site but accesses the same database data as the d.dh
 
 #load all facilities with report status since 2015 to current
-#each new reporting cycle, update startdate max year in this url
-tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=2022-01-01&name_op=%3D&name="
+tsdef_url <- paste0(site,"/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=",ryear,"-01-01&name_op=%3D&name=")
 
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
@@ -27,8 +28,7 @@ facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv"
 cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
 
 #load in MGY from Annual Map Exports view
-#each new reporting cycle, update tstime max year in this url
-tsdef_url <- "http://deq1.bse.vt.edu:81/d.dh/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=2022-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498"
+tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=",ryear,"-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498")
 
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
@@ -72,7 +72,7 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
 #dput(names(data_sp_cont_cu))  #print df names in a comma separated list
 
 #Only show necessary columns
-#each reporting cycle, add reporting year columns in this sqldf
+#next reporting cycle add columns: "MGY_2023",  a."Submittal_2023.01.01" AS "Submittal_2023"
 data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method",
 "MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
 "MGY_2015",  a."Submittal_2015.01.01" AS "Submittal_2015", 
