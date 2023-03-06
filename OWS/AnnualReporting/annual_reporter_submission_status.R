@@ -32,6 +32,8 @@ tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime
 
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
+#load planner coverage areas
+plannerAreas <- read.csv("U:\\OWS\\GIS\\Water Supply Planning\\PlannerCoverageAreaTable.csv")
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
@@ -71,10 +73,16 @@ data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Fra
 
 #dput(names(data_sp_cont_cu))  #print df names in a comma separated list
 
+#reassign Planner names if Planner assignment columns are yielding NAs
+data_addPlanners <- sqldf('SELECT a.*, b.Planner
+                     FROM data_sp_cont_cu AS a
+                     LEFT OUTER JOIN plannerAreas AS b
+                     on a."FIPS.Code" = b.FIPS')
+
 #Only show necessary columns
 #note for next reporting cycle add columns: "MGY_2023",  a."Submittal_2023.01.01" AS "Submittal_2023"
 #note for next reporting  cycle, ORDER BY MGY_2023
-data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "OWS.Planner", "Reporting_Method",
+output_reporters <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "Planner", "Reporting_Method",
 "MGY_2014",  a."Submittal_2014.01.01" AS "Submittal_2014", 
 "MGY_2015",  a."Submittal_2015.01.01" AS "Submittal_2015", 
 "MGY_2016",  a."Submittal_2016.01.01" AS "Submittal_2016", 
@@ -89,8 +97,7 @@ data_sp_cont_cu <- sqldf('SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Fi
 "Firstname", "Lastname", "corrected_latitude", "corrected_longitude", 
 "MinorBasin_Name", "VAHydro_RSeg_Name", 
 "riverseg", "Current Consumptive Use Frac"
-                         FROM data_sp_cont_cu AS a
+                         FROM data_addPlanners AS a
                          ORDER BY "MGY_2022" DESC', method = data.frame) 
 
-
-write.csv(data_sp_cont_cu, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
+write.csv(output_reporters, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
