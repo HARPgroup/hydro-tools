@@ -1,1 +1,1 @@
-![alt text](https://github.com/HARPgroup/hydro-tools/blob/master/examples/DEMO_MAP.png)
+![alt text](https://github.com/HARPgroup/hydro-tools/blob/master/examples/DEMO_MAP_2.0.png)
