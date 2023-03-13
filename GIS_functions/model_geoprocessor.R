@@ -3,10 +3,10 @@ library("sp")
 source(paste(hydro_tools_location,'/R/om_vahydro_metric_grid.R', sep = ''));
 
 # function to retrieve & format model segment metric & geometry data
-model_geoprocessor <- function(scenario,segswhere) {
+model_geoprocessor <- function(ds,scenario_info,segswhere) {
   
-  model_version <- scenario[1]
-  runid <- scenario[2]
+  model_version <- scenario_info[1]
+  runid <- scenario_info[2]
   
   # retrieve segments & metric data
   model_data <- data.frame(
