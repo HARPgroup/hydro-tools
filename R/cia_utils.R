@@ -173,13 +173,19 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
 #' @export fn_extract_basin
 fn_extract_basin <- function(cia_data_frame, end_seg){
   #calculating upstream segments
-  upstream <- data.frame((fn_ALL.upstream(end_seg, AllSegList)))
+  upstream <- data.frame((fn_ALL.upstream(end_seg, cia_data_frame[!is.na(cia_data_frame$riverseg),]$riverseg)))
   names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
-  if(upstream == 'NA'){
+  if(!is.data.frame(upstream)) {
     river <- end_seg
-  }else {
-    river <- rbind(upstream,end_seg)
+  } else {
+    if (nrow(upstream) == 1) {
+      if (upstream[1,] == 'NA') {
+        upstream = data.frame(riverseg = character())
+        names(upstream) <- c('riv_seg')
+      }
+    } 
+    river <- rbind(upstream,data.frame('riv_seg' = end_seg))
   }
   basin_data <- sqldf("SELECT * FROM river join cia_data_frame
                     WHERE riv_seg like riverseg")
