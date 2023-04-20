@@ -36,6 +36,14 @@ model_geoprocessor <- function(ds,scenario_info,segswhere) {
       riverseg <- watersheds$riverseg[i]
       
       watershed_feature <- RomFeature$new(ds, list(hydroid = featureid), TRUE)
+      watershed_poly <- sp::SpatialPolygonsDataFrame(readWKT(watershed_feature$geom), data.frame(watershed_feature$hydrocode) )
+      # this may be a more elegant way to do this, or at least a bit more readale
+      # we would need to change "i in 2:", to "i in 1:" 
+      if (is.logical(poly2)) {
+        poly2 <- watershed_poly
+      } else {
+        poly2 <- rbind(poly2, watershed_poly)
+      }
       watershed_wkt <- watershed_feature$geom
       polygons_sp <- rbind(polygons_sp, sp::SpatialPolygonsDataFrame(readWKT(watershed_wkt), data.frame(hydrocode=hydrocode,riverseg=riverseg)))
     }
