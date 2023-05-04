@@ -147,7 +147,7 @@ map_gg <- mapgen(start_point = data.frame(lat = 37.286, lon = -80.076, label = "
 
 # save the map image as png
 fpath = "C:/Users/nrf46657/Desktop/tmp_maps/"
-fname = paste(fpath,"test_map.png",sep="")
+fname = paste(fpath,"fig.location_map_test.png",sep="")
 ggsave(
   filename = fname,
   plot = map_gg,
