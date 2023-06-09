@@ -146,8 +146,8 @@ map_gg <- mapgen(start_point = data.frame(lat = 37.286, lon = -80.076, label = "
                  segswhere <- "hydrocode LIKE 'vahydrosw_wshed_OR%'")
 
 # save the map image as png
-fpath = "C:/Users/nrf46657/Desktop/tmp_maps/"
-fname = paste(fpath,"fig.location_map_test.png",sep="")
+fpath = "C:/Workspace/tmp/"
+fname = paste(fpath,"fig.location_map_test-redo.png",sep="")
 ggsave(
   filename = fname,
   plot = map_gg,

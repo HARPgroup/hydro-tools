@@ -18,12 +18,18 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
   pr_data$cu_daily <- 100.0 * (
     (pr_data[,cu_post_var] - pr_data[,cu_pre_var]) / pr_data[,cu_pre_var]
   )
+  # first do these tables with effectively no rounding (10 decimal places)
+  qi_table_noro = om_flow_table(pr_data, q_col = cu_pre_var, mo_col = 'month', rdigits = 10)
+  qo_table_noro = om_flow_table(pr_data, cu_post_var, 'month', 10)
+  # now re-do these tables with rounding for formatting purposes
   qi_table = om_flow_table(pr_data, q_col = cu_pre_var, mo_col = 'month', rdigits = cu_decimals)
   qo_table = om_flow_table(pr_data, cu_post_var, 'month', cu_decimals)
   cu_table = qi_table # make a copy formatted with months and labels
+  # now, cu_table uses the rounded values for display, but the noro values for calculating 
+  # the percent change
   cu_table[,2:ncol(cu_table)] <- round(
-    100.0 * (qo_table[,2:ncol(qo_table)] - qi_table[,2:ncol(qi_table)]) 
-    / qi_table[,2:ncol(qi_table)]
+    100.0 * (qo_table_noro[,2:ncol(qo_table)] - qi_table_noro[,2:ncol(qi_table_noro)]) 
+    / qi_table_noro[,2:ncol(qi_table_noro)]
   )
   cu_table <- replace(cu_table, is.na(cu_table), "n/a")
   cu_table <- replace(cu_table, (qi_table < cu_min_valid), "n/a")
