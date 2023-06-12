@@ -4,6 +4,9 @@ om_multi_image_list <- function(ds,model_pids, scenarios, image_names, column_de
   thiscol = 1
   thisrow = 1
   img_list = list() 
+  if (!(length(image_names) > 0)) {
+    return(img_list)
+  }
   n = 1
   for (i in 1:length(image_names)) {
     img_name = image_names[i]
@@ -51,6 +54,9 @@ om_rmd_img_table <- function(image_info, col_max=2, num_prefix="", num_delim="."
   }
   img_pct = round(100 / col_max)
   attribute_matrix <- matrix(NA, ceiling(length(image_info)/col_max),col_max)
+  if (length(image_info) == 0) {
+    return(attribute_matrix)
+  }
   for (i in 1:length(image_info)) {
     this_info = image_info[[i]]
     image_path = this_info$img_url
