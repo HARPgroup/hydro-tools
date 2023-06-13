@@ -41,13 +41,22 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
   return(intake_summary_tbl)
 }
 
-om_quantile_table <- function(metrics = c("Runit", "wd_mgd"), quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), rdigits = 2) {
-  quantile_df <- data.frame(Doubles=double(),stringsAsFactors=FALSE)
+om_quantile_table <- function(metrics = c("OldDuck_use_remain_mg"), quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), rdigits = 2) {
+  quantile_df <- data.frame(matrix(ncol = length(quantiles), nrow = 0))
+  colnames(quantile_df) <- paste0(quantiles*100, "%")
   for (i in 1:length(metrics)){
-    quantile <- data.frame(quantile(facdat_df[,metrics[i]], probs=quantiles))
-    colnames(quantile) <- metrics[i]
-    quantile_df <- rbind(quantile_df, t(quantile))
+    if (length(grep(metrics[i],names(facdat_df),value=TRUE)) == 0){
+      quantile <- data.frame(rep(NA,length(quantiles)))
+      colnames(quantile) <- metrics[i]
+      quantile <- t(quantile)
+      colnames(quantile) <- paste0(quantiles*100, "%")
+      quantile_df <- rbind(quantile_df, quantile)
+    } else {
+      quantile <- data.frame(quantile(facdat_df[,metrics[i]], probs=quantiles))
+      colnames(quantile) <- metrics[i]
+      quantile_df <- rbind(quantile_df, t(quantile))
+    }
   }
   quantile_df <- round(quantile_df,rdigits)
   return(quantile_df)
-}  
+}
