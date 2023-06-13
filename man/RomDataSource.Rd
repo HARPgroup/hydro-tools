@@ -26,6 +26,8 @@ NA
 \describe{
 \item{\code{site}}{URL of some RESTful repository}
 
+\item{\code{json_obj_url}}{URL for retrieving full objects}
+
 \item{\code{rest_uname}}{username to connect to RESTful repository}
 
 \item{\code{timeline}}{for default time series data}
@@ -39,6 +41,8 @@ NA
 \item{\code{var_defs}}{table of variable definitions}
 
 \item{\code{admin_features}}{table of adminreg features}
+
+\item{\code{prop_json_cache}}{list of json objects retrieved, keyed by ID}
 
 \item{\code{ts_cache}}{list of ts objects instantiated}
 
@@ -63,8 +67,11 @@ NA
 \item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
 \item \href{#method-set_prop}{\code{RomDataSource$set_prop()}}
 \item \href{#method-set_vardef}{\code{RomDataSource$set_vardef()}}
+\item \href{#method-store_features}{\code{RomDataSource$store_features()}}
+\item \href{#method-set_feature}{\code{RomDataSource$set_feature()}}
 \item \href{#method-get}{\code{RomDataSource$get()}}
 \item \href{#method-post}{\code{RomDataSource$post()}}
+\item \href{#method-get_json_prop}{\code{RomDataSource$get_json_prop()}}
 \item \href{#method-clone}{\code{RomDataSource$clone()}}
 }
 }
@@ -288,6 +295,44 @@ local df index?
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-store_features"></a>}}
+\if{latex}{\out{\hypertarget{method-store_features}{}}}
+\subsection{Method \code{store_features()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$store_features(features)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{feature}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing seprop internal private token
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-set_feature"></a>}}
+\if{latex}{\out{\hypertarget{method-set_feature}{}}}
+\subsection{Method \code{set_feature()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_feature(feature)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{feature}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing seprop internal private token
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get"></a>}}
 \if{latex}{\out{\hypertarget{method-get}{}}}
 \subsection{Method \code{get()}}{
@@ -331,6 +376,25 @@ local df index?
 }
 \subsection{Returns}{
 local df index?
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_json_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-get_json_prop}{}}}
+\subsection{Method \code{get_json_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_json_prop(pid)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{pid}}{= object pid}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+unserialized json as list, with object stored in ds$prop_json_cache
 }
 }
 \if{html}{\out{<hr>}}

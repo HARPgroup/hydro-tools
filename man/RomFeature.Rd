@@ -43,6 +43,8 @@ NA
 \item{\code{description}}{notes field}
 
 \item{\code{mps}}{linked features}
+
+\item{\code{geom}}{feature geometry WKT}
 }
 \if{html}{\out{</div>}}
 }

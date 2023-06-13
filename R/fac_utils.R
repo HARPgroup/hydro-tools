@@ -40,3 +40,13 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
   names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%', 'Mean')
   return(intake_summary_tbl)
 }
+
+om_quantile_table <- function(metrics = c("Runit", "wd_mgd"), quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), rdigits = 2) {
+  quantile_df <- data.frame(Doubles=double(),stringsAsFactors=FALSE)
+  for (i in 1:length(metrics)){
+    quantile <- data.frame(quantile(facdat_df[,metrics[i]], probs=quantiles))
+    colnames(quantile) <- metrics[i]
+    quantile_df <- rbind(quantile_df, t(quantile))
+  }
+  quantile_df <- round(quantile_df,rdigits)
+}  
