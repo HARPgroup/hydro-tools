@@ -44,6 +44,8 @@ NA
 
 \item{\code{propcode}}{alphanumeric value}
 
+\item{\code{proptext}}{alphanumeric value}
+
 \item{\code{varid}}{variable ID from RomDataSource}
 
 \item{\code{bundle}}{(for future use)}
