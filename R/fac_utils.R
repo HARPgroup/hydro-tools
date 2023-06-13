@@ -49,4 +49,5 @@ om_quantile_table <- function(metrics = c("Runit", "wd_mgd"), quantiles = c(0,0.
     quantile_df <- rbind(quantile_df, t(quantile))
   }
   quantile_df <- round(quantile_df,rdigits)
+  return(quantile_df)
 }  
