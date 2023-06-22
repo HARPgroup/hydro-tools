@@ -2,10 +2,10 @@ options(scipen=999) #turn off scientific notation
 library(sqldf)
 library("kableExtra")
 
-syear = 2017
-eyear = 2021
+syear = 2018
+eyear = 2022
 #mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv")) #syntax not working for some reason
-mp_all <- read.csv("U:/OWS/foundation_datasets/awrr/2022/mp_all_mgy_2017-2021.csv")
+mp_all <- read.csv("U:/OWS/foundation_datasets/awrr/2023/mp_all_mgy_2018-2022.csv")
 fips <- read.csv(file = "U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv") #GM correct FIPS names
 
 table_caption <- paste0("Water Withdrawals Within Localities in ",eyear," (MGD)")
@@ -156,8 +156,10 @@ ktable <- kable(all_fips_round,
   
   library(plyr)
   a <- join_all(list(fips_use, GW, SW, TOTAL), by=c('FIPS', 'Use_Type', 'name'), type='left')
+## BB- Added a line to remove null fips lines (applies to Null facility and Alamance County, NC. Niether had any withdrawals)
 aa <- sqldf('SELECT FIPS, name, Use_Type, GW_Withdrawal, SW_Withdrawal, Total_Withdrawal 
             FROM a
+            WHERE FIPS IS NOT NULL
             ORDER BY name, Use_type')  
 #GM fix 2021->eyear+1 in paste0 statement
 write.csv(aa, paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Bylocality_UseType_table3.csv"))

@@ -3,12 +3,14 @@ library(dplyr)
 #site <- "http://deq2.bse.vt.edu/d.dh/"
 site <- "https://deq1.bse.vt.edu/d.dh/"
 
-syear <- 2017
-eyear <- 2021
+syear <- 2018
+eyear <- 2022
 #remember to change legend year in figure setup section
 
 basepath <- "/var/www/R/"
+
 source(paste(basepath,"config.local.private",sep = '/'))
+export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf") ##BB Put this line after 12 since it overwrites export_path
 Table1 <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Table1_",syear,"-",eyear,".csv"))
 
 # AWRR Pie Charts ################################################################
@@ -42,7 +44,7 @@ wd.df  ["year.percent"] <- round((100*(wd.df[paste0("X",eyear)]/sum(wd.df[paste0
 # FIGURE SETUP
 cols <- wd.df$col
 legend.avg <-paste(wd.df$Category," (",wd.df$multi_yr_avg," MGD)",sep="")
-legend.year <-paste(wd.df$Category," (",wd.df$X2021," MGD)",sep="")  #update to eyear
+legend.year <-paste(wd.df$Category," (",wd.df$X2022," MGD)",sep="")  #update to eyear
 
 filename <- paste("AWRR",source_type[s],"Withdrawals_Pie.png", sep="_")
 png(filename=paste(export_path,filename,sep='/'),width=10,height=6,units="in",res=1000)

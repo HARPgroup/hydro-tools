@@ -21,8 +21,8 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                  bottom = extent$y[1],
                  right = extent$x[2],
                  top = extent$y[2]),
-    source = "osm", zoom = plot_zoom, maptype = "satellite" #good
-  )
+    source = "stamen", zoom = plot_zoom, maptype = "terrain" 
+  ) #BB Changed source to stamen and maptype to terrain in response to OSM API changes
   base_layer <- ggmap(tile_layer)
   
   map <- base_layer +

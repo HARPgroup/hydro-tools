@@ -3,26 +3,28 @@
 ######################################################################################################
 library("dataRetrieval")
 library("ggspatial")
+library("rgeos") #BB Added this line, as the readWKT function is needed. Will lose support in 2024
 color_list <- sort(colors())
 options(scipen=9999)
 sf::sf_use_s2(FALSE) #needed for adding DEQ logo to maps
-site <- "http://deq1.bse.vt.edu:81/d.dh/"
+site <- "http://deq1.bse.vt.edu/d.dh/" ##BB Removed the :81 after edu, was causing errors
 basepath <- "/var/www/R/"
 source(paste(basepath,"config.local.private",sep = '/'))
-source(paste(hydro_tools,"GIS_functions/base.layers.R",sep = '/'))
-source(paste(hydro_tools,"GIS_functions/base.map.R",sep = '/'))
-if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already 
+## Have been moved to the depricated folder, but are still used
+source(paste(hydro_tools,"GIS_functions/deprecated_mapgen_scripts/base.layers.R",sep = '/'))
+source(paste(hydro_tools,"GIS_functions/deprecated_mapgen_scripts/base.map.R",sep = '/'))
+if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map layers if they're not already. Need VPN
 
 ###################################################################################################### 
 # LOAD ALL FOUNDATION DATA
-syear = 2017
-eyear = 2021
+syear = 2018
+eyear = 2022
 source_directory <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
 mp_all_mgy <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #GM this is mp_all_mgy now
-mp_all_wide <- read.csv(paste(source_directory,"/mp_all_wide_",syear,"-",eyear,".csv",sep=""))
-mp_all_wide_power <- read.csv(paste(source_directory,"/mp_all_wide_power_",syear,"-",eyear,".csv",sep=""))
+mp_all_wide <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #BB mp_all_mhy is already wide
+mp_all_wide_power <- read.csv(paste(source_directory,"/mp_power_mgy_",syear,"-",eyear,".csv",sep="")) #BB mp_al_wide_power replaced with mp_power_mgy
 ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep="")) #GM - from https://deq1.bse.vt.edu/d.dh/ows-permit-list, filter by active and expired permits, do manual check for incorrect cells 
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
 
@@ -46,8 +48,8 @@ mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode
 ######################################################################################################
 
 # BASEMAP ############################################################################################
-baselayers.gg <- base.layers(baselayers)
-basemap.obj <- base.map(baselayers.gg)
+baselayers.gg <- base.layers(baselayers) # Need readWKT function here
+basemap.obj <- base.map(baselayers.gg) ##BB: Need to run this line twice, first time always fails
 
 #LOAD RIVERS AND RESERVOIRS LAYERS
 rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]
@@ -122,7 +124,7 @@ monitoring_map <- basemap.obj + ms.gg +
                   scale_shape_manual(name = "Groundwater & Surface Water \n Monitoring Stations", 
                                      labels=c("Observation Well", "Streamflow Gage"),
                                      values = c(19, 17))
-                  
+
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 monitoring_map_draw <- ggdraw(monitoring_map)+deqlogo
 #ggsave(plot = monitoring_map_draw, file = paste0(export_path, "/awrr/2021/","MonitoringStationsMap.pdf",sep = ""), width=6.5, height=4.95) #Working map saves here
@@ -572,7 +574,7 @@ pws_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pws_map_draw <- ggdraw(pws_map)+deqlogo
 
-ggsave(plot = pws_map_draw, file = paste0(working_path,"map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = pws_map_draw, file = paste0(working_path,"map_pws_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pws_map_draw, file = paste0(export_path, "PublicWaterSupply_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -598,7 +600,9 @@ mp_df_f <-sqldf(paste('SELECT *,
                           END AS point_size
                         FROM mp_all_wide_power AS a
                         WHERE Use_Type = "fossilpower"
-                    AND a.fips NOT LIKE "3%"
+                        AND a."FIPS.Code" NOT LIKE "3%"
+                        AND a."Fips.Code" NOT IN (0)
+                        AND a.MP_Hydroid NOT IN(65370)
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE NC LOCALITIES
 
@@ -615,7 +619,7 @@ mp_df_n <-sqldf(paste('SELECT *,
                           END AS point_size
                         FROM mp_all_wide_power AS a
                         WHERE Use_Type = "nuclearpower"
-                    AND a.fips NOT LIKE "3%"
+                        AND a."FIPS.Code" NOT LIKE "3%"
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE, NC LOCALITIES
 
@@ -654,7 +658,7 @@ pow_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp_f.gg + mp_n.gg +
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 pow_map_draw <- ggdraw(pow_map)+deqlogo
 
-ggsave(plot = pow_map_draw, file = paste0(working_path,"map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
+#ggsave(plot = pow_map_draw, file = paste0(working_path,"map_pow_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
 ggsave(plot = pow_map_draw, file = paste0(export_path, "Power_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -763,7 +767,8 @@ mp_df <-sqldf(paste('SELECT *,
   gw_permit_map_draw <- ggdraw(gw_permit_map)+deqlogo
   
   ggsave(plot = gw_permit_map_draw, file = paste0(working_path, "GWPermits_AWRR.png",sep = ""), width=6.5, height=4.95) #Working map saves here
- 
+  ggsave(plot = gw_permit_map_draw, file = paste0(export_path, "GWPermits_AWRR.pdf",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+
 #############################################################################################
   # ZOOMED IN EXTENT - Groundwater Withdrawal Permitting Activities - USE THIS Version in Annual Report ##############################################
   
