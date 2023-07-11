@@ -1872,12 +1872,12 @@ mp_df <-sqldf(paste('SELECT *,
   
   #MPs LAYER
   #join/union the SW MPs into 1 layer
-  mp_all_wide_sw <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+  mp_all_wide_sw <- sqldf(paste0('SELECT "MP_HydroID","Source.Type","MP.Name","Facility_HydroID","Facility","Use.Type", "FIPS.Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
                   FROM mp_all_wide
-                  WHERE "Source_Type" LIKE "Surface Water"')
-  mp_all_wide_power_sw <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_hydroID" AS "Facility_HydroID","Facility","Use_Type", "fips" as "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
+                  WHERE "Source.Type" LIKE "Surface Water"'))
+  mp_all_wide_power_sw <- sqldf(paste0('SELECT "MP_HydroID","Source.Type","MP.Name","Facility_HydroID","Facility","Use.Type", "FIPS.Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
                   FROM mp_all_wide_power
-                  WHERE "Source_Type" LIKE "Surface Water"')
+                  WHERE "Source.Type" LIKE "Surface Water"'))
   mp <- sqldf('SELECT *
               FROM mp_all_wide_sw
               UNION all 
