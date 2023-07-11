@@ -247,7 +247,7 @@ fn_upstream <- function(riv.seg, AllSegList) {
       }else if (length(Downstream)==1){
         ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1])
       }else if (length(Downstream)>1){
-        ModelSegments[j,5] <- 'NA'
+        ModelSegments[j,5] <- as.character(ModelSegments[Downstream,1][1])
       }
     }
     j<-j+1
@@ -270,7 +270,7 @@ fn_upstream <- function(riv.seg, AllSegList) {
   if (class(SegUpstream)=='try-error') {
     SegUpstream <- NA
   }
-  return(SegUpstream)
+  return(unique(SegUpstream))
 }
 
 
