@@ -149,9 +149,7 @@ str(r)
 writeOGR(r, export_path,
          paste0("mp_wd_annual_",syear,"-",eyear), driver="ESRI Shapefile", overwrite_layer = T)
 
-
-
-#PART 2 - MONTHLY ####################################################################
+#PART 2 - MONTHLY #########################################################
 ### RETRIEVE MONTHLY WITHDRAWAL DATA #################################################
 #begin with syear=1982 and eyear=1989, then repeat for 1990-1999, 2000-2009, 2010-2019, 2020-2021
 #load variables
