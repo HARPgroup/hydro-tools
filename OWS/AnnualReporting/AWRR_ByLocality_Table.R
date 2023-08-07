@@ -4,40 +4,33 @@ library("kableExtra")
 
 syear = 2018
 eyear = 2022
-#mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_wide_",syear,"-",eyear,".csv")) #syntax not working for some reason
-mp_all <- read.csv("U:/OWS/foundation_datasets/awrr/2023/mp_all_mgy_2018-2022.csv")
-fips <- read.csv(file = "U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv") #GM correct FIPS names
+mp_all <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_mgy_",eyear-4,"-",eyear,".csv"))
+fips <- read.csv(file = "U:\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv")
 
 table_caption <- paste0("Water Withdrawals Within Localities in ",eyear," (MGD)")
 table_label   <- table_caption
 #########################################################################################
-colnames(mp_all)[colnames(mp_all)=="FIPS.Code"] <- "FIPS" #GM addition
-colnames(mp_all)[colnames(mp_all)=="Source.Type"] <- "Source_Type" #GM addition
+colnames(mp_all)[colnames(mp_all)=="FIPS_Code"] <- "FIPS" #GM addition
+# colnames(mp_all)[colnames(mp_all)=="Source.Type"] <- "Source_Type" #GM addition
 yearcol <- paste0("X",eyear) #GM method to replace hard-coded X2020 with current year automatically
 
 
-GW <- paste('SELECT sum((',yearcol,'/365)) as "GW_Withdrawal", FIPS, b.name
+GW <- paste('SELECT sum((',yearcol,'/365)) as "GW_Withdrawal", FIPS, Locality
                  FROM "mp_all" a
-                 LEFT JOIN fips b
-                 ON a.FIPS = b.code
                  WHERE Source_Type = "Groundwater"
-                 GROUP BY FIPS',sep='')
+                 GROUP BY Locality',sep='')
 GW <- sqldf(GW)
 
 
-SW <- paste('SELECT sum((',yearcol,'/365)) as "SW_Withdrawal", FIPS, b.name
+SW <- paste('SELECT sum((',yearcol,'/365)) as "SW_Withdrawal", FIPS, Locality
                  FROM "mp_all" a
-                 LEFT JOIN fips b
-                 ON a.FIPS = b.code
                  WHERE Source_Type = "Surface Water"
-                 GROUP BY FIPS',sep='')
+                 GROUP BY Locality',sep='')
 SW <- sqldf(SW)
 
-TOTAL <- paste('SELECT sum((',yearcol,'/365)) as "Total_Withdrawal", FIPS, b.name
+TOTAL <- paste('SELECT sum((',yearcol,'/365)) as "Total_Withdrawal", FIPS, Locality
                  FROM "mp_all" a
-                 LEFT JOIN fips b
-                 ON a.FIPS = b.code
-                 GROUP BY FIPS',sep='')
+                 GROUP BY Locality',sep='')
 TOTAL <- sqldf(TOTAL)
 #########################################################################################
 VA_TOTAL <- sqldf('SELECT sum(Total_withdrawal) AS Total_Withdrawal

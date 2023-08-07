@@ -23,7 +23,7 @@ source_directory <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURC
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
 mp_all_mgy <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #GM this is mp_all_mgy now
-mp_all_wide <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #BB mp_all_mhy is already wide
+##mp_all_wide <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #BB Redundant, mp_all_mgy is already wide
 mp_all_wide_power <- read.csv(paste(source_directory,"/mp_power_mgy_",syear,"-",eyear,".csv",sep="")) #BB mp_al_wide_power replaced with mp_power_mgy
 ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep="")) #GM - from https://deq1.bse.vt.edu/d.dh/ows-permit-list, filter by active and expired permits, do manual check for incorrect cells 
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
@@ -35,7 +35,8 @@ working_path <- "C:/Users/rnv55934/Documents/Docs/AnnualReport/2022/" #FOR TESTI
 
 #GM SET UP MP_ALL FOR MAPGEN
 eyearX <- paste0("X",eyear)
-mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source.Type" as Source_Type, "MP.Name" as MP_Name, "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use.Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS.Code" as FIPS, ',eyearX,' as ',eyearX,',
+mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source_Type" as Source_Type, "MP_Name" as MP_Name, 
+                       "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use_Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS_Code" as FIPS, ',eyearX,' as ',eyearX,',
                        (',eyearX,')/365 as mgd
                        FROM mp_all_mgy'))
 # removed   WHERE Year = ',eyear,'  from each point map, add AND WHERE mgd IS NOT NULL
@@ -600,8 +601,8 @@ mp_df_f <-sqldf(paste('SELECT *,
                           END AS point_size
                         FROM mp_all_wide_power AS a
                         WHERE Use_Type = "fossilpower"
-                        AND a."FIPS.Code" NOT LIKE "3%"
-                        AND a."Fips.Code" NOT IN (0)
+                        AND a."FIPS_Code" NOT LIKE "3%"
+                        AND a."Fips_Code" NOT IN (0)
                         AND a.MP_Hydroid NOT IN(65370)
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE NC LOCALITIES
@@ -619,7 +620,7 @@ mp_df_n <-sqldf(paste('SELECT *,
                           END AS point_size
                         FROM mp_all_wide_power AS a
                         WHERE Use_Type = "nuclearpower"
-                        AND a."FIPS.Code" NOT LIKE "3%"
+                        AND a."FIPS_Code" NOT LIKE "3%"
                       ORDER BY "',eyear,'mgd" DESC 
                       ',sep="")) #EXCLUDE, NC LOCALITIES
 
@@ -819,7 +820,7 @@ mp_df <-sqldf(paste('SELECT *,
    wsp_df <- sqldf('SELECT *  
          FROM ows_wsp_regions_wkt
          WHERE geom IS NOT NULL
-         AND "FIPS.Code" NOT LIKE "3%"')
+         AND "FIPS_Code" NOT LIKE "3%"')
   
   wsp.sf <- st_as_sf(wsp_df, wkt = 'geom')
   wsp.gg <- geom_sf(data = wsp.sf,aes(fill = factor(region_name)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
@@ -875,7 +876,7 @@ mp_df <-sqldf(paste('SELECT *,
   #MPs LAYER
   #join/union the SW MPs into 1 layer
   mp_all_wide_sw <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
-                  FROM mp_all_wide
+                  FROM mp_all_mgy
                   WHERE "Source_Type" LIKE "Surface Water"')
   mp_all_wide_power_sw <- sqldf('SELECT "HydroID","Source_Type","MP_Name","Facility_hydroID" AS "Facility_HydroID","Facility","Use_Type", "fips" as "FIPS","lat","lon","X2016","X2017","X2018","X2019","X2020","Locality"
                   FROM mp_all_wide_power
@@ -1779,7 +1780,7 @@ mp_df <-sqldf(paste('SELECT *,
    wsp_df <- sqldf('SELECT *  
          FROM ows_wsp_regions_wkt
          WHERE geom IS NOT NULL
-         AND "FIPS.Code" NOT LIKE "3%"')
+         AND "FIPS_Code" NOT LIKE "3%"')
   
   wsp.sf <- st_as_sf(wsp_df, wkt = 'geom')
   wsp.gg <- geom_sf(data = wsp.sf,aes(fill = factor(region_name)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
@@ -1872,12 +1873,12 @@ mp_df <-sqldf(paste('SELECT *,
   
   #MPs LAYER
   #join/union the SW MPs into 1 layer
-  mp_all_wide_sw <- sqldf(paste0('SELECT "MP_HydroID","Source.Type","MP.Name","Facility_HydroID","Facility","Use.Type", "FIPS.Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
+  mp_all_wide_sw <- sqldf(paste0('SELECT "MP_HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS_Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
                   FROM mp_all_wide
-                  WHERE "Source.Type" LIKE "Surface Water"'))
-  mp_all_wide_power_sw <- sqldf(paste0('SELECT "MP_HydroID","Source.Type","MP.Name","Facility_HydroID","Facility","Use.Type", "FIPS.Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
+                  WHERE "Source_Type" LIKE "Surface Water"'))
+  mp_all_wide_power_sw <- sqldf(paste0('SELECT "MP_HydroID","Source_Type","MP_Name","Facility_HydroID","Facility","Use_Type", "FIPS_Code","Latitude" AS lat,"longitude" AS lon,X',eyear-4,',X',eyear-3,',X',eyear-2,',X',eyear-1,',X',eyear,',"Locality"
                   FROM mp_all_wide_power
-                  WHERE "Source.Type" LIKE "Surface Water"'))
+                  WHERE "Source_Type" LIKE "Surface Water"'))
   mp <- sqldf('SELECT *
               FROM mp_all_wide_sw
               UNION all 

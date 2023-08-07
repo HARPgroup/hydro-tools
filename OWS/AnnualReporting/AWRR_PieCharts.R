@@ -12,7 +12,7 @@ basepath <- "/var/www/R/"
 source(paste(basepath,"config.local.private",sep = '/'))
 export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf") ##BB Put this line after 12 since it overwrites export_path
 ## Needs to read in table1 without power
-Table1 <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Table1_All_",syear,"-",eyear,".csv"))
+Table1 <- read.csv(paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"/Table1_",eyear-4,"-",eyear,".csv"))
  Table1 <- Table1[-c(7:8,15:16,23:24,28:31),]  ##Alternatively, this line removes power from Table1 (with power)
 
 # AWRR Pie Charts ################################################################
