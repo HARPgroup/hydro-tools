@@ -27,8 +27,9 @@ om_multi_image_list <- function(ds,model_pids, scenarios, image_names, column_de
         }
         scen_results <- find_name(model, scenario)
         fig_prop <- find_name(scen_results,img_name)
+        short_name <- find_name(scen_results, "short_name")
         img_list[[n]] = list()
-        img_list[[n]]$text = paste(img_desc, model$name)
+        img_list[[n]]$text = paste(img_desc, model$name, short_name)
         img_list[[n]]$label = label_prefix
         if (!(is.null(fig_prop))) {
           fig_path <- fig_prop$code
