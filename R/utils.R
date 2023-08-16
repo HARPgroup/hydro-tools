@@ -140,6 +140,7 @@ fn_get_runfile <- function(
   if (host_site == site) {
     localname = finfo$output_file
     cached = TRUE
+    message(paste("Using Local File Storage", localname))
   } else {
     localname = basename(as.character(finfo$output_file));
   }
