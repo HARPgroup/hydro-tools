@@ -112,13 +112,14 @@ fn_get_runfile <- function(
   }
   # may be obsolete
   #setInternet2(TRUE)
-
+  # set this for comparisons
+  host_site <- paste0('http://',finfo$host)
+  
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
   if (finfo$compressed == 1) {
     # If the host is not the same as site, and finfo$compressed == 1, then we need to 
     # Repeat this request on the other host
-    host_site <- paste0('http://',finfo$host)
     if (host_site != site) {
       finfo_save <- finfo
       message("Compressed file requested, repeating request on model run host site")
@@ -127,13 +128,21 @@ fn_get_runfile <- function(
         message("host site retrieval failed, trying original site.")
         finfo <- finfo_save
       }
+    } else {
+      # allow access to local file which will be much faster
+      cached = TRUE
     }
   }
   if (!is.list(finfo)) {
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
-  localname = basename(as.character(finfo$output_file));
+  if (host_site == site) {
+    localname = finfo$output_file
+    cached = TRUE
+  } else {
+    localname = basename(as.character(finfo$output_file));
+  }
   if (cached & file.exists(localname)) {
     linfo = file.info(localname)
     if (as.Date(finfo$run_date) > as.Date(linfo$mtime)) {
