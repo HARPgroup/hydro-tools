@@ -137,6 +137,7 @@ fn_get_runfile <- function(
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
+  message(paste("Comparing host_site and site", host_site, "site"))
   if (host_site == site) {
     localname = finfo$output_file
     cached = TRUE
