@@ -11,8 +11,8 @@
 #' @export om_cu_table
 #' @examples NA
 om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_threshold, cu_decimals) {
-  if ( (cu_post_var == "Qout" & cu_pre_var == "Qbaseline") ) {
-    # regular calculations
+  if ( (cu_post_var == "Qout" & cu_pre_var == "Qbaseline") & !("Qbaseline" %in% names(pr_data))) {
+    # perform regular calculations if Qbaseline does not already exist
     pr_data$Qbaseline <- pr_data$Qout + (pr_data$wd_cumulative_mgd - pr_data$ps_cumulative_mgd) * 1.547
   }
   pr_data$cu_daily <- 100.0 * (

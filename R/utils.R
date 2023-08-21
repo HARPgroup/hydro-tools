@@ -708,7 +708,7 @@ fn_search_vardefs <- function(config, var_defs_tmp) {
 #' Retrieve Property data from propvalues style data frame
 #'
 #' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-#' @param propvalues_tmp data frame to search
+#' @param features_tmp data frame to search
 #' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
 #' @return data frame of propvalue or FALSE
 #' @seealso NA
