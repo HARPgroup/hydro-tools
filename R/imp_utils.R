@@ -11,7 +11,7 @@
 #' @param Qout_col Outflow column
 #' @param wd_col Withdrawal column
 #' @return plot object
-#' @export fn_plot_impoundment
+#' @export fn_plot_impoundment_flux
 fn_plot_impoundment_flux <- function(
     dat, pur_col = 'pct_use_remain', 
     Qin_col = 'Qin', Qout_col = 'Qout',

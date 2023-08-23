@@ -32,6 +32,8 @@ om_vahydro_metric_grid(
 \item{model_version}{character default 'vahydro-1.0'}
 
 \item{base_url}{character deprecated to be replaced by global datasource}
+
+\item{ds}{datasource object of class RomDataSource}
 }
 \value{
 reference class of type openmi.om.equation

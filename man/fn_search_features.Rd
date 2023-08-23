@@ -9,9 +9,9 @@ fn_search_features(config, features_tmp, multiplicity = "default")
 \arguments{
 \item{config}{= list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 
-\item{multiplicity}{uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)}
+\item{features_tmp}{data frame to search}
 
-\item{propvalues_tmp}{data frame to search}
+\item{multiplicity}{uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)}
 }
 \value{
 data frame of propvalue or FALSE
