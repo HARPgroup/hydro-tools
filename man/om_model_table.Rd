@@ -11,7 +11,8 @@ om_model_table(
     "wd_cumulative_mgd", "ps_cumulative_mgd"),
   include.elfgen = FALSE,
   site = "http://deq1.bse.vt.edu:81/d.dh",
-  site_base = "http://deq1.bse.vt.edu:81"
+  site_base = "http://deq1.bse.vt.edu:81",
+  rdigits = 2
 )
 }
 \arguments{
