@@ -138,8 +138,11 @@ r <- sqldf('SELECT CASE
 # first, convert the data.frame to spdf
 coordinates(r) <- ~Lon+Lat
 
+## Cleaning up some of the data to only include VA (roughly)
+r<-r[(r$Lat > 36.4 & r$Lat < 40) & (r$Lon > -85 & r$Lon < -75),]
+
 # second, assign the CRS in one of two ways
-crs(r) <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs 
+crs(r) <- "+proj=webmerc +zone=18 +datum=WGS84 +units=m +no_defs 
                  +ellps=WGS84 +towgs84=0,0,0"
 plot(r, 
      main=paste0("Map of Withdrawal Points: ",syear,"-",eyear))
@@ -150,7 +153,7 @@ writeOGR(r, export_path,
 
 #PART 2 - MONTHLY ####
 ### RETRIEVE MONTHLY WITHDRAWAL DATA #################################################
-#begin with syear=1982 and eyear=1989, then repeat for 1990-1999, 2000-2009, 2010-2019, 2020-2021
+#begin with syear=1982 and eyear=1989, then repeat for 1990-1999, 2000-2009, 2010-2019, 2020-2023
 #load variables
 syear = 1982
 # eyear = 1989
@@ -199,31 +202,31 @@ wd_mgm <- sqldf('SELECT MP_hydroid AS MP_ID,
                           Year,
                           Month,
                           CASE 
-                          WHEN Month = 1
-                          THEN "Jan"
-                          WHEN Month = 2
-                          THEN "Feb"
-                          WHEN Month = 3
-                          THEN "Mar"
-                          WHEN Month = 4
-                          THEN "Apr"
-                          WHEN Month = 5
-                          THEN "May"
-                          WHEN Month = 6
-                          THEN "Jun"
-                          WHEN Month = 7
-                          THEN "Jul"
-                          WHEN Month = 8
-                          THEN "Aug"
-                          WHEN Month = 9
-                          THEN "Sep"
-                          WHEN Month = 10
-                          THEN "Oct"
-                          WHEN Month = 11
-                          THEN "Nov"
-                          WHEN Month = 12
-                          THEN "Dec"
-                          ELSE "No Date"
+                            WHEN Month = 1
+                            THEN "Jan"
+                            WHEN Month = 2
+                            THEN "Feb"
+                            WHEN Month = 3
+                            THEN "Mar"
+                            WHEN Month = 4
+                            THEN "Apr"
+                            WHEN Month = 5
+                            THEN "May"
+                            WHEN Month = 6
+                            THEN "Jun"
+                            WHEN Month = 7
+                            THEN "Jul"
+                            WHEN Month = 8
+                            THEN "Aug"
+                            WHEN Month = 9
+                            THEN "Sep"
+                            WHEN Month = 10
+                            THEN "Oct"
+                            WHEN Month = 11
+                            THEN "Nov"
+                            WHEN Month = 12
+                            THEN "Dec"
+                            ELSE "No Date"
                           END AS Month2,
                           "Water.Use.MGM" AS USE_MGM,
                           "POINT "||"("||Longitude||" "||Latitude||")" AS geom,
@@ -249,7 +252,7 @@ write.csv(wd_mgm_export,paste0(export_path,"withdrawal_monthly_",syear,"-",eyear
 
 ### CSV TO SHAPEFILE --------------------------------------------------------------------------
 # Read the .csv file
-#wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
+wd_mgm_export <- read.csv(paste0(export_path,"withdrawal_monthly_",syear,"-",eyear,".csv"), stringsAsFactors = F)
 
 syear_range <- c(1982,1990,2000,2010,2020)
 eyear_range <- c(1989,1999,2009,2019,eyear)
@@ -292,8 +295,11 @@ for (i in 1:length(eyear_range)) {
   # first, convert the data.frame to spdf
   coordinates(r) <- ~Lon+Lat
   
+  ## Cleaning up some of the data to only include VA (roughly)
+  r<-r[(r$Lat > 36.4 & r$Lat < 40) & (r$Lon > -85 & r$Lon < -75),]
+  
   # second, assign the CRS in one of two ways
-  crs(r) <- "+proj=utm +zone=18 +datum=WGS84 +units=m +no_defs 
+  crs(r) <- "+proj=webmerc +zone=18 +datum=WGS84 +units=m +no_defs 
                    +ellps=WGS84 +towgs84=0,0,0"
   plot(r, 
        main=paste0("Map of Withdrawal Points: ",syear_range[i],"-",eyear_range[i]))

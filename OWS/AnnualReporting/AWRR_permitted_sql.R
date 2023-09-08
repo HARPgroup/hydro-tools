@@ -29,9 +29,8 @@ data_all <- sqldf(paste('SELECT * FROM mp_all_mgy
                GROUP BY "MP_hydroid", "Hydrocode", "Source_Type", "MP_Name", "Facility_hydroid", "Facility", "Use_Type","FIPS_Code", "Locality", "OWS_Planner"'))
 
 # retaining this line in case it's still needed
-if (length(which(data_all$Use_Type=='facility')) > 0) {
-  data_all <- data_all[-which(data_all$Use_Type=='facility'),]
-} 
+data_all <- sqldf('SELECT * FROM data_all
+                  WHERE Use_Type NOT LIKE "facility"')
 
 #rename columns and remove prior year withdrawal values
 mp_all <- sqldf(paste('SELECT MP_hydroid AS "MP_hydroid",
