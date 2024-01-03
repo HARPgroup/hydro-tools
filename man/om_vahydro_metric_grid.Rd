@@ -12,7 +12,8 @@ om_vahydro_metric_grid(
   bundle = "watershed",
   ftype = "vahydro",
   model_version = "vahydro-1.0",
-  base_url = "http://deq2.bse.vt.edu/d.dh/entity-model-prop-level-export"
+  base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
+  ds = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ om_vahydro_metric_grid(
 \item{model_version}{character default 'vahydro-1.0'}
 
 \item{base_url}{character deprecated to be replaced by global datasource}
+
+\item{ds}{datasource object of class RomDataSource}
 }
 \value{
 reference class of type openmi.om.equation

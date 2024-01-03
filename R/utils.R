@@ -112,13 +112,14 @@ fn_get_runfile <- function(
   }
   # may be obsolete
   #setInternet2(TRUE)
-
+  # set this for comparisons
+  host_site <- paste0('http://',finfo$host)
+  
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
   if (finfo$compressed == 1) {
     # If the host is not the same as site, and finfo$compressed == 1, then we need to 
     # Repeat this request on the other host
-    host_site <- paste0('http://',finfo$host)
     if (host_site != site) {
       finfo_save <- finfo
       message("Compressed file requested, repeating request on model run host site")
@@ -127,13 +128,23 @@ fn_get_runfile <- function(
         message("host site retrieval failed, trying original site.")
         finfo <- finfo_save
       }
+    } else {
+      # allow access to local file which will be much faster
+      cached = TRUE
     }
   }
   if (!is.list(finfo)) {
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
-  localname = basename(as.character(finfo$output_file));
+  message(paste("Comparing host_site and site", host_site, "site"))
+  if (host_site == site) {
+    localname = finfo$output_file
+    cached = TRUE
+    message(paste("Using Local File Storage", localname))
+  } else {
+    localname = basename(as.character(finfo$output_file));
+  }
   if (cached & file.exists(localname)) {
     linfo = file.info(localname)
     if (as.Date(finfo$run_date) > as.Date(linfo$mtime)) {
@@ -697,7 +708,7 @@ fn_search_vardefs <- function(config, var_defs_tmp) {
 #' Retrieve Property data from propvalues style data frame
 #'
 #' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-#' @param propvalues_tmp data frame to search
+#' @param features_tmp data frame to search
 #' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
 #' @return data frame of propvalue or FALSE
 #' @seealso NA

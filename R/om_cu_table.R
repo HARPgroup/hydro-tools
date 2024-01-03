@@ -11,19 +11,25 @@
 #' @export om_cu_table
 #' @examples NA
 om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_threshold, cu_decimals) {
-  if ( (cu_post_var == "Qout" & cu_pre_var == "Qbaseline") ) {
-    # regular calculations
+  if ( (cu_post_var == "Qout" & cu_pre_var == "Qbaseline") & !("Qbaseline" %in% names(pr_data))) {
+    # perform regular calculations if Qbaseline does not already exist
     pr_data$Qbaseline <- pr_data$Qout + (pr_data$wd_cumulative_mgd - pr_data$ps_cumulative_mgd) * 1.547
   }
   pr_data$cu_daily <- 100.0 * (
     (pr_data[,cu_post_var] - pr_data[,cu_pre_var]) / pr_data[,cu_pre_var]
   )
+  # first do these tables with effectively no rounding (10 decimal places)
+  qi_table_noro = om_flow_table(pr_data, q_col = cu_pre_var, mo_col = 'month', rdigits = 10)
+  qo_table_noro = om_flow_table(pr_data, cu_post_var, 'month', 10)
+  # now re-do these tables with rounding for formatting purposes
   qi_table = om_flow_table(pr_data, q_col = cu_pre_var, mo_col = 'month', rdigits = cu_decimals)
   qo_table = om_flow_table(pr_data, cu_post_var, 'month', cu_decimals)
   cu_table = qi_table # make a copy formatted with months and labels
+  # now, cu_table uses the rounded values for display, but the noro values for calculating 
+  # the percent change
   cu_table[,2:ncol(cu_table)] <- round(
-    100.0 * (qo_table[,2:ncol(qo_table)] - qi_table[,2:ncol(qi_table)]) 
-    / qi_table[,2:ncol(qi_table)]
+    100.0 * (qo_table_noro[,2:ncol(qo_table)] - qi_table_noro[,2:ncol(qi_table_noro)]) 
+    / qi_table_noro[,2:ncol(qi_table_noro)]
   )
   cu_table <- replace(cu_table, is.na(cu_table), "n/a")
   cu_table <- replace(cu_table, (qi_table < cu_min_valid), "n/a")
@@ -48,12 +54,25 @@ om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_th
           qcu_colors[rn,cn] = "red"
         } 
         # consider augmentation to be similar to depletion percentiles.
-        if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[2]) {
-          qcu_colors[rn,cn] = "lightblue2"
-        } 
-        if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[3]) {
-          qcu_colors[rn,cn] = "lightblue3"
-        } 
+        if (!is.na(cu_threshold[4])) {
+          if ( as.numeric(cu_table[r,c]) >= cu_threshold[4]) {
+            qcu_colors[rn,cn] = "lightblue2"
+          } 
+        } else {
+          if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[2]) {
+            qcu_colors[rn,cn] = "lightblue2"
+          } 
+        }
+        # consider augmentation to be similar to depletion percentiles.
+        if (!is.na(cu_threshold[5])) {
+          if ( as.numeric(cu_table[r,c]) >= cu_threshold[5]) {
+            qcu_colors[rn,cn] = "lightblue3"
+          } 
+        } else {
+          if ( as.numeric(cu_table[r,c]) >= -1.0 * cu_threshold[3]) {
+            qcu_colors[rn,cn] = "lightblue3"
+          } 
+        }
         # qcu_table[r,c] <- paste0( qo_table[r,c], " (", cu_table[r,c],"%)")
         cu_table[r,c] <- sprintf("%+.0f", as.numeric(cu_table[r,c]))
       }

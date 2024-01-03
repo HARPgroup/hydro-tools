@@ -6,6 +6,7 @@
 #' @param include.elfgen include elfgen metrics TRUE or FALSE
 #' @param site vhydro url
 #' @param site_base base vahydro url
+#' @param rdigits
 #' @return stats.df dataframe of summary stats
 #' @seealso NA
 #' @export om_model_table
@@ -17,7 +18,8 @@ om_model_table <- function (
                        "l90_Qout","consumptive_use_frac","wd_cumulative_mgd","ps_cumulative_mgd"),
   include.elfgen = FALSE,
   site = "http://deq1.bse.vt.edu:81/d.dh",
-  site_base = "http://deq1.bse.vt.edu:81"
+  site_base = "http://deq1.bse.vt.edu:81",
+  rdigits = 2
 ) {
   
   if (is.logical(model_info)){
@@ -74,7 +76,7 @@ om_model_table <- function (
       varname <- metric.list[j]
       varvalue <- om.as.numeric(find_name(run_info,varname)$value)
       if (is.numeric(varvalue)) {
-        varvalue <- format(round(varvalue,2), big.mark=",")
+        varvalue <- format(round(varvalue,rdigits), big.mark=",")
       }
       summary.i[varname] <- varvalue
     }
@@ -101,7 +103,7 @@ om_model_table <- function (
         varname <- elfgen.metric.list[j]
         varvalue <- om.as.numeric(find_name(run_info.elfgen,varname)$value)
         if (is.numeric(varvalue)) {
-          varvalue <- format(round(varvalue,2), big.mark=",")
+          varvalue <- format(round(varvalue,rdigits), big.mark=",")
         }
         elfgen_summary.i[varname] <- varvalue
       }
