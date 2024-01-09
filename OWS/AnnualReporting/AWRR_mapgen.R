@@ -50,7 +50,7 @@ mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode
 
 # BASEMAP ############################################################################################
 baselayers.gg <- base.layers(baselayers) # Need readWKT function here
-basemap.obj <- base.map(baselayers.gg) ##BB: Need to run this line twice, first time always fails
+basemap.obj <- base.map(baselayers.gg) 
 
 #LOAD RIVERS AND RESERVOIRS LAYERS
 rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]

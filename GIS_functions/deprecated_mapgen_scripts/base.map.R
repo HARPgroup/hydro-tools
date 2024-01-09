@@ -2,6 +2,7 @@ library(ggplot2)
 library(ggsn)
 library(ggmap) #used for get_stamenmap, get_map
 library(ggspatial) #annotation_north_arrow()
+library(arcpullr)
 
 #FUNCTION DEFAULTS TO STATEWIDE EXTENTS
 base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6)),
@@ -16,18 +17,37 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]
   reservoirs.gg <- baselayers.gg[[which(names(baselayers.gg) == "reservoirs.gg")]]
   
-  tile_layer <- get_map(
-    location = c(left = extent$x[1],
-                 bottom = extent$y[1],
-                 right = extent$x[2],
-                 top = extent$y[2]),
-    source = "stamen", zoom = plot_zoom, maptype = "terrain" 
-  ) #BB Changed source to stamen and maptype to terrain in response to OSM API changes
-  base_layer <- ggmap(tile_layer)
+  # tile_layer <- get_map(
+  #   location = c(left = extent$x[1],
+  #                bottom = extent$y[1],
+  #                right = extent$x[2],
+  #                top = extent$y[2]),
+  #   source = "stamen", zoom = plot_zoom, maptype = "terrain" 
+  # ) #BB Changed source to stamen and maptype to terrain in response to OSM API changes
+  # base_layer <- ggmap(tile_layer)
+  
+  ### ADDED IN HARP CODE ###
+  
+  bbox_points <- data.frame(x = c(-83.38,-75.24), y = c(36.54,39.46))
+  map_server <- "https://gismaps.vdem.virginia.gov/arcgis/rest/services"
+  # VA LandCover - very sparse, 
+  map_layer <- "Download/LandCover_Downloads/MapServer/0"
+  
+  sf_use_s2(TRUE) ### Had to add this line to stop an error at st_crop using planar coordinates
+  
+  map_url <- paste(map_server,map_layer,sep ="/")
+  mapdata <- get_spatial_layer(map_url)
+  mapdata <- st_crop(mapdata, c(xmin= min(bbox_points$x), ymin = min(bbox_points$y), 
+                                xmax = max(bbox_points$x), ymax = max(bbox_points$y))) #crop to our extent 
+  base_layer <- ggplot() + 
+                  geom_sf(data = mapdata)
+  
+  
+  ### END HARP CODE ###
   
   map <- base_layer +
     #ADD STATE BORDER LAYER
-    geom_path(data = states.gg,aes(x = long, y = lat, group = group), color="gray20",lwd=0.5,na.rm=TRUE) +
+    geom_path(data = states.gg,aes(x = long, y = lat, group = group),lwd=0.5,na.rm=TRUE) +
     
     #ADD RIVERS LAYER
     geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4,na.rm=TRUE) +
@@ -89,6 +109,9 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
                      ))
   }
   
+  ## Trying to limit the frame to only include the bounding box in states.gg
+  # map + coord_sf(xlim = c(-83.65,-75.25), ylim = c(35.45,40.4))
+  # map + xlim = c(-84,-75)+ylim = c(35.25,40.6)
   
   return(map)
 }

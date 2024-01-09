@@ -50,7 +50,8 @@ year_range <- format(seq(as.Date(paste0(syear,"/1/1")), as.Date(paste0(eyear,"/1
 #   enddate <- paste(y, "-12-31", sep='')
 # 
 #   #with power
-#   export_view <- paste0("ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498")
+#   export_view <- paste0("ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&
+#                          dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498")
 #   output_filename <- "wd_mgy_export.csv"
 #   wd_annual <- from_vahydro(datasite,export_view,localpath,output_filename)
 # 
@@ -75,16 +76,16 @@ for (i in syear:eyear) {
 #rename columns & CONVERT LAT/LON COLUMNS TO WKT COLUMN.
 wd_mgy_export <- sqldf(paste0('SELECT MP_hydroid AS MP_ID,
                           Hydrocode AS Hcode,
-                          "Source.Type" AS Source_Type,
-                          "MP.Name" AS MP_Name,
+                          Source_Type AS Source_Type,
+                          MP_Name AS MP_Name,
                           Facility_hydroid AS Fac_ID,
                           Facility AS Fac_Name,
-                          "USE.Type" AS UseType,
+                          Use_Type AS UseType,
                           ',year_range,'
                           "POINT "||"("||Longitude||" "||Latitude||")" AS geom,
                           Latitude AS Lat,
                           Longitude AS Lon,
-                          "FIPS.Code" AS FIPS
+                          FIPS_Code AS FIPS
                        FROM wd_annual_data
                        ORDER BY MGY_',eyear
                        ))
@@ -107,7 +108,6 @@ WKT_layer <- wd_mgy_export
 
 #### CSV TO SHAPEFILE ############################################################
 # Read the .csv file
-wd_mgy_export <- read.csv(paste0(export_path,"withdrawal_annual.csv"), stringsAsFactors = F)
 WKT_layer$id <- as.numeric(rownames(WKT_layer))
 
 # look at the data structure
@@ -117,22 +117,23 @@ str(WKT_layer)
 names(WKT_layer)
 
 # SpatialPointsDataFrame does not accept NA values in coordinate fields
-r <- sqldf('SELECT CASE
+r <- sqldf('SELECT 
+            CASE
               WHEN Lat = ""
               THEN 99
               WHEN Lat IS NULL
               THEN 99
               ELSE Lat
-              END AS Lat,
-              CASE
+            END AS Lat,
+            CASE
               WHEN Lon = ""
               THEN 99
               WHEN Lon IS NULL
               THEN 99
               ELSE Lon
-              END AS Lon,
-              *
-           FROM WKT_layer
+            END AS Lon,
+            *
+            FROM WKT_layer
            ')
 
 # first, convert the data.frame to spdf
@@ -140,7 +141,11 @@ coordinates(r) <- ~Lon+Lat
 
 ## Cleaning up some of the data to only include VA (roughly)
 r<-r[(r$Lat > 36.4 & r$Lat < 40) & (r$Lon > -85 & r$Lon < -75),]
-
+## Removing the rest outside of VA
+exclusions <- c(58954,59590,59591,59592,59593,59594,60318,60802,60810,60817,60829,
+                60834,62262,63125,64320,64374,64769,65025,65521,65549,65552,65557
+                ,65646,65662,68485,454961,454962,454964,454965,454966,462401,462485,59596,59099,65156,59596,59099,60447,64320)
+r <- r[!(r$MP_ID %in% exclusions),]
 # second, assign the CRS in one of two ways
 crs(r) <- "+proj=webmerc +zone=18 +datum=WGS84 +units=m +no_defs 
                  +ellps=WGS84 +towgs84=0,0,0"
@@ -173,7 +178,8 @@ options(timeout=300) #this adjusts to 5min
 #   enddate <- paste(y, "-12-31", sep='')
 #   
 #   #with power
-#   export_view <- paste0("ows-annual-report-map-exports-monthly-export/wd_mgm?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498")
+#   export_view <- paste0("ows-annual-report-map-exports-monthly-export/wd_mgm?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=",startdate,"&tstime%5Bmax%5D=",enddate,"&bundle%5B0%5D=well&
+#                          bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=65668&dh_link_admin_reg_issuer_target_id%5B1%5D=91200&dh_link_admin_reg_issuer_target_id%5B2%5D=77498")
 #   output_filename <- "wd_mgm_export.csv"
 #   wd_monthly <- from_vahydro(datasite,export_view,localpath,output_filename)
 #   
@@ -297,6 +303,10 @@ for (i in 1:length(eyear_range)) {
   
   ## Cleaning up some of the data to only include VA (roughly)
   r<-r[(r$Lat > 36.4 & r$Lat < 40) & (r$Lon > -85 & r$Lon < -75),]
+  exclusions <- c(58954,59590,59591,59592,59593,59594,60318,60802,60810,60817,60829,
+                  60834,62262,63125,64320,64374,64769,65025,65521,65549,65552,65557
+                  ,65646,65662,68485,454961,454962,454964,454965,454966,462401,462485,59596,59099,65156,59596,59099,60447,64320)
+  r <- r[!(r$MP_ID %in% exclusions),]
   
   # second, assign the CRS in one of two ways
   crs(r) <- "+proj=webmerc +zone=18 +datum=WGS84 +units=m +no_defs 
