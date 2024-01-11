@@ -42,7 +42,6 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   base_layer <- ggplot() + 
                   geom_sf(data = mapdata)
   
-  
   ### END HARP CODE ###
   
   map <- base_layer +
@@ -58,9 +57,10 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   ###geom_point(data = reservoirs.gg, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
   #################################################################################
   
-  #ADD BORDER LAYER
-  geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE)+
+    #ADD BORDER LAYER
+    geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE) +
     
+    coord_sf(xlim = extent$x, ylim = extent$y, expand = F) +
     # #ADD SCALE BAR
     # ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
     #       
