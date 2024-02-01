@@ -21,7 +21,8 @@ ryear <- 2023
 #Note: the :81/d.dh is the modeling version of the site but accesses the same database data as the d.dh
 
 #load all facilities with report status since 2015 to current
-tsdef_url <- paste0(site,"/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&uid_raw=&mail_op=not&mail=&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=",ryear,"-01-01&name_op=%3D&name=")
+tsdef_url <- paste0(site,"/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propcode_op=%3D&propcode=&propvalue_1_op=%21%3D&propvalue_1%5Bvalue%5D=&propvalue_1%5Bmin%5D=&propvalue_1%5Bmax%5D=&",
+                    "uid_raw=&mail_op=not&mail=&startdate_op=between&startdate%5Bvalue%5D=2015-01-01&startdate%5Bmin%5D=2014-01-01&startdate%5Bmax%5D=",ryear,"-01-01&name_op=%3D&name=")
 
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
@@ -29,7 +30,8 @@ facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv"
 cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
 
 #load in MGY from Annual Map Exports view
-tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=",ryear,"-12-31&bundle%5B0%5D=well&bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498")
+tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=",ryear,"-12-31&bundle%5B0%5D=well&",
+                    "bundle%5B1%5D=intake&dh_link_admin_reg_issuer_target_id%5B0%5D=91200&dh_link_admin_reg_issuer_target_id%5B1%5D=77498")
 
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
@@ -38,7 +40,8 @@ plannerAreas <- read.csv("U:\\OWS\\GIS\\WSP\\PlannerCoverageAreaTable.csv")
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
-facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Reporting_Method"), names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
+facility_report_status <- pivot_wider(data = facility_report_status_data, id_cols = c("Facility","Facility_Name", "Facility Use Type", "Latitude", "Longitude","UserName","UserEmail","ContactEmail","Onetime_login_URL","Firstname","Lastname", "Five_yr_avg_MGY", "OWS Planner", "Reporting_Method"), 
+                                      names_from = "Reporting_Year", values_from = "Submittal_ID", values_fn = length, names_sort = TRUE, names_prefix = "Submittal_")
 #facility_report_status <- facility_report_status[,-grep("12-31",names(facility_report_status))]
 
 a <- mp_MGY %>% 
@@ -143,9 +146,10 @@ data_addPlanners <- sqldf('SELECT a.*, b.Planner
 #Only show necessary columns
 #note for next reporting cycle add columns: "MGY_2024",  a."Submittal_2024.01.01" AS "Submittal_2024",
 #note for next reporting  cycle, ORDER BY MGY_2024
+
 output_reporters <- sqldf('
 SELECT "Facility_hydroid", "Fac_Name", "Use.Type", "Five_yr_avg_MGY", "Planner", "Reporting_Method",
-"UserName", "UserEmail", "Firstname", "Lastname", "Locality",
+"UserName", "UserEmail","contactemail", "Firstname", "Lastname", "Locality",
 "MGY_2023",  a."Submittal_2023.01.01" AS "Submittal_2023",
 "MGY_2022",  a."Submittal_2022.01.01" AS "Submittal_2022", 
 "MGY_2021",  a."Submittal_2021.01.01" AS "Submittal_2021", 
@@ -164,9 +168,58 @@ FROM data_addPlanners AS a
 
 ORDER BY "MGY_2023" DESC')
 
-write.csv(output_reporters, paste0(export_path,paste0("annual_reporter_submission_status_",Sys.Date(),".csv")), row.names = F)
+write.csv(output_reporters, paste0(export_path,paste0("annual_reporter_submission_status_ALL_",Sys.Date(),".csv")), row.names = F)
 
-dim(output_reporters)
+## Filtering and Splitting by Planner ###############
+## Filtering out only missing based on the criteria in guidance
+### CWS (clean water supply, aka municipal), 50 mgy >,  CU > 0.05 (or 0.03)
 
-cols <- c(7:30)
-sapply(output_reporters[,cols],function(x) {sum(is.na(x))})
+## Getting only reporters who have not submitted in 2023
+missing <- output_reporters[is.na(output_reporters$Submittal_2023),]
+
+write.csv(missing, paste0(export_path,paste0("Missing_Reporters_",Sys.Date(),".csv")), row.names = F)
+
+## Filtering out reproters based on guidance. Also only selecting online reporters (this changes later in the cycle)
+missing_filtered <-  missing[missing$Reporting_Method == 'email',]
+
+missing_filtered <- missing[missing$Five_yr_avg_MGY > 50    | 
+                            missing$Use.Type == 'municipal' |
+                            missing$`Current Consumptive Use Frac` > 0.05,]
+
+##Above filter statement creates NA rows, this removes those
+missing_filtered <- missing_filtered[!is.na(missing_filtered$Facility_hydroid),]
+
+##Save a file for each planner
+planners <- unique(missing_filtered$Planner)
+
+for (i in planners) {
+  ## Fetches all records fore ach planner then creates a csv
+  planner_df <- missing_filtered[missing_filtered$Planner == i,]
+  print(dim(planner_df))
+  write.csv(planner_df,file = paste0(export_path,"Missing_Reporters_",i,"_",Sys.Date(),".csv"), row.names = F)
+
+}
+
+
+## Some basic analysis #########################
+
+## Total number of facilities
+length(unique(missing$Facility_hydroid))
+
+## Total number of contacts for split by planner
+
+sqldf('
+SELECT planner,COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+FROM missing
+GROUP BY planner
+')
+
+sqldf('
+SELECT COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+FROM missing')
+
+sqldf('
+SELECT planner,COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+FROM missing_filtered
+GROUP BY planner
+')
