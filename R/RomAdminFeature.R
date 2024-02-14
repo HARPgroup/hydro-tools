@@ -4,26 +4,26 @@
 #' @importFrom R6 R6Class  
 #' @param datasource optional RomDataSource for remote and local storage
 #' @param config list of attributes to set
-#' @return feature class of type RomFeature
+#' @return feature class of type RomAdminFeature
 #' @seealso NA
 #' @examples NA
-#' @export RomFeature
-RomFeature <- R6Class(
-  "RomFeature",
+#' @export RomAdminFeature
+RomAdminFeature <- R6Class(
+  "RomAdminFeature",
   inherit = RomEntity,
   public = list(
     #' @field base_entity_type kind of entity
-    base_entity_type = 'dh_feature',
+    base_entity_type = 'dh_adminreg_feature',
     #' @field pk_name the name of this entity's pk column
-    pk_name = 'hydroid',
+    pk_name = 'adminid',
     #' @field name of this entity
     name = NA,
-    #' @field hydrocode alpha code for this entity from original dataset
-    hydrocode = NA,
+    #' @field admincode alpha code for this entity from original dataset
+    admincode = NA,
     #' @field ftype feature type
     ftype = NA,
-    #' @field hydroid unique ID (integer)
-    hydroid = NA,
+    #' @field adminid unique ID (integer)
+    adminid = NA,
     #' @field bundle main content type, i.e. facility, well, intake, ...
     bundle = NA,
     #' @field fstatus entity status
@@ -48,20 +48,19 @@ RomFeature <- R6Class(
     },
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
-      return(self$hydroid)
+      return(self$adminid)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function() {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(
-        hydroid = self$hydroid,
+        adminid = self$adminid,
         name = self$name,
-        hydrocode = self$hydrocode,
+        admincode = self$admincode,
         ftype = self$ftype,
         fstatus = self$fstatus,
-        bundle = self$bundle,
-        geom = self$geom
+        bundle = self$bundle
       )
       return(t_list)
     },
@@ -69,12 +68,12 @@ RomFeature <- R6Class(
     #' @return NULL
     from_list = function(config) {
       for (i in names(config)) {
-        if (i == "hydroid") {
-          self$hydroid = as.integer(as.character(config$hydroid))
+        if (i == "adminid") {
+          self$adminid = as.integer(as.character(config$adminid))
         } else if (i == "name") {
           self$name = as.character(config$name)
-        } else if (i == "hydrocode") {
-          self$hydrocode = as.character(config$hydrocode)
+        } else if (i == "admincode") {
+          self$admincode = as.character(config$admincode)
         } else if (i == "ftype") {
           self$ftype = as.character(config$ftype)
         } else if (i == "bundle") {
@@ -92,18 +91,6 @@ RomFeature <- R6Class(
       j = length(self$mps) + 1
       #self$mps[j] <- thismp
       self$mps[j] <- list('obj' = thismp)
-    },
-    save = function(push_remote=FALSE) {
-      # object class responsibilities
-      # - know the required elemenprop such as varid, featureid, entity_type
-      #   fail if these required elemenprop are not available 
-      if (push_remote) {
-        finfo <- self$to_list()
-        hydroid = self$datasource$post('dh_feature', 'hydroid', finfo)
-        if (!is.logical(hydroid)) {
-          self$hydroid = hydroid
-        }
-      }
     }
   )
 )
