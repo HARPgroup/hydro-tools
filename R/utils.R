@@ -112,11 +112,11 @@ fn_get_runfile <- function(
   }
   # may be obsolete
   #setInternet2(TRUE)
-  # set this for comparisons
-  host_site <- paste0('http://',finfo$host)
-  
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
+  
+  # set this for comparisons
+  host_site <- paste0('http://',finfo$host)
   if (finfo$compressed == 1) {
     # If the host is not the same as site, and finfo$compressed == 1, then we need to 
     # Repeat this request on the other host
