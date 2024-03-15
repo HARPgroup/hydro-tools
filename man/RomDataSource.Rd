@@ -57,27 +57,27 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RomDataSource$new()}}
-\item \href{#method-reset}{\code{RomDataSource$reset()}}
-\item \href{#method-get_token}{\code{RomDataSource$get_token()}}
-\item \href{#method-get_vardef}{\code{RomDataSource$get_vardef()}}
-\item \href{#method-get_prop}{\code{RomDataSource$get_prop()}}
-\item \href{#method-get_ts}{\code{RomDataSource$get_ts()}}
-\item \href{#method-auth_read}{\code{RomDataSource$auth_read()}}
-\item \href{#method-set_ts}{\code{RomDataSource$set_ts()}}
-\item \href{#method-set_prop}{\code{RomDataSource$set_prop()}}
-\item \href{#method-set_vardef}{\code{RomDataSource$set_vardef()}}
-\item \href{#method-store_features}{\code{RomDataSource$store_features()}}
-\item \href{#method-set_feature}{\code{RomDataSource$set_feature()}}
-\item \href{#method-get}{\code{RomDataSource$get()}}
-\item \href{#method-post}{\code{RomDataSource$post()}}
-\item \href{#method-get_json_prop}{\code{RomDataSource$get_json_prop()}}
-\item \href{#method-clone}{\code{RomDataSource$clone()}}
+\item \href{#method-RomDataSource-new}{\code{RomDataSource$new()}}
+\item \href{#method-RomDataSource-reset}{\code{RomDataSource$reset()}}
+\item \href{#method-RomDataSource-get_token}{\code{RomDataSource$get_token()}}
+\item \href{#method-RomDataSource-get_vardef}{\code{RomDataSource$get_vardef()}}
+\item \href{#method-RomDataSource-get_prop}{\code{RomDataSource$get_prop()}}
+\item \href{#method-RomDataSource-get_ts}{\code{RomDataSource$get_ts()}}
+\item \href{#method-RomDataSource-auth_read}{\code{RomDataSource$auth_read()}}
+\item \href{#method-RomDataSource-set_ts}{\code{RomDataSource$set_ts()}}
+\item \href{#method-RomDataSource-set_prop}{\code{RomDataSource$set_prop()}}
+\item \href{#method-RomDataSource-set_vardef}{\code{RomDataSource$set_vardef()}}
+\item \href{#method-RomDataSource-store_features}{\code{RomDataSource$store_features()}}
+\item \href{#method-RomDataSource-set_feature}{\code{RomDataSource$set_feature()}}
+\item \href{#method-RomDataSource-get}{\code{RomDataSource$get()}}
+\item \href{#method-RomDataSource-post}{\code{RomDataSource$post()}}
+\item \href{#method-RomDataSource-get_json_prop}{\code{RomDataSource$get_json_prop()}}
+\item \href{#method-RomDataSource-clone}{\code{RomDataSource$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RomDataSource-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site, rest_uname = NULL)}\if{html}{\out{</div>}}
@@ -97,8 +97,8 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-reset"></a>}}
-\if{latex}{\out{\hypertarget{method-reset}{}}}
+\if{html}{\out{<a id="method-RomDataSource-reset"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-reset}{}}}
 \subsection{Method \code{reset()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$reset(table)}\if{html}{\out{</div>}}
@@ -116,8 +116,8 @@ nothing clears data tables
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_token"></a>}}
-\if{latex}{\out{\hypertarget{method-get_token}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get_token"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_token}{}}}
 \subsection{Method \code{get_token()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(rest_pw = NULL)}\if{html}{\out{</div>}}
@@ -135,8 +135,8 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_vardef"></a>}}
-\if{latex}{\out{\hypertarget{method-get_vardef}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_vardef}{}}}
 \subsection{Method \code{get_vardef()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_update = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
@@ -158,8 +158,8 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_prop"></a>}}
-\if{latex}{\out{\hypertarget{method-get_prop}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_prop}{}}}
 \subsection{Method \code{get_prop()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_prop(
@@ -185,8 +185,8 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_ts"></a>}}
-\if{latex}{\out{\hypertarget{method-get_ts}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get_ts"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_ts}{}}}
 \subsection{Method \code{get_ts()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "data.frame", force_refresh = FALSE)}\if{html}{\out{</div>}}
@@ -208,8 +208,8 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-auth_read"></a>}}
-\if{latex}{\out{\hypertarget{method-auth_read}{}}}
+\if{html}{\out{<a id="method-RomDataSource-auth_read"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-auth_read}{}}}
 \subsection{Method \code{auth_read()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$auth_read(
@@ -238,8 +238,8 @@ result of web request
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_ts"></a>}}
-\if{latex}{\out{\hypertarget{method-set_ts}{}}}
+\if{html}{\out{<a id="method-RomDataSource-set_ts"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-set_ts}{}}}
 \subsection{Method \code{set_ts()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_ts(ts)}\if{html}{\out{</div>}}
@@ -257,8 +257,8 @@ nothing sets internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_prop"></a>}}
-\if{latex}{\out{\hypertarget{method-set_prop}{}}}
+\if{html}{\out{<a id="method-RomDataSource-set_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-set_prop}{}}}
 \subsection{Method \code{set_prop()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_prop(prop)}\if{html}{\out{</div>}}
@@ -276,8 +276,8 @@ nothing seprop internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_vardef"></a>}}
-\if{latex}{\out{\hypertarget{method-set_vardef}{}}}
+\if{html}{\out{<a id="method-RomDataSource-set_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-set_vardef}{}}}
 \subsection{Method \code{set_vardef()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_vardef(var_def)}\if{html}{\out{</div>}}
@@ -295,8 +295,8 @@ local df index?
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-store_features"></a>}}
-\if{latex}{\out{\hypertarget{method-store_features}{}}}
+\if{html}{\out{<a id="method-RomDataSource-store_features"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-store_features}{}}}
 \subsection{Method \code{store_features()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$store_features(features)}\if{html}{\out{</div>}}
@@ -305,7 +305,7 @@ local df index?
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{feature}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+\item{\code{features}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
 }
 \if{html}{\out{</div>}}
 }
@@ -314,8 +314,8 @@ nothing seprop internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_feature"></a>}}
-\if{latex}{\out{\hypertarget{method-set_feature}{}}}
+\if{html}{\out{<a id="method-RomDataSource-set_feature"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-set_feature}{}}}
 \subsection{Method \code{set_feature()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_feature(feature)}\if{html}{\out{</div>}}
@@ -333,8 +333,8 @@ nothing seprop internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get"></a>}}
-\if{latex}{\out{\hypertarget{method-get}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get}{}}}
 \subsection{Method \code{get()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get(entity_type, pk, config)}\if{html}{\out{</div>}}
@@ -356,8 +356,8 @@ local df index?
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-post"></a>}}
-\if{latex}{\out{\hypertarget{method-post}{}}}
+\if{html}{\out{<a id="method-RomDataSource-post"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-post}{}}}
 \subsection{Method \code{post()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$post(entity_type, pk, config)}\if{html}{\out{</div>}}
@@ -379,8 +379,8 @@ local df index?
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_json_prop"></a>}}
-\if{latex}{\out{\hypertarget{method-get_json_prop}{}}}
+\if{html}{\out{<a id="method-RomDataSource-get_json_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_json_prop}{}}}
 \subsection{Method \code{get_json_prop()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_json_prop(pid)}\if{html}{\out{</div>}}
@@ -398,8 +398,8 @@ unserialized json as list, with object stored in ds$prop_json_cache
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RomDataSource-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

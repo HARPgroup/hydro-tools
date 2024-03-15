@@ -32,16 +32,16 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-get_id}{\code{RomEntity$get_id()}}
-\item \href{#method-propvalues}{\code{RomEntity$propvalues()}}
-\item \href{#method-tsvalues}{\code{RomEntity$tsvalues()}}
-\item \href{#method-new}{\code{RomEntity$new()}}
-\item \href{#method-clone}{\code{RomEntity$clone()}}
+\item \href{#method-RomEntity-get_id}{\code{RomEntity$get_id()}}
+\item \href{#method-RomEntity-propvalues}{\code{RomEntity$propvalues()}}
+\item \href{#method-RomEntity-tsvalues}{\code{RomEntity$tsvalues()}}
+\item \href{#method-RomEntity-new}{\code{RomEntity$new()}}
+\item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_id"></a>}}
-\if{latex}{\out{\hypertarget{method-get_id}{}}}
+\if{html}{\out{<a id="method-RomEntity-get_id"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-get_id}{}}}
 \subsection{Method \code{get_id()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_id()}\if{html}{\out{</div>}}
@@ -52,8 +52,8 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-propvalues"></a>}}
-\if{latex}{\out{\hypertarget{method-propvalues}{}}}
+\if{html}{\out{<a id="method-RomEntity-propvalues"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-propvalues}{}}}
 \subsection{Method \code{propvalues()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL)}\if{html}{\out{</div>}}
@@ -73,8 +73,8 @@ propvalues unique properties of this entity
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-tsvalues"></a>}}
-\if{latex}{\out{\hypertarget{method-tsvalues}{}}}
+\if{html}{\out{<a id="method-RomEntity-tsvalues"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-tsvalues}{}}}
 \subsection{Method \code{tsvalues()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$tsvalues(varkey = NULL, tstime = NULL, tsendtime = NULL)}\if{html}{\out{</div>}}
@@ -96,8 +96,8 @@ tsvalues unique timeseries records for this entity
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RomEntity-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$new(datasource = NULL, config = list(), load_remote = FALSE)}\if{html}{\out{</div>}}
@@ -119,8 +119,8 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RomEntity-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

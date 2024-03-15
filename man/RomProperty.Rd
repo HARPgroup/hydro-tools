@@ -61,26 +61,26 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-get_id}{\code{RomProperty$get_id()}}
-\item \href{#method-new}{\code{RomProperty$new()}}
-\item \href{#method-from_list}{\code{RomProperty$from_list()}}
-\item \href{#method-to_list}{\code{RomProperty$to_list()}}
-\item \href{#method-set_prop}{\code{RomProperty$set_prop()}}
-\item \href{#method-save}{\code{RomProperty$save()}}
-\item \href{#method-clone}{\code{RomProperty$clone()}}
+\item \href{#method-RomProperty-get_id}{\code{RomProperty$get_id()}}
+\item \href{#method-RomProperty-new}{\code{RomProperty$new()}}
+\item \href{#method-RomProperty-from_list}{\code{RomProperty$from_list()}}
+\item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
+\item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
+\item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
+\item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues">}\href{../../hydrotools/html/RomEntity.html#method-propvalues}{\code{hydrotools::RomEntity$propvalues()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues">}\href{../../hydrotools/html/RomEntity.html#method-tsvalues}{\code{hydrotools::RomEntity$tsvalues()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_id"></a>}}
-\if{latex}{\out{\hypertarget{method-get_id}{}}}
+\if{html}{\out{<a id="method-RomProperty-get_id"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-get_id}{}}}
 \subsection{Method \code{get_id()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$get_id()}\if{html}{\out{</div>}}
@@ -91,8 +91,8 @@ get_id the id of this entity alias to remote pkid, subclassed as function
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RomProperty-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$new(datasource = NULL, config = list(), load_remote = FALSE)}\if{html}{\out{</div>}}
@@ -116,8 +116,8 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-from_list"></a>}}
-\if{latex}{\out{\hypertarget{method-from_list}{}}}
+\if{html}{\out{<a id="method-RomProperty-from_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-from_list}{}}}
 \subsection{Method \code{from_list()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$from_list(config)}\if{html}{\out{</div>}}
@@ -135,8 +135,8 @@ NULL
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-to_list"></a>}}
-\if{latex}{\out{\hypertarget{method-to_list}{}}}
+\if{html}{\out{<a id="method-RomProperty-to_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$to_list()}\if{html}{\out{</div>}}
@@ -147,8 +147,8 @@ list of object attributes suitable for input to new() and from_list() methods
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_prop"></a>}}
-\if{latex}{\out{\hypertarget{method-set_prop}{}}}
+\if{html}{\out{<a id="method-RomProperty-set_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-set_prop}{}}}
 \subsection{Method \code{set_prop()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$set_prop(name, value, format = "default")}\if{html}{\out{</div>}}
@@ -170,8 +170,8 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save"></a>}}
-\if{latex}{\out{\hypertarget{method-save}{}}}
+\if{html}{\out{<a id="method-RomProperty-save"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-save}{}}}
 \subsection{Method \code{save()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$save(push_remote = FALSE)}\if{html}{\out{</div>}}
@@ -189,8 +189,8 @@ boolean TRUE on success, FALSE on failure
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RomProperty-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

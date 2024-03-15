@@ -232,7 +232,7 @@ RomDataSource <- R6Class(
         self$var_defs[var_def$ID] <- var_def
       }
     },
-    #' @param feature = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @param features = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
     #' @return nothing seprop internal private token
     store_features = function(features) {
       # prototype.  Testing, does it work for multiple features and single features retrieved?

@@ -11,7 +11,7 @@
 #' @param Qout_col Outflow column
 #' @param wd_col Withdrawal column
 #' @return plot object
-#' @export fn_plot_impoundment
+#' @export fn_plot_impoundment_flux
 fn_plot_impoundment_flux <- function(
     dat, pur_col = 'pct_use_remain', 
     Qin_col = 'Qin', Qout_col = 'Qout',
@@ -30,7 +30,7 @@ fn_plot_impoundment_flux <- function(
   plot(dat[,Qin_col],col='blue', axes=FALSE, xlab="", ylab="")
   lines(dat[,Qout_col],col='green')
   lines(dat[,wd_col] * 1.547,col='red')
-  axis(side = 4)
+  graphics::axis(side = 4)
   mtext(side = 4, line = 3, 'Flow/Demand (cfs)')
 }
 
