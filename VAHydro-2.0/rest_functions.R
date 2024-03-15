@@ -45,6 +45,7 @@ rest_token <- function(base_url, token, rest_uname = FALSE, rest_pw = FALSE) {
     print(paste("RETRIEVING REST TOKEN",sep=""))
     csrf <- GET(url=csrf_url,authenticate(rest_uname,rest_pw));
     token <- content(csrf);
+    token
   }
   
   if (length(token)==1){
@@ -631,6 +632,7 @@ getFeature <- function(inputs, token, base_url, feature, debug=FALSE){
   #inputs <-    conveyance_inputs 
   #base_url <- site
   #print(inputs)
+  
   pbody = list(
     hydroid = inputs$hydroid,
     bundle = inputs$bundle,
@@ -661,12 +663,14 @@ getFeature <- function(inputs, token, base_url, feature, debug=FALSE){
   if (debug) {
     message(paste("trying: ", paste(base_url,"/dh_feature.json",sep="")))
   }
+  
   feature <- GET(
     paste(base_url,"/dh_feature.json",sep=""), 
     add_headers(HTTP_X_CSRF_TOKEN = token),
     query = pbody, 
     encode = "json"
   );
+
   feature_cont <- content(feature);
   
   if (length(feature_cont$list) != 0) {
@@ -742,13 +746,14 @@ getFeature <- function(inputs, token, base_url, feature, debug=FALSE){
   feature <- feat
 }
 
-postFeature <- function(inputs,base_url,feature){
+postFeature <- function(inputs,token,base_url,feature){
 
   #inputs <- facility_inputs  
   #base_url <- site
   
   #Search for existing feature matching supplied bundle, ftype, hydrocode
   dataframe <- getFeature(inputs, token, base_url, feature)
+
   if (is.data.frame(dataframe)) {
     hydroid <- as.character(dataframe$hydroid)
   } else {
@@ -779,11 +784,14 @@ postFeature <- function(inputs,base_url,feature){
  
   if (is.null(hydroid)){
     print("Creating Feature...")
-    feature <- POST(paste(base_url,"/dh_feature/",sep=""), 
+    feature <- POST(paste(base_url,"/dh_feature.json",sep=""), 
                  add_headers(HTTP_X_CSRF_TOKEN = token),
                  body = pbody,
-                 encode = "json"
-    );
+                 encode = "json");
+      
+    content(feature)
+    feature$status_code
+    
     if (feature$status == 201){feature <- paste("Status ",feature$status,", Feature Created Successfully",sep="")
     } else {feature <- paste("Status ",feature$status,", Error: Feature Not Created Successfully",sep="")}
     
@@ -824,8 +832,8 @@ getAdminregFeature <- function(inputs, base_url, adminreg_feature){
     }
   }
   
-  adminreg_feature <- GET(
-    paste(base_url,"/dh_adminreg_feature.json",sep=""), 
+  adminerg_feature <- GET(
+    paste("http://deq1.bse.vt.edu/d.dh","/dh_adminreg_feature.json",sep=""), 
     add_headers(HTTP_X_CSRF_TOKEN = token),
     query = pbody, 
     encode = "json"
