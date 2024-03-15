@@ -93,6 +93,8 @@ RomFeature <- R6Class(
       #self$mps[j] <- thismp
       self$mps[j] <- list('obj' = thismp)
     },
+    #' @param push_remote update locally only or push to remote database
+    #' @return NULL
     save = function(push_remote=FALSE) {
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type

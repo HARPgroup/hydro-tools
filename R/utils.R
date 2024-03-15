@@ -47,6 +47,30 @@ fn_get_rundata <- function(
   
 }
 
+
+#' Truncate run data to best guess for warmup and water year periods
+#'
+#' @param dat the data timeseries to handle
+#' @return a shortened time series
+#' @seealso NA
+#' @export fn_remove_model_warmup
+#' @examples NA
+fn_remove_model_warmup <- function(dat) {
+  syear = as.integer(min(dat$year))
+  eyear = as.integer(max(dat$year))
+  if (syear < (eyear - 2)) {
+    sdate <- as.POSIXct(paste0(syear,"-10-01"), tz = "UTC")
+    edate <- as.POSIXct(paste0(eyear,"-09-30"), tz = "UTC")
+    flow_year_type <- 'water'
+  } else {
+    sdate <- as.POSIXct(paste0(syear,"-02-01"), tz = "UTC")
+    edate <- as.POSIXct(paste0(eyear,"-12-31"), tz = "UTC")
+    flow_year_type <- 'calendar'
+  }
+  dat <- window(dat, start = sdate, end = edate)
+  return(dat)
+}
+
 #' Retrieve Info About Run File from Old OM model
 #'
 #' @param elementid integer OM model element id
