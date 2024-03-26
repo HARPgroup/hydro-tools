@@ -8,6 +8,7 @@ library(ggspatial)
 library(data.table)
 library(sp)
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/R/om_vahydro_metric_grid.R")
+# source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/GIS_functions/model_geoprocessor.R")
 
 basepath='/var/www/R'
 source('/var/www/R/config.R')
@@ -17,6 +18,7 @@ ds$get_token(rest_pw)
 # function to generate map gg object (should replace hydro-tools/GIS_functions/mapgen.R)
 mapgen <- function(start_point = data.frame(lat = 37.2863888889, lon = -80.0758333333, label = "Intake"),
                    points = data.frame(lat=double(),lon=double(),label=character()),
+                   # points = data.frame(lat=37.2,lon=-80,label="Test Point"),
                    segswhere = "hydrocode NOT LIKE '%0000_0000'") {
 
   ######################################################################
@@ -47,6 +49,19 @@ mapgen <- function(start_point = data.frame(lat = 37.2863888889, lon = -80.07583
   sf_bbox <- st_bbox(nhd$flowline)
   ggmap_bbox <- setNames(sf_bbox, c("left", "bottom", "right", "top"))
   basemap_toner <- get_map(source = "stamen", maptype = "toner", location = ggmap_bbox, zoom = 12)
+  
+  tiles <- maptiles::get_tiles(sf_bbox, zoom = 12,
+                               crop = FALSE, verbose = FALSE,
+                               provider = "Esri.WorldTerrain")
+  
+  # mapsf::mf_map(nhd$flowline, type = "base", col = NA, 
+  #               border = NA)
+  maptiles::plot_tiles(tiles, add = F)
+  # mapsf::mf_map(nhd$flowline, type = "base", add = TRUE, 
+  #               col = NA, border = NA)
+  mapsf::mf_arrow(adjust = nhd$flowline)
+  mapsf::mf_scale()
+  
   toner_map <- ggmap(basemap_toner)
   
   ######################################################################
@@ -106,6 +121,7 @@ model_geoprocessor <- function(ds,scenario_info,segswhere) {
   FROM model_data
   WHERE ",segswhere,";
   "))
+  browser()
   #####################################################################
   # retrieve & format geometry data
   watershed_feature <- RomFeature$new(ds, list(hydroid = watersheds$featureid[1]), TRUE)

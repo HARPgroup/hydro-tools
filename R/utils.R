@@ -67,6 +67,10 @@ fn_remove_model_warmup <- function(dat) {
     edate <- as.POSIXct(paste0(eyear,"-12-31"), tz = "UTC")
     flow_year_type <- 'calendar'
   }
+  #Due to change in stats::window in R 4.3.3, convert dates to posixCT to
+  #ensure there are associated timezones
+  sdate <- as.POSIXct(sdate,tz = "EST")
+  edate <- as.POSIXct(edate,tz = "EST")
   dat <- window(dat, start = sdate, end = edate)
   return(dat)
 }

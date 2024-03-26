@@ -29,7 +29,13 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu', cached=FA
       edate <- paste0(eyear,"-12-31")
     }
   }
+  #Due to change in stats::window in R 4.3.3, convert dates to posixCT to
+  #ensure there are associated timezones
+  sdate <- as.POSIXct(sdate,tz = "EST")
+  edate <- as.POSIXct(edate,tz = "EST")
+  #Get the window of interest from the timeseries
   dat <- window(dat, start = sdate, end = edate);
+  #Change mode of zoo to numeric e.g. Convert all fields to numeric
   mode(dat) <- 'numeric'
   return(dat)
 }
