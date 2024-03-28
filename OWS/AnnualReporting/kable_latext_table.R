@@ -1,7 +1,8 @@
 library("readxl")
+source(paste0(basepath,'/config.local.private'))
 
 source <- "2019AWRR-TablesGraphs.xlsx"
-folder <- "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Water Use Exports/"
+folder <- paste0(foundation_location,"/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Water Use Exports/")
 sheet <- "PWS"
 
 data <- read_excel(paste(folder,source,sep=""),sheet)

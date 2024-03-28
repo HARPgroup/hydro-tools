@@ -1,8 +1,9 @@
 library("readxl")
 library("kableExtra")
+source(paste0(basepath,'/config.local.private'))
 
 source <- "2019AWRR-TablesGraphs.xlsx"
-folder <- "U:/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Water Use Exports/"
+folder <- paste0(foundation_location,"/OWS/Report Development/Annual Water Resources Report/October 2019 Report/Water Use Exports/")
 
 # sheet <- "2018TotalGWWithdrawals"
 # sheet <- "2018TotalSurfaceWater"
