@@ -14,6 +14,10 @@ source(paste0(basepath,'/config.R'))
 ds <- RomDataSource$new(site, rest_uname)
 ds$get_token(rest_pw)
 
+#LOAD FUNCTIONS AND GDB FILES
+source("/var/www/R/config.local.private"); 
+source(paste(hydro_tools_location,'/GIS_functions/GIS_functions.R', sep = ''));
+
 #set reporting year
 ryear <- 2023
 
@@ -27,7 +31,7 @@ tsdef_url <- paste0(site,"/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propc
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #load in watershed consumptive use fractions
-cu <- read.csv("U:/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv", stringsAsFactors = F)
+cu <- read.csv(paste0(foundation_location,"/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv"), stringsAsFactors = F)
 
 #load in MGY from Annual Map Exports view
 tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=",ryear,"-12-31&bundle%5B0%5D=well&",
@@ -36,7 +40,7 @@ tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #load planner coverage areas
-plannerAreas <- read.csv("U:\\OWS\\GIS\\WSP\\PlannerCoverageAreaTable.csv")
+plannerAreas <- read.csv(paste0(foundation_location,"\\OWS\\GIS\\WSP\\PlannerCoverageAreaTable.csv"))
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year
@@ -68,9 +72,6 @@ write.csv(facility_status_MGY, paste0(export_path,"xxannual_reporter_submission_
 ##### run spatial containment FOUNDATION3_CONTAINING_POLYGONS.R --------------------------------------------------
 # source(paste0(github_location,"/vahydro/R/wsp/wsp2020/FOUNDATION3_CONTAINING_POLYGONS.R"))
 
-#LOAD FUNCTIONS AND GDB FILES
-source("/var/www/R/config.local.private"); 
-source(paste(hydro_tools_location,'/GIS_functions/GIS_functions.R', sep = ''));
 
 MinorBasins_path <- paste(github_location,'/HARParchive/GIS_layers/MinorBasins.gdb', sep = '')
 MinorBasins_layer <- 'MinorBasins'
@@ -101,7 +102,7 @@ fips_join <- sqldf('SELECT a.*,
 
 #Set geoms equal to fips centroid if NA or outside of VA bounding box 
 data_sp <- sqldf("SELECT *,
-              CASE
+              CASE 
                 WHEN Latitude IS NULL THEN fips_latitude
                 WHEN Latitude < 35 THEN fips_latitude
                 WHEN Latitude > 41 THEN fips_latitude
@@ -128,20 +129,20 @@ data_sp_cont <- data.frame(data_sp_cont)
 ########## End Spatial Containment ##############
 
 
-data_sp_cont <- sqldf('SELECT *, substr(VAHydro_RSeg_Code, 17)"riverseg" 
+data_sp_cont <- sqldf('SELECT *, substr(VAHydro_RSeg_Code, 17) AS riverseg
                        FROM data_sp_cont')
 
 #Append CU Frac column
-data_sp_cont_cu <- sqldf('SELECT a.*, b.runid_13 AS "Current Consumptive Use Frac"
+data_sp_cont_cu <- sqldf('SELECT b.featureid, a.*, b.runid_13 AS "Current Consumptive Use Frac"
                          FROM data_sp_cont as a
                          LEFT OUTER JOIN cu as b
                          ON a.riverseg = b.riverseg') 
 
 #reassign Planner names if Planner assignment columns are yielding NAs
-data_addPlanners <- sqldf('SELECT a.*, b.Planner
-                     FROM data_sp_cont_cu AS a
-                     LEFT OUTER JOIN plannerAreas AS b
-                     on a."FIPS.Code" = b.FIPS')
+data_addPlanners <-sqldf('SELECT a.*, b.Planner
+                          FROM data_sp_cont_cu AS a
+                          LEFT OUTER JOIN plannerAreas AS b
+                          on a."FIPS.Code" = b.FIPS')
 
 #Only show necessary columns
 #note for next reporting cycle add columns: "MGY_2024",  a."Submittal_2024.01.01" AS "Submittal_2024",
@@ -180,7 +181,7 @@ missing <- output_reporters[is.na(output_reporters$Submittal_2023),]
 write.csv(missing, paste0(export_path,paste0("Missing_Reporters_",Sys.Date(),".csv")), row.names = F)
 
 ## Filtering out reproters based on guidance. Also only selecting online reporters (this changes later in the cycle)
-missing_filtered <-  missing[missing$Reporting_Method == 'email',]
+# missing_filtered <-  missing[missing$Reporting_Method == 'mail',]
 
 missing_filtered <- missing[missing$Five_yr_avg_MGY > 50    | 
                             missing$Use.Type == 'municipal' |
@@ -204,22 +205,45 @@ for (i in planners) {
 ## Some basic analysis #########################
 
 ## Total number of facilities
-length(unique(missing$Facility_hydroid))
+length(unique(missing_filtered$Facility_hydroid))
 
-## Total number of contacts for split by planner
+## Some data analysis. Getting the total number, the total not signed, and the unique facilities
+## Also groups by plannner
 
 sqldf('
-SELECT planner,COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+SELECT planner,
+planner,COUNT(*) AS Total,
+COUNT(DISTINCT CASE WHEN MGY_2023 IS NOT NULL THEN Facility_hydroid END) AS Not_Signed,
+COUNT(DISTINCT Facility_hydroid) AS Facilities
 FROM missing
 GROUP BY planner
 ')
 
 sqldf('
-SELECT COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
-FROM missing')
+SELECT COUNT(*) AS Total,COUNT(MGY_2023) AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+FROM missing_filtered
+')
 
 sqldf('
-SELECT planner,COUNT(*) AS Total,COUNT(MGY_2023 = "NA") AS Not_Signed,COUNT(DISTINCT Facility_hydroid) AS Facilities
+SELECT
+planner,COUNT(*) AS Total,
+COUNT(DISTINCT CASE WHEN MGY_2023 IS NOT NULL THEN Facility_hydroid END) AS Not_Signed,
+COUNT(DISTINCT Facility_hydroid) AS Facilities
 FROM missing_filtered
 GROUP BY planner
 ')
+
+## Getting some numbers requested from management
+## Total rows, number of facilities reported, number of missing reporters
+#### Number of reporters who reported over the past 5 years but not today
+total <- length(unique(output_reporters$Facility_hydroid))
+reported <- length(unique(output_reporters$Facility_hydroid[!is.na(output_reporters$MGY_2023)]))
+reported_submit <- length(unique(output_reporters$Facility_hydroid[!is.na(output_reporters$Submittal_2023)]))
+missing <- length(unique(output_reporters$Facility_hydroid[is.na(output_reporters$MGY_2023)]))
+prioritized <- length(unique(missing_filtered$Facility_hydroid))
+consistent <- length(unique(output_reporters$Facility_hydroid[is.na(output_reporters$MGY_2023) & (
+                                                                !is.na(output_reporters$MGY_2022) |
+                                                                !is.na(output_reporters$MGY_2021) |
+                                                                !is.na(output_reporters$MGY_2020) |
+                                                                !is.na(output_reporters$MGY_2019) )]))
+
