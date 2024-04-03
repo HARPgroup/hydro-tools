@@ -7,13 +7,18 @@
 fn_extract_basin(cia_data_frame, end_seg)
 }
 \arguments{
-\item{cia_data_frame}{Data frame of cumulative impact data}
+\item{cia_data_frame}{Data frame of cumulative impact data. This must contain
+a column with the name "riverseg" that contains all river segments of
+interest. This function can ONLY find upstream segments if they are present
+in this riverseg column!}
 
 \item{end_seg}{Desired end river segment - river segment that is most downstream}
 }
 \value{
-Trimmed cumulative impact data frame
+Trimmed cumulative impact data frame containing the outlet and all upstream segments
 }
 \description{
-Trims data frame to include only segments upstream of end segment
+Trims data frame to include only segments upstream of end
+  segment. It is inclusive of the end segment and will thus include the
+  outlet and all upstream segments
 }

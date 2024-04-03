@@ -222,7 +222,7 @@ fn_extract_basin <- function(cia_data_frame, end_seg){
 #'   the hydrotools package in cia_utils.R
 #' @return string next upstream segment ID
 #' @export fn_upstream
-fn_upstream <- function(AllSegList,riv.seg){
+fn_upstream <- function(riv.seg,AllSegList){
   #Default output is NULL
   out <- NULL
   #First, unlist riv.seg to make it easier to work with
@@ -333,7 +333,7 @@ fn_ALL.upstream <- function(
   #Add the next upstream segment to the data frame by calling fn_upstream() and
   #using the riverseg column as the first input. For each river segment, this
   #will return a character vector of all upstream segments
-  segDataFrame$fn_upstream <- mapply(fn_upstream,riv.seg = segDataFrame$riverseg,
+  segDataFrame$upstreamSegs <- mapply(fn_upstream,riv.seg = segDataFrame$riverseg,
                                      MoreArgs = list(
                                        AllSegList = AllSegList),
                                      SIMPLIFY = TRUE,USE.NAMES = FALSE)
@@ -343,7 +343,7 @@ fn_ALL.upstream <- function(
   #repeatedly. Lets first create an object to store the results in. We will want
   #to store the final list of segments in AllSegList so lets add that as a
   #column, allUpstreamSegs
-  segDataFrame$allUpstreamSegs <- segDataFrame$fn_upstream
+  segDataFrame$allUpstreamSegs <- segDataFrame$upstreamSegs
   #Store upstream segments as their own vector. This will be updated in each
   #loop iteration
   upstreamSegs <- segDataFrame$allUpstreamSegs

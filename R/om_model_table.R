@@ -6,7 +6,7 @@
 #' @param include.elfgen include elfgen metrics TRUE or FALSE
 #' @param site vhydro url
 #' @param site_base base vahydro url
-#' @param rdigits
+#' @param rdigits Number of digits to round
 #' @return stats.df dataframe of summary stats
 #' @seealso NA
 #' @export om_model_table
