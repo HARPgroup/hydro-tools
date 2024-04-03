@@ -27,6 +27,8 @@ om_model_table(
 \item{site}{vhydro url}
 
 \item{site_base}{base vahydro url}
+
+\item{rdigits}{Number of digits to round}
 }
 \value{
 stats.df dataframe of summary stats

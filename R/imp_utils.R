@@ -10,6 +10,7 @@
 #' @param Qin_col Inflow column
 #' @param Qout_col Outflow column
 #' @param wd_col Withdrawal column
+#' @param legend_on Should legend be included on plot?
 #' @return plot object
 #' @export fn_plot_impoundment_flux
 fn_plot_impoundment_flux <- function(

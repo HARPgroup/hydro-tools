@@ -23,6 +23,8 @@ fn_plot_impoundment_flux(
 \item{Qout_col}{Outflow column}
 
 \item{wd_col}{Withdrawal column}
+
+\item{legend_on}{Should legend be included on plot?}
 }
 \value{
 plot object
