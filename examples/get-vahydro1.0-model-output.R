@@ -82,8 +82,11 @@ wshed_summary_tbl = data.frame(
 
 omsite = site <- "http://deq2.bse.vt.edu"
 dat <- fn_get_runfile(elid, runid, site= omsite,  cached = FALSE);
-
-dat <- window(dat, start = as.Date("1984-10-01"), end = as.Date("2005-09-30"));
+#Due to change in stats::window in R 4.3.3, convert dates to posixCT to
+#ensure there are associated timezones
+sdate <- as.POSIXct("1984-10-01",tz = "EST")
+edate <- as.POSIXct("2005-09-30",tz = "EST")
+dat <- window(dat, start = sdate, end = edate);
 Qdat <- zoo(as.numeric(dat$Qout), order.by = dat$timestamp)
 group2(Qdat)
 

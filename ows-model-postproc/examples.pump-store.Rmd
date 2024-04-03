@@ -47,7 +47,11 @@ flows <- zoo(as.numeric(as.character( dat$Qintake )), order.by = dat$thisdate);
 fn_iha_mlf(flows,8)
 g2 <- group2(flows);
 # plot monthly 10% flows?
-oneyr <- window(dat, start = as.Date("1998-10-01"), end = as.Date("1999-09-30"))
+#Due to change in stats::window in R 4.3.3, convert dates to posixCT to
+#ensure there are associated timezones
+sdate <- as.POSIXct("1998-10-01",tz = "EST")
+edate <- as.POSIXct("1999-09-30",tz = "EST")
+oneyr <- window(dat, start = sdate, end = edate)
 ```
 
 ```{r echo=FALSE,fig.width=8, fig.show='hold'}
