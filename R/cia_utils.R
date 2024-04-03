@@ -336,7 +336,7 @@ fn_ALL.upstream <- function(
   segDataFrame$upstreamSegs <- mapply(fn_upstream,riv.seg = segDataFrame$riverseg,
                                      MoreArgs = list(
                                        AllSegList = AllSegList),
-                                     SIMPLIFY = TRUE,USE.NAMES = FALSE)
+                                     SIMPLIFY = FALSE,USE.NAMES = FALSE)
   
   #Now, we need to find all segments upstream of the upstream segments. These
   #may branch into different tributaries so we will need to run fn_upstream
