@@ -6,6 +6,8 @@ library('sqldf')
 library('stringr')
 library("tidyr")
 library("kableExtra")
+## Pulls in onedrive_location for onedrive
+source(paste0(basepath,'/config.local.private'))
 
 #Set current year
 eyear <- 2022
@@ -17,9 +19,9 @@ for (y in five) { Xyears[y] = paste0("X",(eyear+1)-five[y]) }
 #load foundation data
 #permit only data from https://deq1.bse.vt.edu/d.dh/ows-permit-list
 
-ows_permit_list <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
+ows_permit_list <- read.csv(file = paste0(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
 #mp_all_mgy generated from AWRR_data.R is all MPs without power, without Dalecarlia, source type and use type names mostly already corrected
-mp_all_mgy <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_mgy_",eyear-4,"-",eyear,".csv"))
+mp_all_mgy <- read.csv(file = paste0(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_all_mgy_",eyear-4,"-",eyear,".csv"))
 
 
 #Process mp_all ##################################################
@@ -187,10 +189,10 @@ join_all$Use_Type <- str_to_title(join_all$Use_Type)
 colnames(join_all)[colnames(join_all)=="has_GWP"] <- "facility_contains_a_GWP"
 colnames(join_all)[colnames(join_all)=="has_VWP"] <- "facility_contains_a_VWP"
 
-write.csv(join_all, paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
+write.csv(join_all, paste(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""), row.names = F)
 
 #read static data in
-join_all <- read.csv(file = paste("U:\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
+join_all <- read.csv(file = paste(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\mp_permitted_",eyear,".csv",sep = ""))
 
 #and undo name change
 colnames(join_all)[colnames(join_all)=="facility_contains_a_GWP"] <- "has_GWP"
@@ -338,4 +340,4 @@ for (i in 1:length(use_stripe)) {
 }
 table3w_tex
 table3w_tex %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
+  cat(., file = paste(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))

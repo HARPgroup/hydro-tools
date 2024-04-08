@@ -31,7 +31,7 @@ tsdef_url <- paste0(site,"/vwuds-eblast-not-submitted-export?rid%5B0%5D=12&propc
 facility_report_status_data <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #load in watershed consumptive use fractions
-cu <- read.csv(paste0(foundation_location,"/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv"), stringsAsFactors = F)
+cu <- read.csv(paste0(onedrive_location,"/OWS/foundation_datasets/wsp/wsp2020/metrics_watershed_consumptive_use_frac.csv"), stringsAsFactors = F)
 
 #load in MGY from Annual Map Exports view
 tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime_op=between&tstime%5Bvalue%5D=&tstime%5Bmin%5D=2014-01-01&tstime%5Bmax%5D=",ryear,"-12-31&bundle%5B0%5D=well&",
@@ -40,7 +40,7 @@ tsdef_url <- paste0(site,"/ows-awrr-map-export/wd_mgy?ftype_op=%3D&ftype=&tstime
 mp_MGY <- ds$auth_read(tsdef_url, content_type = "text/csv", delim = ",")
 
 #load planner coverage areas
-plannerAreas <- read.csv(paste0(foundation_location,"\\OWS\\GIS\\WSP\\PlannerCoverageAreaTable.csv"))
+plannerAreas <- read.csv(paste0(onedrive_location,"\\OWS\\GIS\\WSP\\PlannerCoverageAreaTable.csv"))
 
 ##### MANIPULATE DATA ---------------------------------------------------------------------------------------------
 #transform long report status table to wide table with column for each year

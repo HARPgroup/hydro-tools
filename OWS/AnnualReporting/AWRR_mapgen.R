@@ -16,7 +16,7 @@ if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map 
 # LOAD ALL FOUNDATION DATA
 syear = 2018
 eyear = 2022
-source_directory <- paste0("U:/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
+source_directory <- paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
 mp_all_mgy <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #GM this is mp_all_mgy now
@@ -26,7 +26,7 @@ ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep=""
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
 
 #MAP OUTPUT LOCATION
-export_path <- paste0("U:/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/") 
+export_path <- paste0(onedrive_location,"/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/") 
 # export_path <- paste0("C:/Users/nrf46657/Desktop/GitHub/hydro-tools/OWS/AnnualReporting/TEST_MAPS/") #FOR TESTING
 working_path <- "C:/Users/rnv55934/Documents/Docs/AnnualReport/2022/" #FOR TESTING
 

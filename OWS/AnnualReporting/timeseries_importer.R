@@ -16,7 +16,7 @@ token <- rest_token(site, token, rest_uname, rest_pw)
 
 #####################
 #Load import file
-data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2018
+data <-read.csv(paste0(onedrive_location,"/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018_mgm_VWUDS.csv"),sep=",",header=TRUE) #AQUAVA 2018
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2017/AquaVA2017_mgm_VWUDS.csv",sep=",",header=TRUE) #AQUAVA 2017
 
 #data <-read.csv("U:/OWS/VWWR_VWUDS/Annual Reporting/2018/AquaVA2018.csv",sep=",",header=TRUE) #SYDNOR

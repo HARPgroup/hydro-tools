@@ -3,6 +3,8 @@ library('httr')
 library('stringr')
 library("kableExtra")
 
+source(paste0(basepath,'/config.local.private'))
+
 a <- c(
   'agricultural', 
   'commercial', 
@@ -184,13 +186,13 @@ cat_table <- rbind(cat_table,catsum.sums)
 ##############################################################
 
 print(cat_table)
-write.csv(cat_table,paste0("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\May_QA\\summary_table_vahydro_",eyear+1,".csv"))
+write.csv(cat_table,paste0(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\May_QA\\summary_table_vahydro_",eyear+1,".csv"))
 
 kable(cat_table, booktabs = T) %>%
   kable_styling(latex_options = c("striped", "scale_down")) %>%
   column_spec(8, width = "5em") %>%
   column_spec(9, width = "5em") %>%
-  cat(., file = paste("U:\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\May_QA\\summary_table_vahydro_",eyear+1,".html",sep = ''))
+  cat(., file = paste(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\May_QA\\summary_table_vahydro_",eyear+1,".html",sep = ''))
 
 
 ##################################################################################
