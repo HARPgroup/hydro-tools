@@ -6,8 +6,8 @@ source(paste0(basepath,'/config.local.private'))
 
 syear = 2018
 eyear = 2022
-mp_all <- read.csv(paste0(foundation_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_mgy_",eyear-4,"-",eyear,".csv"))
-fips <- read.csv(file = paste0(foundation_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv"))
+mp_all <- read.csv(paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/mp_all_mgy_",eyear-4,"-",eyear,".csv"))
+fips <- read.csv(file = paste0(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October 2022 Report\\fips_codes_propernames.csv"))
 
 table_caption <- paste0("Water Withdrawals Within Localities in ",eyear," (MGD)")
 table_label   <- table_caption
@@ -88,7 +88,7 @@ all_fips_round <- sqldf('SELECT Locality, FIPS_CODE, CASE
         END AS "Total Withdrawal",
         "% of Total Withdrawal"
       FROM all_fips_round')
-write.csv(all_fips_round, paste(foundation_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/ByLocality.csv",sep=""), row.names = F)
+write.csv(all_fips_round, paste(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/ByLocality.csv",sep=""), row.names = F)
 
 # ROUND TABLE VALUES, WITHOUT FIPS_NUM COL 
 all_fips_round <- paste('SELECT name AS Locality, 
@@ -111,7 +111,7 @@ ktable <- kable(all_fips_round,
           #kable_styling(latex_options = c("repeat_header")) %>%
           kable_styling(latex_options = "striped")
 
-  cat(ktable, file = paste(foundation_location,"/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/ByLocality.tex",sep = '')) #USED TO SAVE .tex FILE OF KABLE OUTPUT
+  cat(ktable, file = paste(onedrive_location,"/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/ByLocality.tex",sep = '')) #USED TO SAVE .tex FILE OF KABLE OUTPUT
 
 # BY LOCALITY BY USE TYPE #######################################################################  
   #GM fix X2020 -> X2021. and Use_Type to Use.Type 
@@ -157,4 +157,4 @@ aa <- sqldf('SELECT FIPS, name, Use_Type, GW_Withdrawal, SW_Withdrawal, Total_Wi
             WHERE FIPS IS NOT NULL
             ORDER BY name, Use_type')  
 #GM fix 2021->eyear+1 in paste0 statement
-write.csv(aa, paste0(foundation_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/Bylocality_UseType_table3.csv"))
+write.csv(aa, paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/Bylocality_UseType_table3.csv"))

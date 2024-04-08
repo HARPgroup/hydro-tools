@@ -1,7 +1,7 @@
 # THIS SCRIPT ADDS A COLUMN OF FACILITY 5-yr AVG TO THE EXPORT OF VIEW ows_permit_list
 # Source files:
 ows_permit_list.path = "http://deq1.bse.vt.edu:81/d.dh/ows-list-permits-export"
-mp_all_wide.path = paste0(foundation_location,"/OWS/foundation_datasets/awrr/2022/mp_all_wide_2017-2021.csv")
+mp_all_wide.path = paste0(onedrive_location,"/OWS/foundation_datasets/awrr/2022/mp_all_wide_2017-2021.csv")
 
 source(paste0(basepath,'/config.local.private'))
 #Output file path: 

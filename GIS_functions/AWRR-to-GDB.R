@@ -58,7 +58,7 @@ year_range <- format(seq(as.Date(paste0(syear,"/1/1")), as.Date(paste0(eyear,"/1
 #   wd_annual_data <- rbind(wd_annual_data, wd_annual)
 # }
 
-wd_annual_data <- read.csv(paste0(foundation_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/foundation_dataset_mgy_1982-",eyear,".csv"))
+wd_annual_data <- read.csv(paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/foundation_dataset_mgy_1982-",eyear,".csv"))
 
 ## Unecessary, if using the foundation data, as this step is done in AWRR_data.R
 #remove duplicates - GROUP BY USING MAX
@@ -186,7 +186,7 @@ options(timeout=300) #this adjusts to 5min
 #   wd_monthly_data <- rbind(wd_monthly_data, wd_monthly)
 # }
 
-wd_monthly_data <- read.csv(paste0(foundation_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/awrr_monthly_foundation_",eyear+1,".csv"))
+wd_monthly_data <- read.csv(paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/awrr_monthly_foundation_",eyear+1,".csv"))
 
 #remove duplicates - GROUP BY USING MAX. Also added logic to remove gw2s and orphan wells
 wd_mon <- sqldf('SELECT "MP_hydroid","Hydrocode","Source.Type","MP.Name","Facility_hydroid","Facility",LOWER("Use.Type") AS "Use.Type","Year","Month", max("tsvalue") AS "Water.Use.MGM","Latitude", "Longitude","Locality","FIPS.Code" 
