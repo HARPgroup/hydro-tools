@@ -216,13 +216,25 @@ fn_extract_basin <- function(cia_data_frame, end_seg){
 #' @description Returns a vector of the segments immediately upstream of riv.seg
 #'   based on the list in AllSegList
 #' @param riv.seg string ID of segment from which to find upstream segments
-#' @param AllSegList AllSegList data frame of all segments. These should be
-#'   river segments. This function can only find segments that are in this list
+#' @param AllSegList AllSegList vector of all model segments. These should be
+#'   river segments. This function can only find segments that are in this vector
 #'   so the user should use a comprehensive list of segments as demonstrated in
 #'   the hydrotools package in cia_utils.R
+#' @param allSegToSeg Primarily for use when fn_upstream is called repeatedly.
+#'   By providing the vector of segments that each segment in AllSegList flow
+#'   into, we can improve the performance of fn_upstream
+#' @param allSegThisSeg Primarily for use when fn_upstream is called repeatedly.
+#'   By providing the vector of segments IDs for each segment in AllSegList,
+#'   we can improve the performance of fn_upstream
+#' @param allSegOldshed Primarily for use when fn_upstream is called repeatedly.
+#'   By providing the vector of segments in AllSegList flow that have the old
+#'   watershed notation (e.g. JL8_2090_8021_Big_Cerry), we can improve the
+#'   performance of fn_upstream
 #' @return string next upstream segment ID
 #' @export fn_upstream
-fn_upstream <- function(riv.seg,AllSegList){
+fn_upstream <- function(riv.seg,AllSegList,
+                        allSegToSeg = NULL,allSegThisSeg = NULL,
+                        allSegOldshed = NULL){
   #Default output is NULL
   out <- NULL
   #First, unlist riv.seg to make it easier to work with
@@ -236,6 +248,23 @@ fn_upstream <- function(riv.seg,AllSegList){
   #Get the individual segment IDs of each segment in riv.seg (i.e. excluding
   #the segment it flows to)
   thisSeg <- gsub(".+_([0-9]{4})_([0-9]{4}).*","\\1",thisSeg)
+  
+  if(any(mapply(is.null,list(allSegToSeg,allSegThisSeg,allSegOldshed)))){
+    #Find the individual id of the river segment each segment flows to
+    allSegToSeg <- gsub(".+_[0-9]{4}_([0-9]{4}).*","\\1",
+                  AllSegList)
+    
+    #Find the individual id of each river segment
+    allSegThisSeg <- gsub(".+_([0-9]{4})_[0-9]{4}.*","\\1",
+                       AllSegList)
+    
+    #Identify subwatersheds that follow the old notation of
+    #TU3_8880_9230_sf_big_cherry (which is a subwatershed of TU3_8880_9230 and
+    #must be captured as upstream of TU3_8880_9230)
+    allSegOldshed <- grepl(".+_[0-9]{4}_[0-9]{4}_+.*",
+                        AllSegList)
+  }
+  
   #If the end segment is defined (e.g. not NA and has length greater than
   #zero), then get all segments upstream of all segments in riv.seg. This does
   #NOT apply to old subwatersheds, which should not return upstream segs
@@ -246,16 +275,16 @@ fn_upstream <- function(riv.seg,AllSegList){
     #Return all river segments that have a "toSeg" column matching the ID in
     #thisSeg. In other words, find all segments that flow into the segments in
     #riv.seg.
-    upstreamSegs <- AllSegList$riverseg[grepl(thisSeg,AllSegList$toSeg)
-                                        & !AllSegList$oldSubshed]
+    upstreamSegs <- AllSegList[grepl(thisSeg,allSegToSeg)
+                                        & !allSegOldshed]
     
     #Also capture any upstream watersheds that use the previous notation. For
     #instance, the segment TU3_8880_9230 has several watersheds that flow into
     #it. These include TU3_8881_8880 - TU3_8884_8880 as well as
     #TU3_8880_9230_sf_big_cherry and TU3_8880_9230_sf_below_big_cherry. These
     #latter two segments need to be captured
-    oldSubsheds <- AllSegList$riverseg[grepl(thisSeg,AllSegList$thisSeg) &
-                                         AllSegList$oldSubshed]
+    oldSubsheds <- AllSegList[grepl(thisSeg,allSegThisSeg) &
+                                         allSegOldshed]
     
     out <- c(oldSubsheds,upstreamSegs)
   }
@@ -303,18 +332,19 @@ fn_ALL.upstream <- function(
     riverseg column!")
   }
   
-  # AllSegList <- rsegs[grepl(".+_.*[1-9]+.*_.*",rsegs$riverseg),]
   #Find the individual id of the river segment each segment flows to
-  AllSegList$toSeg <- gsub(".+_[0-9]{4}_([0-9]{4}).*","\\1",
-                           AllSegList$riverseg)
-  #Get the individual id of each river segment for reference
-  AllSegList$thisSeg <- gsub(".+_([0-9]{4})_[0-9]{4}.*","\\1",
-                             AllSegList$riverseg)
+  allSegToSeg <- gsub(".+_[0-9]{4}_([0-9]{4}).*","\\1",
+                      AllSegList$riverseg)
+  
+  #Find the individual id of each river segment
+  allSegThisSeg <- gsub(".+_([0-9]{4})_[0-9]{4}.*","\\1",
+                        AllSegList$riverseg)
+  
   #Identify subwatersheds that follow the old notation of
   #TU3_8880_9230_sf_big_cherry (which is a subwatershed of TU3_8880_9230 and
   #must be captured as upstream of TU3_8880_9230)
-  AllSegList$oldSubshed <- grepl(".+_[0-9]{4}_[0-9]{4}_+.*",
-                                 AllSegList$riverseg)
+  allSegOldshed <- grepl(".+_[0-9]{4}_[0-9]{4}_+.*",
+                         AllSegList$riverseg)
   
   #Create a copy of AllSegList to alter and return to user
   segDataFrame <- AllSegList
@@ -332,10 +362,16 @@ fn_ALL.upstream <- function(
   
   #Add the next upstream segment to the data frame by calling fn_upstream() and
   #using the riverseg column as the first input. For each river segment, this
-  #will return a character vector of all upstream segments
+  #will return a character vector of all upstream segments. By providing
+  #fn_upstream with additional details of allSegList, we can speed up this
+  #function
   segDataFrame$upstreamSegs <- mapply(fn_upstream,riv.seg = segDataFrame$riverseg,
                                      MoreArgs = list(
-                                       AllSegList = AllSegList),
+                                       AllSegList = AllSegList$riverseg,
+                                       allSegToSeg = allSegToSeg,
+                                       allSegThisSeg = allSegThisSeg,
+                                       allSegOldshed = allSegOldshed
+                                       ),
                                      SIMPLIFY = FALSE,USE.NAMES = FALSE)
   
   #Now, we need to find all segments upstream of the upstream segments. These
@@ -359,7 +395,10 @@ fn_ALL.upstream <- function(
     #automatically return NULL
     upstreamSegs <- mapply(fn_upstream,riv.seg = upstreamSegs,
                            MoreArgs = list(
-                             AllSegList = AllSegList),
+                             AllSegList = AllSegList$riverseg,
+                             allSegToSeg = allSegToSeg,
+                             allSegThisSeg = allSegThisSeg,
+                             allSegOldshed = allSegOldshed),
                            SIMPLIFY = FALSE,USE.NAMES = FALSE)
     
     #Combine new list of next upstream segments with existing list and unlist

@@ -5,15 +5,34 @@
 \title{Find Upstream Segments: A basic function that finds the segments immediately
 upstream of a given segment(s). riv.seg may be a character vector of segments.}
 \usage{
-fn_upstream(riv.seg, AllSegList)
+fn_upstream(
+  riv.seg,
+  AllSegList,
+  allSegToSeg = NULL,
+  allSegThisSeg = NULL,
+  allSegOldshed = NULL
+)
 }
 \arguments{
 \item{riv.seg}{string ID of segment from which to find upstream segments}
 
-\item{AllSegList}{AllSegList data frame of all segments. These should be
-river segments. This function can only find segments that are in this list
+\item{AllSegList}{AllSegList vector of all model segments. These should be
+river segments. This function can only find segments that are in this vector
 so the user should use a comprehensive list of segments as demonstrated in
 the hydrotools package in cia_utils.R}
+
+\item{allSegToSeg}{Primarily for use when fn_upstream is called repeatedly.
+By providing the vector of segments that each segment in AllSegList flow
+into, we can improve the performance of fn_upstream}
+
+\item{allSegThisSeg}{Primarily for use when fn_upstream is called repeatedly.
+By providing the vector of segments IDs for each segment in AllSegList,
+we can improve the performance of fn_upstream}
+
+\item{allSegOldshed}{Primarily for use when fn_upstream is called repeatedly.
+By providing the vector of segments in AllSegList flow that have the old
+watershed notation (e.g. JL8_2090_8021_Big_Cerry), we can improve the
+performance of fn_upstream}
 }
 \value{
 string next upstream segment ID
