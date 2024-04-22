@@ -6,6 +6,7 @@
 #' @param cu_pre_var list of facility metrics of interest
 #' @param cu_threshold list 3 percent CU values for yellow, orange, red coding 
 #' @param cu_decimals vhydro url
+#' @param cu_min_valid Minimum flow value to display, otherwise assumed below model valid range.
 #' @return dataframe of summary stats
 #' @seealso NA
 #' @export om_cu_table
