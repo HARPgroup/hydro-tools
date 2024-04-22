@@ -9,7 +9,8 @@ fn_plot_impoundment_flux(
   pur_col = "pct_use_remain",
   Qin_col = "Qin",
   Qout_col = "Qout",
-  wd_col = "demand"
+  wd_col = "demand",
+  legend_on = TRUE
 )
 }
 \arguments{

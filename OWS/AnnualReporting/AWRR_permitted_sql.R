@@ -8,11 +8,11 @@ library("tidyr")
 library("kableExtra")
 
 #Set current year
-eyear <- 2021
+eyear <- 2022
 eyearX <- paste0("X",eyear)
 Xyears <- array()
 five <- 5:1
-for (y in five) { Xyears[y] = paste0("X",2022-five[y]) }
+for (y in five) { Xyears[y] = paste0("X",(eyear+1)-five[y]) }
 
 #load foundation data
 #permit only data from https://deq1.bse.vt.edu/d.dh/ows-permit-list
@@ -26,24 +26,23 @@ mp_all_mgy <- read.csv(file = paste0("U:\\OWS\\foundation_datasets\\awrr\\",eyea
 
 #remove duplicates (keeps one row)
 data_all <- sqldf(paste('SELECT * FROM mp_all_mgy
-               GROUP BY "MP_hydroid", "Hydrocode", "Source.Type", "MP.Name", "Facility_hydroid", "Facility", "Use.Type", "Latitude", "Longitude", "FIPS.Code", "Locality", "OWS.Planner",',Xyears,'',sep=''))
+               GROUP BY "MP_hydroid", "Hydrocode", "Source_Type", "MP_Name", "Facility_hydroid", "Facility", "Use_Type","FIPS_Code", "Locality", "OWS_Planner"'))
 
 # retaining this line in case it's still needed
-if (length(which(data_all$Use.Type=='facility')) > 0) {
-  data_all <- data_all[-which(data_all$Use.Type=='facility'),]
-} 
+data_all <- sqldf('SELECT * FROM data_all
+                  WHERE Use_Type NOT LIKE "facility"')
 
 #rename columns and remove prior year withdrawal values
 mp_all <- sqldf(paste('SELECT MP_hydroid AS "MP_hydroid",
     Hydrocode AS "Hydrocode",
-    "Source.Type" AS "Source_Type",
-    "MP.Name" AS "MP_Name",
+    "Source_Type" AS "Source_Type",
+    "MP_Name" AS "MP_Name",
     Facility_hydroid AS "Facility_hydroid",
     Facility AS "Facility",
-    "Use.Type" AS "Use_Type",
+    "Use_Type" AS "Use_Type",
     Latitude AS "lat",
     Longitude AS "lon",
-    "FIPS.Code" AS "FIPS",
+    "FIPS_Code" AS "FIPS",
     Locality AS "locality",
     ',eyearX,' AS mgy,
     (',eyearX,')/365 AS mgd
@@ -140,7 +139,7 @@ apps_gw_QA <- sqldf('select * from apps_gw group by Facility_hydroid HAVING coun
 write.csv(apps_sw_added, "C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\apps_sw_added.csv")
 write.csv(apps_gw_added, "C:\\Users\\rnv55934\\Documents\\Docs\\AnnualReport\\2022\\apps_gw_added.csv")
 #remove clutter
-rm(temp_gw_act,temp_sw_act,temp_gw_fac,temp_sw_fac,apps_sw,apps_gw, apps_sw_status,apps_sw_added,apps_gw_added, apps_sw_QA, apps_gw_QA)
+rm(temp_gw_act,temp_sw_act,temp_gw_fac,temp_sw_fac,apps_sw,apps_gw,apps_sw_added,apps_gw_added, apps_sw_QA, apps_gw_QA)
 ##################################
 
 ##########################################################################
@@ -154,7 +153,7 @@ join_all <- sqldf('SELECT a.*, b.has_GWP, c.has_VWP
                   LEFT OUTER JOIN per_sw_fac AS c
                    ON a.Facility_hydroid = c.Facility_HydroID')
 #check there is no duplication of MPs by the join, should result in 0 obs.
-QAjoin <- sqldf('select * from join_all group by MP_hydroid HAVING count(*) >1')
+QAjoin <- sqldf('select *,count(*) from join_all group by MP_hydroid HAVING count(*) >1')
 
 join_all$Use_Type <- str_to_title(join_all$Use_Type)
 
@@ -198,6 +197,9 @@ colnames(join_all)[colnames(join_all)=="facility_contains_a_GWP"] <- "has_GWP"
 colnames(join_all)[colnames(join_all)=="facility_contains_a_VWP"] <- "has_VWP"
 
 ## FORMAT Table 3: 20XX Permitted and Unpermitted (Excluded) By Use Type Withdrawals (MGD) ###############
+#Removing Use Type agricultural
+
+join_all <- sqldf('SELECT * FROM join_all WHERE Use_Type NOT IN ("Agricultural")')
 
 #Sum groundwater
 
