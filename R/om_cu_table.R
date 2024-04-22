@@ -4,13 +4,13 @@
 #' @param pr_data riverseg json list
 #' @param cu_post_var list of runids of interest 
 #' @param cu_pre_var list of facility metrics of interest
-#' @param cu_threshold list of riverseg metrics of interest  
+#' @param cu_threshold list 3 percent CU values for yellow, orange, red coding 
 #' @param cu_decimals vhydro url
 #' @return dataframe of summary stats
 #' @seealso NA
 #' @export om_cu_table
 #' @examples NA
-om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_threshold, cu_decimals) {
+om_cu_table <- function(fac_report_info, pr_data, cu_post_var, cu_pre_var, cu_threshold, cu_decimals, cu_min_valid = 0.0) {
   if ( (cu_post_var == "Qout" & cu_pre_var == "Qbaseline") & !("Qbaseline" %in% names(pr_data))) {
     # perform regular calculations if Qbaseline does not already exist
     pr_data$Qbaseline <- pr_data$Qout + (pr_data$wd_cumulative_mgd - pr_data$ps_cumulative_mgd) * 1.547
