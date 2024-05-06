@@ -10,7 +10,8 @@ om_cu_table(
   cu_post_var,
   cu_pre_var,
   cu_threshold,
-  cu_decimals
+  cu_decimals,
+  cu_min_valid = 0
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ om_cu_table(
 
 \item{cu_pre_var}{list of facility metrics of interest}
 
-\item{cu_threshold}{list of riverseg metrics of interest}
+\item{cu_threshold}{list 3 percent CU values for yellow, orange, red coding}
 
 \item{cu_decimals}{vhydro url}
+
+\item{cu_min_valid}{Minimum flow value to display, otherwise assumed below model valid range.}
 }
 \value{
 dataframe of summary stats
