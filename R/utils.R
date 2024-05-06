@@ -802,3 +802,40 @@ fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
   }
   return(features)
 }
+
+
+
+#' Send a property to VAHydro with a simple one line command
+#'
+#' @param pid The unique property ID
+#' @param varkey The variable key for the property
+#' @param propcode The propcode, null OK
+#' @param propname The property name - must be non-null
+#' @param propvalue The numerical value
+#' @param ds A valid Rom datasource
+#' @return A RomProperty object
+#' @seealso NA
+#' @export vahydro_post_metric_to_scenprop
+#' @examples NA
+vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, propvalue, ds = FALSE) {
+  if (is.logical(ds)) {
+    stop("Error: This function has been modified to require a ds (RomDataSource) argument.")
+  }
+  if (is.null(propvalue)) {
+    propvalue <- 0
+  }
+  if (is.null(propcode)) {
+    propcode <- ''
+  }
+  metinfo <- list(
+    varkey = varkey,
+    propname = propname,
+    featureid = as.integer(pid),
+    entity_type = "dh_properties",
+    bundle = "dh_properties"
+  )
+  metprop <- RomProperty$new( ds, metinfo, TRUE)
+  metprop$propcode <- propcode
+  metprop$propvalue <- as.numeric(propvalue)
+  metprop$save(TRUE)
+}
