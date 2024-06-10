@@ -1,5 +1,5 @@
 library(ggplot2)
-library(ggsn)
+# library(ggsn)
 library(ggmap) #used for get_stamenmap, get_map
 library(ggspatial) #annotation_north_arrow()
 library(arcpullr)
@@ -44,42 +44,24 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   
   ### END HARP CODE ###
   
-  map <- base_layer +
+  map <- ggplot() +
     #ADD STATE BORDER LAYER
-    geom_path(data = states.gg,aes(x = long, y = lat, group = group),lwd=0.5,na.rm=TRUE) +
+    geom_sf(data = states.gg,aes(group = id),lwd=0.5,na.rm=TRUE) +
     
     #ADD RIVERS LAYER
-    geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4,na.rm=TRUE) +
-    # ADD WATERBODIES ###############################################################
-  # geom_point(data = WBDF, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
-  # geom_path(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
-  # geom_polygon(data = reservoirs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4) +
-  ###geom_point(data = reservoirs.gg, aes(x = long, y = lat), color="dodgerblue3", size=0.09)+
-  #################################################################################
-  
+    geom_sf(data = rivs.gg, aes(group = id), color="dodgerblue3",lwd=0.4,na.rm=TRUE) +
+
     #ADD BORDER LAYER
-    geom_polygon(data = bb.gg,aes(x = long, y = lat, group = group), color="black", fill = NA,lwd=0.5,na.rm=TRUE) +
+    geom_sf(data = bb.gg,color="black", fill = NA,lwd=0.5,na.rm=TRUE) +
     
     coord_sf(xlim = extent$x, ylim = extent$y, expand = F) +
-    # #ADD SCALE BAR
-    # ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
-    #       
-    #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
-    #                st.size = 3.5, st.dist = 0.0285,
-    #                anchor = c(
-    #                  x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
-    #                  y = extent$y[1]+(extent$y[1])*0.001
-    #                ))+
-    
-  #ADD NORTH BAR
-  annotation_north_arrow(which_north = "grid", location = "tr",
+
+    #ADD NORTH BAR
+    annotation_north_arrow(which_north = "grid", location = "tr",
                          height = unit(1, "cm"),
-                         width = unit(1, "cm")
-  )+
+                         width = unit(1, "cm"))  +
     
     #CUSTOMIZE THEME
-    # theme(legend.justification=c(0,1), 
-    #       legend.position="none",
     theme(plot.margin = unit(plot_margin, "cm"),
           plot.title = element_text(size=12),
           plot.subtitle = element_text(size=10),
@@ -96,22 +78,20 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   
   if (isTRUE(scale_bar)){
     
-    map <- map +
-      
-      #ADD SCALE BAR
-      ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
-                     
-                     transform = TRUE, model = 'WGS84',st.bottom=FALSE,
-                     st.size = 3.5, st.dist = 0.0285,
-                     anchor = c(
-                       x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
-                       y = extent$y[1]+(extent$y[1])*0.001
-                     ))
+    map <- 
+      map + 
+      annotation_scale(data = bb.gg,  bar_cols = c("white","black"),
+                       pad_x = unit(3.75,"cm"), width_hint = 0.5, unit_category = "imperial")
+      # #ADD SCALE BAR
+      # ggsn::scalebar(bb.gg, location = 'bottomleft', dist = 100, dist_unit = 'mi',
+      #                
+      #                transform = TRUE, model = 'WGS84',st.bottom=FALSE,
+      #                st.size = 3.5, st.dist = 0.0285,
+      #                anchor = c(
+      #                  x = (((extent$x[2] - extent$x[1])/2)+extent$x[1])-1.8,
+      #                  y = extent$y[1]+(extent$y[1])*0.001
+      #                ))
   }
-  
-  ## Trying to limit the frame to only include the bounding box in states.gg
-  # map + coord_sf(xlim = c(-83.65,-75.25), ylim = c(35.45,40.4))
-  # map + xlim = c(-84,-75)+ylim = c(35.25,40.6)
   
   return(map)
 }

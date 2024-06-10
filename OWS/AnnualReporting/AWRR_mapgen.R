@@ -1,7 +1,9 @@
 # THIS SCRIPT CURRENTLY PRODUCES 18 MAP IMAGES (AS PNG OR PDF)
 library("dataRetrieval")
 library("ggspatial")
-library("rgeos") #BB Added this line, as the readWKT function is needed. Will lose support in 2024
+library(ggplot2)
+
+# library("rgeos") #BB Added this line, as the readWKT function is needed. Will lose support in 2024
 color_list <- sort(colors())
 options(scipen=9999)
 site <- "http://deq1.bse.vt.edu/d.dh/" ##BB Removed the :81 after edu, was causing errors
@@ -14,29 +16,44 @@ if(!exists("baselayers")) {baselayers <- load_MapLayers(site = site)} #Load map 
 
 #LOAD IN DATA######################################################################################## 
 # LOAD ALL FOUNDATION DATA
-syear = 2018
-eyear = 2022
+syear = 2019
+eyear = 2023
 source_directory <- paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"") #SOURCE LOCATION
 
 ByLocality <- read.csv(paste(source_directory,"/ByLocality.csv",sep=""))
 mp_all_mgy <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #GM this is mp_all_mgy now
 ##mp_all_wide <- read.csv(paste(source_directory,"/mp_all_mgy_",syear,"-",eyear,".csv",sep="")) #BB Redundant, mp_all_mgy is already wide
 mp_all_wide_power <- read.csv(paste(source_directory,"/mp_power_mgy_",syear,"-",eyear,".csv",sep="")) #BB mp_al_wide_power replaced with mp_power_mgy
+ceds_permits <- read.csv(paste0(source_directory,"/Ceds_permits.csv"))
 ows_permit_list <- read.csv(paste(source_directory,"/ows_permit_list.csv",sep="")) #GM - from https://deq1.bse.vt.edu/d.dh/ows-permit-list, filter by active and expired permits, do manual check for incorrect cells 
 ows_permit_list$Permit.Start2 <- as.character(as.Date(ows_permit_list$Permit.Start, format = "%m/%d/%Y"))#must convert columns with date info to character data type so sqldf can recognize the date format
 
 #MAP OUTPUT LOCATION
 export_path <- paste0(onedrive_location,"/OWS/Report Development/Annual Water Resources Report/October ",eyear+1," Report/overleaf/") 
-# export_path <- paste0("C:/Users/nrf46657/Desktop/GitHub/hydro-tools/OWS/AnnualReporting/TEST_MAPS/") #FOR TESTING
-working_path <- "C:/Users/rnv55934/Documents/Docs/AnnualReport/2022/" #FOR TESTING
 
 #GM SET UP MP_ALL FOR MAPGEN
 eyearX <- paste0("X",eyear)
 mp_all <- sqldf(paste0('SELECT "MP_hydroid" as HydroID, "Hydrocode" as Hydrocode, "Source_Type" as Source_Type, "MP_Name" as MP_Name, 
-                       "Facility_hydroid" as Facility_hydroid, "Facility" as Facility, "Use_Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS_Code" as FIPS, ',eyearX,' as ',eyearX,',
+                       "Facility_hydroid" as Facility_hydroid,fac_CEDSid, "Facility" as Facility, "Use_Type" as Use_Type, "Latitude" as lat, "Longitude" as lon, "FIPS_Code" as FIPS, ',eyearX,' as ',eyearX,',
                        (',eyearX,')/365 as mgd
                        FROM mp_all_mgy'))
-# removed   WHERE Year = ',eyear,'  from each point map, add AND WHERE mgd IS NOT NULL
+
+## 2024 CORRECTION: No access to GIS db, need to fill in lat/lon for some MPs that are missing it
+## This is done with 2023 Hydro foundation dataset
+latloncorrection <- read.csv(paste(source_directory,"/awrr_foundation_",eyear+1,".csv",sep=""))
+latloncorrection <- sqldf('SELECT mp_hydroid, latitude, longitude FROM latloncorrection
+                          GROUP BY mp_hydroid')
+
+## Replaces any MPs with NA lat/lon with lat/lon data from Hydro as of 03/28/2024
+for (i in 1:nrow(mp_all)) {
+  ## Only moves forward if BOTH lat and lon are NA
+  if (is.na(mp_all$lat[i]) & is.na(mp_all$lon[i]) & !is.na(mp_all$HydroID[i])) {
+    
+    mp_all$lat[i] <- latloncorrection$latitude[latloncorrection$mp_hydroid == mp_all$HydroID[i]]
+    mp_all$lon[i] <- latloncorrection$longitude[latloncorrection$mp_hydroid == mp_all$HydroID[i]]
+    
+  }
+}
 
 
 #GENERATE BASEMAP ############################################################################################
@@ -47,7 +64,7 @@ sf::sf_use_s2(FALSE) #needed for adding DEQ logo to maps ## Moved here since bas
 
 #LOAD RIVERS AND RESERVOIRS LAYERS
 rivs.gg <- baselayers.gg[[which(names(baselayers.gg) == "rivs.gg")]]
-rivs.gg <- geom_path(data = rivs.gg, aes(x = long, y = lat, group = group), color="dodgerblue3",lwd=0.4,na.rm=TRUE)
+rivs.gg <-  geom_sf(data = rivs.gg, aes(group = id), color="dodgerblue3",lwd=0.4,na.rm=TRUE) 
 res_csv <- baselayers[[which(names(baselayers) == "MajorReservoirs.csv")]]
 res.sf <- st_as_sf(res_csv, wkt = 'geom', crs = st_crs(4326))
 res.gg <- geom_sf(data = res.sf,color="dodgerblue3",lwd=0.4, inherit.aes = FALSE, show.legend =FALSE)
@@ -161,7 +178,6 @@ drought_fips.sf <- st_as_sf(drought_fips_df, wkt = 'geom', crs = st_crs(4326))
 drought_fips.gg <- geom_sf(data = drought_fips.sf,aes(fill = factor(col)),lwd=0.4, inherit.aes = FALSE, show.legend =TRUE)
 
 finalmap.obj <- basemap.obj + drought_fips.gg +
-                rivs.gg +
                 res.gg +
                 coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
                 theme(legend.position = c(0.23, 0.782),
@@ -169,7 +185,7 @@ finalmap.obj <- basemap.obj + drought_fips.gg +
                        legend.text=element_text(size=8),
                        aspect.ratio = 12.05/16
                        ) +
-                guides(fill=guide_legend(ncol=2))+
+                guides(fill=guide_legend(ncol=2)) +
                 scale_fill_manual(name = "Drought Evaluation Regions",
                                    values = c("khaki1","slateblue2","darkolivegreen2","blue4","chocolate1",
                                               "darkcyan","darkkhaki","indianred1","aquamarine","lightpink",
@@ -332,7 +348,7 @@ mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)
 ag_map <-  basemap.obj + fips.gg + res.gg + mp.gg +
   #  rivs.gg +
   coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
-  theme(legend.position = c(0.146, 0.817),
+  theme(legend.position = c(0.178, 0.818),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         legend.background = element_rect(fill="lightblue",
@@ -346,7 +362,6 @@ ag_map <-  basemap.obj + fips.gg + res.gg + mp.gg +
 
 deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.175, height = 1, x = -.388, y = -0.413) #LEFT BOTTOM LOGO
 ag_map_draw <- ggdraw(ag_map)+deqlogo
-
 
 #ggsave(plot = ag_map_draw, file = paste0(working_path,"map_ag_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here
 ggsave(plot = ag_map_draw, file = paste0(export_path, "Agriculture_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
@@ -374,7 +389,7 @@ mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)
 irr_map <-  basemap.obj + fips.gg + res.gg + mp.gg +
   #  rivs.gg +
   coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
-  theme(legend.position = c(0.146, 0.817),
+  theme(legend.position = c(0.153, 0.817),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         legend.background = element_rect(fill="lightblue",
@@ -431,8 +446,7 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 comm_map_draw <- ggdraw(comm_map)+deqlogo
 
 #ggsave(plot = comm_map_draw, file = paste0(working_path,"map_com_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
-ggsave(plot = comm_map_draw, file = "C:\\Users\\ejp42531\\Desktop\\The shoulders of broken giants\\Commerical_PointMap_LegendFill.png", width=6.5, height=4.95) #FINAL MAP SAVES HERE
-# ggsave(plot = comm_map_draw, file = paste0(export_path, "Commerical_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
+ggsave(plot = comm_map_draw, file = paste0(export_path, "Commerical_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
 # Mining Water Withdrawals by Withdrawal Point Location################
@@ -458,7 +472,7 @@ mp.gg <- geom_point(data = mp_df,aes(x = lon, y = lat, size = factor(point_size)
 min_map <-  basemap.obj + fips.gg + res.gg + mp.gg +
   #  rivs.gg +
   coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
-  theme(legend.position = c(0.146, 0.817),
+  theme(legend.position = c(0.146, 0.842),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         legend.background = element_rect(fill="lightblue",
@@ -474,7 +488,6 @@ deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLog
 min_map_draw <- ggdraw(min_map)+deqlogo
 
 #ggsave(plot = min_map_draw, file = paste0(working_path,"map_min_mp.png",sep = ""), width=6.5, height=4.95) #Working map saves here 
-ggsave(plot = comm_map_draw, file = "C:\\Users\\ejp42531\\Desktop\\The shoulders of broken giants\\Mining_PointMap.png", width=6.5, height=4.95) #FINAL MAP SAVES HERE
 ggsave(plot = min_map_draw, file = paste0(export_path, "Mining_PointMap.png",sep = ""), width=6.5, height=4.95) #FINAL MAP SAVES HERE
 
 #############################################################################################
@@ -535,7 +548,7 @@ mp_df <-sqldf(paste('SELECT *,
                             ELSE 0
                           END AS point_size
                         FROM mp_all AS a
-                        WHERE Use_Type = "municipal"
+                        WHERE Use_Type = "public water supply"
                         AND mgd IS NOT NULL
                     AND a.FIPS NOT LIKE "3%"',sep="")) #EXCLUDE, NC LOCALITIES
 
@@ -566,47 +579,39 @@ ggsave(plot = pws_map_draw, file = paste0(export_path, "PublicWaterSupply_PointM
 #############################################################################################
 # Power Generation Water Withdrawals by Withdrawal Point Location################
 
-#five MP with missing lat/lon in the mp_all_wide_power csv, each less than 0.02mgd, each with another facility mp that does show on map, so lat/lon was not corrected this year
-mp_all_wide_power[is.na(mp_all_wide_power)] <- 0 # Convert NAs to zeros because NA means 0mgd was reported
-
-mp_all_wide_power <- sqldf(paste0('SELECT *, "X',eyear,'"/365 AS "',eyear,'mgd"
-                         FROM mp_all_wide_power
-                         ')) #convert mgy values into mgd using SQL
+mp_all$mgd[is.na(mp_all$mgd)] <- 0
 
 #Fossil Power
 #order mgd column by descending size so larger mgd points appear behind smaller ones
 mp_df_f <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "',eyear,'mgd" < 0.5 THEN 2
-                            WHEN "',eyear,'mgd" BETWEEN 0.5 AND 5 THEN 3
-                            WHEN "',eyear,'mgd" BETWEEN 5 AND 50 THEN 4
-                            WHEN "',eyear,'mgd" BETWEEN 50 AND 500 THEN 5
-                            WHEN "',eyear,'mgd" > 500 THEN 6
+                            WHEN "mgd" < 0.5 THEN 2
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 3
+                            WHEN "mgd" BETWEEN 5 AND 50 THEN 4
+                            WHEN "mgd" BETWEEN 50 AND 500 THEN 5
+                            WHEN "mgd" > 500 THEN 6
                             ELSE 0
                           END AS point_size
-                        FROM mp_all_wide_power AS a
-                        WHERE Use_Type = "fossilpower"
-                        AND a."FIPS_Code" NOT LIKE "3%"
-                        AND a."Fips_Code" NOT IN (0)
-                        AND a.MP_Hydroid NOT IN(65370)
-                      ORDER BY "',eyear,'mgd" DESC 
+                        FROM mp_all AS a
+                        WHERE Use_Type = "fossil power"
+                          AND hydroid NOT IN (65370,462485) --Excluding MPs not in VA
+                        ORDER BY "mgd" DESC 
                       ',sep="")) #EXCLUDE NC LOCALITIES
 
 #Nuclear Power
 #order mgd column by descending size so larger mgd points appear behind smaller ones
 mp_df_n <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "',eyear,'mgd" < 0.5 THEN 2
-                            WHEN "',eyear,'mgd" BETWEEN 0.5 AND 5 THEN 3
-                            WHEN "',eyear,'mgd" BETWEEN 5 AND 50 THEN 4
-                            WHEN "',eyear,'mgd" BETWEEN 50 AND 500 THEN 5
-                            WHEN "',eyear,'mgd" > 500 THEN 6
+                            WHEN "mgd" < 0.5 THEN 2
+                            WHEN "mgd" BETWEEN 0.5 AND 5 THEN 3
+                            WHEN "mgd" BETWEEN 5 AND 50 THEN 4
+                            WHEN "mgd" BETWEEN 50 AND 500 THEN 5
+                            WHEN "mgd" > 500 THEN 6
                             ELSE 0
                           END AS point_size
-                        FROM mp_all_wide_power AS a
-                        WHERE Use_Type = "nuclearpower"
-                        AND a."FIPS_Code" NOT LIKE "3%"
-                      ORDER BY "',eyear,'mgd" DESC 
+                        FROM mp_all AS a
+                        WHERE Use_Type = "nuclear power"
+                      ORDER BY "mgd" DESC 
                       ',sep="")) #EXCLUDE, NC LOCALITIES
 
 #adding color category here so fossil and nuclear have a category that can show up in the legend
@@ -617,7 +622,7 @@ mp_n.gg <- geom_point(data = mp_df_n,aes(x = lon, y = lat, size = factor(point_s
 pow_map <-  basemap.obj + fips.gg + res.gg +  mp_f.gg + mp_n.gg +
   #  rivs.gg +
   coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
-  theme(legend.position = c(0.146, 0.817),
+  theme(legend.position = c(0.144, 0.757),
         legend.title=element_text(size=10),
         legend.text=element_text(size=8),
         legend.background = element_rect(fill="lightblue",
@@ -645,23 +650,39 @@ ggsave(plot = pow_map_draw, file = paste0(export_path, "Power_PointMap.png",sep 
 #############################################################################################
 # Surface Water Withdrawal Permitting Activities ############################################
 
+## 2024 CORRECTION: NEED TO GET FACILITY LAT/LON SINCE CEDS DOESNT HAVE THEM
+ceds_permits_full <- sqldf('
+SELECT c.*, COALESCE(ows."Facility.Latitude",  mp.lat) AS Lat,
+            COALESCE(ows."Facility.Longitude", mp.lon) AS Lon
+
+FROM ceds_permits c
+LEFT JOIN mp_all mp
+  ON c.Fac_Id = mp.fac_CEDSid
+LEFT JOIN ows_permit_list ows
+  ON ows."VA.Hydro.Facility.ID" = mp.Facility_hydroid
+
+GROUP BY c.Permit_Number
+')
+
+
+
 #filter for SW that are currently active or in admin continued status
 mp_point_sw <- sqldf('SELECT a.*
-                     FROM ows_permit_list AS a
-                     WHERE a."Permit.Program" LIKE "%VWP%"
-                     AND a."Status" IN ("active", "expired")')
+                     FROM ceds_permits_full AS a
+                     WHERE Permit_Type LIKE "Surface Water"
+                     ')
 
 #filter for New Permit Issuances - bins for point color
 mp_df <-sqldf(paste('SELECT *,
                           CASE
-                            WHEN "Permit.Start2" >= "',eyear,'-01-01" THEN 3
+                            WHEN Start_date >= "',eyear,'-01-01" THEN 3
                           ELSE 2
                           END AS point_size
                         FROM mp_point_sw AS a
                     ORDER BY "Permit.Start2" ASC',sep="")) 
 #GM update for eyear
 
-mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
+mp.gg <- geom_point(data = mp_df,aes(x = Lon, y = Lat, size = factor(point_size), fill=factor(point_size)), alpha=0.9, shape=21, show.legend = TRUE)
 
 sw_permit_map <- basemap.obj + fips.gg + rivs.gg + res.gg + mp.gg +
   coord_sf(xlim = c(-84,-75), ylim = c(35.25,40.6),expand = F) +
@@ -686,20 +707,20 @@ ggsave(plot = sw_permit_map_draw, file = paste0(export_path, "VWPermits_AWRR.pdf
 
 #filter for SW that are currently active or in admin continued status
 mp_point_gw <- sqldf('SELECT a.*
-                   FROM ows_permit_list AS a
-                   WHERE a."Permit.Program" LIKE "%GWP%"
-                   AND a."Status" IN ("active", "expired")')
+                      FROM ceds_permits_full AS a
+                      WHERE Permit_Type LIKE "Groundwater"
+                      ')
 
 #filter for New Permit Issuances - bins for point color
 mp_df <-sqldf(paste('SELECT *,
                         CASE
-                          WHEN "Permit.Start2" >= "',eyear,'-01-01" THEN 4
+                          WHEN Start_date >= "',eyear,'-01-01" THEN 4
                         ELSE 3
                         END AS point_size
                       FROM mp_point_gw AS a
                   ORDER BY "Permit.Start2" ASC',sep="")) 
 
-mp.gg <- geom_point(data = mp_df,aes(x = Facility.Longitude, y = Facility.Latitude, fill=factor(point_size)), alpha=0.9, size = 2, shape=21, inherit.aes = FALSE, show.legend = TRUE)
+mp.gg <- geom_point(data = mp_df,aes(x = Lon, y = Lat, fill=factor(point_size)), alpha=0.9, size = 2, shape=21, inherit.aes = FALSE, show.legend = TRUE)
 
 # #GWMA LAYER
 gwma_df <- sqldf('SELECT *, CASE
@@ -762,7 +783,7 @@ GWMA.basemap.obj <- base.map(GWMA.baselayers.gg,
 # MAP
 gw_permit_map_zoom <- GWMA.basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + mp.gg +
   coord_sf(xlim = GWMA.extent$x, ylim = GWMA.extent$y,expand = F) +
-  theme(legend.position = c(0.31, .85),
+  theme(legend.position = c(0.39, .85),
         legend.title=element_text(size=7),
         legend.background = element_rect(fill="lightblue",
                                          size=0.5, linetype="solid"),

@@ -13,12 +13,10 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   
   
   print(extent)
-  ######################################################################################################
   
-  # BOUNDING BOX
+  ### BOUNDING BOX ##########
   bb=st_as_sf(extent, coords = c(2,1)) ## Flipping the lat/lon
-  bbProjected <- as_Spatial(bb)
-  
+
   ## Set up a geometry of the bbox so things can be clipped based on it
   bbdf <- paste0("POLYGON((",extent$x[1]," ",extent$y[1],",",extent$x[2]," ",extent$y[1],",",extent$x[2]," ",extent$y[2],",",extent$x[1]," ",extent$y[2],",",extent$x[1]," ",extent$y[1],"))")
   bbdf <- st_as_sfc(bbdf)
@@ -44,14 +42,14 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
       STATES$id[i] <- NA
       next
     }
-    # 
-    # stateProjected <- SpatialPolygonsDataFrame(state_geom_clip, data.frame('id'), match.ID = TRUE)
-    # stateProjected@data$id <- as.character(i)
+
     STATES$geom[i] <- state_geom_clip
   }
   
   #REMOVE THOSE STATES THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
   STATES <- STATES[!is.na(STATES$id),]
+  
+  STATES <- st_set_crs(STATES,4326)
 
   ### PROCESS Minor Basin LAYER  #######################################################################
   
@@ -77,6 +75,8 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   
   #REMOVE THOSE BASINS THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
   mb_data <- mb_data[!is.na(mb_data$id),]
+  
+  mb_data <- st_set_crs(mb_data,4326)
  
   ### PROCESS FIPS LAYER  #############################################################################
   
@@ -102,11 +102,13 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
       next
     }
     
-    fips_data$geom[i] <- mb_geom_clip
+    fips_data$fips_geom[i] <- mb_geom_clip
   }
   
   #REMOVE THOSE FIPS THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
   fips_data <- fips_data[!is.na(fips_data$id),]
+  
+  fips_data <- st_set_crs(fips_data,4326)
   
   ### PROCESS MajorRivers.csv LAYER  ###################################################################
   
@@ -138,8 +140,13 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   #REMOVE THOSE RIVS THAT WERE SKIPPED ABOVE (OUT OF MINOR BASIN EXTENT)
   rivs_layer <- rivs_layer[!is.na(rivs_layer$id),]
   
+  rivs_layer <- st_set_crs(rivs_layer,4326)
+  
+  ## Setting a CRS for the bbox
+  bbdf <- st_set_crs(bbdf,4326)
+  
   ### Creating final object #############
-  baselayers.gg <- list("bb.gg" = bb, 
+  baselayers.gg <- list("bb.gg" = bbdf, 
                         "states.gg" = STATES,
                         "mb.gg" = mb_data,
                         "fips.gg" = fips_data,

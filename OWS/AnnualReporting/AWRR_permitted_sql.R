@@ -46,12 +46,12 @@ getquery <- function(tableView, schema = "water") {
     
     #List the columns in order for the query in form SQL expects
     colOrderForQuery <- c(all_other_cols,long_cols)
-    colOrderForQuery <- paste0(colOrderForQuery,collapse=",")
+    colOrderForQuery <- paste0(colOrderForQuery,collapse='","')
     
     #Develop a query
-    sql <- paste0("SELECT ",
+    sql <- paste0('SELECT "',
                   colOrderForQuery,
-                  " FROM ",
+                  '" FROM ',
                   paste0(schema,".",tableView))
     
     result <- dbGetQuery(conn_DBI,sql)
@@ -60,27 +60,33 @@ getquery <- function(tableView, schema = "water") {
 
 ## These two tables have the weird column issue and need the workaround
 gwp <- getquery("GWP_Permits_Vw")
+##Format the date column
+gwp$GPP_DATE_START <- as.Date(gwp$GPP_DATE_START)
 
 vwp_cond <- getquery("VWP_Withdrawal_Condition_Vw")
 
 sql_string <- 'SELECT * FROM water.[VWP Permits]'
 vwp <-  dbGetQuery(conn_DBI,sql_string)
 
+vwp$`Most Recent Date Issuance` <- as.Date(vwp$`Most Recent Date Issuance`)
+
 sql_string <- 'SELECT * FROM water.Measuring_Point_Vw'
 mp <-  dbGetQuery(conn_DBI,sql_string)
 
+# facs <- dbGetQuery(conn_DBI, "SELECT * FROM ceds.CEDS_Core_Facilities_Geospatial_Data_View")
 
 vwpdf <- sqldf('
 SELECT 
 c.Permit_Id, v."Permit Number" AS Permit_Number, v."CEDS Facility Id" AS Fac_Id,
 v."Activity Type" AS Use_Type,c.Annual_Withdrawal_Limit AS Annual_Limit, c.Monthly_Withdrawal_Limit AS Monthly_Limit,
-"Surface Water" AS Permit_Type
+"Surface Water" AS Permit_Type, v."Most Recent Date Issuance" AS Start_date
 
 FROM vwp v
-INNER JOIN vwp_cond c
+LEFT JOIN vwp_cond c
   ON c.Permit_Id = v."Permit Id"
 
 WHERE v.Classification = "Active"
+  AND v."Activity Type" = "Water Withdrawal"
 
 GROUP BY v."CEDS Facility Id" -- Remove facilities with multiple permits. Only need permited or not field
 ')
@@ -98,7 +104,7 @@ WITH mostrecent AS (
 
 SELECT g.GPP_ID AS Permit_Id, g.GPP_VAHYDRO_PERMIT_NUMBER AS Permit_Number, mp.Facility_ID AS Fac_Id,
 g.GPPU_DESCRIPTION AS Use_Type, g.GPP_OP_COND_YEARLY_LIMIT AS Annual_Limit, g.GPP_OP_COND_MONTHLY_LIMIT AS Monthly_Limit,
-"Groundwater" AS Permit_Type
+"Groundwater" AS Permit_Type, GPP_DATE_START AS Start_date
 
 FROM gwp g
 INNER JOIN mostrecent mr
@@ -114,12 +120,15 @@ GROUP BY mp.Facility_ID -- Remove facilities with multiple permits. Only need pe
 
 ceds_permits <- rbind(vwpdf,gwpdf)
 
+ceds_permits$Start_date <- as.Date(ceds_permits$Start_date)
+
 ## CORRECTIONS : DUE TO FLAWS IN CEDS PERMITTING DATASET #####
 ## REMOVE THIS SECTION IN 2025 WHEN THE DATASET IS CORRECTED
 
 ## Adding in permit 16-0946 (not in ceds)
 fluv <- data.frame(Permit_Id = NA, Permit_Number = '16-0946', Fac_Id = 200000069020,
-                   Use_Type = 'public water supply',Annual_Limit = NA,Monthly_Limit = NA,Permit_Type = 'Surface Water')
+                   Use_Type = 'public water supply',Annual_Limit = NA,Monthly_Limit = NA,Permit_Type = 'Surface Water',
+                   Start_date = as.Date('2018-09-01'))
 
 ceds_permits <- rbind(ceds_permits,fluv)
 
@@ -131,7 +140,14 @@ ceds_permits <- ceds_permits[!(ceds_permits$Permit_Number %in% RemovePermits),]
 
 ## END CORRECTIONS #######
 
-## Joining permits to mp_all ######
+
+
+## Writing the data 
+write.csv(ceds_permits, paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/Ceds_permits.csv"), row.names = F)
+
+
+
+## Joining permits to mp_all ###########################
 ows_permit_list <- read.csv(file = paste0(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
 
 #mp_all_mgy generated from AWRR_data.R is all MPs without power, without Dalecarlia, source type and use type names mostly already corrected
@@ -327,7 +343,3 @@ for (i in 1:length(use_stripe)) {
 #table3w_tex
 table3w_tex %>%
   cat(., file = paste(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
-
-## Getting the percent of the total
-sw_uses$Unpermitted_Pct <- sw_uses$Unpermitted_total/swTotal * 100
-sw_uses$Permitted_Pct <- sw_uses$Permitted_total/swTotal * 100
