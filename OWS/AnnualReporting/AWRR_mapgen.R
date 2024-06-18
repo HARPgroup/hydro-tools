@@ -802,7 +802,7 @@ gw_permit_map_zoom <- GWMA.basemap.obj + gwma.gg + fips.gg + rivs.gg + res.gg + 
                              "Active Groundwater Withdrawal Permits", 
                              paste0("Issued Since January ",eyear)))
 
-deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.14, y = -0.43) #LEFT BOTTOM LOGO
+deqlogo <- draw_image(paste(github_location,'/HARParchive/GIS_layers/HiResDEQLogo.tif',sep=''),scale = 0.13, height = 1, x = -.095, y = -0.43) #LEFT BOTTOM LOGO
 gw_permit_map_zoom_draw <- ggdraw(gw_permit_map_zoom)+deqlogo
 
 #ggsave(plot = gw_permit_map_zoom_draw, file = paste0(working_path,"xtest_GWPermits_AWRR.png",sep = ""), width=6.5, height=4.95) #Working map saves here

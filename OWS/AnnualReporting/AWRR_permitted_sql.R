@@ -343,3 +343,80 @@ for (i in 1:length(use_stripe)) {
 #table3w_tex
 table3w_tex %>%
   cat(., file = paste(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\overleaf\\summary_table3.tex",sep = ''))
+
+
+## Permit Status in TOP20 table 4 ##########
+
+## Uses the same method as in AWRR_Data.R, using the same dataset
+##Simplified in this script
+
+fiveyr_avg_mgy <- round((rowMeans(mp_all_mgy[(length(mp_all_mgy)-4):length(mp_all_mgy)], na.rm = TRUE, dims = 1)),2)
+mp_all_mgy <- cbind(mp_all_mgy,fiveyr_avg_mgy)
+
+#group by facility
+## Should this be limited to eyear?
+data_all_fac <- sqldf(paste0('
+SELECT fac_CEDSid, Facility, Use_Type, Locality,
+ROUND((SUM(',eyearX,')/365),1) AS mgd,
+ROUND((SUM(fiveyr_avg_mgy)/365),1) AS fiveyr_avg_mgy,
+CASE  WHEN MIN(Source_Type) = "Groundwater" THEN 1 END AS GW_type,   --MAX/MIN of strings is determined by number of characters
+CASE  WHEN MAX(Source_Type) = "Surface Water" THEN 1 END AS SW_type  --nchar("Surface Water") > nchar("Groundwater")
+
+FROM mp_all_mgy
+GROUP BY Facility_HydroID, fac_CEDSid
+'))
+
+#limit 20
+top_20 <- sqldf('
+SELECT awrr.fac_CEDSid, 
+CASE
+  WHEN p.Permit_Number IS NOT NULL THEN 
+    awrr.Facility || "*"
+  WHEN p.Permit_Number IS NULL THEN
+    awrr.Facility || "**"
+END AS Facility,  awrr.Locality, 
+CASE
+    WHEN GW_type = 1 AND SW_type IS NULL THEN  "GW"
+    WHEN SW_type = 1 AND GW_type IS NULL THEN  "SW"
+    WHEN GW_type = 1 AND SW_type = 1 THEN      "SW/GW"
+END AS Type,
+awrr.fiveyr_avg_mgy, awrr.mgd, awrr.Use_Type AS Category,
+CASE
+  WHEN p.Permit_Number IS NOT NULL THEN "Yes"
+  ELSE "No"
+END AS permitted, p.Permit_Number
+
+FROM data_all_fac awrr
+LEFT JOIN ceds_permits p
+  ON awrr.fac_CEDSid = p.Fac_ID
+
+WHERE awrr.Use_Type NOT LIKE "%power%"
+
+GROUP BY awrr.fac_CEDSid --Removing dups from facilities with 2 types of permits
+ORDER BY awrr.mgd DESC
+LIMIT 20
+')
+
+###KABLE####
+table4_latex <- kable(top_20[2:7],'latex', booktabs = T, align = c('l','l','c','c','c','l') ,
+                      caption = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
+                      label = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
+                      col.names = c(
+                        'Facility',
+                        'Locality',
+                        'Type',
+                        "5 Year Avg.",
+                        paste(eyear, 'Withdrawal', sep = ' '),
+                        'Category')) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, width = "12em")
+
+#CUSTOM LATEX CHANGES
+#insert hold position header
+table4_tex <- gsub(pattern = "{table}[t]", 
+                   repl    = "{table}[ht!]", 
+                   x       = table4_latex, fixed = T )
+table4_tex
+
+table4_tex %>%
+  cat(., file = paste0(onedrive_location,"\\OWS\\Report Development\\Annual Water Resources Report\\October ",eyear+1," Report\\Overleaf\\summary_table4.tex"))
