@@ -3,6 +3,7 @@ library(ggplot2)
 library(ggmap) #used for get_stamenmap, get_map
 library(ggspatial) #annotation_north_arrow()
 library(arcpullr)
+library(maptiles)
 
 #FUNCTION DEFAULTS TO STATEWIDE EXTENTS
 base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25, 40.6)),
@@ -28,25 +29,32 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
   
   ### ADDED IN HARP CODE ###
   
-  bbox_points <- data.frame(x = c(-83.38,-75.24), y = c(36.54,39.46))
-  map_server <- "https://gismaps.vdem.virginia.gov/arcgis/rest/services"
-  # VA LandCover - very sparse, 
-  map_layer <- "Download/LandCover_Downloads/MapServer/0"
+  # bbox_points <- data.frame(x = c(-83.38,-75.24), y = c(36.54,39.46))
+  # map_server <- "https://gismaps.vdem.virginia.gov/arcgis/rest/services"
+  # # VA LandCover - very sparse, 
+  # map_layer <- "Download/LandCover_Downloads/MapServer/0"
+  # 
+  # sf_use_s2(TRUE) ### Had to add this line to stop an error at st_crop using planar coordinates
+  # 
+  # map_url <- paste(map_server,map_layer,sep ="/")
+  # mapdata <- get_spatial_layer(map_url)
+  # mapdata <- st_crop(mapdata, c(xmin= min(bbox_points$x), ymin = min(bbox_points$y), 
+  #                               xmax = max(bbox_points$x), ymax = max(bbox_points$y))) #crop to our extent 
+  # base_layer <- ggplot() + 
+  #                 geom_sf(data = mapdata)
+    ### END HARP CODE ###
   
-  sf_use_s2(TRUE) ### Had to add this line to stop an error at st_crop using planar coordinates
+  ## Using the get_tiles function to generate a basemap
+  tiles <- get_tiles(bb.gg, provider = "Esri.WorldStreetMap",
+                     zoom = 9)
   
-  map_url <- paste(map_server,map_layer,sep ="/")
-  mapdata <- get_spatial_layer(map_url)
-  mapdata <- st_crop(mapdata, c(xmin= min(bbox_points$x), ymin = min(bbox_points$y), 
-                                xmax = max(bbox_points$x), ymax = max(bbox_points$y))) #crop to our extent 
-  base_layer <- ggplot() + 
-                  geom_sf(data = mapdata)
+  tiles_layer <- layer_spatial(tiles, alpha = 1)
   
-  ### END HARP CODE ###
+    # ggplot() + tiles_layer  #+  coord_sf(xlim = extent$x, ylim = extent$y, expand = F) 
   
-  map <- ggplot() +
+  map <- ggplot() +  tiles_layer +
     #ADD STATE BORDER LAYER
-    geom_sf(data = states.gg,aes(group = id),lwd=0.5,na.rm=TRUE) +
+    geom_sf(data = states.gg,aes(group = id), color = 'black',lwd=0.5,na.rm=TRUE, alpha = 0) +
     
     #ADD RIVERS LAYER
     geom_sf(data = rivs.gg, aes(group = id), color="dodgerblue3",lwd=0.4,na.rm=TRUE) +
@@ -75,6 +83,8 @@ base.map <- function(baselayers.gg,extent=data.frame(x = c(-84, -75),y = c(35.25
           panel.grid.minor = element_blank(),
           panel.background = element_blank(),
           panel.border = element_blank()) 
+  
+  
   
   if (isTRUE(scale_bar)){
     
