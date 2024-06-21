@@ -79,13 +79,13 @@ vwpdf <- sqldf('
 SELECT 
 c.Permit_Id, v."Permit Number" AS Permit_Number, v."CEDS Facility Id" AS Fac_Id,
 v."Activity Type" AS Use_Type,c.Annual_Withdrawal_Limit AS Annual_Limit, c.Monthly_Withdrawal_Limit AS Monthly_Limit,
-"Surface Water" AS Permit_Type, v."Most Recent Date Issuance" AS Start_date
+"Surface Water" AS Permit_Type, v."Most Recent Date Issuance" AS Start_date, v.classification
 
 FROM vwp v
 LEFT JOIN vwp_cond c
   ON c.Permit_Id = v."Permit Id"
 
-WHERE v.Classification = "Active"
+WHERE (v.Classification = "Active" OR v.classification = "Application")
   AND v."Activity Type" = "Water Withdrawal"
 
 GROUP BY v."CEDS Facility Id" -- Remove facilities with multiple permits. Only need permited or not field
@@ -95,26 +95,18 @@ GROUP BY v."CEDS Facility Id" -- Remove facilities with multiple permits. Only n
 #### you need to take the highest ID version of the permit, as that is the most recent one created
 #### Migration was ordered by adminid (asc), so based on assumption msot recent permit = active = highest id
 gwpdf <- sqldf('
--- Get the highest ID for each CEDS permit number (sorts through versions)
-WITH mostrecent AS (
-  SELECT GPP_PERMIT_NUMBER, MAX(GPP_DATE_END) AS END_DATE
-  FROM gwp
-  GROUP BY GPP_PERMIT_NUMBER
-)
-
 SELECT g.GPP_ID AS Permit_Id, g.GPP_VAHYDRO_PERMIT_NUMBER AS Permit_Number, mp.Facility_ID AS Fac_Id,
 g.GPPU_DESCRIPTION AS Use_Type, g.GPP_OP_COND_YEARLY_LIMIT AS Annual_Limit, g.GPP_OP_COND_MONTHLY_LIMIT AS Monthly_Limit,
-"Groundwater" AS Permit_Type, GPP_DATE_START AS Start_date
+"Groundwater" AS Permit_Type, GPP_DATE_START AS Start_date, mp.permit_classification_string AS Classification
 
 FROM gwp g
-INNER JOIN mostrecent mr
-  ON g.GPP_PERMIT_NUMBER = mr.GPP_PERMIT_NUMBER
-  AND g.GPP_DATE_END = mr.END_DATE
+
 INNER JOIN mp
   ON mp.Permit_ID = g.GPP_ID
   
 --WHERE Classification = "Active"  -- This would be ideal but this field does not exist
-  
+WHERE (permit_classification_string = "Active" OR permit_classification_string = "Application")
+
 GROUP BY mp.Facility_ID -- Remove facilities with multiple permits. Only need permited or not field
 ')
 
@@ -128,24 +120,14 @@ ceds_permits$Start_date <- as.Date(ceds_permits$Start_date)
 ## Adding in permit 16-0946 (not in ceds)
 fluv <- data.frame(Permit_Id = NA, Permit_Number = '16-0946', Fac_Id = 200000069020,
                    Use_Type = 'public water supply',Annual_Limit = NA,Monthly_Limit = NA,Permit_Type = 'Surface Water',
-                   Start_date = as.Date('2018-09-01'))
+                   Start_date = as.Date('2018-09-01'), Classification = 'Active')
 
 ceds_permits <- rbind(ceds_permits,fluv)
 
-## Removing History GWP permits since there is no classification field
-## 7 of these are drawn from vw2
-RemovePermits <- c("GW0060001","AGTRO19","GW0009000","EV0041600","GW0032900","GW0032200","GW00126EU")
-
-ceds_permits <- ceds_permits[!(ceds_permits$Permit_Number %in% RemovePermits),]
-
 ## END CORRECTIONS #######
-
-
 
 ## Writing the data 
 write.csv(ceds_permits, paste0(onedrive_location,"/OWS/foundation_datasets/awrr/",eyear+1,"/Ceds_permits.csv"), row.names = F)
-
-
 
 ## Joining permits to mp_all ###########################
 ows_permit_list <- read.csv(file = paste0(onedrive_location,"\\OWS\\foundation_datasets\\awrr\\",eyear+1,"\\ows_permit_list.csv")) 
@@ -163,7 +145,7 @@ CASE
 END AS Permit_Status
 
 FROM mp_all_mgy a
-LEFT JOIN ceds_permits c
+LEFT JOIN ceds_permits2 c
   ON c.Fac_Id = a.fac_CEDSid
   AND c.Permit_Type = a.Source_Type
 
