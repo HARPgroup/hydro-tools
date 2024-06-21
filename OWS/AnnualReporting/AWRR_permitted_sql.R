@@ -354,7 +354,7 @@ fiveyr_avg_mgy <- round((rowMeans(mp_all_mgy[(length(mp_all_mgy)-4):length(mp_al
 mp_all_mgy <- cbind(mp_all_mgy,fiveyr_avg_mgy)
 
 #group by facility
-## Should this be limited to eyear?
+## Limited by 5 year average, so inactive MPs dont cause a facility to show both source types (ex: WestRock CP LLC - West Point)
 data_all_fac <- sqldf(paste0('
 SELECT fac_CEDSid, Facility, Use_Type, Locality,
 ROUND((SUM(',eyearX,')/365),1) AS mgd,
@@ -363,6 +363,7 @@ CASE  WHEN MIN(Source_Type) = "Groundwater" THEN 1 END AS GW_type,   --MAX/MIN o
 CASE  WHEN MAX(Source_Type) = "Surface Water" THEN 1 END AS SW_type  --nchar("Surface Water") > nchar("Groundwater")
 
 FROM mp_all_mgy
+WHERE fiveyr_avg_mgy > 0      -- Filters out inactive MPs
 GROUP BY Facility_HydroID, fac_CEDSid
 '))
 
@@ -400,7 +401,7 @@ LIMIT 20
 ###KABLE####
 table4_latex <- kable(top_20[2:7],'latex', booktabs = T, align = c('l','l','c','c','c','l') ,
                       caption = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
-                      label = paste("Top 20 Reported Water Withdrawals in",eyear,"Excluding Power Generation (MGD)",sep=" "),
+                      label = "Top 20 Reported Water Withdrawals in Excluding Power Generation (MGD)",
                       col.names = c(
                         'Facility',
                         'Locality',
