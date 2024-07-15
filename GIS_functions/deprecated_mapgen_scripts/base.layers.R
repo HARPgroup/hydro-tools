@@ -6,7 +6,7 @@ base.layers <- function(baselayers,extent = data.frame(x = c(-84, -75),y = c(35.
   # # LOAD MAP LAYERS FROM THE baselayers LIST 
   STATES <- baselayers[[which(names(baselayers) == "STATES")]]
   MinorBasins.csv <- baselayers[[which(names(baselayers) == "MinorBasins.csv")]]
-  #RSeg.csv <- baselayers[[which(names(baselayers) == "RSeg.csv")]]
+  RSeg.csv <- baselayers[[which(names(baselayers) == "RSeg.csv")]]
   MajorRivers.csv <- baselayers[[which(names(baselayers) == "MajorRivers.csv")]]
   fips.csv <- baselayers[[which(names(baselayers) == "fips.csv")]]
   WBDF <- baselayers[[which(names(baselayers) == "WBDF")]]
@@ -178,102 +178,135 @@ load_MapLayers <- function(site,localpath = tempdir()){
   
   #DOWNLOAD STATES AND MINOR BASIN LAYERS DIRECT FROM GITHUB
   print(paste("DOWNLOADING STATES AND MINOR BASIN LAYERS DIRECT FROM GITHUB...",sep=""))  
-  
+    
   if(!exists("STATES")) {  
-    STATES_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/STATES.tsv"
-    STATES_filename <- "STATES.tsv"
+    state_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/STATES.csv", sep = '')
+    
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
-    if (file.exists(paste(localpath, STATES_filename, sep = '/')) == FALSE) {
+    if (file.exists(state_path)) {
+      print("__STATES LAYER PREVIOUSLY DOWNLOADED")
+      STATES <- read.csv(state_path)
+    } else {
+      STATES_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/STATES.tsv"
+      STATES_filename <- "STATES.tsv"
+      
       print(paste("__DOWNLOADING STATES LAYER", sep = ''))
       destfile <- paste(localpath,STATES_filename,sep="\\")
       download.file(STATES_item, destfile = destfile, method = "libcurl")
-    } else {
-      print(paste("__STATES LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      print(paste("__LOADING STATES LAYER...", sep = ''))
+      STATES <- read.csv(file=paste(localpath,STATES_filename,sep="\\"), header=TRUE, sep="\t")
     }
     #read csv from local directory
-    print(paste("__LOADING STATES LAYER...", sep = ''))
-    STATES <- read.csv(file=paste(localpath,STATES_filename,sep="\\"), header=TRUE, sep="\t")
     print(paste("__COMPLETE!", sep = ''))
   }  
   
+  minorbasin_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/MinorBasins.csv", sep = '')
+  
   if(!exists("MinorBasins.csv")) {  
-    MinorBasins.csv_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MinorBasins.csv"
-    MinorBasins.csv_filename <- "MinorBasins.csv.tsv"
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
-    if (file.exists(paste(localpath, MinorBasins.csv_filename, sep = '/')) == FALSE) {
+    if (file.exists(minorbasin_path)) {
+      print("__MinorBasins.csv LAYER PREVIOUSLY DOWNLOADED")
+      MinorBasins.csv <- read.csv(minorbasin_path)
+      
+    } else {
+      MinorBasins.csv_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MinorBasins.csv"
+      MinorBasins.csv_filename <- "MinorBasins.csv.tsv"
       print(paste("__DOWNLOADING MinorBasins.csv LAYER", sep = ''))
       destfile <- paste(localpath,MinorBasins.csv_filename,sep="\\")
       download.file(MinorBasins.csv_item, destfile = destfile, method = "libcurl")
-    } else {
-      print(paste("__MinorBasins.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      #read csv from local directory
+      print(paste("__LOADING MinorBasins.csv LAYER...", sep = ''))
+      MinorBasins.csv <- read.csv(file=paste(localpath,MinorBasins.csv_filename,sep="\\"), header=TRUE, sep=",")
+      print(paste("__COMPLETE!", sep = ''))  
     }
-    #read csv from local directory
-    print(paste("__LOADING MinorBasins.csv LAYER...", sep = ''))
-    MinorBasins.csv <- read.csv(file=paste(localpath,MinorBasins.csv_filename,sep="\\"), header=TRUE, sep=",")
-    print(paste("__COMPLETE!", sep = ''))  
+
   }
+  
+  RSeg_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/RSeg.csv", sep = '')
   
   #DOWNLOAD RSEG LAYER DIRECT FROM VAHYDRO
   if(!exists("RSeg.csv")) {  
-    print(paste("DOWNLOADING RSEG LAYER DIRECT FROM VAHYDRO...",sep=""))
-    RSeg.csv_item <- paste(site,"vahydro_riversegs_export",sep="")
-    RSeg.csv_filename <- "RSeg.csv"
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
-    if (file.exists(paste(localpath, RSeg.csv_filename, sep = '/')) == FALSE) {
+    if (file.exists(RSeg_path)) {
+      print(paste("__RSeg.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      RSeg.csv <- read.csv(RSeg_path)
+    } else {
+      print(paste("DOWNLOADING RSEG LAYER DIRECT FROM VAHYDRO...",sep=""))
+      RSeg.csv_item <- paste(site,"vahydro_riversegs_export",sep="")
+      RSeg.csv_filename <- "RSeg.csv"
       print(paste("__DOWNLOADING RSeg.csv LAYER", sep = ''))
       destfile <- paste(localpath,RSeg.csv_filename,sep="\\")
       download.file(RSeg.csv_item, destfile = destfile, method = "libcurl")
-    } else {
-      print(paste("__RSeg.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      #read csv from local directory
+      print(paste("__LOADING RSeg.csv LAYER...", sep = ''))
+      RSeg.csv <- read.csv(file=paste(localpath,RSeg.csv_filename,sep="\\"), header=TRUE, sep=",")
+      print(paste("__COMPLETE!", sep = '')) 
     }
-    #read csv from local directory
-    print(paste("__LOADING RSeg.csv LAYER...", sep = ''))
-    RSeg.csv <- read.csv(file=paste(localpath,RSeg.csv_filename,sep="\\"), header=TRUE, sep=",")
-    print(paste("__COMPLETE!", sep = ''))  
+ 
   }
+  
+  MajorRivers_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/MajorRivers.csv", sep = '')
   
   #DOWNLOAD MAJORRIVERS LAYER DIRECT FROM GITHUB
   if(!exists("MajorRivers.csv")) {  
-    print(paste("DOWNLOADING MAJORRIVERS LAYER DIRECT FROM GITHUB...",sep=""))
-    MajorRivers.csv_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MajorRivers.csv"
-    MajorRivers.csv_filename <- "MajorRivers.csv"
-    #file downloaded into local directory, as long as file exists it will not be re-downloaded
-    if (file.exists(paste(localpath, MajorRivers.csv_filename, sep = '/')) == FALSE) {
+       #file downloaded into local directory, as long as file exists it will not be re-downloaded
+    if (file.exists(MajorRivers_path)) {
+      print(paste("__MajorRivers.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      MajorRivers.csv <- read.csv(MajorRivers_path)
+    } else {
+      print(paste("DOWNLOADING MAJORRIVERS LAYER DIRECT FROM GITHUB...",sep=""))
+      MajorRivers.csv_item <- "https://raw.githubusercontent.com/HARPgroup/HARParchive/master/GIS_layers/MajorRivers.csv"
+      MajorRivers.csv_filename <- "MajorRivers.csv"
+      
       print(paste("__DOWNLOADING MajorRivers.csv LAYER", sep = ''))
       destfile <- paste(localpath,MajorRivers.csv_filename,sep="\\")
       download.file(MajorRivers.csv_item, destfile = destfile, method = "libcurl")
-    } else {
-      print(paste("__MajorRivers.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      #read csv from local directory
+      print(paste("__LOADING MajorRivers.csv LAYER...", sep = ''))
+      MajorRivers.csv <- read.csv(file=paste(localpath,MajorRivers.csv_filename,sep="\\"), header=TRUE, sep=",")
+      print(paste("__COMPLETE!", sep = '')) 
+      
     }
-    #read csv from local directory
-    print(paste("__LOADING MajorRivers.csv LAYER...", sep = ''))
-    MajorRivers.csv <- read.csv(file=paste(localpath,MajorRivers.csv_filename,sep="\\"), header=TRUE, sep=",")
-    print(paste("__COMPLETE!", sep = ''))  
+ 
   }
   
   #DOWNLOAD FIPS LAYER DIRECT FROM VAHYDRO
   if(!exists("fips.csv")) {  
-    print(paste("DOWNLOADING FIPS LAYER DIRECT FROM VAHYDRO...",sep=""))
-    fips.csv_item <- paste(site,"/usafips_geom_export",sep="")
-    fips.csv_filename <- "fips.csv"
+    
+    fips_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/fips.csv", sep = '')
+
     #file downloaded into local directory, as long as file exists it will not be re-downloaded
-    if (file.exists(paste(localpath, fips.csv_filename, sep = '/')) == FALSE) {
+    if (file.exists(fips_path)) {
+      print(paste("__fips.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      fips.csv <- read.csv(fips_path)
+    } else {
+      print(paste("DOWNLOADING FIPS LAYER DIRECT FROM VAHYDRO...",sep=""))
+      fips.csv_item <- paste(site,"/usafips_geom_export",sep="")
+      fips.csv_filename <- "fips.csv"
+      
       print(paste("__DOWNLOADING fips.csv LAYER", sep = ''))
       destfile <- paste(localpath,fips.csv_filename,sep="\\")
       download.file(fips.csv_item, destfile = destfile, method = "libcurl")
-    } else {
-      print(paste("__fips.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      #read csv from local directory
+      print(paste("__LOADING fips.csv LAYER...", sep = ''))
+      fips.csv <- read.csv(file=paste(localpath,fips.csv_filename,sep="\\"), header=TRUE, sep=",")
+      print(paste("__COMPLETE!", sep = '')) 
     }
-    #read csv from local directory
-    print(paste("__LOADING fips.csv LAYER...", sep = ''))
-    fips.csv <- read.csv(file=paste(localpath,fips.csv_filename,sep="\\"), header=TRUE, sep=",")
-    print(paste("__COMPLETE!", sep = '')) 
+    
   }
   
   #DOWNLOAD RESERVOIR LAYER FROM LOCAL REPO
   if(!exists("WBDF")) {
-    print(paste("__LOADING RESERVOIR LAYER FROM LOCAL REPO...",sep=""))
-    WBDF <- read.table(file=paste(github_location,"HARPArchive/GIS_layers","WBDF.csv",sep="/"), header=TRUE, sep=",")
+    
+    WBDF_path <- paste(localpath,"/hydro-tools/GIS_functions/deprecated_mapgen_scripts/AWRR_geom_data/WBDF.csv", sep = '')
+    if (file.exists(WBDF_path)) {
+      print(paste("__WBDF.csv LAYER PREVIOUSLY DOWNLOADED", sep = ''))
+      WBDF <- read.csv(WBDF_path)
+    } else {
+      print(paste("__LOADING RESERVOIR LAYER FROM LOCAL REPO...",sep=""))
+      WBDF <- read.table(paste(github_location,"HARPArchive/GIS_layers","WBDF.csv",sep="/"), header=TRUE, sep=",")
+    }
+    
   }
   
   #DOWNLOAD RESERVOIR LAYER FROM LOCAL REPO (AS .SHP)
