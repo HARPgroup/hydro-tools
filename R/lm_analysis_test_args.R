@@ -1,0 +1,6 @@
+data_location <- "http://deq1.bse.vt.edu:81/met/nldas2/precip/usgs_ws_02031000-nldas2-weekly.csv"
+y_var <- "precip_cfs"
+x_var <- "obs_flow"
+mo_var <- "mo"
+json_write_path <- "/c/temp/usgs_ws_02031000.json"
+stats_write_path <- "/c/temp/usgs_ws_02031000.stats.json"
