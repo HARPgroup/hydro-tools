@@ -1,6 +1,7 @@
 # 
 #' om_model_object Function: Retrieves a model object, creates if needed
 #' @description Retrieves a model object, creates if needed
+#' @param ds RomDataSource
 #' @param feature Feature object RomFeature
 #' @param model_version Model version
 #' @param model_name Model name, defaults to feature name + model_Version
@@ -8,7 +9,7 @@
 #' @return model object as RomProperty
 #' @export om_model_object
 om_model_object <- function(
-    feature, model_version, model_name = FALSE,
+    ds, feature, model_version, model_name = FALSE,
     model_varkey='om_model_element'
 ) {
   model <- RomProperty$new(
