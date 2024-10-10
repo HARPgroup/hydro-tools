@@ -67,6 +67,7 @@ om_vahydro_metric_grid <- function (
     } else {
       dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
     }
+    meta_cols <- c('pid', 'propname', 'hydrocode', 'featureid', 'riverseg')
     rawdata <- as.data.frame(dat)
     if (is.null(alldata) ) {
       alldata = sqldf(
@@ -77,11 +78,18 @@ om_vahydro_metric_grid <- function (
         )
       )
     } else {
+      data_cols <- paste(names(alldata)[ !names(alldata) %in% meta_cols],collapse=' ,')
       mergeq = paste(
-        "select a.*, b.attribute_value as ",
+        "select CASE WHEN a.pid is NULL THEN b.pid ELSE a.pid END as pid,
+            CASE WHEN a.propname is null then b.propname ELSE a.propname END AS propname,
+            CASE WHEN a.hydrocode is null THEN b.hydrocode ELSE a.hydrocode END as hydrocode,
+            CASE WHEN a.featureid is null THEN b.featureid ELSE a.featureid END AS featureid,
+            CASE WHEN a.riverseg is null THEN b.riverseg ELSE a.riverseg END AS riverseg,",
+            data_cols, ",",
+            "b.attribute_value as ",
         runlabel, 
         "from alldata as a 
-        left outer join rawdata as b 
+        full join rawdata as b 
         on (
           a.featureid = b.featureid
         "
