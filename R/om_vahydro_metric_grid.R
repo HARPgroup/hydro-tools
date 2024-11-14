@@ -13,7 +13,7 @@
 #' @seealso NA
 #' @export om_vahydro_metric_grid
 #' @examples NA
-om_vahydro_metric_grid <- function (
+om_vahydro_metric_grid2 <- function (
   metric,
   runids,
   featureid = 'all',
@@ -95,6 +95,27 @@ om_vahydro_metric_grid <- function (
       alldata = sqldf(
         mergeq
       )
+      ## Determine if any features were cut out
+      if (sum(!(rawdata$pid %in% alldata$pid)) > 0) {
+        ## Add them back in 
+        ## Pull out the features that are missing
+        adddata <- rawdata[!(rawdata$pid %in% alldata$pid),]
+          
+        ## Format to match alldata (This will only happen after at least 1 column has been added to alldata)
+        adddata = sqldf(
+          paste("select a.pid, a.propname, a.hydrocode, a.featureid, a.riverseg, a.attribute_value as ",
+                runlabel, 
+                "from adddata as a ")
+        )
+        ## Fill in any existing columns with NAs, since up to this point it has been
+        adddata[,(ncol(adddata)+1):(ncol(alldata))] <- NA
+        ## Rearrange the columns slightly
+        adddata <- adddata[,c(1:5,7:ncol(alldata),6)]
+        ##Make the names match for rbind
+        names(adddata) <- names(alldata)
+
+        alldata <- rbind(alldata,adddata)
+      }
     }
   }
   return(alldata)
