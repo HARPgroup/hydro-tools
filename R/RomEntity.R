@@ -14,7 +14,7 @@ RomEntity <- R6Class(
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
     #' @field pk_name the name of this entity's pk column
-    pk_name = NA,
+    pk_name = "entity_id",
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(NULL)
@@ -65,6 +65,11 @@ RomEntity <- R6Class(
         }
       }
       self$from_list(config)
+      if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
+        # stash a copy in the local datasource database 
+        # if this was a valid retrieval from remote
+        self$save(FALSE) 
+      }
     }
   )
 )

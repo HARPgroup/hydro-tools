@@ -81,6 +81,11 @@ RomProperty <- R6Class(
         }
       }
       self$from_list(config)
+      if (!is.na(self$pid) & (load_remote == TRUE) ) {
+        # stash a copy in the local datasource database 
+        # if this was a valid retrieval from remote
+        self$save(FALSE) 
+      }
     },
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return NULL
