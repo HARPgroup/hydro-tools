@@ -243,7 +243,7 @@ fn_get_runfile <- function(
 fn_get_vardef_view <- function(varkey, site, token, debug = FALSE) {
   tsdef_url<- paste(site,"?q=vardefs.tsv/", varkey,sep="")
   #tsdef_table <- read.table(tsdef_url,header = TRUE, sep = "\t")    
-  message(paste("Trying ", tsdef_url))
+  #message(paste("Trying ", tsdef_url))
   tsdef_table <- om_auth_read(tsdef_url, token, "text/tab-separated-values", delim = "\t")
   vardef <- as.list(tsdef_table[1,])
   varid <- vardef$varid
@@ -335,9 +335,9 @@ fn_get_timeseries <- function(inputs, site, token){
       query = pbody, 
       encode = "json"
     )
-    message(tsrest)
+    #message(tsrest)
     ts_cont <- httr::content(tsrest);
-    message(paste(site,"/dh_timeseries.json",sep=""))
+    #message(paste(site,"/dh_timeseries.json",sep=""))
     
     if (length(ts_cont$list) != 0) {
       
@@ -407,7 +407,7 @@ fn_post_rest <- function(entity_type, pk, inputs, site, token){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
-  message(paste("Called fn_post_rest(", entity_type, ",", pk, ", pkid=", pkid, ")"))
+  #message(paste("Called fn_post_rest(", entity_type, ",", pk, ", pkid=", pkid, ")"))
   
   for (j in 1:length(inputs)) {
     if (is.na(inputs[j])) {
@@ -513,7 +513,7 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
     );
     #message(entity_rest)
     entity_cont <- httr::content(entity_rest);
-    message(paste0(site, "/",entity_type, ".json"))
+    #message(paste0(site, "/",entity_type, ".json"))
     
     if (length(entity_cont$list) != 0) {
       numrecs <- length(entity_cont$list)
@@ -635,7 +635,7 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
   }
   if (nchar(where_clause) > 0 ) {
     tss <- paste(tss, where_clause)
-    message(tss)
+    #message(tss)
     tsvals <- sqldf::sqldf(tss)
     if (!nrow(tsvals)) {
       tsvals = FALSE
@@ -707,7 +707,7 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   }
   if (nchar(where_clause) > 0 ) {
     propsql <- paste(propsql, where_clause)
-    message(propsql)
+    #message(propsql)
     propvals <- sqldf::sqldf(propsql)
     if (!nrow(propvals)) {
       propvals = FALSE
@@ -794,7 +794,7 @@ fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
   }
   if (nchar(where_clause) > 0 ) {
     tmp_sql <- paste(tmp_sql, where_clause)
-    message(tmp_sql)
+    #message(tmp_sql)
     features <- sqldf::sqldf(tmp_sql)
     if (!nrow(features)) {
       features = FALSE
