@@ -606,11 +606,11 @@ fn_search_tsvalues <- function(config, tsvalues_tmp, multiplicity = 'default') {
     # todo: handle other multiplicity modes
     for (i in wcols) {
       if (is.na(config[i])) {
-        message(paste("Skipping NULL", i))
+        #message(paste("Skipping NULL", i))
         next
       }
       if (!(i %in% colnames(tsvalues_tmp))) {
-        message(paste0("Skipping ", i))
+        #message(paste0("Skipping ", i))
         next
       }
       if (nchar(where_clause) > 1) {
@@ -674,15 +674,15 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
     for (i in wcols) {
       # check for null first since is.na will give an error if the column does not exist.
       if (is.null(config[[i]])) {
-        message(paste("Skipping NULL", i))
+        #message(paste("Skipping NULL", i))
         next
       }
       if (is.na(config[[i]])) {
-        message(paste("Skipping NA", i))
+        #message(paste("Skipping NA", i))
         next
       }
       if (!(i %in% colnames(propvalues_tmp))) {
-        message(paste0("Skipping ", i))
+        #message(paste0("Skipping ", i))
         next
       }
       if (nchar(where_clause) > 1) {
@@ -761,15 +761,15 @@ fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
     for (i in wcols) {
       # check for null first since is.na will give an error if the column does not exist.
       if (is.null(config[[i]])) {
-        message(paste("Skipping NULL", i))
+        #message(paste("Skipping NULL", i))
         next
       }
       if (is.na(config[[i]])) {
-        message(paste("Skipping NA", i))
+        #message(paste("Skipping NA", i))
         next
       }
       if (!(i %in% colnames(features_tmp))) {
-        message(paste0("Skipping ", i))
+        #message(paste0("Skipping ", i))
         next
       }
       if (nchar(where_clause) > 1) {
