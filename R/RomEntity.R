@@ -15,6 +15,8 @@ RomEntity <- R6Class(
     base_entity_type = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = NA,
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(NULL)

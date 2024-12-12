@@ -44,6 +44,29 @@ RomProperty <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = "
+      select * from (
+        select a.*, b.proptext_value as proptext, 
+          php_unserialize_to_json(c.field_dh_matrix_value ) as dh_matrix_value
+        from dh_properties as a 
+        left outer join field_data_proptext as b
+        on (
+          b.entity_id = a.pid
+          and b.entity_type = 'dh_properties'
+        )
+        left outer join field_data_field_dh_matrix as c
+        on (
+          c.entity_id = a.pid
+          and c.entity_type = 'dh_properties'
+        )
+        left outer join field_data_field_projection_table as d
+        on (
+          d.entity_id = a.pid
+          and d.entity_type = 'dh_properties'
+        )
+      ) as dh_properties
+    ",
     #' @return get_id the id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$pid)
@@ -63,7 +86,7 @@ RomProperty <- R6Class(
         if (!is.null(self$datasource)) {
           vardef = self$datasource$get_vardef(config$varkey)
           config$varid = vardef$varid
-          # eliminate this since if passed raw to reest will cause problems
+          # eliminate this since if passed raw to rest will cause problems
           config$varkey <- NULL
         }
       }
@@ -73,7 +96,7 @@ RomProperty <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        prop <- self$datasource$get_prop(config, 'list', TRUE)
+        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
         # merge config with prop
         #message("Found")
         if (!is.logical(prop)) {

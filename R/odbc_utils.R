@@ -9,7 +9,7 @@
 #' @seealso NA
 #' @export fn_post_odbc
 #' @examples NA
-fn_post_odbc <- function(entity_type, pk, inputs, site, token){
+fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
@@ -85,14 +85,32 @@ fn_post_odbc <- function(entity_type, pk, inputs, site, token){
 #' @param token for xhttp auth
 #' @export fn_get_odbc
 #' @examples NA
-fn_get_odbc <- function(entity_type, pk, inputs, con){
+fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   
-  pkid <- as.integer(as.character(inputs[pk]))
-  if (is.na(pkid)) {
-    pkid = NULL
+  sql_stuff <- fn_guess_sql(entity_type, pk, inputs)
+  get_sql = sql_stuff$get_sql
+  limits = sql_stuff$limits
+  if (!is.logical(obj)) {
+    if ("sql_select_from" %in% names(obj)) {
+      get_sql = obj$sql_select_from
+    }
   }
-  get_sql = paste("select * from ", entity_type) 
+  get_where = fn_guess_sql_where(entity_type, pk, inputs)
+  get_sql = paste(get_sql, "WHERE", get_where, limits)
+  message(get_sql)
+  entities = sqldf(get_sql, connection = con)
+  if (is.logical(entities)) {
+    message("----- This entity does not exist")
+    entities = FALSE
+  } else {
+    message(paste("Total =", nrow(entities)))
+  }
+  return(entities)
+}
+
+fn_guess_sql <- function(entity_type, pk, inputs) {
+  sql_stuff <- list()
   if (is.null(inputs$limit)) {
     inputs$limit = 0
   }
@@ -101,7 +119,24 @@ fn_get_odbc <- function(entity_type, pk, inputs, con){
   } else {
     limits = ""
   }
+  # remove special things that are not part of the columns
+  inputs$limit <- NULL
+  get_sql = paste("select * from ", entity_type) 
+  
+  sql_stuff$get_sql <- get_sql
+  sql_stuff$limits <- limits
+  return(sql_stuff)
+}
+
+fn_guess_sql_where <- function(entity_type, pk, inputs) {
   get_where = ""
+  pkid <- as.integer(as.character(inputs[pk]))
+  if (is.na(pkid)) {
+    pkid = NULL
+  }
+  # remove special things that are not part of the columns
+  inputs$limit <- NULL
+  inputs$page <- NULL
   if (!is.null(pkid)) {
     # Simple PK retrieval
     get_where = paste(pk,"=",pkid)
@@ -110,10 +145,6 @@ fn_get_odbc <- function(entity_type, pk, inputs, con){
     message(paste("inputs:", inputs))
     for (col_name in names(inputs)) {
       col_val = inputs[[col_name]]
-      #message(paste("Handling", col_name))
-      if (col_name == 'limit') {
-        next
-      }
       if (is.na(inputs[j])) {
         inputs[j] <- NULL
       }
@@ -131,14 +162,5 @@ fn_get_odbc <- function(entity_type, pk, inputs, con){
       }
     }
   }
-  get_sql = paste(get_sql, "WHERE", get_where, limits)
-  message(get_sql)
-  entities = sqldf(get_sql, connection = con)
-  if (is.logical(entities)) {
-    message("----- This entity does not exist")
-    entities = FALSE
-  } else {
-    message(paste("Total =", nrow(entities)))
-  }
-  return(entities)
+  return(get_where)
 }

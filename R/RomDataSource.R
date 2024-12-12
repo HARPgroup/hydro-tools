@@ -21,14 +21,19 @@ RomDataSource <- R6Class(
     site = NULL,
     #' @field json_obj_url URL for retrieving full objects
     json_obj_url = NULL,
+    #' @field connection_type rest or odbc
+    connection_type = 'rest', 
+    #' @field connection rest or odbc
+    connection = NULL, 
     #' @field rest_uname username to connect to RESTful repository
     rest_uname = NULL,
     #' @param site URL of some RESTful repository
     #' @param rest_uname username to connect to RESTful repository
     #' @return object instance
-    initialize = function(site, rest_uname = NULL) {
+    initialize = function(site, rest_uname = NULL, connection_type = 'rest') {
       self$site = site
       self$rest_uname = rest_uname
+      self$connection_type = connection_type
     },
     #' @param table which table. Default 'all'
     #' @return nothing clears data tables
@@ -80,8 +85,12 @@ RomDataSource <- R6Class(
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
-    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       props = FALSE
+      if (self$connection_type == 'odbc') {
+        propvalues <- self$get('dh_properties', 'pid', config, obj)
+        return(propvalues)
+      }
       propvalues <- fn_search_properties(config, self$propvalues)
       
       if (is.logical(propvalues)) {
@@ -270,9 +279,15 @@ RomDataSource <- R6Class(
     #' @param entity_type = dh_feature, dh_properties, ...
     #' @param pk = primary key column name, e.g. hydroid, pid, ...
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
+    #' @param obj = (optional) object class calling this routine, can supply extra info
     #' @return local df index?
-    get = function(entity_type, pk, config) {
-      retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
+    get = function(entity_type, pk, config, obj = FALSE) {
+      if (self$connection_type == 'rest') {
+        retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj)
+      }
+      
       return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
