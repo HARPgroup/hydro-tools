@@ -22,7 +22,7 @@ RomDataSource <- R6Class(
     #' @field json_obj_url URL for retrieving full objects
     json_obj_url = NULL,
     #' @field connection_type rest or odbc
-    connection_type = 'odbc', 
+    connection_type = NULL, 
     #' @field connection rest or odbc
     connection = NULL, 
     #' @field rest_uname username to connect to RESTful repository
@@ -31,7 +31,7 @@ RomDataSource <- R6Class(
     #' @param rest_uname username to connect to RESTful repository
     #' @param connection_type supported rest or odbc
     #' @return object instance
-    initialize = function(site, rest_uname = NULL, connection_type = 'rest') {
+    initialize = function(site, rest_uname = NULL, connection_type = 'odbc') {
       self$site = site
       self$rest_uname = rest_uname
       self$connection_type = connection_type
