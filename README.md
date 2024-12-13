@@ -11,7 +11,7 @@ install.packages("devtools")
 library("devtools")
 install_github("HARPgroup/hydro-tools")
 # alternate, install a development branch for testing:
-install_github("HARPgroup/hydro-tools", ref = "odbc")
+install_github("HARPgroup/hydro-tools", ref = "odbc", force=TRUE)
 
 # hydrotools uses IHA for some metrics.
 # Install IHA as:
