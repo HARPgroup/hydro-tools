@@ -22,7 +22,7 @@ RomDataSource <- R6Class(
     #' @field json_obj_url URL for retrieving full objects
     json_obj_url = NULL,
     #' @field connection_type rest or odbc
-    connection_type = 'rest', 
+    connection_type = 'odbc', 
     #' @field connection rest or odbc
     connection = NULL, 
     #' @field rest_uname username to connect to RESTful repository
@@ -46,11 +46,22 @@ RomDataSource <- R6Class(
     },
     #' @param rest_pw to use, if NULL will prompt
     #' @return nothing sets internal private token
-    get_token = function(rest_pw = NULL) {
+    get_token = function(rest_pw = NULL, odbc_port = 5431) {
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
+      if (self$connection_type == 'rest') {
+        private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
+      } else {
+        self$connection <- dbConnect(
+          RPostgres::Postgres(),
+          dbname = dbname,
+          host = httr::parse_url(self$site)$hostname,
+          port = odbc_port,
+          user = self$rest_uname,
+          password =  rest_pw
+        )
+      }
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key

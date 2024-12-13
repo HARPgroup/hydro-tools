@@ -1,3 +1,13 @@
+fn_pg_odbc_connect <- function (dbname, host,port,user) {
+  con <- dbConnect(
+    RPostgres::Postgres(),
+    dbname = "drupal.dh03",
+    host = "deq1.bse.vt.edu",
+    port = 5431,
+    user = readline("DB User Name: "),
+    password =  getPass::getPass("REST Password: ")
+  )
+}
 
 #' Post any entity to a RESTful web service
 #'
