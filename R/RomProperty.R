@@ -34,6 +34,8 @@ RomProperty <- R6Class(
     propcode = NA,
     #' @field proptext alphanumeric value
     proptext = NA,
+    #' @field data_matrix json matrix
+    data_matrix = NA,
     #' @field varid variable ID from RomDataSource
     varid = NA,
     #' @field bundle (for future use)
@@ -48,7 +50,11 @@ RomProperty <- R6Class(
     sql_select_from = "
       select * from (
         select a.*, b.proptext_value as proptext, 
-          php_unserialize_to_json(c.field_dh_matrix_value ) as dh_matrix_value
+          CASE
+            WHEN c.field_dh_matrix_value IS NOT NULL THEN php_unserialize_to_json(c.field_dh_matrix_value )
+            WHEN d.field_projection_table_value IS NOT NULL THEN php_unserialize_to_json(d.field_projection_table_value )
+            ELSE NULL
+          END as data_matrix
         from dh_properties as a 
         left outer join field_data_proptext as b
         on (
@@ -81,6 +87,25 @@ RomProperty <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
+      config <- self$handle_config(config)
+      # if requested, we try to load
+      # only the last one returned will be sent back to user if multiple
+      if (load_remote) {
+        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
+        if (nrow(prop) >= 1) {
+          prop <- as.list(prop[1,])
+        }
+        # merge config with prop
+        #message("Found")
+        if (!is.logical(prop)) {
+          config <- prop
+        }
+      }
+      self$load_data(config, load_remote)
+    },
+    #' @param config 
+    #' @returns an updated config if necessary or FALSE if it fails
+    handle_config = function(config) {
       config_cols <- names(config)
       if (is.element("varkey", config_cols)) {
         if (!is.null(self$datasource)) {
@@ -93,22 +118,7 @@ RomProperty <- R6Class(
       if (!is.element("bundle", config_cols)) {
         config$bundle <- 'dh_properties'
       }
-      # if requested, we try to load
-      # only the last one returned will be sent back to user if multiple
-      if (load_remote) {
-        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
-        # merge config with prop
-        #message("Found")
-        if (!is.logical(prop)) {
-          config <- prop
-        }
-      }
-      self$from_list(config)
-      if (!is.na(self$pid) & (load_remote == TRUE) ) {
-        # stash a copy in the local datasource database 
-        # if this was a valid retrieval from remote
-        self$save(FALSE) 
-      }
+      return(config)
     },
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return NULL
@@ -137,6 +147,11 @@ RomProperty <- R6Class(
           self$proptext = as.character(config$proptext)
         } else if (i == "bundle") {
           self$bundle = as.character(config$bundle)
+        } else if (i == "data_matrix") {
+          mvalid <- jsonlite::validate(config$data_matrix)
+          if (mvalid[1] == TRUE) {
+            self$data_matrix = jsonlite::fromJSON(config$data_matrix)
+          }
         }
       }
     },
@@ -165,6 +180,10 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
+      mvalid <- jsonlite::validate(self$data_matrix)
+      if (mvalid[1] == TRUE) {
+        t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
+      }
       return(t_list)
     },
     #' @param name attribute name

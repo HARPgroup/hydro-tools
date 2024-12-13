@@ -56,6 +56,11 @@ RomEntity <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
+      config <- self$handle_config(config)
+      if (is.logical(config)) {
+        message("Configuration information faild validation. Returning.")
+        return(FALSE)
+      }
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
@@ -66,11 +71,25 @@ RomEntity <- R6Class(
           config <- feature
         }
       }
+      self$load_data(config)
+    },
+    #' @param config 
+    #' @returns an updated config if necessary or FALSE if it fails
+    handle_config = function(config) {
+      return(config)
+    },
+    load_data = function(config, load_remote) {
       self$from_list(config)
+      # this should be handled better.  We need to decide if we want to 
+      # still use the local datasource as a repository for remote data
+      # at first the thinking was no with ODBC, but maybe that's not correct?
+      # in other words, it was thought that ODBC replaced the local storage...
       if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
-        self$save(FALSE) 
+        if (self$datasource$connection_type != 'odbc') {
+          self$save(FALSE) 
+        }
       }
     }
   )
