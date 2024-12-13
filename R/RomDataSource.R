@@ -34,7 +34,7 @@ RomDataSource <- R6Class(
     #' @param connection_type supported rest or odbc
     #' @param dbname supported odbc dbname
     #' @return object instance
-    initialize = function(site, rest_uname = NULL, connection_type = 'odbc', dbname = 'drupal.dh03') {
+    initialize = function(site, rest_uname = NULL, connection_type = 'rest', dbname = NULL) {
       self$site = site
       self$rest_uname = rest_uname
       self$connection_type = connection_type
@@ -65,7 +65,7 @@ RomDataSource <- R6Class(
           host = httr::parse_url(self$site)$hostname,
           port = odbc_port,
           user = self$rest_uname,
-          password =  rest_pw
+          password = rest_pw
         )
       }
     },

@@ -75,7 +75,7 @@ RomEntity <- R6Class(
           config <- feature
         }
       }
-      self$load_data(config)
+      self$load_data(config, load_remote)
     },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
