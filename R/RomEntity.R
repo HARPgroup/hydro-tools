@@ -11,15 +11,19 @@
 RomEntity <- R6Class(
   "RomEntity",
   public = list(
+    #' @field name what is it called
+    name = NA,
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
+    #' @field entity_id unique ID of entity
+    entity_id = NA,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = NA,
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
-      return(NULL)
+      return(self$entity_id)
     },
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
@@ -89,6 +93,30 @@ RomEntity <- R6Class(
         # if this was a valid retrieval from remote
         if (self$datasource$connection_type != 'odbc') {
           self$save(FALSE) 
+        }
+      }
+    },
+    #' @return list of object attributes suitable for input to new() and from_list() methods
+    to_list = function() {
+      # returns as a list, which can be set and fed back to 
+      # from_list() or new(config)
+      t_list <- list(
+        entity_id = self$get_id(),
+        name = self$name
+      )
+      return(t_list)
+    },
+    #' @param push_remote update locally only or push to remote database
+    #' @return NULL
+    save = function(push_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (push_remote) {
+        finfo <- self$to_list()
+        fid = self$datasource$post(self$base_entity_type, self$pk_name, finfo)
+        if (!is.logical(hydroid)) {
+          self[[self$pk_name]] = fid
         }
       }
     }

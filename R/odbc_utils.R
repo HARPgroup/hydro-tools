@@ -98,7 +98,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   }
   get_where = fn_guess_sql_where(entity_type, pk, inputs)
   get_sql = paste(get_sql, "WHERE", get_where, limits)
-  message(get_sql)
+  #message(get_sql)
   entities = sqldf(get_sql, connection = con)
   if (is.logical(entities)) {
     message("----- This entity does not exist")
@@ -142,13 +142,13 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
     get_where = paste(pk,"=",pkid)
   } else {
     get_where_glue = ""
-    message(paste("inputs:", inputs))
+    #message(paste("inputs:", inputs))
     for (col_name in names(inputs)) {
       col_val = inputs[[col_name]]
       if (is.na(inputs[j])) {
         inputs[j] <- NULL
       }
-      message(paste(col_name,'=',typeof(col_val)))
+      #message(paste(col_name,'=',typeof(col_val)))
       if (is.character(col_val)) {
         col_val = paste0("'",col_val,"'")
       }

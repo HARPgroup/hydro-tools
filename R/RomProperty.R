@@ -92,8 +92,13 @@ RomProperty <- R6Class(
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
         prop <- self$datasource$get_prop(config, 'list', TRUE, self)
-        if (nrow(prop) >= 1) {
-          prop <- as.list(prop[1,])
+        #print((nrow(prop) >= 1))
+        if (is.data.frame(prop)) {
+          if (nrow(prop) >= 1) {
+            prop <- as.list(prop[1,])
+          } else {
+            prop <- FALSE
+          }
         }
         # merge config with prop
         #message("Found")
@@ -114,9 +119,6 @@ RomProperty <- R6Class(
           # eliminate this since if passed raw to rest will cause problems
           config$varkey <- NULL
         }
-      }
-      if (!is.element("bundle", config_cols)) {
-        config$bundle <- 'dh_properties'
       }
       return(config)
     },
@@ -148,9 +150,29 @@ RomProperty <- R6Class(
         } else if (i == "bundle") {
           self$bundle = as.character(config$bundle)
         } else if (i == "data_matrix") {
-          mvalid <- jsonlite::validate(config$data_matrix)
-          if (mvalid[1] == TRUE) {
-            self$data_matrix = jsonlite::fromJSON(config$data_matrix)
+          if (is.character(config$data_matrix)) {
+            mvalid <- jsonlite::validate(config$data_matrix)
+            if (mvalid[1] == TRUE) {
+              drupal_data = jsonlite::fromJSON(config$data_matrix)
+              data_header <- drupal_data$tabledata[[1]]
+              n <- 1
+              for (h in data_header) {
+                if(is.null(h) | is.na(h)) {
+                  data_header[[n]] <- paste0("V",n)
+                }
+                n <- n + 1
+              }
+              data_table <- as.data.frame(data_header)
+              for (i in 2:length(drupal_data$tabledata)) {
+                raw_row <- drupal_data$tabledata[[i]]
+                drow <- as.data.frame(drupal_data$tabledata[[i]])
+                data_table <- rbind(data_table, drow)
+              }
+              self$data_matrix = data_table
+            } else {
+              # it is either valid, or empty either way, assign it
+              self$data_matrix <- config$data_matrix
+            }
           }
         }
       }
@@ -180,9 +202,17 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
-      mvalid <- jsonlite::validate(self$data_matrix)
-      if (mvalid[1] == TRUE) {
-        t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
+      if (is.character(self$data_matrix)) {
+        mvalid <- jsonlite::validate(self$data_matrix)
+        if (mvalid[1] == TRUE) {
+          t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
+        }
+      }
+      if (is.null(self$bundle)) {
+        self$bundle <- 'dh_properties'
+      }
+      if (!nchar(self$bundle) > 0) {
+        self$bundle <- 'dh_properties'
       }
       return(t_list)
     },

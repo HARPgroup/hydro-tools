@@ -87,10 +87,17 @@ RomDataSource <- R6Class(
     #' @return nothing sets internal private token
     get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       props = FALSE
+      # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
         propvalues <- self$get('dh_properties', 'pid', config, obj)
         return(propvalues)
       }
+      # todo: all entities should be able to be searched by the odbc methods
+      #       so eventually all this will be phased out, since the odbc methods
+      #       have robust querying, and should be able to query against the datasource
+      #       using it's names as an environment.  We can make the propvalues
+      #       point to dh_properties on the datasource
+      #       and also tsvalues point to dh_timeseries_values
       propvalues <- fn_search_properties(config, self$propvalues)
       
       if (is.logical(propvalues)) {
