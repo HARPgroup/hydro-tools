@@ -144,14 +144,14 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
     #message(paste("inputs:", inputs))
     for (col_name in names(inputs)) {
       col_val = inputs[[col_name]]
-      if (is.na(inputs[j])) {
-        inputs[j] <- NULL
+      if (is.na(inputs[col_name])) {
+        inputs[col_name] <- NULL
       }
       #message(paste(col_name,'=',typeof(col_val)))
       if (is.character(col_val)) {
         col_val = paste0("'",col_val,"'")
       }
-      if (!is.null(inputs[j])) {
+      if (!is.null(inputs[col_name])) {
         get_where = paste(
           get_where, 
           get_where_glue, 
