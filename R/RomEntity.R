@@ -82,6 +82,9 @@ RomEntity <- R6Class(
     handle_config = function(config) {
       return(config)
     },
+    #' @param config 
+    #' @param load_remote automatically query remote data source for matches?
+    #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
       self$from_list(config)
       # this should be handled better.  We need to decide if we want to 

@@ -29,6 +29,7 @@ RomDataSource <- R6Class(
     rest_uname = NULL,
     #' @param site URL of some RESTful repository
     #' @param rest_uname username to connect to RESTful repository
+    #' @param connection_type supported rest or odbc
     #' @return object instance
     initialize = function(site, rest_uname = NULL, connection_type = 'rest') {
       self$site = site
@@ -45,6 +46,7 @@ RomDataSource <- R6Class(
       }
     },
     #' @param rest_pw to use, if NULL will prompt
+    #' @param odbc_port to use, if NULL will prompt
     #' @return nothing sets internal private token
     get_token = function(rest_pw = NULL, odbc_port = 5431) {
       if (!is.character(self$site) ) {
@@ -95,6 +97,7 @@ RomDataSource <- R6Class(
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
+    #' @param obj optional object which can supply more specific query info for odbc
     #' @return nothing sets internal private token
     get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       props = FALSE

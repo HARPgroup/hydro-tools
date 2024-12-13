@@ -1,21 +1,10 @@
-fn_pg_odbc_connect <- function (dbname, host,port,user) {
-  con <- dbConnect(
-    RPostgres::Postgres(),
-    dbname = "drupal.dh03",
-    host = "deq1.bse.vt.edu",
-    port = 5431,
-    user = readline("DB User Name: "),
-    password =  getPass::getPass("REST Password: ")
-  )
-}
-
 #' Post any entity to a RESTful web service
 #'
 #' @param entity_type = dh_feature, dh_properties, ...
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs  contents of record to post in list(pid, propname, propvalue, ...)
-#' @param site URL of rest server
-#' @param token for xhttp auth
+#' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
+#' @param con connection to ODBC server
+#' @param obj optional class with extra query info
 #' @seealso NA
 #' @export fn_post_odbc
 #' @examples NA
@@ -90,9 +79,9 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
 #'
 #' @param entity_type = dh_feature, dh_properties, ...
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs  contents of record to get in list(pid, propname, propvalue, ...)
-#' @param site URL of rest server
-#' @param token for xhttp auth
+#' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
+#' @param con connection to ODBC server
+#' @param obj optional class with extra query info
 #' @export fn_get_odbc
 #' @examples NA
 fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
