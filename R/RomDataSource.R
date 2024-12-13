@@ -27,14 +27,18 @@ RomDataSource <- R6Class(
     connection = NULL, 
     #' @field rest_uname username to connect to RESTful repository
     rest_uname = NULL,
+    #' @field dbname DATABASE TO USE IN odbC CONNECTION
+    dbname = NULL,
     #' @param site URL of some RESTful repository
     #' @param rest_uname username to connect to RESTful repository
     #' @param connection_type supported rest or odbc
+    #' @param dbname supported odbc dbname
     #' @return object instance
-    initialize = function(site, rest_uname = NULL, connection_type = 'odbc') {
+    initialize = function(site, rest_uname = NULL, connection_type = 'odbc', dbname = 'drupal.dh03') {
       self$site = site
       self$rest_uname = rest_uname
       self$connection_type = connection_type
+      self$dbname = dbname
     },
     #' @param table which table. Default 'all'
     #' @return nothing clears data tables
@@ -57,7 +61,7 @@ RomDataSource <- R6Class(
       } else {
         self$connection <- dbConnect(
           RPostgres::Postgres(),
-          dbname = dbname,
+          dbname = self$dbname,
           host = httr::parse_url(self$site)$hostname,
           port = odbc_port,
           user = self$rest_uname,
