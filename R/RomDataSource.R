@@ -108,29 +108,29 @@ RomDataSource <- R6Class(
       # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
         propvalues <- self$get('dh_properties', 'pid', config, obj)
-        return(propvalues)
-      }
-      # todo: all entities should be able to be searched by the odbc methods
-      #       so eventually all this will be phased out, since the odbc methods
-      #       have robust querying, and should be able to query against the datasource
-      #       using it's names as an environment.  We can make the propvalues
-      #       point to dh_properties on the datasource
-      #       and also tsvalues point to dh_timeseries_values
-      propvalues <- fn_search_properties(config, self$propvalues)
-      
-      if (is.logical(propvalues)) {
-        # none exists locally, so query
-        force_refresh = TRUE
-      }
-      if (!is.null(self$site) & force_refresh) {
-        propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
-        if (!is.logical(propvalues)) {
-          if (nrow(propvalues) >= 1) {
-            prop <- as.list(propvalues[1,])
-          }
-        } else {
-          prop <- propvalues
+      } else {
+        # todo: all entities should be able to be searched by the odbc methods
+        #       so eventually all this will be phased out, since the odbc methods
+        #       have robust querying, and should be able to query against the datasource
+        #       using it's names as an environment.  We can make the propvalues
+        #       point to dh_properties on the datasource
+        #       and also tsvalues point to dh_timeseries_values
+        propvalues <- fn_search_properties(config, self$propvalues)
+        
+        if (is.logical(propvalues)) {
+          # none exists locally, so query
+          force_refresh = TRUE
         }
+        if (!is.null(self$site) & force_refresh) {
+          propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
+        }
+      }
+      if (!is.logical(propvalues)) {
+        if (nrow(propvalues) >= 1) {
+          prop <- as.list(propvalues[1,])
+        }
+      } else {
+        prop <- propvalues
       }
       # return either the raw fn_get_timeseries/fn_search_propvalues 
       # or a the first found item
@@ -148,7 +148,7 @@ RomDataSource <- R6Class(
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
-    get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+    get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       # return_type = 'list', or 'data.frame'
       # default to data.frame to maintain compatibility with getTimeseries
       # force_refresh = if FALSE, use local value if we already have one
@@ -157,6 +157,7 @@ RomDataSource <- R6Class(
       # or, return FALSE with message that df is only option? Hmmmm.
       # or return 
       # search first in 
+      # odbc has robust query handling so we don't need to do this
       ts = FALSE
       tsvalues <- fn_search_tsvalues(config, self$tsvalues)
       if (is.logical(tsvalues)) {

@@ -37,14 +37,19 @@ RomEntity <- R6Class(
     #' @param tstime timespan begin
     #' @param tsendtime timespan end
     tsvalues = function(varkey = NULL, tstime = NULL, tsendtime = NULL) {
-      ts <- self$datasource$get_ts(
-        list(
-          featureid = self$get_id(), 
-          varkey = varkey, 
-          tstime = tstime, 
-          tsendtime = tsendtime, 
-          entity_type=self$base_entity_type
-        )
+      ts_obj = RomTS$new(self$datasource)
+      criteria <- list(
+        featureid = self$get_id(), 
+        entity_type=self$base_entity_type
+      )
+      if (!is.null(varkey)) { criteria$varkey = varkey } 
+      if (!is.null(tstime)) { criteria$tstime = tstime } 
+      if (!is.null(tsendtime)) { criteria$tsendtime = tsendtime } 
+      ts <- self$datasource$get(
+        'dh_timeseries', 
+        'tid',
+        criteria,
+        ts_obj
       )
       return(ts)
     },

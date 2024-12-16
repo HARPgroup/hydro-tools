@@ -37,7 +37,7 @@ RomFeature <- R6Class(
     geom = NA,
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
-    #' @param load_remote automatically query REST data source for matches?
+    #' @param load_remote automatically query REST dataa source for matches?
     #' @return object instance
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       #col.names(self$properties <-

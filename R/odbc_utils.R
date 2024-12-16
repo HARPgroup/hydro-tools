@@ -86,18 +86,21 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
 #' @examples NA
 fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  
-  sql_stuff <- fn_guess_sql(entity_type, pk, inputs)
-  get_sql = sql_stuff$get_sql
-  limits = sql_stuff$limits
+  message(entity_type)
+  message(paste(inputs))
   if (!is.logical(obj)) {
     if ("sql_select_from" %in% names(obj)) {
       get_sql = obj$sql_select_from
     }
+  } else {
+    sql_stuff <- fn_guess_sql(entity_type, pk, inputs)
+    get_sql = sql_stuff$get_sql
   }
   get_where = fn_guess_sql_where(entity_type, pk, inputs)
+  limits = fn_guess_limits(entity_type, pk, inputs)
+  # put it all together
   get_sql = paste(get_sql, "WHERE", get_where, limits)
-  #message(get_sql)
+  message(get_sql)
   entities = sqldf(get_sql, connection = con)
   if (is.logical(entities)) {
     message("----- This entity does not exist")
@@ -113,17 +116,11 @@ fn_guess_sql <- function(entity_type, pk, inputs) {
   if (is.null(inputs$limit)) {
     inputs$limit = 0
   }
-  if (inputs$limit > 0) {
-    limits = paste("limit",inputs$limits)
-  } else {
-    limits = ""
-  }
   # remove special things that are not part of the columns
   inputs$limit <- NULL
   get_sql = paste("select * from ", entity_type) 
   
   sql_stuff$get_sql <- get_sql
-  sql_stuff$limits <- limits
   return(sql_stuff)
 }
 
@@ -162,4 +159,14 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
     }
   }
   return(get_where)
+}
+
+
+fn_guess_limits <- function(entity_type, pk, inputs) {
+  if (is.null(inputs$limit)) {
+    limit = ""
+  } else {
+    limit = paste ("limit",inputs$limit)
+  }
+  return(limit)
 }
