@@ -53,7 +53,7 @@ RomEntity <- R6Class(
       )
       if (!is.null(varkey)) { 
         vardef <- self$datasource$get_vardef(varkey)
-        config$varid <- vardef$ 
+        config$varid <- vardef$hydroid
       } 
       if (!is.null(tstime)) { config$tstime = tstime } 
       if (!is.null(tsendtime)) { config$tsendtime = tsendtime } 
