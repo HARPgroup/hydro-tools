@@ -29,7 +29,16 @@ RomEntity <- R6Class(
     #' @param propname optional name to filter
     #' @param varid option variable to filter
     propvalues = function(propname = NULL, varid = NULL) {
-      ps <- self$datasource$get_prop(list(featureid = self$get_id(), propname = propname, varid = varid, entity_type=self$base_entity_type))
+      prop_obj = RomProperty$new(self$datasource)
+      config <- list(
+        featureid = self$get_id(), 
+        entity_type=self$base_entity_type
+      )
+      if (!is.null(varid)) { config$varid = varid } 
+      if (!is.null(propname)) { config$propname = propname } 
+      ps <- self$datasource$get_prop(
+        config
+      )
       return(ps)
     },
     #' @return tsvalues unique timeseries records for this entity
@@ -38,19 +47,17 @@ RomEntity <- R6Class(
     #' @param tsendtime timespan end
     tsvalues = function(varkey = NULL, tstime = NULL, tsendtime = NULL) {
       ts_obj = RomTS$new(self$datasource)
-      criteria <- list(
+      config <- list(
         featureid = self$get_id(), 
         entity_type=self$base_entity_type
       )
-      if (!is.null(varkey)) { criteria$varkey = varkey } 
-      if (!is.null(tstime)) { criteria$tstime = tstime } 
-      if (!is.null(tsendtime)) { criteria$tsendtime = tsendtime } 
-      ts <- self$datasource$get(
-        'dh_timeseries', 
-        'tid',
-        criteria,
-        ts_obj
-      )
+      if (!is.null(varkey)) { 
+        vardef <- self$datasource$get_vardef(varkey)
+        config$varid <- vardef$ 
+      } 
+      if (!is.null(tstime)) { config$tstime = tstime } 
+      if (!is.null(tsendtime)) { config$tsendtime = tsendtime } 
+      ts <- self$datasource$get_ts(config)
       return(ts)
     },
     #' @field datasource RomDataSource

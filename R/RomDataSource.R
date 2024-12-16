@@ -76,25 +76,30 @@ RomDataSource <- R6Class(
     #' @return nothing sets internal private token
     get_vardef = function(varkey, force_update = FALSE, debug = FALSE) {
       # NOt yet tested,
-      # check local store, if not there, check remote
-      var_def <- fn_search_vardefs(config, self$var_defs)
-      if (is.logical(var_def)) {
-        # none exists locally, so query
-        force_refresh = TRUE
-      }
-      if (!is.null(self$site) & force_refresh) {
-        var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
-        # TBD
-        # var_def <- RomVarDef$new(self,var_one)
-        # var_def <- var_def$to_list()
-         self$set_vardef(var_def)
+      if (self$connection_type == 'odbc') {
+        var_def <- self$get('dh_variabledefinition', 'hydroid', list(varkey=varkey,limit=1))
+        var_def <- as.list(var_def[1,])
       } else {
-        # TBD
-        #var_def <- RomVarDef$new(self, config)
-        #var_def <- var_def$to_list()
-        #self$set_vardef(ts)
+        # check local store, if not there, check remote
+        var_def <- fn_search_vardefs(config, self$var_defs)
+        if (is.logical(var_def)) {
+          # none exists locally, so query
+          force_refresh = TRUE
+        }
+        if (!is.null(self$site) & force_refresh) {
+          var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
+          # TBD
+          # var_def <- RomVarDef$new(self,var_one)
+          # var_def <- var_def$to_list()
+           self$set_vardef(var_def)
+        } else {
+          # TBD
+          #var_def <- RomVarDef$new(self, config)
+          #var_def <- var_def$to_list()
+          #self$set_vardef(ts)
+        }
+        # after retrieval, store locally
       }
-      # after retrieval, store locally
       return(var_def)
     },
     # get properties
@@ -107,7 +112,8 @@ RomDataSource <- R6Class(
       props = FALSE
       # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
-        propvalues <- self$get('dh_properties', 'pid', config, obj)
+        prop_obj = RomProperty$new(self)
+        propvalues <- self$get('dh_properties', 'pid', config, prop_obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods
@@ -157,22 +163,33 @@ RomDataSource <- R6Class(
       # or, return FALSE with message that df is only option? Hmmmm.
       # or return 
       # search first in 
-      # odbc has robust query handling so we don't need to do this
-      ts = FALSE
-      tsvalues <- fn_search_tsvalues(config, self$tsvalues)
-      if (is.logical(tsvalues)) {
-        # none exists locally, so query
-        force_refresh = TRUE
+      # odbc has robust query handling so we don't need to us fn_get_timeseries
+      if (self$connection_type == 'odbc') {
+        ts_obj = RomTS$new(self)
+        tsvalues <- self$get('dh_timeseries', 'tid', config, ts_obj)
+      } else {
+        # todo: all entities should be able to be searched by the odbc methods
+        #       so eventually all this will be phased out, since the odbc methods
+        #       have robust querying, and should be able to query against the datasource
+        #       using it's names as an environment.  We can make the propvalues
+        #       point to dh_properties on the datasource
+        #       and also tsvalues point to dh_timeseries_values
+        ts = FALSE
+        tsvalues <- fn_search_tsvalues(config, self$tsvalues)
+        if (is.logical(tsvalues)) {
+          # none exists locally, so query
+          force_refresh = TRUE
+        }
+        if (!is.null(self$site) & force_refresh) {
+          # todo: switch to generic get method if possible
+          tsvalues <- fn_get_timeseries(config, self$site, private$token)
+        }
       }
-      if (!is.null(self$site) & force_refresh) {
-        # todo: switch to generic get method if possible
-        tsvalues <- fn_get_timeseries(config, self$site, private$token)
-        if (!is.logical(tsvalues)) {
-          if (nrow(tsvalues) >= 1) {
-            # stash the first one in case we only want a single
-            ts <- as.list(tsvalues[1,])
-            # store all features in local db
-          }
+      if (!is.logical(tsvalues)) {
+        if (nrow(tsvalues) >= 1) {
+          # stash the first one in case we only want a single
+          ts <- as.list(tsvalues[1,])
+          # store all features in local db
         }
       }
       # return either the raw fn_get_timeseries/fn_search_tsvalues 
