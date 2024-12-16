@@ -75,9 +75,11 @@ RomTS <- R6Class(
       config_cols <- names(config)
       if (is.element("varkey", config_cols)) {
         if (!is.null(self$datasource)) {
+          message(paste("getting varid for", config$varkey))
           vardef = self$datasource$get_vardef(config$varkey)
-          config$varid = vardef$varid
-          # eliminate this since if passed raw to reest will cause problems
+          config$varid = vardef$hydroid
+          message(paste(" varid =", config$varid))
+          # eliminate this since if passed raw to rest will cause problems
           config$varkey <- NULL
         }
       }
