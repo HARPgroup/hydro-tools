@@ -88,11 +88,15 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   message(entity_type)
   message(paste(inputs))
+  get_sql = FALSE
   if (!is.logical(obj)) {
-    if ("sql_select_from" %in% names(obj)) {
+    if ("sql_select_from" %in% names(obj) 
+        & (length(obj[["sql_select_from"]]) > 0)
+    ) {
       get_sql = obj$sql_select_from
     }
-  } else {
+  }
+  if (is.logical(get_sql)) {
     sql_stuff <- fn_guess_sql(entity_type, pk, inputs)
     get_sql = sql_stuff$get_sql
   }
