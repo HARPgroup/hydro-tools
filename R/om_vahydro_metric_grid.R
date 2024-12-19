@@ -65,7 +65,17 @@ om_vahydro_metric_grid <- function (
       );
       dat <- content(rawdat)
     } else {
-      dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
+      if (ds$connection_type == 'odbc') {
+        message("om_vahydro_metric_grid() called using ODBC ")
+        prop_sql = om_vahydro_metric_grid_sql('all','dh_feature','watershed','vahydro','vahydro-1.0', 'runid_11', 'Qout') 
+        message(prop_sql)
+        dat <- sqldf(prop_sql, connection = ds$connection)
+        message(paste("returned", nrow(dat),"rows"))
+      } else {
+        dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
+        message("om_vahydro_metric_grid() called using http views ")
+      }
+      
     }
     meta_cols <- c('pid', 'propname', 'hydrocode', 'featureid', 'riverseg')
     rawdata <- as.data.frame(dat)
@@ -75,7 +85,7 @@ om_vahydro_metric_grid <- function (
           "select a.pid, a.propname, a.hydrocode, a.featureid, a.riverseg, a.attribute_value as ",
           runlabel, 
           "from rawdata as a "
-        )
+        ), method = "raw"
       )
     } else {
       data_cols <- paste(names(alldata)[ !names(alldata) %in% meta_cols],collapse=' ,')
@@ -106,4 +116,49 @@ om_vahydro_metric_grid <- function (
     }
   }
   return(alldata)
+}
+
+om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_version, runid, metric) {
+  prop_sql <- "
+    SELECT model.pid AS pid, model.propname as propname, 
+    model.propcode AS propcode, 
+    model.propvalue AS propvalue, 
+    model.startdate AS startdate, model.enddate AS enddate, 
+    dh_variabledefinition.varkey AS varkey, 
+    dh_variabledefinition.varname AS varname, 
+    scenario.propname AS run_name, 
+    metric.propname AS attribute_name, metric.propvalue AS attribute_value, 
+    metric.propcode AS attribute_code, 
+    model.featureid AS featureid, 
+    base_entity.hydrocode AS hydrocode, 
+    elementid.propvalue AS om_elementid, 
+    riverseg.propcode AS riverseg
+    FROM dh_properties as model
+    LEFT JOIN [entity_type] as base_entity 
+    ON model.featureid = base_entity.hydroid AND model.entity_type = '[entity_type]'
+    LEFT JOIN dh_properties as scenario 
+    ON model.pid = scenario.featureid AND scenario.entity_type = 'dh_properties'
+    LEFT JOIN dh_properties as metric 
+    ON scenario.pid = metric.featureid AND metric.entity_type = 'dh_properties'
+    LEFT JOIN dh_properties as elementid 
+    ON model.pid = elementid.featureid AND (elementid.entity_type = 'dh_properties' AND elementid.propname = 'om_element_connection')
+    LEFT JOIN dh_properties as riverseg 
+    ON model.pid = riverseg.featureid AND (riverseg.entity_type = 'dh_properties' AND riverseg.propname = 'riverseg')
+    LEFT JOIN dh_variabledefinition 
+    ON model.varid = dh_variabledefinition.hydroid
+    WHERE (( (model.entity_type = '[entity_type]') 
+      AND (base_entity.bundle = '[bundle]') 
+      AND (base_entity.ftype = '[ftype]') 
+      AND (model.propcode = '[model_version]') 
+      AND (scenario.propname = '[runid]') 
+      AND (metric.propname = '[metric]') 
+    ))
+  "
+  prop_sql <- str_replace_all(prop_sql, "\\[bundle\\]", bundle)
+  prop_sql <- str_replace_all(prop_sql, "\\[entity_type\\]", entity_type)
+  prop_sql <- str_replace_all(prop_sql, "\\[ftype\\]", ftype)
+  prop_sql <- str_replace_all(prop_sql, "\\[model_version\\]", model_version)
+  prop_sql <- str_replace_all(prop_sql, "\\[runid\\]", runid)
+  prop_sql <- str_replace_all(prop_sql, "\\[metric\\]", metric)
+  return(prop_sql)
 }
