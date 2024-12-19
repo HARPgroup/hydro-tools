@@ -66,14 +66,14 @@ om_vahydro_metric_grid <- function (
       dat <- content(rawdat)
     } else {
       if (ds$connection_type == 'odbc') {
-        message("om_vahydro_metric_grid() called using ODBC ")
-        prop_sql = om_vahydro_metric_grid_sql('all','dh_feature','watershed','vahydro','vahydro-1.0', 'runid_11', 'Qout') 
-        message(prop_sql)
+        #message("om_vahydro_metric_grid() called using ODBC ")
+        prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
+        #message(prop_sql)
         dat <- sqldf(prop_sql, connection = ds$connection)
-        message(paste("returned", nrow(dat),"rows"))
+        #message(paste("returned", nrow(dat),"rows"))
       } else {
         dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
-        message("om_vahydro_metric_grid() called using http views ")
+        #message("om_vahydro_metric_grid() called using http views ")
       }
       
     }
