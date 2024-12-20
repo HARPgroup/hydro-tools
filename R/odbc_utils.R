@@ -105,7 +105,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   # put it all together
   get_sql = paste(get_sql, "WHERE", get_where, limits)
   message(get_sql)
-  entities = sqldf(get_sql, connection = con)
+  entities = sqldf(get_sql, connection = con, method = "raw")
   if (is.logical(entities)) {
     message("----- This entity does not exist")
     entities = FALSE

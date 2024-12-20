@@ -83,11 +83,11 @@ RomPropertyTree <- R6Class(
         message("save() is not yet available")
       }
     },
-    #' @param config 
+    #' @param config
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
-      self$prop_list = config
+      self$datasource$set_prop(config)
     }
   )
 )

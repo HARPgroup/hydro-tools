@@ -85,7 +85,7 @@ NA
 
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
 
-\item{\code{load_remote}}{automatically query REST data source for matches?}
+\item{\code{load_remote}}{automatically query REST dataa source for matches?}
 }
 \if{html}{\out{</div>}}
 }

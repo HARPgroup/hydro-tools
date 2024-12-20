@@ -30,3 +30,7 @@ wshed_data <- om_vahydro_metric_grid(
 
 tn_odbcdata = fn_extract_basin(wshed_data_odbc,'TU4_9260_0000')
 tn_data = fn_extract_basin(wshed_data,'TU4_9260_0000')
+
+
+dso <- RomDataSource$new(site, rest_uname = odbc_ro_user, connection_type = 'odbc', dbname = 'drupal.dh03')
+dso$get_token(rest_pw = odbc_ro_pass)

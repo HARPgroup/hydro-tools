@@ -53,6 +53,8 @@ NA
 \item{\code{modified}}{timestamp}
 
 \item{\code{datasource}}{RomDataSource}
+
+\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 }
 \if{html}{\out{</div>}}
 }

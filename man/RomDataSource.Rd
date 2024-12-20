@@ -34,6 +34,8 @@ NA
 
 \item{\code{rest_uname}}{username to connect to RESTful repository}
 
+\item{\code{dbname}}{DATABASE TO USE IN odbC CONNECTION}
+
 \item{\code{timeline}}{for default time series data}
 
 \item{\code{tsvalues}}{table of time series data}
@@ -84,7 +86,12 @@ NA
 \if{latex}{\out{\hypertarget{method-RomDataSource-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site, rest_uname = NULL, connection_type = "rest")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(
+  site,
+  rest_uname = NULL,
+  connection_type = "rest",
+  dbname = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -95,6 +102,8 @@ NA
 \item{\code{rest_uname}}{username to connect to RESTful repository}
 
 \item{\code{connection_type}}{supported rest or odbc}
+
+\item{\code{dbname}}{supported odbc dbname}
 }
 \if{html}{\out{</div>}}
 }
@@ -200,7 +209,12 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_ts}{}}}
 \subsection{Method \code{get_ts()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "data.frame", force_refresh = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(
+  config,
+  return_type = "data.frame",
+  force_refresh = FALSE,
+  obj = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

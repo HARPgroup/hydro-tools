@@ -14,6 +14,11 @@ model_pid = 4824696
 model <- FALSE
 model <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
 model$prop_list # this might be temporary 
+for (i in 1:nrow(model$prop_list)) {
+  prop = model$prop_list[i,]
+  model$datasource$set_prop(as.list(prop))
+}
+model$datasource$propvalues
 
 vardef <- FALSE
 vardef <- RomVariableDefinition$new(dso, list(varkey='wd_mgy'), TRUE)

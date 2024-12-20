@@ -226,7 +226,7 @@ RomDataSource <- R6Class(
       }
       if (is.logical(ts_check)) {
         # not found, so add
-        message("Storing TS")
+        #message("Storing TS")
         self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
       } else {
         # update 
@@ -241,21 +241,48 @@ RomDataSource <- R6Class(
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       #message(prop)
-      prop_check = FALSE
-      if (!is.na(prop$pid)) {
-        if (prop$pid > 0) {
-          prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
-          #message(prop_check)
+      if (is.data.frame(prop)) {
+        name_check <- names(self$propvalues)[
+          which(!(names(self$propvalues) %in% names(prop)))
+        ]
+        # add missing columns if they exist
+        if (length(name_check) > 0) {
+          message("Warning: all property columns must be present in data frame to do batch insert.")
+          message("Adding", cat(names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))],sep=","))
+          for (n in names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))]) {
+            prop[,n] <- NA
+          }
         }
-      }
-      if (is.logical(prop_check)) {
-        # not found, so add
-        message("Storing prop")
-        self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
+        # eliminate superfluous and sort in the same order
+        prop <- prop[,names(self$propvalues)]
+        propvalue_tmp <- self$propvalues
+        # we handle this a little differently, and it may have multiples
+        dsl <- sqldf(
+          "select * from prop 
+           where pid not in (
+             select pid from propvalue_tmp
+          )"
+        )
+        self$propvalues = rbind(self$propvalues, dsl)
+        
       } else {
-        # update 
-        message("Found, trying to load")
-        self$propvalues[prop$ID] <- prop
+        
+        prop_check = FALSE
+        if (!is.na(prop$pid)) {
+          if (prop$pid > 0) {
+            prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
+            #message(prop_check)
+          }
+        }
+        if (is.logical(prop_check)) {
+          # not found, so add
+          #message("Storing prop")
+          self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
+        } else {
+          # update 
+          message("Found, trying to load")
+          self$propvalues[prop$ID] <- prop
+        }
       }
     },
     #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
@@ -276,7 +303,7 @@ RomDataSource <- R6Class(
       }
       if (is.logical(var_check)) {
         # not found, so add
-        message("Storing Var")
+        #message("Storing Var")
         self$tsvalues <- rbind(self$var_defs, as.data.frame(var_def))
       } else {
         # update 
@@ -311,7 +338,7 @@ RomDataSource <- R6Class(
       }
       if (is.logical(feature_check)) {
         # not found, so add
-        message("Storing feature")
+        #message("Storing feature")
         self$features <- rbind(self$features, as.data.frame(feature))
       } else {
         # update 
