@@ -1,0 +1,292 @@
+---
+title: "Department of Environmental Quality (DEQ) Annual Report of Water Withdrawals"
+output:
+  officedown::rdocx_document:
+    mapstyles:
+      Normal: ['First Paragraph']
+    page_margins:
+      bottom: 0.25
+      top: 0.25
+      right: 0.25
+      left: 0.25
+      header: 0.0
+      footer: 0.0
+    reference_docx: word-styles-reference-01.docx 
+date: "For the Period: January 1, 2024 to December 31, 2024"
+
+
+params:
+  orgid: ["100000055391"] #Owner ID, Appalachian Power Company
+---
+
+```{r setup, include=FALSE}
+library("sqldf")
+library("officedown")
+#library("knitr")
+
+```
+\tiny
+
+Enclosed are the Virginia Department of Environmental Quality's Annual Report of Water Withdrawals forms for reporting all water withdrawals
+from surface water and/or groundwater sources during the period January 1, 2024 through December 31, 2024. Water withdrawal reporting is
+required under State Water Control Board (SWCB) Water Withdrawal Reporting Regulation (9VAC25-200). A copy of the regulation is available
+on this website: [https://law.lis.virginia.gov/admincode/title9/agency25/chapter200/]{.underline}. The purpose of withdrawal reporting is to enable appropriate planning for the State's future water needs through the collection of accurate information. Water Withdrawal Reporting may be submitted to DEQ either in a hardcopy format or online.
+
+**Hardcopy Reporting:**
+
+If you prefer to submit your withdrawal information in a hardcopy format, please complete all applicable sections of the enclosed reporting
+form(s), and return to this office **no later than January 31, 2025**. If you have any questions concerning the requested information, please contact Hannah Somers at hannah.somers@deq.virginia.gov or (804) 814-2780. Mail your forms to:
+
+```{r PlannerAddress, echo=FALSE, eval=TRUE, results='asis'}
+
+#identify the planner corresponding to the locality the organization is in, then suggest they mail the form to that address
+OrgLocality <- as.character(sqldf(paste0('select Locality from ORGFACdf where "Owner ID" == ',orgid,' GROUP BY "Owner ID" ')))
+planner <- as.character(sqldf(paste0('select Planner from PlannerAreas where LocalityPlanner == "',OrgLocality,'"')))
+
+  cat("**Department of Environmental Quality** \n\n **ATTN: ", planner," , Office of Water Supply** \n\n **P.O. Box 1105** \n\n **Richmond, VA 23218** \n\n")
+
+```
+
+**Reporting Requirements:**
+
+Withdrawals in Virginia for ALL purposes (including, but not limited to livestock production, mining operations, public water supplies,
+manufacturing, power production, and golf courses) must be reported by **anyone whose average daily withdrawal during any single month
+exceeds 10,000 gallons per day (300,000 gal/month)**. Withdrawals for agricultural crop production (including nurseries and sod farms) must be reported by **anyone whose withdrawal exceeds one million gallons in any single month**. The regulation requires that reporting information include the user’s name, address, sources and locations of the withdrawal, the cumulative volume of water withdrawn during each month of the calendar year, the maximum day withdrawal and the month in which it occurred, and the method of measurement used to calculate the withdrawal.
+
+If you report groundwater withdrawals to DEQ under a groundwater withdrawal permit, please continue to do so to meet your permit
+requirements. You do not need to duplicate reporting for permitted groundwater withdrawals under this regulation. DEQ imports the monthly
+information submitted to your regional permit writer into the water withdrawal reporting database. **However, you must report the surface water withdrawals that also occur at permitted groundwater withdrawal sites, either as part of your permitted groundwater withdrawal
+reporting or through this reporting process**. If you report surface water withdrawals to DEQ under a Virginia Water Protection (VWP) permit,
+please continue to do so to meet your permit requirements. In addition to the VWP reporting requirement, you must also report under this
+regulation as instructed below.
+
+**Reporting Instructions:**
+
+- If you did not withdraw from one or more source points (your wells, springs, or surface water intakes) this year, but expect you may in future years, simply input zeros on the form in the Current Withdrawals table and note **“no withdrawal this year”** in the "Source Status" field.
+- If the source point has been abandoned and you do not plan to make future withdrawals, please circle **"Permanently Abandoned"** in the "Source Status" field, and write the year it was abandoned in the space provided. 
+- The regulation requires the use of a methodology or the installation and operation of a gaging device at or near the source point to measure the cumulative volume of groundwater and/or surface water withdrawn. The gage or methodology used must be consistent with sound generally accepted engineering practice and produce volume determinations within 10% of accuracy. Methods for estimating your withdrawal volumes are on the "Irrigation and Agriculture Water Use Estimate factsheet" located at this link: [https://www.deq.virginia.gov/our-programs/water/water-quantity/water-supply-planning/water-withdrawal-reporting]{.underline}. Please contact your DEQ water supply planner (contact information above) if assistance is needed in calculating your withdrawal volumes. In addition, the regulation requires retention of water withdrawal and gage calibration records by the user for a period of three years.
+ The regulation requires that you report the maximum withdrawal in a single day and the month during which the maximum day withdrawal occurred. If you do not collect this information at this time, please estimate your maximum day withdrawal and note the month this withdrawal occurred.
+- **As of 2020, location data is required.** Section § 62.1-44.38. of the Code of Virginia requires location data be provided by each user in a coordinate system (decimal degrees) for each point of withdrawal. Provide the latitude and longitude in the location section of this form.
+- **Measuring Method and Source/Customer Metering** - If your withdrawals are metered at the water source, circle "Metered" and "Source". If your withdrawals are metered anywhere other than the source, circle "Metered" and "Customer". If you estimate your withdrawal amounts, circle "Estimated" and please describe the method used (e.g., pump time curves, etc.).
+- If you have a new source point (ex. well, pond, changing a stream intake, etc.) at a new facility, please contact your DEQ water supply planner.
+ 
+
+\pagebreak
+
+```{r MPpages, echo=FALSE, results='asis'}
+#Identify the measuring points that will be looped per each organization
+facids <- sqldf(paste0('select CEDS_Facility_Id from ORGFACdf where "Owner ID" =', orgid))
+sourceids <- sqldf(paste0('select Measuring_Point_Id from MPdf where CEDS_Facility_Id in (select CEDS_Facility_Id from facids)')) 
+
+sourceloop <- as.array(sourceids[,1])
+for (y in 1:nrow(sourceloop)){
+  sourceid <- sourceloop[y]
+  
+  #define value for fields we will supply in the form
+  OrgName <- as.character(sqldf(paste0('SELECT "Owner Name" FROM MAILMERGEdf WHERE Owner_Id ==',orgid)))
+  Facid <- as.character(sqldf(paste0('select CEDS_Facility_Id from MPdf where Measuring_Point_Id = ', sourceid)))
+  FacName <-  as.character(sqldf(paste0('select Facility_Name from MPdf where Measuring_Point_Id = ', sourceid)))
+  FacReg <- as.character(sqldf(paste0('select Registration_Number from ORGFACdf where CEDS_Facility_Id = ', Facid)))
+  CatType <- as.character(sqldf(paste0('select Use_Type from ORGFACdf where CEDS_Facility_Id = ', Facid)))
+  SourceName <- as.character(sqldf(paste0('SELECT MP_Name FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+  SourceType <- as.character(sqldf(paste0('SELECT Source_Type FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+  if (SourceType == "Groundwater"){
+    SouceSubtype <- as.character(sqldf(paste0('SELECT MP_Type FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+    } else if (SourceType == "Surface Water"){
+    SouceSubtype <- as.character(sqldf(paste0('SELECT Intake_Type FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+    } else if (SourceType == "Transferred Water"){
+    SouceSubtype <- as.character(sqldf(paste0('SELECT Transfer_Type FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+    }
+  SourceLocation <- as.character(sqldf(paste0('SELECT Locality FROM ORGFACdf WHERE CEDS_Facility_Id = ', Facid)))
+  SourceID <- as.character(sourceid) 
+  SourceStatus <- as.character(sqldf(paste0('select MP_Status from MPdf where Measuring_Point_Id = ', sourceid)))
+  DEQwellID <- as.character(sqldf(paste0('SELECT DEQ_Well_Number FROM MPdf WHERE Measuring_Point_Id = ', sourceid)))
+  PermitNum <-as.character(sqldf(paste0('SELECT Permit_Number FROM MPdf WHERE CEDS_Facility_Id ==',Facid,' GROUP BY ',Facid)))
+  PWSID <- as.character(sqldf(paste0('select PWSID from MPdf where Measuring_Point_Id = ', sourceid)))
+  MPLat <- as.character(sqldf(paste0('select Latitude from MPdf where Measuring_Point_Id = ', sourceid)))
+  MPLon <- as.character(sqldf(paste0('select Longitude from MPdf where Measuring_Point_Id = ', sourceid)))
+  #print fields
+  cat("**___________________________________________________________________________________________________**","\n\n")
+  cat("**Source Information**","\n\n")
+  cat("[Organization/Owner]{.underline}: ", OrgName, "\n\n")
+  cat("[Facility]{.underline}: ",FacName,", (WWR Registration #: ",FacReg,")\n\n") #  (CEDS ID#: ",Facid,")\n\n")
+  #cat("[DEQ Permit #]{.underline}: ",PermitNum,",   (WWR Registration #: ",FacReg,")\n\n") 
+  #cat("DEQ Well ID #: ",DEQwellID,"\n\n")
+  cat("[Category]{.underline}: ",CatType,",  Source Status: ",SourceStatus,"\n\n")
+  cat("[Water Source Name]{.underline}: ",SourceName,",   (CEDS ID#: ",SourceID, ")\n\n")
+  cat("[Source Type]{.underline}: ",SourceType,",   Sub-type: ",SouceSubtype,"\n\n")
+  cat("[Source Location]{.underline}: ",SourceLocation, ",   Latitude/Longitude: ",MPLat,", ",MPLon,"\n\n")
+
+  
+  ######  Lat/Lon  ############################################################################################
+  cat("**___________________________________________________________________________________________________**","\n\n")
+  cat("**Location data is required for all source points** \n\n") 
+  cat("To add or correct location information, please provide the coordinates below. \n\n")
+  cat("Latitude: ____________________ Longitude: ____________________ \n\n")
+  cat("Note: If you do not know the coordinates of your water source, they can be found by navigating to your source point on https://www.google.com/maps, and right clicking on the precise location. The Latitude/Longitude is the first entry in the box that appears. \n\n ")
+    
+  ######  Withdrawal Table Prefix  ###########################################################################################
+  cat("**___________________________________________________________________________________________________**","\n\n")
+  cat("**REPORTING YOUR WITHDRAWALS**","\n\n")
+  cat("**Source Status Changes (Circle One): In Active Use / No Withdrawal This Year / Permanently Abandoned Date _______________ **","\n\n")
+  cat("**Measuring Method (Circle One): Metered / Estimated**","\n\n")
+  cat("**If estimated please describe: _________________________________________________________________**","\n\n")
+  cat("**Metering (Circle One): Source / Customer**","\n\n")
+  cat("**Maximum Withdrawal in a Day: ___________________________ MG**","\n\n")
+  cat("**Month in which the Max Day occurred: ___________________________**","\n\n")
+  cat("**Additional Withdrawal Comments: __________________________________________________________**","\n\n")
+  cat("  ","\n\n")
+  cat("**PLEASE TURN PAGE OVER AND ENTER ",eyear," WITHDRAWALS FOR THIS SOURCE --->**")
+  
+  
+  ######  Withdrawal Table Start  ############################################################################################
+  
+  #select withdrawal data for the supplied source
+  WDtest <- WDdf 
+  WDtest$Withdrawal_Date <- as.character(WDtest$Withdrawal_Date) #necessary otherwise date is misinterpreted and everything is offset by a month!
+  wddata <- sqldf(paste0('select Measuring_Point_Id, Withdrawal_Date, (Withdraw_Volume)/1000000 as Withdraw_MGM, Max_Withdraw_In_A_Day 
+                     FROM WDtest where Measuring_Point_Id == "',sourceid,'" ' ))
+  
+  #select withdrawal data for the last three years, could be more efficient but strftime() wasn't working
+  #update this next year to use syear
+  #two years prior
+  tablecols_S <- sqldf(paste0('select Withdrawal_Date, Withdraw_MGM from wddata
+                      where Withdrawal_Date LIKE "2022%" ' ))
+  tablecols_S <- sqldf('SELECT *,
+        CASE
+        WHEN Withdrawal_Date LIKE "2022-01%" THEN "JAN"
+        WHEN Withdrawal_Date LIKE "2022-02%" THEN "FEB"
+        WHEN Withdrawal_Date LIKE "2022-03%" THEN "MAR"
+        WHEN Withdrawal_Date LIKE "2022-04%" THEN "APR"
+        WHEN Withdrawal_Date LIKE "2022-05%" THEN "MAY"
+        WHEN Withdrawal_Date LIKE "2022-06%" THEN "JUN"
+        WHEN Withdrawal_Date LIKE "2022-07%" THEN "JUL"
+        WHEN Withdrawal_Date LIKE "2022-08%" THEN "AUG"
+        WHEN Withdrawal_Date LIKE "2022-09%" THEN "SEP"
+        WHEN Withdrawal_Date LIKE "2022-10%" THEN "OCT"
+        WHEN Withdrawal_Date LIKE "2022-11%" THEN "NOV"
+        WHEN Withdrawal_Date LIKE "2022-12%" THEN "DEC"
+        ELSE "NA"
+        END AS KeyS
+        FROM tablecols_S')
+  #one year prior
+  tablecols_M <- sqldf(paste0('select Withdrawal_Date, Withdraw_MGM from wddata
+                      where Withdrawal_Date LIKE "2023%" ' ))
+  tablecols_M <- sqldf('SELECT *,
+        CASE
+        WHEN Withdrawal_Date LIKE "2023-01%" THEN "JAN"
+        WHEN Withdrawal_Date LIKE "2023-02%" THEN "FEB"
+        WHEN Withdrawal_Date LIKE "2023-03%" THEN "MAR"
+        WHEN Withdrawal_Date LIKE "2023-04%" THEN "APR"
+        WHEN Withdrawal_Date LIKE "2023-05%" THEN "MAY"
+        WHEN Withdrawal_Date LIKE "2023-06%" THEN "JUN"
+        WHEN Withdrawal_Date LIKE "2023-07%" THEN "JUL"
+        WHEN Withdrawal_Date LIKE "2023-08%" THEN "AUG"
+        WHEN Withdrawal_Date LIKE "2023-09%" THEN "SEP"
+        WHEN Withdrawal_Date LIKE "2023-10%" THEN "OCT"
+        WHEN Withdrawal_Date LIKE "2023-11%" THEN "NOV"
+        WHEN Withdrawal_Date LIKE "2023-12%" THEN "DEC"
+        ELSE "NA"
+        END AS KeyM
+        FROM tablecols_M')
+  #low tech way of making the columns of the table that we want to output, including an empty column for people to input the current years data
+  tablecols_E <- c("", "", "", "", "", "", "", "", "", "", "", "")
+  tablecols_Key <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+  tablecols_Rowlab <- c("Jan (MG)", "Feb (MG)", "Mar (MG)","Apr (MG)","May (MG)","Jun (MG)","Jul (MG)","Aug (MG)","Sep (MG)","Oct (MG)","Nov (MG)", "Dec (MG)")
+  dfx <- cbind(tablecols_Rowlab, tablecols_E, tablecols_Key)
+  monthcol <- as.data.frame(dfx, row.names = FALSE)
+  #add the prior withdrawal data to the current year column, key needed because not all months have withdrawal data in prior years
+  tablecols_all <- sqldf('select * from monthcol as a 
+                      LEFT OUTER JOIN (select Withdrawal_Date as Withdrawal_Date_M, Withdraw_MGM as Withdraw_MGM_M, KeyM from tablecols_M) as b
+                        ON a.tablecols_Key == b.KeyM
+                      LEFT OUTER JOIN (select Withdrawal_Date as Withdrawal_Date_S, Withdraw_MGM as Withdraw_MGM_S, KeyS from tablecols_S) as c
+                        ON a.tablecols_Key == c.KeyS')
+  #remove the columns we don't want to display in the form
+  tablecols <- sqldf(paste0('select tablecols_Rowlab as "Month", tablecols_E as "Report Current withdrawals for ',eyear,'", Withdraw_MGM_M as "Previously reported in ',myear,'", Withdraw_MGM_S as "Previously reported in ',syear,'" FROM tablecols_all'))
+  
+
+  #print withdrawal table
+  ft <- fn_tablegen_AR(tablecols)
+  cat(knitr::knit_print(ft))
+  cat("\n\n\\pagebreak\n")
+  
+}
+
+#this border line appears only on the top of the extra MP page
+cat("**___________________________________________________________________________________________________**","\n\n") 
+
+```
+
+_**COMPLETE THIS PAGE ONLY FOR ANY NEW OR ADDITIONAL SOURCE POINTS**_
+
+**Facility Name:** _____________________________ , **Source Name:** _______________________________
+
+**Category (Circle One):**  Agriculture / Agricultural Irrigation / Commercial / Manufacturing / Mining / Public Water Supply / Fossil Power / Nuclear Power / Hydropower / Other
+
+**Source Type (Circle One):** Surface Water / Groundwater / Transferred Water
+
+**Source Subtype (Circle One):** Well / Reservoir / Stream / Spring / Release / Delivery
+
+**Source Status (Circle One):** Active / Proposed / Inactive 
+
+**Intake Location (County/City/Town):** ___________________________________
+
+**Intake coordinates:** Latitude: ______________________ Longitude: ______________________ 
+
+```{r BlankMPpg, echo=FALSE, results='asis'}
+  ######  Blank MP Table Prefix  ###########################################################################################
+  cat("**___________________________________________________________________________________________________**","\n\n")
+  cat("**REPORTING YOUR WITHDRAWALS**","\n\n")
+  cat("**Measuring Method (Circle One): Metered / Estimated**","\n\n")
+  cat("**If estimated please describe: _________________________________________________________________**","\n\n")
+  cat("**Metering (Circle One): Source / Customer**","\n\n")
+  cat("**Maximum Withdrawal in a Day: ___________________________ MG**","\n\n")
+  cat("**Month in which the Max Day occurred: ___________________________**","\n\n")
+  cat("**Additional Withdrawal Comments: __________________________________________________________**","\n\n")
+
+  #low tech blank table
+  tablecols_E1 <- c("", "", "", "", "", "")
+  tablecols_E2 <- c("", "", "", "", "", "")
+  tablecols_Rowlab1 <- c("Jan (MG)", "Feb (MG)", "Mar (MG)","Apr (MG)","May (MG)","Jun (MG)")
+  tablecols_Rowlab2 <- c("Jul (MG)","Aug (MG)","Sep (MG)","Oct (MG)","Nov (MG)", "Dec (MG)")
+  dfy <- cbind(tablecols_Rowlab1, tablecols_E1, tablecols_Rowlab2, tablecols_E2)
+  BlankTable <- as.data.frame(dfy, row.names = FALSE)
+  names(BlankTable) <- c("Month", paste0(eyear," Withdrawals"), "Month cont.", paste0(eyear," Withdrawals cont."))
+
+  #display blank mp table
+  ft2 <- fn_tablegen_AR(BlankTable)
+  cat(knitr::knit_print(ft2))
+
+```
+\pagebreak 
+
+**Contact Updates**
+
+Would you like to complete your reporting online next year? Please circle one: YES / NO
+
+If you circled yes, please provide your preferred method of contact, and a Planner will follow up with you to set up your online reporting.
+
+Email: ______________________________________________ 
+
+Phone: ______________________________________________
+
+
+You may update your organization's primary contact information if it is no longer accurate:
+
+Name: _______________________________________________________
+
+Address 1: __________________________________________________ 
+
+Address 2:___________________________________________________ 
+         
+City, State Zip:  ______________________________________________ 
+         
+Phone: ______________________________________________________ 
+
+Email: _______________________________________________________  
+
+.
+
+_**By Signing on the line below, you certify the accuracy of the withdrawal information reported in this form**_.
+
+Signatory Name:______________________________________Date:______________________________________
