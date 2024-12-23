@@ -89,6 +89,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   message(entity_type)
   message(paste(inputs))
   get_sql = FALSE
+  print(obj)
   if (!is.logical(obj)) {
     if ("sql_select_from" %in% names(obj) 
         & (length(obj[["sql_select_from"]]) > 0)

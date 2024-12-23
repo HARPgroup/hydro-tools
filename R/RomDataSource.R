@@ -71,34 +71,38 @@ RomDataSource <- R6Class(
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key
-    #' @param force_update Check remote repository for new info? 
+    #' @param force_refresh Check remote repository for new info? 
     #' @param debug show info
     #' @return nothing sets internal private token
-    get_vardef = function(varkey, force_update = FALSE, debug = FALSE) {
+    get_vardef = function(varkey, force_refresh = FALSE, debug = FALSE) {
       # NOt yet tested,
-      if (self$connection_type == 'odbc') {
-        var_def <- self$get('dh_variabledefinition', 'hydroid', list(varkey=varkey,limit=1))
-        var_def <- as.list(var_def[1,])
+      config = list()
+      #print(paste("Handling ", varkey))
+      if (is.na(as.integer(varkey))) {
+        config$varkey = varkey
       } else {
-        # check local store, if not there, check remote
-        var_def <- fn_search_vardefs(config, self$var_defs)
-        if (is.logical(var_def)) {
-          # none exists locally, so query
-          force_refresh = TRUE
-        }
-        if (!is.null(self$site) & force_refresh) {
+        config$hydroid = as.integer(varkey)
+        #if ()
+      }
+      # check local store, if not there, check remote
+      var_def <- fn_search_vardefs(config, self$var_defs)
+      if (is.logical(var_def)) {
+        # none exists locally, so query
+        force_refresh = TRUE
+      }
+      if (!is.null(self$site) & force_refresh) {
+        if (self$connection_type == 'odbc') {
+          config$limit = 1
+          var_def <- self$get('dh_variabledefinition', 'hydroid', config)
+          var_def <- as.list(var_def[1,])
+        } else {
           var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
           # TBD
           # var_def <- RomVarDef$new(self,var_one)
           # var_def <- var_def$to_list()
-           self$set_vardef(var_def)
-        } else {
-          # TBD
-          #var_def <- RomVarDef$new(self, config)
-          #var_def <- var_def$to_list()
-          #self$set_vardef(ts)
         }
         # after retrieval, store locally
+        self$set_vardef(var_def)
       }
       return(var_def)
     },
@@ -292,23 +296,49 @@ RomDataSource <- R6Class(
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
-      return(TRUE)
-      #message(var_def)
-      ts_check = FALSE
-      if (!is.na(var_def$varid)) {
-        if (var_def$varid > 0) {
-          var_check = fn_search_vardefs(list(varid = var_def$varid), self$var_defs)
-          #message(ts_check)
+      if (is.data.frame(var_def)) {
+        name_check <- names(self$var_defs)[
+          which(!(names(self$var_defs) %in% names(var_def)))
+        ]
+        # add missing columns if they exist
+        if (length(name_check) > 0) {
+          message("Warning: all variable definition columns should be present in data frame to do batch insert.")
+          message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
+          for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
+            var_def[,n] <- NA
+          }
         }
-      }
-      if (is.logical(var_check)) {
-        # not found, so add
-        #message("Storing Var")
-        self$tsvalues <- rbind(self$var_defs, as.data.frame(var_def))
+        # eliminate superfluous and sort in the same order
+        var_def <- var_def[,names(self$var_defs)]
+        var_defs <- self$var_defs
+        # we handle this a little differently, and it may have multiples
+        veq = "select * from var_def 
+           where hydroid not in (
+             select hydroid from var_defs
+          )"
+        dsl <- sqldf(
+          veq
+        )
+        self$var_defs = rbind(self$var_defs, dsl)
+        
       } else {
-        # update 
-        message("Found, trying to load")
-        self$var_defs[var_def$ID] <- var_def
+        
+        var_check = FALSE
+        if (!is.na(var_def$varkey)) {
+          if (var_def$varkey > 0) {
+            var_check = fn_search_vardefs(list(varkey = var_def$varkey), self$var_defs)
+            #message(prop_check)
+          }
+        }
+        if (is.logical(var_check)) {
+          # not found, so add
+          #message("Storing prop")
+          self$var_defs <- rbind(self$var_defs, as.data.frame(var_def))
+        } else {
+          # update 
+          message("Found, trying to load")
+          self$var_defs[var_def$hydroid] <- var_def
+        }
       }
     },
     #' @param features = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -438,7 +468,7 @@ RomDataSource <- R6Class(
     ),
     #' @field var_defs table of variable definitions
     var_defs = data.frame(
-      varid = integer(),
+      hydroid = integer(),
       varname = character(),
       vardesc = character(),
       vocabulary = character(),

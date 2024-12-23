@@ -13,20 +13,18 @@ dHVariablePluginDefault <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
-    #' @field datasource used to retrieve local and remote properties
-    datasource = NA,
-    #' @param datasource RESTful repository (optional)
+    object_class = FALSE,
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
-    initialize = function(datasource = NULL, config = list()) {
-      self$datasource = datasource
+    initialize = function(config = list()) {
+      #message("Created plugin")
     },
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
       # creates an array that can later be serialized as json, xml, or whatever
-      # export = self$exportOpenMIBase(entity);
+      export = self$exportOpenMIBase(entity);
       # # load subComponents 
       # # @todo: figure this out so that other chains work better.
       # children <- self$datasource$propvalues()
@@ -56,15 +54,69 @@ dHVariablePluginDefault <- R6Class(
       #     }
       #     $export[$entity->propname][$thisname] = $sub_export[$sub_entity->propname];
       #   }
-      #   return $export;
+      return(export)
     },
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propvalue
+      )
+      return(export)
     }
   )
 )
 
 
+#' Base entity data object
+#' @description Handler class for property entities (and timeseries if needed)
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVariablePluginDefault
+dHOMEquation <- R6Class(
+  "dHOMEquation",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'Equation',
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propcode
+      )
+      message("Exporting equation type")
+      return(export)
+    }
+  )
+)
+
+# This is heare because there is no way to instantiate a dynamic class using 
+# a string for a class name, so we have to have logic to expose allowed classes
+get_plugin_class <- function(plugin_name, entity) {
+  if (is.na(plugin_name) ) {
+    plugin = dHVariablePluginDefault$new(entity)
+  } else if (plugin_name == "dHOMEquation") {
+    plugin = dHOMEquation$new(entity)
+  } else {
+    plugin = dHVariablePluginDefault$new(entity)
+  }
+  return(plugin)
+}

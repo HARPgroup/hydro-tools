@@ -78,12 +78,18 @@ RomVariableDefinition <- R6Class(
       if (push_remote) {
         message("save() is not yet available")
       }
+      self$datasource$set_vardef(self$to_list())
     },
     #' @param config 
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
-      super$load_data(config, load_remote)
+      if (is.data.frame(config)) {
+        # try to load directly
+        self$datasource$set_vardef(config)
+      } else {
+        super$load_data(config, load_remote)
+      }
     }
   )
 )

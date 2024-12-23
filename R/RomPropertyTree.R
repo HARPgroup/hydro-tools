@@ -87,7 +87,16 @@ RomPropertyTree <- R6Class(
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
+      self$prop_list = config
       self$datasource$set_prop(config)
+      #print("Loading vardefs")
+      # now, load all associated variable definitions if possible
+      vars <- sqldf("select varid from config group by varid", method = "raw")
+      #print(vars)
+      for (v in 1:nrow(vars)) {
+        vid <- as.integer(vars[v,])
+        self$datasource$get_vardef(vid)
+      }
     }
   )
 )
