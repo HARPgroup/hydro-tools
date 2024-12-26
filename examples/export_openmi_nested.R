@@ -48,4 +48,9 @@ endTime <- Sys.time()
 # prints recorded time 
 print(endTime - startTime)
 r400 = find_name(export,"runid_400")
-wd_mgd = find_name(r400, "Smin_L90_mg")
+Smin_L90_mg = find_name(r400, "Smin_L90_mg")
+riverseg = find_name(export, "riverseg")
+fac_demand_mgy = find_name(export,"fac_demand_mgy")
+
+# list all plugins
+dso$var_defs$plugin

@@ -71,7 +71,7 @@ dHVariablePluginDefault <- R6Class(
 )
 
 
-#' Base entity data object
+#' Equation meta-model object
 #' @description Handler class for property entities (and timeseries if needed)
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -79,7 +79,7 @@ dHVariablePluginDefault <- R6Class(
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples NA
-#' @export dHVariablePluginDefault
+#' @export dHOMEquation
 dHOMEquation <- R6Class(
   "dHOMEquation",
   inherit = dHVariablePluginDefault,
@@ -102,7 +102,129 @@ dHOMEquation <- R6Class(
         name=entity$propname,
         value=entity$propcode
       )
-      message("Exporting equation type")
+      return(export)
+    }
+  )
+)
+
+
+#' Numeric Constant meta-model object
+#' @description Simple class to hold numeric values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMEquation
+dHOMConstant <- R6Class(
+  "dHOMConstant",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = FALSE,
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propvalue
+      )
+      return(export)
+    }
+  )
+)
+
+#' Text Constant meta-model object
+#' @description Simple class to hold string values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMAlphanumericConstant
+dHOMAlphanumericConstant <- R6Class(
+  "dHOMAlphanumericConstant",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = FALSE,
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propcode
+      )
+      return(export)
+    }
+  )
+)
+
+#' Object class of meta-model object
+#' @description Simple class to hold text values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMObjectClass
+dHOMObjectClass <- R6Class(
+  "dHOMObjectClass",
+  inherit = dHOMAlphanumericConstant,
+  public = list(
+  )
+)
+
+#' Matrix meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMDataMatrix
+dHOMDataMatrix <- R6Class(
+  "dHOMDataMatrix",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'dataMatrix',
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      print(paste("Entity matrix:", entity$name))
+      for (n in names(entity)) {
+        print(paste(n, entity[[n]]))
+      }
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$data_matrix
+      )
       return(export)
     }
   )
@@ -115,6 +237,12 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHVariablePluginDefault$new(entity)
   } else if (plugin_name == "dHOMEquation") {
     plugin = dHOMEquation$new(entity)
+  } else if (plugin_name == "dHOMAlphanumericConstant") {
+    plugin = dHOMAlphanumericConstant$new(entity)
+  } else if (plugin_name == "dHOMObjectClass") {
+    plugin = dHOMObjectClass$new(entity)
+  } else if (plugin_name == "dHOMDataMatrix") {
+    plugin = dHOMDataMatrix$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }

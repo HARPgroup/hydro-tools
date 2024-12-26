@@ -48,30 +48,7 @@ RomProperty <- R6Class(
     datasource = NA,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = "
-      select * from (
-        select a.*, b.proptext_value as proptext, 
-          CASE
-            WHEN c.field_dh_matrix_value IS NOT NULL THEN php_unserialize_to_json(c.field_dh_matrix_value )
-            WHEN d.field_projection_table_value IS NOT NULL THEN php_unserialize_to_json(d.field_projection_table_value )
-            ELSE NULL
-          END as data_matrix
-        from dh_properties as a 
-        left outer join field_data_proptext as b
-        on (
-          b.entity_id = a.pid
-          and b.entity_type = 'dh_properties'
-        )
-        left outer join field_data_field_dh_matrix as c
-        on (
-          c.entity_id = a.pid
-          and c.entity_type = 'dh_properties'
-        )
-        left outer join field_data_field_projection_table as d
-        on (
-          d.entity_id = a.pid
-          and d.entity_type = 'dh_properties'
-        )
-      ) as dh_properties
+      select * from dh_properties_fielded
     ",
     #' @return get_id the id of this entity alias to remote pkid, subclassed as function
     get_id = function() {

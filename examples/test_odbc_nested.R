@@ -17,6 +17,14 @@ model <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
 model$prop_list # this might be temporary 
 nested = list()
 
+fac_demand_prop <- RomProperty$new(
+  dso, list(
+    propname='fac_demand_mgy', 
+    featureid=model_pid, 
+    entity_type='dh_properties'
+  ), TRUE
+)
+fac_demand_prop$data_matrix
 
 vardef <- FALSE
 vardef <- RomVariableDefinition$new(dso, list(varkey='wd_mgy'), TRUE)

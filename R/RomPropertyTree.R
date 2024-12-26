@@ -24,14 +24,22 @@ RomPropertyTree <- R6Class(
     geom = NA,
     sql_select_from = "
       WITH RECURSIVE prop_tree AS (
-      SELECT [root_pid] as root_pid, p.pid, vp.varkey, p.featureid, p.propname, p.propcode, p.propvalue, p.varid, p.startdate, p.enddate, p.bundle, p.modified, p.entity_type
-      FROM dh_properties as p 
+      SELECT [root_pid] as root_pid, p.pid, vp.varkey, p.featureid, 
+        p.propname, p.propcode, p.propvalue, 
+        p.varid, p.startdate, p.enddate, 
+        p.bundle, p.modified, p.entity_type,
+        p.proptext, p.data_matrix
+      FROM dh_properties_fielded as p 
       LEFT OUTER JOIN dh_variabledefinition as vp
       ON (vp.hydroid = p.varid)
       WHERE p.pid = [root_pid]
       UNION
-      SELECT [root_pid] as root_pid, c.pid, cp.varkey, c.featureid, c.propname, c.propcode, c.propvalue, c.varid, c.startdate, c.enddate, c.bundle, c.modified, c.entity_type
-      FROM dh_properties as c 
+      SELECT [root_pid] as root_pid, c.pid, cp.varkey, c.featureid, 
+        c.propname, c.propcode, c.propvalue, 
+        c.varid, c.startdate, c.enddate, 
+        c.bundle, c.modified, c.entity_type,
+        c.proptext, c.data_matrix
+      FROM dh_properties_fielded as c 
       LEFT OUTER JOIN dh_variabledefinition as cp
       ON (cp.hydroid = c.varid)
       inner join prop_tree as p
@@ -92,7 +100,7 @@ RomPropertyTree <- R6Class(
       #print("Loading vardefs")
       # now, load all associated variable definitions if possible
       vars <- sqldf("select varid from config group by varid", method = "raw")
-      #print(vars)
+      print(vars)
       for (v in 1:nrow(vars)) {
         vid <- as.integer(vars[v,])
         self$datasource$get_vardef(vid)
