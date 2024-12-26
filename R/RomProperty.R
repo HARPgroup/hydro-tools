@@ -89,12 +89,17 @@ RomProperty <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
       config_cols <- names(config)
-      if (is.element("varkey", config_cols)) {
-        if (!is.null(self$datasource)) {
-          vardef = self$datasource$get_vardef(config$varkey)
-          config$varid = vardef$varid
-          # eliminate this since if passed raw to rest will cause problems
-          config$varkey <- NULL
+      if (is.null(config$varid)) {
+        config$varid = 0
+      }
+      if (!(as.integer(config$varid) > 0)) {
+        if (is.element("varkey", config_cols)) {
+          if (!is.null(self$datasource)) {
+            vardef = self$datasource$get_vardef(config$varkey)
+            config$varid = vardef$hydroid
+            # eliminate this since if passed raw to rest will cause problems
+            config$varkey <- NULL
+          }
         }
       }
       return(config)

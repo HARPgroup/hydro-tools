@@ -140,20 +140,23 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
   inputs$page <- NULL
   if (!is.null(pkid)) {
     # Simple PK retrieval
-    get_where = paste(pk,"=",pkid)
+    if (!is.na(pkid)) {
+      get_where = paste(pk,"=",pkid)
+    }
   } else {
     get_where_glue = ""
     #message(paste("inputs:", inputs))
     for (col_name in names(inputs)) {
-      col_val = inputs[[col_name]]
       if (is.na(inputs[col_name])) {
         inputs[col_name] <- NULL
+        next
       }
+      col_val = inputs[[col_name]]
       #message(paste(col_name,'=',typeof(col_val)))
       if (is.character(col_val)) {
         col_val = paste0("'",col_val,"'")
       }
-      if (!is.null(inputs[col_name])) {
+      if (!is.null(inputs[col_name]) & !is.na(inputs[col_name])) {
         get_where = paste(
           get_where, 
           get_where_glue, 

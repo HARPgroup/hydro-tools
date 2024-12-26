@@ -216,10 +216,7 @@ dHOMDataMatrix <- R6Class(
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      print(paste("Entity matrix:", entity$name))
-      for (n in names(entity)) {
-        print(paste(n, entity[[n]]))
-      }
+      print(paste("Entity matrix:", entity$propname))
       export = list(
         id=entity$pid,
         name=entity$propname,
