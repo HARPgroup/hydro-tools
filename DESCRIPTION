@@ -20,4 +20,5 @@ Imports:
     httr,
     rapportools,
     graphics,
-    flextable
+    flextable,
+    bit64

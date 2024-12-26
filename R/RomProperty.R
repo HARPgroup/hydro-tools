@@ -34,6 +34,8 @@ RomProperty <- R6Class(
     propcode = NA,
     #' @field proptext alphanumeric value
     proptext = NA,
+    #' @field data_matrix json matrix
+    data_matrix = NA,
     #' @field varid variable ID from RomDataSource
     varid = NA,
     #' @field bundle (for future use)
@@ -44,6 +46,10 @@ RomProperty <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = "
+      select * from dh_properties_fielded
+    ",
     #' @return get_id the id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$pid)
@@ -58,34 +64,40 @@ RomProperty <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
-      config_cols <- names(config)
-      if (is.element("varkey", config_cols)) {
-        if (!is.null(self$datasource)) {
-          vardef = self$datasource$get_vardef(config$varkey)
-          config$varid = vardef$varid
-          # eliminate this since if passed raw to reest will cause problems
-          config$varkey <- NULL
-        }
-      }
-      if (!is.element("bundle", config_cols)) {
-        config$bundle <- 'dh_properties'
-      }
+      config <- self$handle_config(config)
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        prop <- self$datasource$get_prop(config, 'list', TRUE)
+        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
+        #print((nrow(prop) >= 1))
+        if (is.data.frame(prop)) {
+          if (nrow(prop) >= 1) {
+            prop <- as.list(prop[1,])
+          } else {
+            prop <- FALSE
+          }
+        }
         # merge config with prop
         #message("Found")
         if (!is.logical(prop)) {
           config <- prop
         }
       }
-      self$from_list(config)
-      if (!is.na(self$pid) & (load_remote == TRUE) ) {
-        # stash a copy in the local datasource database 
-        # if this was a valid retrieval from remote
-        self$save(FALSE) 
+      self$load_data(config, load_remote)
+    },
+    #' @param config 
+    #' @returns an updated config if necessary or FALSE if it fails
+    handle_config = function(config) {
+      config_cols <- names(config)
+      if (is.element("varkey", config_cols)) {
+        if (!is.null(self$datasource)) {
+          vardef = self$datasource$get_vardef(config$varkey)
+          config$varid = vardef$varid
+          # eliminate this since if passed raw to rest will cause problems
+          config$varkey <- NULL
+        }
       }
+      return(config)
     },
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return NULL
@@ -114,6 +126,31 @@ RomProperty <- R6Class(
           self$proptext = as.character(config$proptext)
         } else if (i == "bundle") {
           self$bundle = as.character(config$bundle)
+        } else if (i == "data_matrix") {
+          if (is.character(config$data_matrix)) {
+            mvalid <- jsonlite::validate(config$data_matrix)
+            if (mvalid[1] == TRUE) {
+              drupal_data = jsonlite::fromJSON(config$data_matrix)
+              data_header <- drupal_data$tabledata[[1]]
+              n <- 1
+              for (h in data_header) {
+                if(is.null(h) | is.na(h)) {
+                  data_header[[n]] <- paste0("V",n)
+                }
+                n <- n + 1
+              }
+              data_table <- as.data.frame(data_header)
+              for (i in 2:length(drupal_data$tabledata)) {
+                raw_row <- drupal_data$tabledata[[i]]
+                drow <- as.data.frame(drupal_data$tabledata[[i]])
+                data_table <- rbind(data_table, drow)
+              }
+              self$data_matrix = data_table
+            } else {
+              # it is either valid, or empty either way, assign it
+              self$data_matrix <- config$data_matrix
+            }
+          }
         }
       }
     },
@@ -142,6 +179,18 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
+      if (is.character(self$data_matrix)) {
+        mvalid <- jsonlite::validate(self$data_matrix)
+        if (mvalid[1] == TRUE) {
+          t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
+        }
+      }
+      if (is.null(self$bundle)) {
+        self$bundle <- 'dh_properties'
+      }
+      if (!nchar(self$bundle) > 0) {
+        self$bundle <- 'dh_properties'
+      }
       return(t_list)
     },
     #' @param name attribute name

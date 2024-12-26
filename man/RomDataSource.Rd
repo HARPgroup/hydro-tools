@@ -28,7 +28,13 @@ NA
 
 \item{\code{json_obj_url}}{URL for retrieving full objects}
 
+\item{\code{connection_type}}{rest or odbc}
+
+\item{\code{connection}}{rest or odbc}
+
 \item{\code{rest_uname}}{username to connect to RESTful repository}
+
+\item{\code{dbname}}{DATABASE TO USE IN odbC CONNECTION}
 
 \item{\code{timeline}}{for default time series data}
 
@@ -80,7 +86,12 @@ NA
 \if{latex}{\out{\hypertarget{method-RomDataSource-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(site, rest_uname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(
+  site,
+  rest_uname = NULL,
+  connection_type = "rest",
+  dbname = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -89,6 +100,10 @@ NA
 \item{\code{site}}{URL of some RESTful repository}
 
 \item{\code{rest_uname}}{username to connect to RESTful repository}
+
+\item{\code{connection_type}}{supported rest or odbc}
+
+\item{\code{dbname}}{supported odbc dbname}
 }
 \if{html}{\out{</div>}}
 }
@@ -120,13 +135,15 @@ nothing clears data tables
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_token}{}}}
 \subsection{Method \code{get_token()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(rest_pw = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(rest_pw = NULL, odbc_port = 5431)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{rest_pw}}{to use, if NULL will prompt}
+
+\item{\code{odbc_port}}{to use, if NULL will prompt}
 }
 \if{html}{\out{</div>}}
 }
@@ -165,7 +182,8 @@ nothing sets internal private token
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_prop(
   config,
   return_type = "data.frame",
-  force_refresh = FALSE
+  force_refresh = FALSE,
+  obj = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -177,6 +195,8 @@ nothing sets internal private token
 \item{\code{return_type}}{'data.frame' or 'list'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+
+\item{\code{obj}}{optional object which can supply more specific query info for odbc}
 }
 \if{html}{\out{</div>}}
 }
@@ -189,7 +209,12 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_ts}{}}}
 \subsection{Method \code{get_ts()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(config, return_type = "data.frame", force_refresh = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(
+  config,
+  return_type = "data.frame",
+  force_refresh = FALSE,
+  obj = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -337,7 +362,7 @@ nothing seprop internal private token
 \if{latex}{\out{\hypertarget{method-RomDataSource-get}{}}}
 \subsection{Method \code{get()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get(entity_type, pk, config)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get(entity_type, pk, config, obj = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -348,6 +373,8 @@ nothing seprop internal private token
 \item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
 
 \item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+
+\item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
 }
 \if{html}{\out{</div>}}
 }

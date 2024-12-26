@@ -21,14 +21,24 @@ RomDataSource <- R6Class(
     site = NULL,
     #' @field json_obj_url URL for retrieving full objects
     json_obj_url = NULL,
+    #' @field connection_type rest or odbc
+    connection_type = NULL, 
+    #' @field connection rest or odbc
+    connection = NULL, 
     #' @field rest_uname username to connect to RESTful repository
     rest_uname = NULL,
+    #' @field dbname DATABASE TO USE IN odbC CONNECTION
+    dbname = NULL,
     #' @param site URL of some RESTful repository
     #' @param rest_uname username to connect to RESTful repository
+    #' @param connection_type supported rest or odbc
+    #' @param dbname supported odbc dbname
     #' @return object instance
-    initialize = function(site, rest_uname = NULL) {
+    initialize = function(site, rest_uname = NULL, connection_type = 'rest', dbname = NULL) {
       self$site = site
       self$rest_uname = rest_uname
+      self$connection_type = connection_type
+      self$dbname = dbname
     },
     #' @param table which table. Default 'all'
     #' @return nothing clears data tables
@@ -40,20 +50,40 @@ RomDataSource <- R6Class(
       }
     },
     #' @param rest_pw to use, if NULL will prompt
+    #' @param odbc_port to use, if NULL will prompt
     #' @return nothing sets internal private token
-    get_token = function(rest_pw = NULL) {
+    get_token = function(rest_pw = NULL, odbc_port = 5431) {
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
-      private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
+      if (self$connection_type == 'rest') {
+        private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
+      } else {
+        self$connection <- dbConnect(
+          RPostgres::Postgres(),
+          dbname = self$dbname,
+          host = httr::parse_url(self$site)$hostname,
+          port = odbc_port,
+          user = self$rest_uname,
+          password = rest_pw
+        )
+      }
     },
     # this could actually live in the RomTS object
     #' @param varkey = variable key
-    #' @param force_update Check remote repository for new info? 
+    #' @param force_refresh Check remote repository for new info? 
     #' @param debug show info
     #' @return nothing sets internal private token
-    get_vardef = function(varkey, force_update = FALSE, debug = FALSE) {
+    get_vardef = function(varkey, force_refresh = FALSE, debug = FALSE) {
       # NOt yet tested,
+      config = list()
+      #print(paste("Handling ", varkey))
+      if (is.na(as.integer(varkey))) {
+        config$varkey = varkey
+      } else {
+        config$hydroid = as.integer(varkey)
+        #if ()
+      }
       # check local store, if not there, check remote
       var_def <- fn_search_vardefs(config, self$var_defs)
       if (is.logical(var_def)) {
@@ -61,42 +91,56 @@ RomDataSource <- R6Class(
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
-        var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
-        # TBD
-        # var_def <- RomVarDef$new(self,var_one)
-        # var_def <- var_def$to_list()
-         self$set_vardef(var_def)
-      } else {
-        # TBD
-        #var_def <- RomVarDef$new(self, config)
-        #var_def <- var_def$to_list()
-        #self$set_vardef(ts)
+        if (self$connection_type == 'odbc') {
+          config$limit = 1
+          var_def <- self$get('dh_variabledefinition', 'hydroid', config)
+          var_def <- as.list(var_def[1,])
+        } else {
+          var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
+          # TBD
+          # var_def <- RomVarDef$new(self,var_one)
+          # var_def <- var_def$to_list()
+        }
+        # after retrieval, store locally
+        self$set_vardef(var_def)
       }
-      # after retrieval, store locally
       return(var_def)
     },
     # get properties
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
+    #' @param obj optional object which can supply more specific query info for odbc
     #' @return nothing sets internal private token
-    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       props = FALSE
-      propvalues <- fn_search_properties(config, self$propvalues)
-      
-      if (is.logical(propvalues)) {
-        # none exists locally, so query
-        force_refresh = TRUE
-      }
-      if (!is.null(self$site) & force_refresh) {
-        propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
-        if (!is.logical(propvalues)) {
-          if (nrow(propvalues) >= 1) {
-            prop <- as.list(propvalues[1,])
-          }
-        } else {
-          prop <- propvalues
+      # odbc has robust query handling so we don't need to do this
+      if (self$connection_type == 'odbc') {
+        prop_obj = RomProperty$new(self)
+        propvalues <- self$get('dh_properties', 'pid', config, prop_obj)
+      } else {
+        # todo: all entities should be able to be searched by the odbc methods
+        #       so eventually all this will be phased out, since the odbc methods
+        #       have robust querying, and should be able to query against the datasource
+        #       using it's names as an environment.  We can make the propvalues
+        #       point to dh_properties on the datasource
+        #       and also tsvalues point to dh_timeseries_values
+        propvalues <- fn_search_properties(config, self$propvalues)
+        
+        if (is.logical(propvalues)) {
+          # none exists locally, so query
+          force_refresh = TRUE
         }
+        if (!is.null(self$site) & force_refresh) {
+          propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
+        }
+      }
+      if (!is.logical(propvalues)) {
+        if (nrow(propvalues) >= 1) {
+          prop <- as.list(propvalues[1,])
+        }
+      } else {
+        prop <- propvalues
       }
       # return either the raw fn_get_timeseries/fn_search_propvalues 
       # or a the first found item
@@ -114,7 +158,7 @@ RomDataSource <- R6Class(
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
     #' @return nothing sets internal private token
-    get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE) {
+    get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       # return_type = 'list', or 'data.frame'
       # default to data.frame to maintain compatibility with getTimeseries
       # force_refresh = if FALSE, use local value if we already have one
@@ -123,21 +167,33 @@ RomDataSource <- R6Class(
       # or, return FALSE with message that df is only option? Hmmmm.
       # or return 
       # search first in 
-      ts = FALSE
-      tsvalues <- fn_search_tsvalues(config, self$tsvalues)
-      if (is.logical(tsvalues)) {
-        # none exists locally, so query
-        force_refresh = TRUE
+      # odbc has robust query handling so we don't need to us fn_get_timeseries
+      if (self$connection_type == 'odbc') {
+        ts_obj = RomTS$new(self)
+        tsvalues <- self$get('dh_timeseries', 'tid', config, ts_obj)
+      } else {
+        # todo: all entities should be able to be searched by the odbc methods
+        #       so eventually all this will be phased out, since the odbc methods
+        #       have robust querying, and should be able to query against the datasource
+        #       using it's names as an environment.  We can make the propvalues
+        #       point to dh_properties on the datasource
+        #       and also tsvalues point to dh_timeseries_values
+        ts = FALSE
+        tsvalues <- fn_search_tsvalues(config, self$tsvalues)
+        if (is.logical(tsvalues)) {
+          # none exists locally, so query
+          force_refresh = TRUE
+        }
+        if (!is.null(self$site) & force_refresh) {
+          # todo: switch to generic get method if possible
+          tsvalues <- fn_get_timeseries(config, self$site, private$token)
+        }
       }
-      if (!is.null(self$site) & force_refresh) {
-        # todo: switch to generic get method if possible
-        tsvalues <- fn_get_timeseries(config, self$site, private$token)
-        if (!is.logical(tsvalues)) {
-          if (nrow(tsvalues) >= 1) {
-            # stash the first one in case we only want a single
-            ts <- as.list(tsvalues[1,])
-            # store all features in local db
-          }
+      if (!is.logical(tsvalues)) {
+        if (nrow(tsvalues) >= 1) {
+          # stash the first one in case we only want a single
+          ts <- as.list(tsvalues[1,])
+          # store all features in local db
         }
       }
       # return either the raw fn_get_timeseries/fn_search_tsvalues 
@@ -174,7 +230,7 @@ RomDataSource <- R6Class(
       }
       if (is.logical(ts_check)) {
         # not found, so add
-        message("Storing TS")
+        #message("Storing TS")
         self$tsvalues <- rbind(self$tsvalues, as.data.frame(ts))
       } else {
         # update 
@@ -189,21 +245,48 @@ RomDataSource <- R6Class(
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       #message(prop)
-      prop_check = FALSE
-      if (!is.na(prop$pid)) {
-        if (prop$pid > 0) {
-          prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
-          #message(prop_check)
+      if (is.data.frame(prop)) {
+        name_check <- names(self$propvalues)[
+          which(!(names(self$propvalues) %in% names(prop)))
+        ]
+        # add missing columns if they exist
+        if (length(name_check) > 0) {
+          message("Warning: all property columns must be present in data frame to do batch insert.")
+          message("Adding", cat(names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))],sep=","))
+          for (n in names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))]) {
+            prop[,n] <- NA
+          }
         }
-      }
-      if (is.logical(prop_check)) {
-        # not found, so add
-        message("Storing prop")
-        self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
+        # eliminate superfluous and sort in the same order
+        prop <- prop[,names(self$propvalues)]
+        propvalue_tmp <- self$propvalues
+        # we handle this a little differently, and it may have multiples
+        dsl <- sqldf(
+          "select * from prop 
+           where pid not in (
+             select pid from propvalue_tmp
+          )"
+        )
+        self$propvalues = rbind(self$propvalues, dsl)
+        
       } else {
-        # update 
-        message("Found, trying to load")
-        self$propvalues[prop$ID] <- prop
+        
+        prop_check = FALSE
+        if (!is.na(prop$pid)) {
+          if (prop$pid > 0) {
+            prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
+            #message(prop_check)
+          }
+        }
+        if (is.logical(prop_check)) {
+          # not found, so add
+          #message("Storing prop")
+          self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
+        } else {
+          # update 
+          message("Found, trying to load")
+          self$propvalues[prop$ID] <- prop
+        }
       }
     },
     #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
@@ -213,23 +296,49 @@ RomDataSource <- R6Class(
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
-      return(TRUE)
-      #message(var_def)
-      ts_check = FALSE
-      if (!is.na(var_def$varid)) {
-        if (var_def$varid > 0) {
-          var_check = fn_search_vardefs(list(varid = var_def$varid), self$var_defs)
-          #message(ts_check)
+      if (is.data.frame(var_def)) {
+        name_check <- names(self$var_defs)[
+          which(!(names(self$var_defs) %in% names(var_def)))
+        ]
+        # add missing columns if they exist
+        if (length(name_check) > 0) {
+          message("Warning: all variable definition columns should be present in data frame to do batch insert.")
+          message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
+          for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
+            var_def[,n] <- NA
+          }
         }
-      }
-      if (is.logical(var_check)) {
-        # not found, so add
-        message("Storing Var")
-        self$tsvalues <- rbind(self$var_defs, as.data.frame(var_def))
+        # eliminate superfluous and sort in the same order
+        var_def <- var_def[,names(self$var_defs)]
+        var_defs <- self$var_defs
+        # we handle this a little differently, and it may have multiples
+        veq = "select * from var_def 
+           where hydroid not in (
+             select hydroid from var_defs
+          )"
+        dsl <- sqldf(
+          veq
+        )
+        self$var_defs = rbind(self$var_defs, dsl)
+        
       } else {
-        # update 
-        message("Found, trying to load")
-        self$var_defs[var_def$ID] <- var_def
+        
+        var_check = FALSE
+        if (!is.na(var_def$varkey)) {
+          if (var_def$varkey > 0) {
+            var_check = fn_search_vardefs(list(varkey = var_def$varkey), self$var_defs)
+            #message(prop_check)
+          }
+        }
+        if (is.logical(var_check)) {
+          # not found, so add
+          #message("Storing prop")
+          self$var_defs <- rbind(self$var_defs, as.data.frame(var_def))
+        } else {
+          # update 
+          message("Found, trying to load")
+          self$var_defs[var_def$hydroid] <- var_def
+        }
       }
     },
     #' @param features = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -259,7 +368,7 @@ RomDataSource <- R6Class(
       }
       if (is.logical(feature_check)) {
         # not found, so add
-        message("Storing feature")
+        #message("Storing feature")
         self$features <- rbind(self$features, as.data.frame(feature))
       } else {
         # update 
@@ -270,9 +379,15 @@ RomDataSource <- R6Class(
     #' @param entity_type = dh_feature, dh_properties, ...
     #' @param pk = primary key column name, e.g. hydroid, pid, ...
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
+    #' @param obj = (optional) object class calling this routine, can supply extra info
     #' @return local df index?
-    get = function(entity_type, pk, config) {
-      retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
+    get = function(entity_type, pk, config, obj = FALSE) {
+      if (self$connection_type == 'rest') {
+        retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj)
+      }
+      
       return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
@@ -353,7 +468,7 @@ RomDataSource <- R6Class(
     ),
     #' @field var_defs table of variable definitions
     var_defs = data.frame(
-      varid = integer(),
+      hydroid = integer(),
       varname = character(),
       vardesc = character(),
       vocabulary = character(),

@@ -42,6 +42,22 @@ RomTS <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = "
+      select * from (
+        select a.*, c.filename as image_name, c.uri as image_uri
+        from dh_timeseries as a 
+        left outer join field_data_field_image as b
+        on (
+          b.entity_id = a.tid
+          and b.entity_type = 'dh_timeseries'
+        )
+        left outer join file_managed as c
+        on (
+          c.fid = b.field_image_fid
+        )
+      ) as dh_timeseries
+    ",
     #' @return get_id the id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$tid)
@@ -59,9 +75,11 @@ RomTS <- R6Class(
       config_cols <- names(config)
       if (is.element("varkey", config_cols)) {
         if (!is.null(self$datasource)) {
+          message(paste("getting varid for", config$varkey))
           vardef = self$datasource$get_vardef(config$varkey)
-          config$varid = vardef$varid
-          # eliminate this since if passed raw to reest will cause problems
+          config$varid = vardef$hydroid
+          message(paste(" varid =", config$varid))
+          # eliminate this since if passed raw to rest will cause problems
           config$varkey <- NULL
         }
       }

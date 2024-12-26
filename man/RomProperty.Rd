@@ -5,6 +5,8 @@
 \title{Time Series data object}
 \value{
 reference class of type openmi.om.base.
+
+an updated config if necessary or FALSE if it fails
 }
 \description{
 Object for storing single time series value
@@ -46,6 +48,8 @@ NA
 
 \item{\code{proptext}}{alphanumeric value}
 
+\item{\code{data_matrix}}{json matrix}
+
 \item{\code{varid}}{variable ID from RomDataSource}
 
 \item{\code{bundle}}{(for future use)}
@@ -55,6 +59,8 @@ NA
 \item{\code{modified}}{timestamp}
 
 \item{\code{datasource}}{RomDataSource}
+
+\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 }
 \if{html}{\out{</div>}}
 }
@@ -63,6 +69,7 @@ NA
 \itemize{
 \item \href{#method-RomProperty-get_id}{\code{RomProperty$get_id()}}
 \item \href{#method-RomProperty-new}{\code{RomProperty$new()}}
+\item \href{#method-RomProperty-handle_config}{\code{RomProperty$handle_config()}}
 \item \href{#method-RomProperty-from_list}{\code{RomProperty$from_list()}}
 \item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
 \item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
@@ -73,6 +80,7 @@ NA
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
 </ul>
@@ -113,6 +121,22 @@ get_id the id of this entity alias to remote pkid, subclassed as function
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-handle_config"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-handle_config}{}}}
+\subsection{Method \code{handle_config()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$handle_config(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

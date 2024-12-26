@@ -11,19 +11,34 @@
 RomEntity <- R6Class(
   "RomEntity",
   public = list(
+    #' @field name what is it called
+    name = NA,
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
+    #' @field entity_id unique ID of entity
+    entity_id = NA,
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = NA,
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
-      return(NULL)
+      return(self$entity_id)
     },
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
     propvalues = function(propname = NULL, varid = NULL) {
-      ps <- self$datasource$get_prop(list(featureid = self$get_id(), propname = propname, varid = varid, entity_type=self$base_entity_type))
+      prop_obj = RomProperty$new(self$datasource)
+      config <- list(
+        featureid = self$get_id(), 
+        entity_type=self$base_entity_type
+      )
+      if (!is.null(varid)) { config$varid = varid } 
+      if (!is.null(propname)) { config$propname = propname } 
+      ps <- self$datasource$get_prop(
+        config
+      )
       return(ps)
     },
     #' @return tsvalues unique timeseries records for this entity
@@ -31,15 +46,18 @@ RomEntity <- R6Class(
     #' @param tstime timespan begin
     #' @param tsendtime timespan end
     tsvalues = function(varkey = NULL, tstime = NULL, tsendtime = NULL) {
-      ts <- self$datasource$get_ts(
-        list(
-          featureid = self$get_id(), 
-          varkey = varkey, 
-          tstime = tstime, 
-          tsendtime = tsendtime, 
-          entity_type=self$base_entity_type
-        )
+      ts_obj = RomTS$new(self$datasource)
+      config <- list(
+        featureid = self$get_id(), 
+        entity_type=self$base_entity_type
       )
+      if (!is.null(varkey)) { 
+        vardef <- self$datasource$get_vardef(varkey)
+        config$varid <- vardef$hydroid
+      } 
+      if (!is.null(tstime)) { config$tstime = tstime } 
+      if (!is.null(tsendtime)) { config$tsendtime = tsendtime } 
+      ts <- self$datasource$get_ts(config)
       return(ts)
     },
     #' @field datasource RomDataSource
@@ -54,21 +72,68 @@ RomEntity <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
+      config <- self$handle_config(config)
+      if (is.logical(config)) {
+        message("Configuration information faild validation. Returning.")
+        return(FALSE)
+      }
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        feature <- self$datasource$get(self$base_entity_type, self$pk_name, config)
+        message("RomEntity calling ds$get()")
+        feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
           config <- feature
         }
       }
+      self$load_data(config, load_remote)
+    },
+    #' @param config 
+    #' @returns an updated config if necessary or FALSE if it fails
+    handle_config = function(config) {
+      return(config)
+    },
+    #' @param config 
+    #' @param load_remote automatically query remote data source for matches?
+    #' @returns the data from the remote connection
+    load_data = function(config, load_remote) {
       self$from_list(config)
+      # this should be handled better.  We need to decide if we want to 
+      # still use the local datasource as a repository for remote data
+      # at first the thinking was no with ODBC, but maybe that's not correct?
+      # in other words, it was thought that ODBC replaced the local storage...
       if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
-        self$save(FALSE) 
+        if (self$datasource$connection_type != 'odbc') {
+          self$save(FALSE) 
+        }
+      }
+    },
+    #' @return list of object attributes suitable for input to new() and from_list() methods
+    to_list = function() {
+      # returns as a list, which can be set and fed back to 
+      # from_list() or new(config)
+      t_list <- list(
+        entity_id = self$get_id(),
+        name = self$name
+      )
+      return(t_list)
+    },
+    #' @param push_remote update locally only or push to remote database
+    #' @return NULL
+    save = function(push_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (push_remote) {
+        finfo <- self$to_list()
+        fid = self$datasource$post(self$base_entity_type, self$pk_name, finfo)
+        if (!is.logical(hydroid)) {
+          self[[self$pk_name]] = fid
+        }
       }
     }
   )

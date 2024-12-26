@@ -5,6 +5,10 @@
 \title{Base entity data object}
 \value{
 reference class of type openmi.om.base.
+
+an updated config if necessary or FALSE if it fails
+
+the data from the remote connection
 }
 \description{
 Object for storing a single entity with attribute and timeseries related
@@ -21,9 +25,15 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{name}}{what is it called}
+
 \item{\code{base_entity_type}}{kind of entity}
 
 \item{\code{pk_name}}{the name of this entity's pk column}
+
+\item{\code{entity_id}}{unique ID of entity}
+
+\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
 \item{\code{datasource}}{RomDataSource}
 }
@@ -36,6 +46,10 @@ NA
 \item \href{#method-RomEntity-propvalues}{\code{RomEntity$propvalues()}}
 \item \href{#method-RomEntity-tsvalues}{\code{RomEntity$tsvalues()}}
 \item \href{#method-RomEntity-new}{\code{RomEntity$new()}}
+\item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
+\item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
+\item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
+\item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
@@ -116,6 +130,71 @@ tsvalues unique timeseries records for this entity
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-handle_config"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-handle_config}{}}}
+\subsection{Method \code{handle_config()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$handle_config(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-load_data"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-load_data}{}}}
+\subsection{Method \code{load_data()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_data(config, load_remote)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+
+\item{\code{load_remote}}{automatically query remote data source for matches?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-to_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-to_list}{}}}
+\subsection{Method \code{to_list()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+list of object attributes suitable for input to new() and from_list() methods
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-save"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-save}{}}}
+\subsection{Method \code{save()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$save(push_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{push_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
 }
 }
 \if{html}{\out{<hr>}}

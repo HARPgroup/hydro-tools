@@ -726,7 +726,16 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
 #' @examples NA
 fn_search_vardefs <- function(config, var_defs_tmp) {
   # TBD, return false now, which means no local store, must retrieve
-  return(FALSE)
+  vardef = FALSE
+  if (!is.null(config$hydroid)) {
+    vardef = var_defs_tmp[which(var_defs_tmp$hydroid == config$hydroid),]
+    if (nrow(vardef) == 0) { vardef = FALSE}
+  }
+  if (!is.null(config$varkey)) {
+    vardef = var_defs_tmp[which(var_defs_tmp$varkey == config$varkey),]
+    if (nrow(vardef) == 0) { vardef = FALSE}
+  }
+  return(vardef)
 }
 
 
