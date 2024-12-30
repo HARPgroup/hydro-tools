@@ -216,7 +216,7 @@ dHOMDataMatrix <- R6Class(
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      print(paste("Entity matrix:", entity$propname))
+      #print(paste("Entity matrix:", entity$propname))
       export = list(
         id=entity$pid,
         name=entity$propname,
@@ -227,8 +227,16 @@ dHOMDataMatrix <- R6Class(
   )
 )
 
-# This is heare because there is no way to instantiate a dynamic class using 
-# a string for a class name, so we have to have logic to expose allowed classes
+# 'This is heare because there is no way to instantiate a dynamic class using 
+# 'a string for a class name, so we have to have logic to expose allowed classes
+#' Retrieve Plugin object for a variable entity
+#'
+#' @param plugin_name the actual class name
+#' @param entity the object to apply the plugin to
+#' @return class matching plugin or default generic plugin
+#' @seealso NA
+#' @export fn_search_vardefs
+#' @examples NA
 get_plugin_class <- function(plugin_name, entity) {
   if (is.na(plugin_name) ) {
     plugin = dHVariablePluginDefault$new(entity)

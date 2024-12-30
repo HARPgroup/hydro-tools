@@ -1,8 +1,3 @@
-get_plugin <- function(ds, thisobject) {
-  vardef = ds$get_vardef(as.integer(thisobject$varid))
-  plugin = get_plugin_class(vardef$plugin, thisobject)
-  return(plugin)
-}
 
 get_export <- function(ds, featureid, props, depth=0) {
   #message(paste("Handling pid=",featureid))
@@ -10,8 +5,8 @@ get_export <- function(ds, featureid, props, depth=0) {
   #thisobject = props[which(props$pid == featureid),]
   propatts <- as.list(props[which(props$pid == featureid),])
   thisobject = RomProperty$new(ds, propatts, FALSE )
-  print(paste("handling", thisobject$propname))
-  plugin <- get_plugin(ds,thisobject)
+  #print(paste("handling", thisobject$propname))
+  plugin <- get_plugin(thisobject)
   export[[thisobject$propname]] = plugin$exportOpenMI(thisobject)
   #export[[thisobject$propname]] = list(propname=thisobject$propname, code=thisobject$propcode)
   children = props[which(props$featureid == featureid),]

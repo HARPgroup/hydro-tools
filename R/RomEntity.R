@@ -25,6 +25,14 @@ RomEntity <- R6Class(
     get_id = function() {
       return(self$entity_id)
     },
+    #' @field has_vardef is pluggable?
+    has_vardef = FALSE,
+    #' @field varid (optional) integer field for pluggable entities
+    varid = NA,
+    #' @field vardef (optional) full RomVariableDefinition
+    vardef = NULL,
+    #' @field plugin (optional) instance of dHVariablePlugin class
+    plugin = NA,
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
@@ -53,7 +61,7 @@ RomEntity <- R6Class(
       )
       if (!is.null(varkey)) { 
         vardef <- self$datasource$get_vardef(varkey)
-        config$varid <- vardef$hydroid
+        config$varid = vardef$hydroid
       } 
       if (!is.null(tstime)) { config$tstime = tstime } 
       if (!is.null(tsendtime)) { config$tsendtime = tsendtime } 
@@ -71,7 +79,7 @@ RomEntity <- R6Class(
       # of a blank object
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
-      self$datasource <- datasource 
+      self$datasource = datasource 
       config <- self$handle_config(config)
       if (is.logical(config)) {
         message("Configuration information faild validation. Returning.")
@@ -96,10 +104,49 @@ RomEntity <- R6Class(
       return(config)
     },
     #' @param config 
+    #' @returns loads the varid
+    insure_varid = function(config) {
+      # this is used by variable enabled objects properties, timeseries, ...
+      # it converts a varkey to varid if varkey is supplied
+      config_cols <- names(config)
+      if (is.element("varkey", config_cols)) {
+        if (!is.element("varid", config_cols)) {
+          if (!is.null(self$datasource)) {
+            vardef = self$get_vardef(config)
+            config$varid = vardef$hydroid
+            # eliminate this since if passed raw to rest will cause problems
+            config$varkey <- NULL
+          }
+        }
+      }
+      return(config)
+    },
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @param refresh automatically refresh var info?
+    get_vardef = function(config = FALSE, refresh=FALSE) {
+      if (!self$has_vardef) {
+        return(FALSE)
+      }
+      if (!is.null(self$vardef) & !refresh) {
+        return(self$vardef)
+      }
+      if (!is.logical(config)) {
+        vardef = self$datasource$get_vardef(config$varkey)
+      } else {
+        vardef = self$datasource$get_vardef(self$varid)
+      }
+      self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
+      return(self$vardef)
+    },
+    #' @param config 
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
       self$from_list(config)
+      #print(paste("Loaded object: "))
+      #print(self)
+      self$get_vardef()
+      self$load_plugin()
       # this should be handled better.  We need to decide if we want to 
       # still use the local datasource as a repository for remote data
       # at first the thinking was no with ODBC, but maybe that's not correct?
@@ -107,10 +154,26 @@ RomEntity <- R6Class(
       if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
+        message("Saving to local db")
         if (self$datasource$connection_type != 'odbc') {
           self$save(FALSE) 
         }
+      } else {
+        message("not saving to local")
       }
+      return(TRUE)
+    },
+    #' @returns nothing, but loads the objects plugin
+    load_plugin = function() {
+      print("load_plugin() called")
+      if (is.null(self$vardef)) {
+        # this is only valid for types that have vardefs
+        return(FALSE)
+      }
+      # get_plugin method is 
+      print("trying to load plugin for object vardef ")
+      print(typeof(self$vardef))
+      self$plugin = self$vardef$get_plugin(self)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function() {

@@ -22,6 +22,8 @@ RomProperty <- R6Class(
     featureid = NA,
     #' @field entity_type type of entity this is attached to
     entity_type = NA,
+    #' @field has_vardef is pluggable?
+    has_vardef = TRUE,
     #' @field propname locally unique name
     propname = NA,
     #' @field startdate begin timestamp
@@ -46,6 +48,8 @@ RomProperty <- R6Class(
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field tree_loaded - this is a switch to enable fast loading of export tree from local storage
+    tree_loaded = FALSE,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = "
       select * from dh_properties_fielded
@@ -69,7 +73,6 @@ RomProperty <- R6Class(
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
         prop <- self$datasource$get_prop(config, 'list', TRUE, self)
-        #print((nrow(prop) >= 1))
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
             prop <- as.list(prop[1,])
@@ -88,20 +91,7 @@ RomProperty <- R6Class(
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
-      config_cols <- names(config)
-      if (is.null(config$varid)) {
-        config$varid = 0
-      }
-      if (!(as.integer(config$varid) > 0)) {
-        if (is.element("varkey", config_cols)) {
-          if (!is.null(self$datasource)) {
-            vardef = self$datasource$get_vardef(config$varkey)
-            config$varid = vardef$hydroid
-            # eliminate this since if passed raw to rest will cause problems
-            config$varkey <- NULL
-          }
-        }
-      }
+      config = self$insure_varid(config)
       return(config)
     },
     #' @param config list of attributes to set, see also: to_list() for format

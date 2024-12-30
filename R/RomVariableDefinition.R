@@ -7,7 +7,7 @@
 #' @return feature class of type RomFeature
 #' @seealso NA
 #' @examples NA
-#' @export RomFeature
+#' @export RomVariableDefinition
 RomVariableDefinition <- R6Class(
   "RomVariableDefinition",
   inherit = RomEntity,
@@ -16,21 +16,20 @@ RomVariableDefinition <- R6Class(
     base_entity_type = 'dh_variabledefinition',
     #' @field pk_name the name of this entity's pk column
     pk_name = 'hydroid',
-    #' @field The unique alphanumeric key for this variable
+    #' @field varkey The unique alphanumeric key for this variable
     varkey = NA,
-    #' @field name of this entity
+    #' @field varname the name of this entity
     varname = NA,
-    #' @field alpha code for this entity from original dataset
+    #' @field varcode alpha code for this entity from original dataset
     varcode = NA,
-    #' @field duplicate of hydroid, more common name
+    #' @field varid duplicate of hydroid, more common name
     varid = NA,
     #' @field hydroid unique ID (integer)
     hydroid = NA,
-    #' @field bundle main content type, i.e. facility, well, intake, ...
+    #' @field varunits cfs/MGD, ...
     varunits = NA,
     #' @field plugin handler code for advanced operations
     plugin = NA,
-    # list of object references?  or list format name, value, ...
     #' @field vardesc notes field
     vardesc = NA,
     #' @field vocabulary group that this belongs to
@@ -48,7 +47,7 @@ RomVariableDefinition <- R6Class(
     },
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
-      return(self$pid)
+      return(self$hydroid)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function() {
@@ -90,7 +89,16 @@ RomVariableDefinition <- R6Class(
       } else {
         super$load_data(config, load_remote)
       }
+    },
+    #' @param thisobject an instance of RomEntity with vardef enabled 
+    #' @returns instance of dHVariablePlugin 
+    get_plugin = function(thisobject) {
+      # get_plugin_class() is defined in dHVariablePluginDefault.R
+      # we pass the object in case the plugin needs it on instantiation
+      plugin = get_plugin_class(thisobject$plugin, thisobject)
+      return(plugin)
     }
+    
   )
 )
 

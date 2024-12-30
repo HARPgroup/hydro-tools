@@ -739,6 +739,18 @@ fn_search_vardefs <- function(config, var_defs_tmp) {
 }
 
 
+#' Delete any entity from a RESTful web service
+#'
+#' @param entity_type = dh_feature, dh_properties, ...
+#' @param pk = primary key column name, e.g. hydroid, pid, ...
+#' @param inputs  contents of record to get in list(pid, propname, propvalue, ...)
+#' @param site URL of rest server
+#' @param token for xhttp auth
+fn_delete_rest <- function(entity_type, pk, inputs, site, token){
+  # not yet 
+  result = FALSE
+  return(result)
+}
 
 
 #' Retrieve Property data from propvalues style data frame

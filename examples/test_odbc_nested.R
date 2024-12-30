@@ -12,10 +12,22 @@ dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc'
 dso$get_token(rest_pw = odbc_pw)
 
 model_pid = 4824696
-model <- FALSE
-model <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
-model$prop_list # this might be temporary 
+model <- RomProperty$new(
+  dso, list(
+    pid=model_pid
+  ), TRUE
+)
+model_tree <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
+model$tree_loaded = TRUE
+
+model_tree$prop_list # this might be temporary 
 nested = list()
+
+
+blank_prop <- RomProperty$new(
+  dso
+)
+
 
 fac_demand_prop <- RomProperty$new(
   dso, list(
@@ -28,3 +40,36 @@ fac_demand_prop$data_matrix
 
 vardef <- FALSE
 vardef <- RomVariableDefinition$new(dso, list(varkey='wd_mgy'), TRUE)
+
+
+fn_guess_insert(
+  "dh_properties", 
+  "pid",
+  list(
+    propname='fac_demand_mgy', 
+    featureid=model_pid, 
+    entity_type='dh_properties'
+  )
+)
+
+fn_guess_update(
+  "dh_properties", 
+  "pid",
+  list(
+    propname='fac_demand_mgy', 
+    pid=model_pid, 
+    entity_type='dh_properties'
+  )
+)
+
+fn_post_odbc(
+  "dh_properties", 
+  "pid",
+  list(
+    propname='fac_demand_mgy', 
+    pid=model_pid, 
+    entity_type='dh_properties',
+    propvalue = 12050
+  ),
+  con = dso$connection
+)

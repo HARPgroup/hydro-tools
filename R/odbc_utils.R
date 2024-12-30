@@ -12,65 +12,24 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
-  #message(paste("Called fn_post_odbc(", entity_type, ",", pk, ", pkid=", pkid, ")"))
-  
   for (j in 1:length(inputs)) {
     if (is.na(inputs[j])) {
       inputs[j] <- NULL
     }
   }
-  #message(inputs)
-  #message(paste("pk= ", pkid))
   this_result <- list(
     status = FALSE
   )
-  if (!is.na(match(pk, names(inputs)) )) {
-    #remove this for saving if it is not null
-    iix <- which(names(inputs) == pk)
-    inputs  <- inputs[-iix]
-    # the reason we remove this is that the REST service bombs if we 
-    # send it a pk, like tid or pid, and this is unnecessary because 
-    # the pkid is part of the URL so no worries.
-    #message(paste("removed ", pk, " from inputs"))
-  }
   if ( is.na(pkid) | is.null(pkid) ) {
     message(paste0("----- Creating ", entity_type, "..."))
-    this_result <- httr::POST(
-      paste0(site, "/",entity_type, "/"), 
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      body = inputs,
-      encode = "json"
-    )
-    # need to harvest the id col since this is an insert
-    rest_parts = httr::content(this_result)
-    #print(paste("Parts:", rest_parts))
-    pkid = as.integer(rest_parts$id)
+    odbc_sql = fn_guess_insert(entity_type, pk, inputs)
   } else {
     message(paste0("----- Updating ", entity_type, "..."))
-    #message(paste("PUT URL: ", paste0(site, "/",entity_type, "/", pkid)))
-    this_result <- httr::PUT(
-      paste0(site, "/",entity_type, "/", pkid), 
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      body = inputs,
-      encode = "json"
-    );
-    #print(this_result)
+    odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
-  #rest_parts = strsplit(this_result$url, '/', fixed = TRUE)
-  #print(paste("Rest Parts:", rest_parts))
-  #pkid = as.integer(rest_parts[[1]][length(rest_parts[[1]])])
+  print(odbc_sql)
+  pkid = sqldf(odbc_sql, connection = con)
   
-  if (!is.logical(this_result$status )) {
-    return_id <- switch(
-      this_result$status,
-      "200" = pkid,
-      "201" = pkid,
-      "400" = FALSE,
-      "500" = FALSE
-    )
-  } else {
-    pkid = FALSE
-  }
   message(paste("REST returned", pkid))
   return(pkid)
 }
@@ -86,8 +45,8 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
 #' @examples NA
 fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  message(entity_type)
-  message(paste(inputs))
+  #message(entity_type)
+  #message(paste(inputs))
   get_sql = FALSE
   print(obj)
   if (!is.logical(obj)) {
@@ -104,8 +63,13 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   get_where = fn_guess_sql_where(entity_type, pk, inputs)
   limits = fn_guess_limits(entity_type, pk, inputs)
   # put it all together
-  get_sql = paste(get_sql, "WHERE", get_where, limits)
-  message(get_sql)
+  if (nchar(trimws(get_where)) == 0) {
+    where_pre = ""
+  } else {
+    where_pre = "WHERE"
+  }
+  get_sql = paste(get_sql, where_pre, get_where, limits)
+  #message(get_sql)
   entities = sqldf(get_sql, connection = con, method = "raw")
   if (is.logical(entities)) {
     message("----- This entity does not exist")
@@ -177,4 +141,62 @@ fn_guess_limits <- function(entity_type, pk, inputs) {
     limit = paste ("limit",inputs$limit)
   }
   return(limit)
+}
+
+
+fn_guess_insert <- function(entity_type, pk, inputs) {
+  col_sql = ""
+  val_sql = ""
+  in_sql = ""
+  in_sep = ""
+  for (col_name in names(inputs)) {
+    if (is.na(inputs[col_name])) {
+      inputs[col_name] <- NULL
+      next
+    }
+    col_val = inputs[[col_name]]
+    col_sql <- paste(col_sql, in_sep, col_name)
+    if (is.character(col_val)) {
+      col_val = paste0("'",col_val,"'")
+    }
+    val_sql <- paste(val_sql, in_sep, col_val)
+    in_sep = ","
+  }
+  in_sql = paste(
+    "INSERT INTO", entity_type, "(", col_sql, ")", 
+    "VALUES", "(", val_sql, ")",
+    "RETURNING", pk
+  )
+  return(in_sql)
+}
+
+fn_guess_update <- function(entity_type, pk, inputs) {
+  val_sql = ""
+  up_sql = ""
+  up_sep = ""
+  pk_val = NULL
+  for (col_name in names(inputs)) {
+    print(paste("handling ", col_name))
+    if (is.na(inputs[col_name])) {
+      inputs[col_name] <- NULL
+      next
+    }
+    col_val = inputs[[col_name]]
+    if (is.character(col_val)) {
+      col_val = paste0("'",col_val,"'")
+    }
+    if (col_name == pk) {
+      print(paste("Found pk col", pk))
+      pk_val = col_val
+      next
+    }
+    val_sql <- paste(val_sql, up_sep, col_name, "=", col_val)
+    up_sep = ","
+  }
+  up_sql = paste(
+    "UPDATE", entity_type, 
+    "SET", val_sql, 
+    "WHERE", pk, "=", pk_val
+  )
+  return(up_sql)
 }

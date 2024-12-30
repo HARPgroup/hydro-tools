@@ -116,8 +116,7 @@ RomDataSource <- R6Class(
       props = FALSE
       # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
-        prop_obj = RomProperty$new(self)
-        propvalues <- self$get('dh_properties', 'pid', config, prop_obj)
+        propvalues <- self$get('dh_properties', 'pid', config, obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods
@@ -296,49 +295,33 @@ RomDataSource <- R6Class(
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
-      if (is.data.frame(var_def)) {
-        name_check <- names(self$var_defs)[
-          which(!(names(self$var_defs) %in% names(var_def)))
-        ]
-        # add missing columns if they exist
-        if (length(name_check) > 0) {
-          message("Warning: all variable definition columns should be present in data frame to do batch insert.")
-          message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
-          for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
-            var_def[,n] <- NA
-          }
+      if (!is.data.frame(var_def)) {
+        var_def = as.data.frame(var_def)
+    }
+      name_check <- names(self$var_defs)[
+        which(!(names(self$var_defs) %in% names(var_def)))
+      ]
+      # add missing columns if they exist
+      if (length(name_check) > 0) {
+        message("Warning: all variable definition columns should be present in data frame to do batch insert.")
+        message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
+        for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
+          var_def[,n] <- NA
         }
-        # eliminate superfluous and sort in the same order
-        var_def <- var_def[,names(self$var_defs)]
-        var_defs <- self$var_defs
-        # we handle this a little differently, and it may have multiples
-        veq = "select * from var_def 
-           where hydroid not in (
-             select hydroid from var_defs
-          )"
-        dsl <- sqldf(
-          veq
-        )
+      }
+      # eliminate superfluous and sort in the same order
+      var_def <- var_def[,names(self$var_defs)]
+      var_defs <- self$var_defs
+      # we handle this a little differently, and it may have multiples
+      veq = "select * from var_def 
+         where hydroid not in (
+           select hydroid from var_defs
+        )"
+      dsl <- sqldf(
+        veq
+      )
+      if (nrow(dsl) > 0) {
         self$var_defs = rbind(self$var_defs, dsl)
-        
-      } else {
-        
-        var_check = FALSE
-        if (!is.na(var_def$varkey)) {
-          if (var_def$varkey > 0) {
-            var_check = fn_search_vardefs(list(varkey = var_def$varkey), self$var_defs)
-            #message(prop_check)
-          }
-        }
-        if (is.logical(var_check)) {
-          # not found, so add
-          #message("Storing prop")
-          self$var_defs <- rbind(self$var_defs, as.data.frame(var_def))
-        } else {
-          # update 
-          message("Found, trying to load")
-          self$var_defs[var_def$hydroid] <- var_def
-        }
       }
     },
     #' @param features = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -395,10 +378,22 @@ RomDataSource <- R6Class(
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
     #' @return local df index?
     post = function(entity_type, pk, config) {
-      message(paste("site",self$site))
-      message(paste("token", private$token))
       return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
       return(return_id)
+    },
+    #' @param entity_type = dh_feature, dh_properties, ...
+    #' @param pk = primary key column name, e.g. hydroid, pid, ...
+    #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
+    #' @param obj = (optional) object class calling this routine, can supply extra info
+    #' @return local df index?
+    delete = function(entity_type, pk, config, obj = FALSE) {
+      if (self$connection_type == 'rest') {
+        retvals = fn_delete_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        retvals = fn_delete_odbc(entity_type, pk, config, self$connection, obj)
+      }
+      
+      return(retvals)
     },
     #' @param pid = object pid
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
