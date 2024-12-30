@@ -94,6 +94,8 @@ RomDataSource <- R6Class(
         if (self$connection_type == 'odbc') {
           config$limit = 1
           var_def <- self$get('dh_variabledefinition', 'hydroid', config)
+          print("vardef")
+          print(vardef)
           var_def <- as.list(var_def[1,])
         } else {
           var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)

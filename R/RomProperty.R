@@ -76,6 +76,7 @@ RomProperty <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
+        print("calling get_prop() from Property init")
         prop <- self$datasource$get_prop(config, 'list', TRUE, self)
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
@@ -90,6 +91,7 @@ RomProperty <- R6Class(
           config <- prop
         }
       }
+      print("Property loaded, calling load_data()")
       self$load_data(config, load_remote)
     },
     #' @param config 

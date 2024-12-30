@@ -44,6 +44,7 @@ RomEntity <- R6Class(
       )
       if (!is.null(varid)) { config$varid = varid } 
       if (!is.null(propname)) { config$propname = propname } 
+      print("get_prop called in propvalues()")
       ps <- self$datasource$get_prop(
         config
       )
