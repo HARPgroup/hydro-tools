@@ -10,6 +10,9 @@ ds <- RomDataSource$new(site, rest_uname = rest_uname)
 ds$get_token(rest_pw = rest_pw)
 dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
 dso$get_token(rest_pw = odbc_pw)
+## If testing on internal network http://192.168.0.21
+dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
+dso$get_token(rest_pw = odbc_pw, port=5432) 
 
 model_pid = 4824696
 model <- RomProperty$new(
