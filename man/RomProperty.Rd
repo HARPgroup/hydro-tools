@@ -58,6 +58,10 @@ NA
 
 \item{\code{uid}}{user id of creator}
 
+\item{\code{vid}}{current revision (pk in dh_properties_revision)}
+
+\item{\code{module}}{related module (optional?)}
+
 \item{\code{modified}}{timestamp}
 
 \item{\code{datasource}}{RomDataSource}

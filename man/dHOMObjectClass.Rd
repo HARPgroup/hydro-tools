@@ -19,7 +19,7 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{hydrotools::dHOMAlphanumericConstant} -> \code{dHOMObjectClass}
+\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMAlphanumericConstant]{hydrotools::dHOMAlphanumericConstant}} -> \code{dHOMObjectClass}
 }
 \section{Methods}{
 \subsection{Public methods}{
