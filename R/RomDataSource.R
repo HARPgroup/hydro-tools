@@ -115,7 +115,7 @@ RomDataSource <- R6Class(
     #' @param obj optional object which can supply more specific query info for odbc
     #' @return nothing sets internal private token
     get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
-      props = FALSE
+      prop = FALSE
       # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
         propvalues <- self$get('dh_properties', 'pid', config, obj)

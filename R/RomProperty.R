@@ -93,6 +93,11 @@ RomProperty <- R6Class(
       }
       print("Property loaded, calling load_data()")
       self$load_data(config, load_remote)
+      if (!is.logical(self$plugin$entity_bundle)) {
+        self$bundle = self$plugin$entity_bundle
+      } else {
+        self$bundle = 'dh_properties'
+      }
     },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails

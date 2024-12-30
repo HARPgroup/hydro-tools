@@ -13,7 +13,10 @@ dHVariablePluginDefault <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = FALSE,
+    #' @field entity_bundle model object type
+    entity_bundle = FALSE,
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
     initialize = function(config = list()) {
