@@ -77,6 +77,7 @@ NA
 \item \href{#method-RomDataSource-set_feature}{\code{RomDataSource$set_feature()}}
 \item \href{#method-RomDataSource-get}{\code{RomDataSource$get()}}
 \item \href{#method-RomDataSource-post}{\code{RomDataSource$post()}}
+\item \href{#method-RomDataSource-delete}{\code{RomDataSource$delete()}}
 \item \href{#method-RomDataSource-get_json_prop}{\code{RomDataSource$get_json_prop()}}
 \item \href{#method-RomDataSource-clone}{\code{RomDataSource$clone()}}
 }
@@ -156,7 +157,7 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_vardef}{}}}
 \subsection{Method \code{get_vardef()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_update = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_refresh = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -164,7 +165,7 @@ nothing sets internal private token
 \describe{
 \item{\code{varkey}}{= variable key}
 
-\item{\code{force_update}}{Check remote repository for new info?}
+\item{\code{force_refresh}}{Check remote repository for new info?}
 
 \item{\code{debug}}{show info}
 }
@@ -398,6 +399,31 @@ local df index?
 \item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
 
 \item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataSource-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$delete(entity_type, pk, config, obj = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+
+\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+
+\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+
+\item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
 }
 \if{html}{\out{</div>}}
 }

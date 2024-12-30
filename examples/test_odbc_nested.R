@@ -55,22 +55,12 @@ fn_guess_insert(
   )
 )
 
-fn_guess_update(
-  "dh_properties", 
-  "pid",
-  list(
-    propname='fac_demand_mgy', 
-    pid=model_pid, 
-    entity_type='dh_properties'
-  )
-)
-
 fn_post_odbc(
   "dh_properties", 
   "pid",
   list(
-    propname='fac_demand_mgy', 
-    pid=model_pid, 
+    propname='test_variable', 
+    featureid=model_pid, 
     entity_type='dh_properties',
     propvalue = 12050
   ),

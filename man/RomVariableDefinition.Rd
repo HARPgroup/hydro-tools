@@ -7,6 +7,8 @@
 feature class of type RomFeature
 
 the data from the remote connection
+
+instance of dHVariablePlugin
 }
 \description{
 Object for storing a single feature with attribute and timeseries related
@@ -30,17 +32,17 @@ NA
 
 \item{\code{pk_name}}{the name of this entity's pk column}
 
-\item{\code{The}}{unique alphanumeric key for this variable}
+\item{\code{varkey}}{The unique alphanumeric key for this variable}
 
-\item{\code{name}}{of this entity}
+\item{\code{varname}}{the name of this entity}
 
-\item{\code{alpha}}{code for this entity from original dataset}
+\item{\code{varcode}}{alpha code for this entity from original dataset}
 
-\item{\code{duplicate}}{of hydroid, more common name}
+\item{\code{varid}}{duplicate of hydroid, more common name}
 
 \item{\code{hydroid}}{unique ID (integer)}
 
-\item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
+\item{\code{varunits}}{cfs/MGD, ...}
 
 \item{\code{plugin}}{handler code for advanced operations}
 
@@ -54,21 +56,6 @@ NA
 }
 \if{html}{\out{</div>}}
 }
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{The}}{unique alphanumeric key for this variable}
-
-\item{\code{name}}{of this entity}
-
-\item{\code{alpha}}{code for this entity from original dataset}
-
-\item{\code{duplicate}}{of hydroid, more common name}
-
-\item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
-}
-\if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -78,13 +65,17 @@ NA
 \item \href{#method-RomVariableDefinition-from_list}{\code{RomVariableDefinition$from_list()}}
 \item \href{#method-RomVariableDefinition-save}{\code{RomVariableDefinition$save()}}
 \item \href{#method-RomVariableDefinition-load_data}{\code{RomVariableDefinition$load_data()}}
+\item \href{#method-RomVariableDefinition-get_plugin}{\code{RomVariableDefinition$get_plugin()}}
 \item \href{#method-RomVariableDefinition-clone}{\code{RomVariableDefinition$clone()}}
 }
 }
 \if{html}{\out{
-<details open><summary>Inherited methods</summary>
+<details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
 </ul>
@@ -189,6 +180,22 @@ NULL
 \item{\code{config}}{}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomVariableDefinition-get_plugin"></a>}}
+\if{latex}{\out{\hypertarget{method-RomVariableDefinition-get_plugin}{}}}
+\subsection{Method \code{get_plugin()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomVariableDefinition$get_plugin(thisobject)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{thisobject}}{an instance of RomEntity with vardef enabled}
 }
 \if{html}{\out{</div>}}
 }
