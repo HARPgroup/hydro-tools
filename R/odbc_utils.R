@@ -29,8 +29,12 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   }
   print(odbc_sql)
   pkid = sqldf(odbc_sql, connection = con)
-  pkid <- pkid[1,pk]
-  message(paste("REST returned", pkid)
+  if (nrow(pkid) > 0) {
+    pkid <- pkid[1,pk]
+  } else {
+    pkid = FALSE
+  }
+  message(paste("REST returned", pkid))
   return(pkid)
 }
 
