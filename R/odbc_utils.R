@@ -28,7 +28,7 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
   print(odbc_sql)
-  pkid = sqldf(odbc_sql, connection = con)
+  pkid <- sqldf(as.character(odbc_sql), connection = con)
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
   } else {

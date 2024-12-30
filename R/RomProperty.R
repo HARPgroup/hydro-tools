@@ -223,14 +223,14 @@ RomProperty <- R6Class(
           # remove 
           pl[[which(names(pl) == 'enddate')]] <- NULL
         }
+        vl <- pl
+        # if this is an insert, add into revisions 
+        if (is.na(pl$vid)) {
+          vl$vid <- NULL # removes it from list
+        }
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
           self$pid = pid
-        }
-        # if this is an insert, add into revisions 
-        if (is.na(pl$vid)) {
-          vl <- pl
-          vl$vid <- NULL # removes it from list
         }
         vid = self$datasource$post('dh_properties_revision', 'vid', pl)
         self$vid = vid

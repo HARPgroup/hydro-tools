@@ -381,7 +381,7 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        return_id = fn_post_odbc(entity_type, pk, config, self$site, private$token)
+        return_id = fn_post_odbc(entity_type, pk, config, self$connection)
       }
       return(return_id)
     },
