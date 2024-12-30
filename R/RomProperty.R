@@ -44,6 +44,10 @@ RomProperty <- R6Class(
     bundle = NA,
     #' @field uid user id of creator
     uid = NA,
+    #' @field vid current revision (pk in dh_properties_revision)
+    vid = NA,
+    #' @field module related module (optional?) 
+    module = NA,
     #' @field modified timestamp 
     modified = NA,
     #' @field datasource RomDataSource
@@ -100,6 +104,8 @@ RomProperty <- R6Class(
       for (i in names(config)) {
         if (i == "pid") {
           self$pid = as.integer(as.character(config$pid))
+        } else if (i == "vid") {
+          self$vid = as.integer(as.character(config$vid))
         } else if (i == "varid") {
           self$varid = as.integer(as.character(config$varid))
         } else if (i == "entity_type") {
@@ -155,6 +161,8 @@ RomProperty <- R6Class(
       # from_list() or new(config)
       t_list <- list(
         pid = as.integer(as.character(self$pid)),
+        vid = as.integer(as.character(self$vid)),
+        module = as.character(self$module),
         entity_type = as.character(self$entity_type),
         varid = as.integer(as.character(self$varid)),
         bundle = as.character(self$bundle),
@@ -219,6 +227,27 @@ RomProperty <- R6Class(
         if (!is.logical(pid)) {
           self$pid = pid
         }
+        # if this is an insert, add into revisions 
+        if (is.na(pl$vid)) {
+          vl <- pl
+          vl$vid <- NULL # removes it from list
+        }
+        vid = self$datasource$post('dh_properties_revision', 'vid', pl)
+        self$vid = vid
+        # otherwise, update revisions, especially now that we are no longer 
+        # dooing revisions.  THis is likely *not* important as drupal is 
+        # the only thing that needs revisions, but since drupal will break if 
+        # an entity lacks a revision, it is important in case we ever have to spin
+        # it back up.
+        # insert into dh_properties_revision (
+        #   pid,propname,propcode,propvalue,startdate,featureid,entity_type,
+        #   bundle,varid,status,module,uid,modified) 
+        # select pid,propname,propcode,propvalue,startdate,featureid,entity_type,
+        #   bundle,varid,status,module,uid,modified from dh_properties 
+        # where pid = 7685242 RETURNING vid;
+        # Returns 8332550, alternative, look for revision:
+        #    select vid from dh_properties_revision where pid = 7685242;
+        # update dh_properties set vid = 8332550 where pid = 7685242;
       }
       self$datasource$set_prop(self$to_list())
     }

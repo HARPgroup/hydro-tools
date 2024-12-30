@@ -378,7 +378,11 @@ RomDataSource <- R6Class(
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
     #' @return local df index?
     post = function(entity_type, pk, config) {
-      return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
+      if (self$connection_type == 'rest') {
+        return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        return_id = fn_post_odbc(entity_type, pk, config, self$site, private$token)
+      }
       return(return_id)
     },
     #' @param entity_type = dh_feature, dh_properties, ...

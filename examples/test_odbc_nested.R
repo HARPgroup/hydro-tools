@@ -12,7 +12,7 @@ dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc'
 dso$get_token(rest_pw = odbc_pw)
 ## If testing on internal network http://192.168.0.21
 dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-dso$get_token(rest_pw = odbc_pw, port=5432) 
+dso$get_token(rest_pw = odbc_pw, odbc_port=5432) 
 
 model_pid = 4824696
 model <- RomProperty$new(
@@ -66,3 +66,34 @@ fn_post_odbc(
   ),
   con = dso$connection
 )
+fn_post_odbc(
+  "dh_properties", 
+  "pid",
+  list(
+    propname='test_variable', 
+    featureid=model_pid, 
+    entity_type='dh_properties',
+    propvalue = 12050
+  ),
+  con = dso$connection
+) 
+prev <- RomProperty$new(
+  dso, list(
+    propname='test_variable', 
+    featureid=model_pid, 
+    entity_type='dh_properties',
+    propvalue = 12050
+  ), TRUE
+)
+prev <- RomProperty$new(
+  dso, list(
+    propname='test_variable', 
+    featureid=model_pid, 
+    entity_type='dh_properties'
+  ), TRUE
+)
+
+prev$propvalue = 13000
+prev$save(TRUE)
+
+model$to_list()

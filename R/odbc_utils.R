@@ -34,7 +34,7 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   } else {
     pkid = FALSE
   }
-  message(paste("REST returned", pkid))
+  message(paste("ODBC returned", pkid))
   return(pkid)
 }
 
