@@ -85,28 +85,28 @@ RomDataSource <- R6Class(
         #if ()
       }
       # check local store, if not there, check remote
-      var_def <- fn_search_vardefs(config, self$var_defs)
-      if (is.logical(var_def)) {
+      vardef <- fn_search_vardefs(config, self$var_defs)
+      if (is.logical(vardef)) {
         # none exists locally, so query
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
         if (self$connection_type == 'odbc') {
           config$limit = 1
-          var_def <- self$get('dh_variabledefinition', 'hydroid', config)
+          vardef <- self$get('dh_variabledefinition', 'hydroid', config)
           print("vardef")
           print(vardef)
-          var_def <- as.list(var_def[1,])
+          vardef <- as.list(vardef[1,])
         } else {
-          var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
+          vardef <- fn_get_vardef_view(varkey, self$site, private$token, debug)
           # TBD
-          # var_def <- RomVarDef$new(self,var_one)
-          # var_def <- var_def$to_list()
+          # vardef <- RomVarDef$new(self,var_one)
+          # vardef <- vardef$to_list()
         }
         # after retrieval, store locally
-        self$set_vardef(var_def)
+        self$set_vardef(vardef)
       }
-      return(var_def)
+      return(vardef)
     },
     # get properties
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -290,32 +290,32 @@ RomDataSource <- R6Class(
         }
       }
     },
-    #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
+    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
     #' @return local df index?
-    set_vardef = function(var_def) {
+    set_vardef = function(vardef) {
       # check uniqueness
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
-      if (!is.data.frame(var_def)) {
-        var_def = as.data.frame(var_def)
+      if (!is.data.frame(vardef)) {
+        vardef = as.data.frame(vardef)
     }
       name_check <- names(self$var_defs)[
-        which(!(names(self$var_defs) %in% names(var_def)))
+        which(!(names(self$var_defs) %in% names(vardef)))
       ]
       # add missing columns if they exist
       if (length(name_check) > 0) {
         message("Warning: all variable definition columns should be present in data frame to do batch insert.")
-        message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
-        for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
-          var_def[,n] <- NA
+        message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))],sep=","))
+        for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))]) {
+          vardef[,n] <- NA
         }
       }
       # eliminate superfluous and sort in the same order
-      var_def <- var_def[,names(self$var_defs)]
+      vardef <- vardef[,names(self$var_defs)]
       var_defs <- self$var_defs
       # we handle this a little differently, and it may have multiples
-      veq = "select * from var_def 
+      veq = "select * from vardef 
          where hydroid not in (
            select hydroid from var_defs
         )"

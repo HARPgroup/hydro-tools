@@ -195,9 +195,20 @@ RomEntity <- R6Class(
       if (push_remote) {
         finfo <- self$to_list()
         fid = self$datasource$post(self$base_entity_type, self$pk_name, finfo)
-        if (!is.logical(hydroid)) {
+        if (!is.logical(fid)) {
           self[[self$pk_name]] = fid
         }
+      }
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (delete_remote) {
+        finfo <- self$to_list()
+        fid = self$datasource$delete(self$base_entity_type, self$pk_name, finfo)
       }
     }
   )

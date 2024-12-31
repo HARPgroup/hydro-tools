@@ -234,6 +234,10 @@ RomProperty <- R6Class(
         # if this is an insert, add into revisions 
         if (is.na(pl$vid)) {
           vl$vid <- NULL # removes it from list
+        } else {
+          if (! (pl$vid > 0)) {
+            vl$vid <- NULL # removes it from list
+          }
         }
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
