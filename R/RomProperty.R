@@ -242,11 +242,15 @@ RomProperty <- R6Class(
           self$pid = pid
           vl$pid = pid
         }
-        vid = self$datasource$post('dh_properties_revision', 'vid', vl)
-        if (is.na(self$vid)) {
-          self$vid = vid
-          # set back the revision ID
-          status = self$datasource$post('dh_properties', 'pid', list(pid=pid, vid=vid))
+        # if this is ODBC, we need to manage the revisions
+        # also, if we transition to *another* REST, we may also have to do so
+        if (self$datasource$connection_type == 'odbc') {
+          vid = self$datasource$post('dh_properties_revision', 'vid', vl)
+          if (is.na(self$vid)) {
+            self$vid = vid
+            # set back the revision ID
+            status = self$datasource$post('dh_properties', 'pid', list(pid=pid, vid=vid))
+          }
         }
         # otherwise, update revisions, especially now that we are no longer 
         # dooing revisions.  THis is likely *not* important as drupal is 
