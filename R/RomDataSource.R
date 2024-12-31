@@ -304,7 +304,9 @@ RomDataSource <- R6Class(
       # add missing columns if they exist
       if (length(name_check) > 0) {
         message("Warning: all variable definition columns should be present in data frame to do batch insert.")
-        message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))],sep=","))
+        # this is a useful message, but the use of the `cat` statement causes output
+        # to hit the console, which goofs up use as a script
+        #message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))],sep=","))
         for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))]) {
           vardef[,n] <- NA
         }
