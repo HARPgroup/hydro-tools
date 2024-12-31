@@ -243,7 +243,11 @@ RomProperty <- R6Class(
           vl$pid = pid
         }
         vid = self$datasource$post('dh_properties_revision', 'vid', vl)
-        self$vid = vid
+        if (is.na(self$vid)) {
+          self$vid = vid
+          # set back the revision ID
+          status = self$datasource$post('dh_properties', 'pid', list(pid=pid, vid=vid))
+        }
         # otherwise, update revisions, especially now that we are no longer 
         # dooing revisions.  THis is likely *not* important as drupal is 
         # the only thing that needs revisions, but since drupal will break if 
