@@ -238,6 +238,7 @@ RomProperty <- R6Class(
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
           self$pid = pid
+          vl$pid = pid
         }
         vid = self$datasource$post('dh_properties_revision', 'vid', pl)
         self$vid = vid
