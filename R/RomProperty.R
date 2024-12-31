@@ -242,7 +242,7 @@ RomProperty <- R6Class(
           self$pid = pid
           vl$pid = pid
         }
-        vid = self$datasource$post('dh_properties_revision', 'vid', pl)
+        vid = self$datasource$post('dh_properties_revision', 'vid', vl)
         self$vid = vid
         # otherwise, update revisions, especially now that we are no longer 
         # dooing revisions.  THis is likely *not* important as drupal is 
