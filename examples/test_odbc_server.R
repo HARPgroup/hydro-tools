@@ -36,6 +36,7 @@ prev2 <- RomProperty$new(
   ), TRUE
 )
 prev2$save(TRUE)
+prev2$delete(TRUE)
 
 prev$propvalue = 14000
 prev$save(TRUE)

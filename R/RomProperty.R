@@ -76,7 +76,6 @@ RomProperty <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        print("calling get_prop() from Property init")
         prop <- self$datasource$get_prop(config, 'list', TRUE, self)
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
@@ -91,7 +90,6 @@ RomProperty <- R6Class(
           config <- prop
         }
       }
-      print("Property loaded, calling load_data()")
       self$load_data(config, load_remote)
       if (!is.logical(self$plugin$entity_bundle)) {
         self$bundle = self$plugin$entity_bundle
@@ -262,6 +260,19 @@ RomProperty <- R6Class(
         # update dh_properties set vid = 8332550 where pid = 7685242;
       }
       self$datasource$set_prop(self$to_list())
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (delete_remote) {
+        finfo <- self$to_list()
+        # we pass the pid, since if there are multiple revisions it will delete all
+        fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
+      }
+      super$delete(delete_remote)
     }
   )
 )

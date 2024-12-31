@@ -27,14 +27,14 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     message(paste0("----- Updating ", entity_type, "..."))
     odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
-  print(odbc_sql)
+  #print(odbc_sql)
   pkid <- sqldf(as.character(odbc_sql), connection = con)
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
   } else {
     pkid = FALSE
   }
-  message(paste("ODBC returned", pkid))
+  #message(paste("ODBC returned", pkid))
   return(pkid)
 }
 
@@ -57,12 +57,12 @@ fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     message(paste0("----- Warning: cannot delete entity", entity_type, "without ", pk))
     return(FALSE)
   } else {
-    message(paste0("----- deleting ", entity_type, "..."))
+    #message(paste0("----- deleting ", entity_type, "..."))
     odbc_sql = paste("DELETE from", entity_type, "WHERE", pk, "=", pkid)
   }
-  print(odbc_sql)
+  #print(odbc_sql)
   result <- sqldf(as.character(odbc_sql), connection = con)
-  message(paste("ODBC returned", result))
+  #message(paste("ODBC returned", result))
   return(result)
 }
 
@@ -101,7 +101,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     where_pre = "WHERE"
   }
   get_sql = paste(get_sql, where_pre, get_where, limits)
-  message(get_sql)
+  #message(get_sql)
   entities = sqldf(get_sql, connection = con, method = "raw")
   if (is.logical(entities)) {
     message("----- This entity does not exist")
@@ -208,7 +208,7 @@ fn_guess_update <- function(entity_type, pk, inputs) {
   up_sep = ""
   pk_val = NULL
   for (col_name in names(inputs)) {
-    print(paste("handling ", col_name))
+    #print(paste("handling ", col_name))
     if (is.na(inputs[col_name])) {
       inputs[col_name] <- NULL
       next
@@ -218,7 +218,7 @@ fn_guess_update <- function(entity_type, pk, inputs) {
       col_val = paste0("'",col_val,"'")
     }
     if (col_name == pk) {
-      print(paste("Found pk col", pk))
+      #print(paste("Found pk col", pk))
       pk_val = col_val
       next
     }

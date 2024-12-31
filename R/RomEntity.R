@@ -44,7 +44,6 @@ RomEntity <- R6Class(
       )
       if (!is.null(varid)) { config$varid = varid } 
       if (!is.null(propname)) { config$propname = propname } 
-      print("get_prop called in propvalues()")
       ps <- self$datasource$get_prop(
         config
       )
@@ -89,7 +88,6 @@ RomEntity <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        message("RomEntity calling ds$get()")
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
@@ -166,14 +164,11 @@ RomEntity <- R6Class(
     },
     #' @returns nothing, but loads the objects plugin
     load_plugin = function() {
-      print("load_plugin() called")
       if (is.null(self$vardef)) {
         # this is only valid for types that have vardefs
         return(FALSE)
       }
       # get_plugin method is 
-      print("trying to load plugin for object vardef ")
-      print(typeof(self$vardef))
       self$plugin = self$vardef$get_plugin(self)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
