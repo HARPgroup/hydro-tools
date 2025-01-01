@@ -215,10 +215,12 @@ dHVarImage <- R6Class(
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
+      # note: we export 'code' attribute but should deprecate in favor of 'value'
       export = list(
         id=entity$pid,
         name=entity$propname,
-        value=entity$propcode
+        value=entity$propcode,
+        code=entity$propcode
       )
       return(export)
     }
@@ -326,6 +328,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMDataMatrix$new(entity)
   } else if (plugin_name == "dHVarImage") {
     plugin = dHVarImage$new(entity)
+  } else if (plugin_name == "dHVarAnnotation") {
+    plugin = dHVarAnnotation$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }
