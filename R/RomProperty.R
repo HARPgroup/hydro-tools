@@ -146,10 +146,12 @@ RomProperty <- R6Class(
                 n <- n + 1
               }
               data_table <- as.data.frame(data_header)
-              for (i in 2:length(drupal_data$tabledata)) {
-                raw_row <- drupal_data$tabledata[[i]]
-                drow <- as.data.frame(drupal_data$tabledata[[i]])
-                data_table <- rbind(data_table, drow)
+              if (length(drupal_data$tabledata) > 1) {
+                for (i in 2:length(drupal_data$tabledata)) {
+                  raw_row <- drupal_data$tabledata[[i]]
+                  drow <- as.data.frame(drupal_data$tabledata[[i]])
+                  data_table <- rbind(data_table, drow)
+                }
               }
               self$data_matrix = data_table
             } else {

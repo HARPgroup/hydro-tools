@@ -753,14 +753,14 @@ fn_delete_rest <- function(entity_type, pk, inputs, site, token){
 }
 
 
-#' Retrieve Property data from propvalues style data frame
+#' Retrieve features data from dh_feature style data frame
 #'
 #' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
 #' @param features_tmp data frame to search
 #' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
 #' @return data frame of propvalue or FALSE
 #' @seealso NA
-#' @export fn_search_properties
+#' @export fn_search_features
 #' @examples NA
 fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
   features = FALSE
