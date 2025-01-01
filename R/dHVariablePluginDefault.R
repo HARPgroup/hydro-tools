@@ -66,7 +66,8 @@ dHVariablePluginDefault <- R6Class(
       export = list(
         id=entity$pid,
         name=entity$propname,
-        value=entity$propvalue
+        value=entity$propvalue,
+        code=entity$propcode
       )
       return(export)
     }
