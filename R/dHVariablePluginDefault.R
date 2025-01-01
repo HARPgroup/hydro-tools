@@ -183,6 +183,43 @@ dHOMAlphanumericConstant <- R6Class(
   )
 )
 
+
+
+#' Image URL pointer
+#' @description Simple class to hold string values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarImage
+dHVarImage <- R6Class(
+  "dHVarImage",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = FALSE,
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propcode
+      )
+      return(export)
+    }
+  )
+)
 #' Object class of meta-model object
 #' @description Simple class to hold text values
 #' @details Has standard methods for managing data and meta data
@@ -251,6 +288,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMObjectClass$new(entity)
   } else if (plugin_name == "dHOMDataMatrix") {
     plugin = dHOMDataMatrix$new(entity)
+  } else if (plugin_name == "dHVarImage") {
+    plugin = dHVarImage$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }

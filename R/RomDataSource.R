@@ -297,10 +297,14 @@ RomDataSource <- R6Class(
       # Just return, the remainder is TBD (based on working ts value code)
       if (!is.data.frame(vardef)) {
         vardef = as.data.frame(vardef)
-    }
+      }
       name_check <- names(self$var_defs)[
         which(!(names(self$var_defs) %in% names(vardef)))
       ]
+      if (is.na(vardef$hydroid)) {
+        message("Bad vardef for variable")
+        return(FALSE)
+      }
       # add missing columns if they exist
       if (length(name_check) > 0) {
         message("Warning: all variable definition columns should be present in data frame to do batch insert.")
@@ -404,13 +408,51 @@ RomDataSource <- R6Class(
     #' @param pid = object pid
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
     get_json_prop = function(pid) {
-      model_obj_url <- paste(self$json_obj_url, pid, sep="/")
-      model_info <- self$auth_read(model_obj_url, "text/json", "")
-      if (!is.logical(model_info)) {
-        model <- jsonlite::fromJSON(model_info)[[1]]
-        self$prop_json_cache[[pid]] <- model
-        return(model)
+      if (self$connection_type == 'rest') {
+        model_obj_url <- paste(self$json_obj_url, pid, sep="/")
+        model_info <- self$auth_read(model_obj_url, "text/json", "")
+        if (!is.logical(model_info)) {
+          model <- jsonlite::fromJSON(model_info)[[1]]
+          self$prop_json_cache[[pid]] <- model
+          return(model)
+        } else {
+          return(FALSE)
+        }
       } else {
+        # use ODBC approach
+        model_tree <- RomPropertyTree$new(self, list(root_pid=pid), TRUE)
+        model <- self$get_nested_export(self, pid, model_tree$prop_list)
+        return(model)
+      }
+    },
+    #' @param ds = satasource object, kept for posterity, as this may not always live here
+    #' @param featureid = object pid
+    #' @param props = container for stashing
+    #' @param depth = depth limit for nesting (rarely used)
+    #' @return unserialized json as list, with object stored in ds$prop_json_cache
+    get_nested_export = function(ds, featureid, props, depth=0) {
+      propatts <- as.list(props[which(props$pid == featureid),])
+      thisobject = RomProperty$new(ds, propatts, FALSE )
+      export = list()
+      if (!is.null(thisobject$vardef)) {
+        plugin <- thisobject$vardef$get_plugin(thisobject)
+        export[[thisobject$propname]] = plugin$exportOpenMI(thisobject)
+        children = props[which(props$featureid == featureid),]
+        # note: this sqldf below is a version that uses sqldf to recursively trace the 
+        #       property tree.  This is hugely inefficient, like 3,000% increase in execution time.
+        #       This is kept for posterity and as an example of what not to do.
+        #children = sqldf(paste("select * from props where featureid =", featureid), method="raw")
+        if (nrow(children) > 0) {
+          for (i in 1:nrow(children)) {
+            thischild <- children[i,]
+            sub_export <- self$get_nested_export(ds, thischild$pid, props, depth)
+            export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+          }
+        }
+        return(export)
+        
+      } else {
+        message(paste("Cannot export", thisobject$base_entity_type, "object vardef is null"))
         return(FALSE)
       }
     },

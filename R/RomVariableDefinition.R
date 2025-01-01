@@ -95,7 +95,7 @@ RomVariableDefinition <- R6Class(
     get_plugin = function(thisobject) {
       # get_plugin_class() is defined in dHVariablePluginDefault.R
       # we pass the object in case the plugin needs it on instantiation
-      plugin = get_plugin_class(thisobject$plugin, thisobject)
+      plugin = get_plugin_class(thisobject$vardef$plugin, thisobject)
       return(plugin)
     }
     
