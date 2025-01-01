@@ -271,6 +271,38 @@ dHOMDataMatrix <- R6Class(
   )
 )
 
+#' Annotation meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarAnnotation
+dHVarAnnotation <- R6Class(
+  "dHVarAnnotation",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'textField',
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        object_class='textField', 
+        value=entity$proptext
+      )
+      return(export)
+    }
+  )
+)
+
 # 'This is heare because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
