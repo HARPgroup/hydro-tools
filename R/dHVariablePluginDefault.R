@@ -103,7 +103,11 @@ dHOMEquation <- R6Class(
       export = list(
         id=entity$pid,
         name=entity$propname,
-        value=entity$propcode
+        value=entity$propcode,
+        equation=list(
+          name='equation',
+          value=entity$propcode,
+        )
       )
       return(export)
     }
