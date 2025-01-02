@@ -245,19 +245,7 @@ RomDataSource <- R6Class(
       # uniqueness is variable def related, not arbitrary 
       #message(prop)
       if (is.data.frame(prop)) {
-        name_check <- names(self$propvalues)[
-          which(!(names(self$propvalues) %in% names(prop)))
-        ]
-        # add missing columns if they exist
-        if (length(name_check) > 0) {
-          message("Warning: all property columns must be present in data frame to do batch insert.")
-          message("Adding", cat(names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))],sep=","))
-          for (n in names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))]) {
-            prop[,n] <- NA
-          }
-        }
-        # eliminate superfluous and sort in the same order
-        prop <- prop[,names(self$propvalues)]
+        prop <- insure_cols(prop, self$propvalues)
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
         dsl <- sqldf(
@@ -277,6 +265,7 @@ RomDataSource <- R6Class(
             #message(prop_check)
           }
         }
+        prop <- insure_cols(prop, self$propvalues)
         if (is.logical(prop_check)) {
           # not found, so add
           #message("Storing prop")
@@ -287,6 +276,24 @@ RomDataSource <- R6Class(
           self$propvalues[prop$ID] <- prop
         }
       }
+    },
+    #' @param src_df = df to verify/insure
+    #' @param dest_df = df template to supply valid names
+    #' @return local df index?
+    insure_cols = function(src_df, dest_df) {
+      name_check <- names(dest_df)[
+        which(!(names(dest_df) %in% names(src_df)))
+      ]
+      # add missing columns if they exist
+      if (length(name_check) > 0) {
+        message("Warning: all src_dferty columns must be present in data frame to do batch insert.")
+        message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
+        for (n in names(dest_df)[which(!(names(dest_df) %in% names(src_df)))]) {
+          src_df[,n] <- NA
+        }
+      }
+      # eliminate superfluous and sort in the same order
+      src_df <- src_df[,names(dest_df)]
     },
     #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
     #' @return local df index?
