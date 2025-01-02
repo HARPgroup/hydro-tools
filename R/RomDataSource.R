@@ -245,7 +245,7 @@ RomDataSource <- R6Class(
       # uniqueness is variable def related, not arbitrary 
       #message(prop)
       if (is.data.frame(prop)) {
-        prop <- insure_cols(prop, self$propvalues)
+        prop <- self$insure_cols(prop, self$propvalues)
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
         dsl <- sqldf(
@@ -265,10 +265,10 @@ RomDataSource <- R6Class(
             #message(prop_check)
           }
         }
-        prop <- insure_cols(prop, self$propvalues)
+        prop <- self$insure_cols(as.data.frame(prop), self$propvalues)
         if (is.logical(prop_check)) {
           # not found, so add
-          #message("Storing prop")
+          message("Storing prop")
           self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
         } else {
           # update 
@@ -287,7 +287,7 @@ RomDataSource <- R6Class(
       # add missing columns if they exist
       if (length(name_check) > 0) {
         message("Warning: all src_dferty columns must be present in data frame to do batch insert.")
-        message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
+        #message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
         for (n in names(dest_df)[which(!(names(dest_df) %in% names(src_df)))]) {
           src_df[,n] <- NA
         }

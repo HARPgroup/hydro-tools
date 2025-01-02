@@ -155,9 +155,9 @@ RomEntity <- R6Class(
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
         message("Saving to local db")
-        if (self$datasource$connection_type != 'odbc') {
+        #if (self$datasource$connection_type != 'odbc') {
           self$save(FALSE) 
-        }
+        #}
       } else {
         #message("not saving to local")
       }
