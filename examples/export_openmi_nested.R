@@ -36,6 +36,23 @@ r400 = find_name(export,"runid_400")
 Smin_L90_mg = find_name(r400, "Smin_L90_mg")
 riverseg = find_name(export, "riverseg")
 fac_demand_mgy = find_name(export,"fac_demand_mgy")
+adj_demand_mgd = find_name(export,"adj_demand_mgd")
+
+# test with dso object
+model_pid = 4824696
+model <- dso$get_json_prop(model_pid)
+model_tree <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
+base_demand_mgd = find_name(model,"base_demand_mgd")
+adj_demand_mgd = find_name(model,"adj_demand_mgd")
+send_to_parent = find_name(model,"Send to Parent")
+kable(send_to_parent$broadcast_params)
+jsonlite::toJSON(send_to_parent$broadcast_params)
+stp_bcp = send_to_parent$broadcast_params$value
+stp_bcp$weight <- NULL
+names(stp_bcp) <- NULL
+
+jsonlite::toJSON(as.matrix(send_to_parent$broadcast_params))
+stp_tree <- RomPropertyTree$new(dso, list(root_pid=send_to_parent$id), TRUE)
 
 # list all plugins
 dso$var_defs$plugin

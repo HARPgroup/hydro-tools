@@ -153,6 +153,10 @@ RomProperty <- R6Class(
                   data_table <- rbind(data_table, drow)
                 }
               }
+              if ('weight' %in% names(data_table)) {
+                data_table$weight <- NULL
+              }
+              names(data_table) <- NULL
               self$data_matrix = data_table
             } else {
               # it is either valid, or empty either way, assign it

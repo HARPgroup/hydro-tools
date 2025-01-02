@@ -306,6 +306,46 @@ dHVarAnnotation <- R6Class(
   )
 )
 
+
+#' Broadcast meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarAnnotation
+dHOMbroadCastObject <- R6Class(
+  "dHOMbroadCastObject",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'broadCastObject',
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        object_class=self$object_class, 
+        value=NULL,
+        broadcast_params = list(
+          name='broadcast_params',
+          object_class='array',
+          value=entity$data_matrix
+        )
+      )
+      return(export)
+    }
+  )
+)
+
+
 # 'This is heare because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
@@ -331,6 +371,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHVarImage$new(entity)
   } else if (plugin_name == "dHVarAnnotation") {
     plugin = dHVarAnnotation$new(entity)
+  } else if (plugin_name == "dHOMbroadCastObject") {
+    plugin = dHOMbroadCastObject$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }
