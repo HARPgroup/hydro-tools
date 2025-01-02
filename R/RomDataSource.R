@@ -504,6 +504,7 @@ RomDataSource <- R6Class(
       status=character(),
       module=character(),
       field_dh_matrix=character(),
+      data_matrix=character(),
       stringsAsFactors=FALSE
     ),
     #' @field features table of physical features
