@@ -119,6 +119,19 @@ om_vahydro_metric_grid <- function (
   return(alldata)
 }
 
+#' Helper function to generate a metric grid via SQL
+#' featureid,entity_type,bundle,ftype,model_version, runid, metric
+#' @param featureid integer or 'all' 
+#' @param entity_type character
+#' @param bundle character 
+#' @param ftype character feature type
+#' @param model_version character default 'vahydro-1.0'
+#' @param runid run info
+#' @param metric character deprecated in favor of runids array
+#' @return string with executable SQL query
+#' @seealso NA
+#' @export om_vahydro_metric_grid_sql
+#' @examples NA
 om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_version, runid, metric) {
   prop_sql <- "
     SELECT model.pid AS pid, model.propname as propname, 
