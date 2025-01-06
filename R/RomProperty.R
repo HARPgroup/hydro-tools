@@ -136,27 +136,31 @@ RomProperty <- R6Class(
           if (is.character(config$data_matrix)) {
             mvalid <- jsonlite::validate(config$data_matrix)
             if (mvalid[1] == TRUE) {
-              drupal_data = jsonlite::fromJSON(config$data_matrix)
-              data_header <- drupal_data$tabledata[[1]]
-              n <- 1
-              for (h in data_header) {
-                if(is.null(h) | is.na(h)) {
-                  data_header[[n]] <- paste0("V",n)
+              raw_data = jsonlite::fromJSON(config$data_matrix)
+              if ("tabledata" %in% names(raw_data)) {
+                data_header <- raw_data$tabledata[[1]]
+                n <- 1
+                for (h in data_header) {
+                  if(is.null(h) | is.na(h)) {
+                    data_header[[n]] <- paste0("V",n)
+                  }
+                  n <- n + 1
                 }
-                n <- n + 1
-              }
-              data_table <- as.data.frame(data_header)
-              if (length(drupal_data$tabledata) > 1) {
-                for (i in 2:length(drupal_data$tabledata)) {
-                  raw_row <- drupal_data$tabledata[[i]]
-                  drow <- as.data.frame(drupal_data$tabledata[[i]])
-                  data_table <- rbind(data_table, drow)
+                data_table <- as.data.frame(data_header)
+                if (length(raw_data$tabledata) > 1) {
+                  for (i in 2:length(raw_data$tabledata)) {
+                    raw_row <- raw_data$tabledata[[i]]
+                    drow <- as.data.frame(raw_data$tabledata[[i]])
+                    data_table <- rbind(data_table, drow)
+                  }
                 }
+                if ('weight' %in% names(data_table)) {
+                  data_table$weight <- NULL
+                }
+                names(data_table) <- NULL
+              } else {
+                data_table = raw_data
               }
-              if ('weight' %in% names(data_table)) {
-                data_table$weight <- NULL
-              }
-              names(data_table) <- NULL
               self$data_matrix = data_table
             } else {
               # it is either valid, or empty either way, assign it
@@ -193,11 +197,8 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
-      if (is.character(self$data_matrix)) {
-        mvalid <- jsonlite::validate(self$data_matrix)
-        if (mvalid[1] == TRUE) {
-          t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
-        }
+      if (is.list(self$data_matrix)) {
+        t_list$data_matrix = as.character(jsonlite::toJSON(self$data_matrix))
       }
       if (is.null(self$bundle)) {
         self$bundle <- 'dh_properties'

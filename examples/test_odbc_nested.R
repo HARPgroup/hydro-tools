@@ -11,8 +11,8 @@ ds$get_token(rest_pw = rest_pw)
 dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
 dso$get_token(rest_pw = odbc_pw)
 ## If testing on internal network http://192.168.0.21
-dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-dso$get_token(rest_pw = odbc_pw, odbc_port=5432) 
+#dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
+#dso$get_token(rest_pw = odbc_pw, odbc_port=5432) 
 
 model_pid = 4824696
 model <- RomProperty$new(
@@ -20,18 +20,29 @@ model <- RomProperty$new(
     pid=model_pid
   ), TRUE
 )
+# this loads a single property under this model
+ps_enabled <- RomProperty$new(
+  dso, list(
+    propname='ps_enabled', 
+    featureid=model_pid, 
+    entity_type='dh_properties'
+  ), TRUE
+)
+ps_enabled$data_matrix
+
+# now, we can do an export to json, but it will only get local
+# properties that have already been retrieved/created
+model_export_local <- dso$get_nested_export(dso, model_pid, dso$propvalues)
+# this goes to the database and insure that all properties under the parent
+# property have been downloaded, then exports:
 model_tree <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
-model$tree_loaded = TRUE
-
-model_tree$prop_list # this might be temporary 
-nested = list()
-
+model_export <- dso$get_json_prop(model_pid)
 
 blank_prop <- RomProperty$new(
-  dso
+  dso, list(featureid=model$pid, varkey='wd_mgy', propname='test_var', TRUE)
 )
 
-
+        
 fac_demand_prop <- RomProperty$new(
   dso, list(
     propname='fac_demand_mgy', 

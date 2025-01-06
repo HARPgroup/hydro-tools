@@ -107,7 +107,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     message("----- This entity does not exist")
     entities = FALSE
   } else {
-    message(paste("Total =", nrow(entities)))
+    #message(paste("Total =", nrow(entities)))
   }
   return(entities)
 }
