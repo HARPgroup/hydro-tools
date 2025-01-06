@@ -65,6 +65,7 @@ NA
 \item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
 \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
+\item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
@@ -248,6 +249,25 @@ list of object attributes suitable for input to new() and from_list() methods
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{push_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
 }
 \if{html}{\out{</div>}}
 }

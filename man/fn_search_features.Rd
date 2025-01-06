@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{fn_search_features}
 \alias{fn_search_features}
-\title{Retrieve Property data from propvalues style data frame}
+\title{Retrieve features data from dh_feature style data frame}
 \usage{
 fn_search_features(config, features_tmp, multiplicity = "default")
 }
@@ -17,7 +17,7 @@ fn_search_features(config, features_tmp, multiplicity = "default")
 data frame of propvalue or FALSE
 }
 \description{
-Retrieve Property data from propvalues style data frame
+Retrieve features data from dh_feature style data frame
 }
 \examples{
 NA

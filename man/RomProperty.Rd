@@ -82,6 +82,7 @@ NA
 \item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
 \item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
+\item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
 \item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
 }
 }
@@ -221,6 +222,25 @@ object instance
 }
 \subsection{Returns}{
 boolean TRUE on success, FALSE on failure
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
 }
 }
 \if{html}{\out{<hr>}}

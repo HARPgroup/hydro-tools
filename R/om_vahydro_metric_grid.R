@@ -160,14 +160,17 @@ om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_
     ON model.pid = riverseg.featureid AND (riverseg.entity_type = 'dh_properties' AND riverseg.propname = 'riverseg')
     LEFT JOIN dh_variabledefinition 
     ON model.varid = dh_variabledefinition.hydroid
-    WHERE (( (model.entity_type = '[entity_type]') 
-      AND (base_entity.bundle = '[bundle]') 
-      AND (base_entity.ftype = '[ftype]') 
-      AND (model.propcode = '[model_version]') 
-      AND (scenario.propname = '[runid]') 
-      AND (metric.propname = '[metric]') 
-    ))
+    WHERE model.entity_type = '[entity_type]'
+      AND model.propcode = '[model_version]' 
+      AND scenario.propname = '[runid]' 
+      AND metric.propname = '[metric]' 
   "
+  if ( (bundle != '') & (bundle != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.bundle = '[bundle]' ")
+  }
+  if ( (ftype != '') & (ftype != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.ftype = '[ftype]' ")
+  }
   prop_sql <- str_replace_all(prop_sql, "\\[bundle\\]", bundle)
   prop_sql <- str_replace_all(prop_sql, "\\[entity_type\\]", entity_type)
   prop_sql <- str_replace_all(prop_sql, "\\[ftype\\]", ftype)
