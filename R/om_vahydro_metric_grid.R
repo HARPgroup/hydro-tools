@@ -67,7 +67,7 @@ om_vahydro_metric_grid <- function (
       if (ds$connection_type == 'odbc') {
         #message("om_vahydro_metric_grid() called using ODBC ")
         prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
-        message(prop_sql)
+        #message(prop_sql)
         message(paste("retrieving via ODBC"))
         dat <- sqldf(prop_sql, connection = ds$connection)
         #message(paste("returned", nrow(dat),"rows"))
