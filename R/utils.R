@@ -848,15 +848,26 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
   if (is.null(propcode)) {
     propcode <- ''
   }
-  metinfo <- list(
-    varkey = varkey,
-    propname = propname,
-    featureid = as.integer(pid),
-    entity_type = "dh_properties",
-    bundle = "dh_properties"
+  # first try to load a prop with just name, entity_type, featureid
+  # in case there are varid mismatches
+  metcheck <- ds$get_prop(
+    list(propname=propname, featureid = as.integer(pid),
+    entity_type = "dh_properties")
   )
-  metprop <- RomProperty$new( ds, metinfo, TRUE)
+  if (nrow(metcheck) > 0) {
+    metprop <- RomProperty$new( ds, list(pid=metcheck[1,]$pid), TRUE)
+  } else {
+    metinfo <- list(
+      varkey = varkey,
+      propname = propname,
+      featureid = as.integer(pid),
+      entity_type = "dh_properties",
+      bundle = "dh_properties"
+    )
+    metprop <- RomProperty$new( ds, metinfo, TRUE)
+  }
   metprop$propcode <- propcode
+  metprop$varid <- as.integer(ds$get_vardef(varkey)$hydroid)
   metprop$propvalue <- as.numeric(propvalue)
   metprop$save(TRUE)
 }
