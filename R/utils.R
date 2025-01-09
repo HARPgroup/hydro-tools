@@ -739,16 +739,28 @@ fn_search_vardefs <- function(config, var_defs_tmp) {
 }
 
 
+#' Delete any entity from a RESTful web service
+#'
+#' @param entity_type = dh_feature, dh_properties, ...
+#' @param pk = primary key column name, e.g. hydroid, pid, ...
+#' @param inputs  contents of record to get in list(pid, propname, propvalue, ...)
+#' @param site URL of rest server
+#' @param token for xhttp auth
+fn_delete_rest <- function(entity_type, pk, inputs, site, token){
+  # not yet 
+  result = FALSE
+  return(result)
+}
 
 
-#' Retrieve Property data from propvalues style data frame
+#' Retrieve features data from dh_feature style data frame
 #'
 #' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
 #' @param features_tmp data frame to search
 #' @param multiplicity uniqueness criteria. default = startdate_singular which is varid + startdate (all are varid singular)
 #' @return data frame of propvalue or FALSE
 #' @seealso NA
-#' @export fn_search_properties
+#' @export fn_search_features
 #' @examples NA
 fn_search_features <- function(config, features_tmp, multiplicity = 'default') {
   features = FALSE
@@ -836,15 +848,26 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
   if (is.null(propcode)) {
     propcode <- ''
   }
-  metinfo <- list(
-    varkey = varkey,
-    propname = propname,
-    featureid = as.integer(pid),
-    entity_type = "dh_properties",
-    bundle = "dh_properties"
+  # first try to load a prop with just name, entity_type, featureid
+  # in case there are varid mismatches
+  metcheck <- ds$get_prop(
+    list(propname=propname, featureid = as.integer(pid),
+    entity_type = "dh_properties")
   )
-  metprop <- RomProperty$new( ds, metinfo, TRUE)
+  if (nrow(metcheck) > 0) {
+    metprop <- RomProperty$new( ds, list(pid=metcheck[1,]$pid), TRUE)
+  } else {
+    metinfo <- list(
+      varkey = varkey,
+      propname = propname,
+      featureid = as.integer(pid),
+      entity_type = "dh_properties",
+      bundle = "dh_properties"
+    )
+    metprop <- RomProperty$new( ds, metinfo, TRUE)
+  }
   metprop$propcode <- propcode
+  metprop$varid <- as.integer(ds$get_vardef(varkey)$hydroid)
   metprop$propvalue <- as.numeric(propvalue)
   metprop$save(TRUE)
 }

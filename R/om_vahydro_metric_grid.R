@@ -52,7 +52,6 @@ om_vahydro_metric_grid <- function (
     runlabel <- stringr::str_replace_all(runlabel, ' ', '_')
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
-    message(paste("retrieving ", url))
     if (is.logical(ds)) {
       # using old method with global expected token.
       # warn that this is deprecated.
@@ -69,9 +68,11 @@ om_vahydro_metric_grid <- function (
         #message("om_vahydro_metric_grid() called using ODBC ")
         prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
         #message(prop_sql)
+        message(paste("retrieving via ODBC"))
         dat <- sqldf(prop_sql, connection = ds$connection)
         #message(paste("returned", nrow(dat),"rows"))
       } else {
+        message(paste("retrieving ", url))
         dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
         #message("om_vahydro_metric_grid() called using http views ")
       }
@@ -118,6 +119,19 @@ om_vahydro_metric_grid <- function (
   return(alldata)
 }
 
+#' Helper function to generate a metric grid via SQL
+#' featureid,entity_type,bundle,ftype,model_version, runid, metric
+#' @param featureid integer or 'all' 
+#' @param entity_type character
+#' @param bundle character 
+#' @param ftype character feature type
+#' @param model_version character default 'vahydro-1.0'
+#' @param runid run info
+#' @param metric character deprecated in favor of runids array
+#' @return string with executable SQL query
+#' @seealso NA
+#' @export om_vahydro_metric_grid_sql
+#' @examples NA
 om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_version, runid, metric) {
   prop_sql <- "
     SELECT model.pid AS pid, model.propname as propname, 
@@ -146,14 +160,17 @@ om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_
     ON model.pid = riverseg.featureid AND (riverseg.entity_type = 'dh_properties' AND riverseg.propname = 'riverseg')
     LEFT JOIN dh_variabledefinition 
     ON model.varid = dh_variabledefinition.hydroid
-    WHERE (( (model.entity_type = '[entity_type]') 
-      AND (base_entity.bundle = '[bundle]') 
-      AND (base_entity.ftype = '[ftype]') 
-      AND (model.propcode = '[model_version]') 
-      AND (scenario.propname = '[runid]') 
-      AND (metric.propname = '[metric]') 
-    ))
+    WHERE model.entity_type = '[entity_type]'
+      AND model.propcode = '[model_version]' 
+      AND scenario.propname = '[runid]' 
+      AND metric.propname = '[metric]' 
   "
+  if ( (bundle != '') & (bundle != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.bundle = '[bundle]' ")
+  }
+  if ( (ftype != '') & (ftype != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.ftype = '[ftype]' ")
+  }
   prop_sql <- str_replace_all(prop_sql, "\\[bundle\\]", bundle)
   prop_sql <- str_replace_all(prop_sql, "\\[entity_type\\]", entity_type)
   prop_sql <- str_replace_all(prop_sql, "\\[ftype\\]", ftype)

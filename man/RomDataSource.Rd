@@ -72,12 +72,15 @@ NA
 \item \href{#method-RomDataSource-auth_read}{\code{RomDataSource$auth_read()}}
 \item \href{#method-RomDataSource-set_ts}{\code{RomDataSource$set_ts()}}
 \item \href{#method-RomDataSource-set_prop}{\code{RomDataSource$set_prop()}}
+\item \href{#method-RomDataSource-insure_cols}{\code{RomDataSource$insure_cols()}}
 \item \href{#method-RomDataSource-set_vardef}{\code{RomDataSource$set_vardef()}}
 \item \href{#method-RomDataSource-store_features}{\code{RomDataSource$store_features()}}
 \item \href{#method-RomDataSource-set_feature}{\code{RomDataSource$set_feature()}}
 \item \href{#method-RomDataSource-get}{\code{RomDataSource$get()}}
 \item \href{#method-RomDataSource-post}{\code{RomDataSource$post()}}
+\item \href{#method-RomDataSource-delete}{\code{RomDataSource$delete()}}
 \item \href{#method-RomDataSource-get_json_prop}{\code{RomDataSource$get_json_prop()}}
+\item \href{#method-RomDataSource-get_nested_export}{\code{RomDataSource$get_nested_export()}}
 \item \href{#method-RomDataSource-clone}{\code{RomDataSource$clone()}}
 }
 }
@@ -156,7 +159,7 @@ nothing sets internal private token
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_vardef}{}}}
 \subsection{Method \code{get_vardef()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_update = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_refresh = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -164,7 +167,7 @@ nothing sets internal private token
 \describe{
 \item{\code{varkey}}{= variable key}
 
-\item{\code{force_update}}{Check remote repository for new info?}
+\item{\code{force_refresh}}{Check remote repository for new info?}
 
 \item{\code{debug}}{show info}
 }
@@ -301,17 +304,38 @@ nothing seprop internal private token
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomDataSource-set_vardef"></a>}}
-\if{latex}{\out{\hypertarget{method-RomDataSource-set_vardef}{}}}
-\subsection{Method \code{set_vardef()}}{
+\if{html}{\out{<a id="method-RomDataSource-insure_cols"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-insure_cols}{}}}
+\subsection{Method \code{insure_cols()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_vardef(var_def)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$insure_cols(src_df, dest_df)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{var_def}}{= list(varid, varkey, varname, varunits, varcode,...)}
+\item{\code{src_df}}{= df to verify/insure}
+
+\item{\code{dest_df}}{= df template to supply valid names}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataSource-set_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-set_vardef}{}}}
+\subsection{Method \code{set_vardef()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_vardef(vardef)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{vardef}}{= list(varid, varkey, varname, varunits, varcode,...)}
 }
 \if{html}{\out{</div>}}
 }
@@ -406,6 +430,31 @@ local df index?
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataSource-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$delete(entity_type, pk, config, obj = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+
+\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+
+\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+
+\item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+local df index?
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_json_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_json_prop}{}}}
 \subsection{Method \code{get_json_prop()}}{
@@ -417,6 +466,31 @@ local df index?
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{pid}}{= object pid}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+unserialized json as list, with object stored in ds$prop_json_cache
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataSource-get_nested_export"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-get_nested_export}{}}}
+\subsection{Method \code{get_nested_export()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_nested_export(ds, featureid, props, depth = 0)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{ds}}{= satasource object, kept for posterity, as this may not always live here}
+
+\item{\code{featureid}}{= object pid}
+
+\item{\code{props}}{= container for stashing}
+
+\item{\code{depth}}{= depth limit for nesting (rarely used)}
 }
 \if{html}{\out{</div>}}
 }

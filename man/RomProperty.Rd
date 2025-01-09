@@ -36,6 +36,8 @@ NA
 
 \item{\code{entity_type}}{type of entity this is attached to}
 
+\item{\code{has_vardef}}{is pluggable?}
+
 \item{\code{propname}}{locally unique name}
 
 \item{\code{startdate}}{begin timestamp}
@@ -56,9 +58,15 @@ NA
 
 \item{\code{uid}}{user id of creator}
 
+\item{\code{vid}}{current revision (pk in dh_properties_revision)}
+
+\item{\code{module}}{related module (optional?)}
+
 \item{\code{modified}}{timestamp}
 
 \item{\code{datasource}}{RomDataSource}
+
+\item{\code{tree_loaded}}{- this is a switch to enable fast loading of export tree from local storage}
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 }
@@ -74,13 +82,17 @@ NA
 \item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
 \item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
+\item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
 \item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
 }
 }
 \if{html}{\out{
-<details open><summary>Inherited methods</summary>
+<details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
 </ul>
@@ -210,6 +222,25 @@ object instance
 }
 \subsection{Returns}{
 boolean TRUE on success, FALSE on failure
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
 }
 }
 \if{html}{\out{<hr>}}

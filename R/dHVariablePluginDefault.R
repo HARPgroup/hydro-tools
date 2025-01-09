@@ -13,7 +13,10 @@ dHVariablePluginDefault <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = FALSE,
+    #' @field entity_bundle model object type
+    entity_bundle = FALSE,
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
     initialize = function(config = list()) {
@@ -63,7 +66,8 @@ dHVariablePluginDefault <- R6Class(
       export = list(
         id=entity$pid,
         name=entity$propname,
-        value=entity$propvalue
+        value=entity$propvalue,
+        code=entity$propcode
       )
       return(export)
     }
@@ -100,7 +104,11 @@ dHOMEquation <- R6Class(
       export = list(
         id=entity$pid,
         name=entity$propname,
-        value=entity$propcode
+        value=entity$propcode,
+        equation=list(
+          name='equation',
+          value=entity$propcode
+        )
       )
       return(export)
     }
@@ -180,6 +188,45 @@ dHOMAlphanumericConstant <- R6Class(
   )
 )
 
+
+
+#' Image URL pointer
+#' @description Simple class to hold string values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarImage
+dHVarImage <- R6Class(
+  "dHVarImage",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = FALSE,
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      # note: we export 'code' attribute but should deprecate in favor of 'value'
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propcode,
+        code=entity$propcode
+      )
+      return(export)
+    }
+  )
+)
 #' Object class of meta-model object
 #' @description Simple class to hold text values
 #' @details Has standard methods for managing data and meta data
@@ -216,10 +263,7 @@ dHOMDataMatrix <- R6Class(
     #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      print(paste("Entity matrix:", entity$name))
-      for (n in names(entity)) {
-        print(paste(n, entity[[n]]))
-      }
+      #print(paste("Entity matrix:", entity$propname))
       export = list(
         id=entity$pid,
         name=entity$propname,
@@ -230,8 +274,88 @@ dHOMDataMatrix <- R6Class(
   )
 )
 
-# This is heare because there is no way to instantiate a dynamic class using 
-# a string for a class name, so we have to have logic to expose allowed classes
+#' Annotation meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarAnnotation
+dHVarAnnotation <- R6Class(
+  "dHVarAnnotation",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'textField',
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        object_class='textField', 
+        value=entity$proptext
+      )
+      return(export)
+    }
+  )
+)
+
+
+#' Broadcast meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHVarAnnotation
+dHOMbroadCastObject <- R6Class(
+  "dHOMbroadCastObject",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    object_class = 'broadCastObject',
+    #' @param entity the local object to work on 
+    #' @param load_remote automatically query REST data source for matches?
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        object_class=self$object_class, 
+        value=NULL,
+        broadcast_params = list(
+          name='broadcast_params',
+          object_class='array',
+          value=entity$data_matrix
+        )
+      )
+      return(export)
+    }
+  )
+)
+
+
+# 'This is heare because there is no way to instantiate a dynamic class using 
+# 'a string for a class name, so we have to have logic to expose allowed classes
+#' Retrieve Plugin object for a variable entity
+#'
+#' @param plugin_name the actual class name
+#' @param entity the object to apply the plugin to
+#' @return class matching plugin or default generic plugin
+#' @seealso NA
+#' @export fn_search_vardefs
+#' @examples NA
 get_plugin_class <- function(plugin_name, entity) {
   if (is.na(plugin_name) ) {
     plugin = dHVariablePluginDefault$new(entity)
@@ -243,6 +367,12 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMObjectClass$new(entity)
   } else if (plugin_name == "dHOMDataMatrix") {
     plugin = dHOMDataMatrix$new(entity)
+  } else if (plugin_name == "dHVarImage") {
+    plugin = dHVarImage$new(entity)
+  } else if (plugin_name == "dHVarAnnotation") {
+    plugin = dHVarAnnotation$new(entity)
+  } else if (plugin_name == "dHOMbroadCastObject") {
+    plugin = dHOMbroadCastObject$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }

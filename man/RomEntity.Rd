@@ -8,7 +8,11 @@ reference class of type openmi.om.base.
 
 an updated config if necessary or FALSE if it fails
 
+loads the varid
+
 the data from the remote connection
+
+nothing, but loads the objects plugin
 }
 \description{
 Object for storing a single entity with attribute and timeseries related
@@ -35,6 +39,14 @@ NA
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
+\item{\code{has_vardef}}{is pluggable?}
+
+\item{\code{varid}}{(optional) integer field for pluggable entities}
+
+\item{\code{vardef}}{(optional) full RomVariableDefinition}
+
+\item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
+
 \item{\code{datasource}}{RomDataSource}
 }
 \if{html}{\out{</div>}}
@@ -47,9 +59,13 @@ NA
 \item \href{#method-RomEntity-tsvalues}{\code{RomEntity$tsvalues()}}
 \item \href{#method-RomEntity-new}{\code{RomEntity$new()}}
 \item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
+\item \href{#method-RomEntity-insure_varid}{\code{RomEntity$insure_varid()}}
+\item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
 \item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
+\item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
 \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
+\item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
@@ -149,6 +165,40 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-insure_varid"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-insure_varid}{}}}
+\subsection{Method \code{insure_varid()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$insure_varid(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-get_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-get_vardef}{}}}
+\subsection{Method \code{get_vardef()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_vardef(config = FALSE, refresh = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+
+\item{\code{refresh}}{automatically refresh var info?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-load_data}{}}}
 \subsection{Method \code{load_data()}}{
@@ -165,6 +215,15 @@ object instance
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-load_plugin"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-load_plugin}{}}}
+\subsection{Method \code{load_plugin()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_plugin()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-to_list"></a>}}
@@ -190,6 +249,25 @@ list of object attributes suitable for input to new() and from_list() methods
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{push_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-delete}{}}}
+\subsection{Method \code{delete()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
 }
 \if{html}{\out{</div>}}
 }

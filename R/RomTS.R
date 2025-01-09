@@ -16,6 +16,8 @@ RomTS <- R6Class(
     base_entity_type = 'dh_timeseries',
     #' @field pk_name the name of this entity's pk column
     pk_name = 'tid',
+    #' @field has_vardef is pluggable?
+    has_vardef = TRUE,
     #' @field tid unique ID in this RomDataSource
     tid = NA,
     #' @field featureid id of entity this is attached to

@@ -22,6 +22,8 @@ RomProperty <- R6Class(
     featureid = NA,
     #' @field entity_type type of entity this is attached to
     entity_type = NA,
+    #' @field has_vardef is pluggable?
+    has_vardef = TRUE,
     #' @field propname locally unique name
     propname = NA,
     #' @field startdate begin timestamp
@@ -42,10 +44,16 @@ RomProperty <- R6Class(
     bundle = NA,
     #' @field uid user id of creator
     uid = NA,
+    #' @field vid current revision (pk in dh_properties_revision)
+    vid = NA,
+    #' @field module related module (optional?) 
+    module = NA,
     #' @field modified timestamp 
     modified = NA,
     #' @field datasource RomDataSource
     datasource = NA,
+    #' @field tree_loaded - this is a switch to enable fast loading of export tree from local storage
+    tree_loaded = FALSE,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = "
       select * from dh_properties_fielded
@@ -69,7 +77,6 @@ RomProperty <- R6Class(
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
         prop <- self$datasource$get_prop(config, 'list', TRUE, self)
-        #print((nrow(prop) >= 1))
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
             prop <- as.list(prop[1,])
@@ -84,19 +91,16 @@ RomProperty <- R6Class(
         }
       }
       self$load_data(config, load_remote)
+      if (!is.logical(self$plugin$entity_bundle)) {
+        self$bundle = self$plugin$entity_bundle
+      } else {
+        self$bundle = 'dh_properties'
+      }
     },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
-      config_cols <- names(config)
-      if (is.element("varkey", config_cols)) {
-        if (!is.null(self$datasource)) {
-          vardef = self$datasource$get_vardef(config$varkey)
-          config$varid = vardef$varid
-          # eliminate this since if passed raw to rest will cause problems
-          config$varkey <- NULL
-        }
-      }
+      config = self$insure_varid(config)
       return(config)
     },
     #' @param config list of attributes to set, see also: to_list() for format
@@ -105,6 +109,8 @@ RomProperty <- R6Class(
       for (i in names(config)) {
         if (i == "pid") {
           self$pid = as.integer(as.character(config$pid))
+        } else if (i == "vid") {
+          self$vid = as.integer(as.character(config$vid))
         } else if (i == "varid") {
           self$varid = as.integer(as.character(config$varid))
         } else if (i == "entity_type") {
@@ -130,20 +136,30 @@ RomProperty <- R6Class(
           if (is.character(config$data_matrix)) {
             mvalid <- jsonlite::validate(config$data_matrix)
             if (mvalid[1] == TRUE) {
-              drupal_data = jsonlite::fromJSON(config$data_matrix)
-              data_header <- drupal_data$tabledata[[1]]
-              n <- 1
-              for (h in data_header) {
-                if(is.null(h) | is.na(h)) {
-                  data_header[[n]] <- paste0("V",n)
+              raw_data = jsonlite::fromJSON(config$data_matrix)
+              if ("tabledata" %in% names(raw_data)) {
+                data_header <- raw_data$tabledata[[1]]
+                n <- 1
+                for (h in data_header) {
+                  if(is.null(h) | is.na(h)) {
+                    data_header[[n]] <- paste0("V",n)
+                  }
+                  n <- n + 1
                 }
-                n <- n + 1
-              }
-              data_table <- as.data.frame(data_header)
-              for (i in 2:length(drupal_data$tabledata)) {
-                raw_row <- drupal_data$tabledata[[i]]
-                drow <- as.data.frame(drupal_data$tabledata[[i]])
-                data_table <- rbind(data_table, drow)
+                data_table <- as.data.frame(data_header)
+                if (length(raw_data$tabledata) > 1) {
+                  for (i in 2:length(raw_data$tabledata)) {
+                    raw_row <- raw_data$tabledata[[i]]
+                    drow <- as.data.frame(raw_data$tabledata[[i]])
+                    data_table <- rbind(data_table, drow)
+                  }
+                }
+                if ('weight' %in% names(data_table)) {
+                  data_table$weight <- NULL
+                }
+                names(data_table) <- NULL
+              } else {
+                data_table = raw_data
               }
               self$data_matrix = data_table
             } else {
@@ -160,6 +176,8 @@ RomProperty <- R6Class(
       # from_list() or new(config)
       t_list <- list(
         pid = as.integer(as.character(self$pid)),
+        vid = as.integer(as.character(self$vid)),
+        module = as.character(self$module),
         entity_type = as.character(self$entity_type),
         varid = as.integer(as.character(self$varid)),
         bundle = as.character(self$bundle),
@@ -179,11 +197,8 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
-      if (is.character(self$data_matrix)) {
-        mvalid <- jsonlite::validate(self$data_matrix)
-        if (mvalid[1] == TRUE) {
-          t_list$data_matrix = jsonlite::toJSON(self$data_matrix)
-        }
+      if (is.list(self$data_matrix)) {
+        t_list$data_matrix = as.character(jsonlite::toJSON(self$data_matrix))
       }
       if (is.null(self$bundle)) {
         self$bundle <- 'dh_properties'
@@ -220,12 +235,59 @@ RomProperty <- R6Class(
           # remove 
           pl[[which(names(pl) == 'enddate')]] <- NULL
         }
+        vl <- pl
+        # if this is an insert, add into revisions 
+        if (is.na(pl$vid)) {
+          vl$vid <- NULL # removes it from list
+        } else {
+          if (! (pl$vid > 0)) {
+            vl$vid <- NULL # removes it from list
+          }
+        }
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
           self$pid = pid
+          vl$pid = pid
         }
+        # if this is ODBC, we need to manage the revisions
+        # also, if we transition to *another* REST, we may also have to do so
+        if (self$datasource$connection_type == 'odbc') {
+          vid = self$datasource$post('dh_properties_revision', 'vid', vl)
+          if (is.na(self$vid)) {
+            self$vid = vid
+            # set back the revision ID
+            status = self$datasource$post('dh_properties', 'pid', list(pid=pid, vid=vid))
+          }
+        }
+        # otherwise, update revisions, especially now that we are no longer 
+        # dooing revisions.  THis is likely *not* important as drupal is 
+        # the only thing that needs revisions, but since drupal will break if 
+        # an entity lacks a revision, it is important in case we ever have to spin
+        # it back up.
+        # insert into dh_properties_revision (
+        #   pid,propname,propcode,propvalue,startdate,featureid,entity_type,
+        #   bundle,varid,status,module,uid,modified) 
+        # select pid,propname,propcode,propvalue,startdate,featureid,entity_type,
+        #   bundle,varid,status,module,uid,modified from dh_properties 
+        # where pid = 7685242 RETURNING vid;
+        # Returns 8332550, alternative, look for revision:
+        #    select vid from dh_properties_revision where pid = 7685242;
+        # update dh_properties set vid = 8332550 where pid = 7685242;
       }
       self$datasource$set_prop(self$to_list())
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (delete_remote) {
+        finfo <- self$to_list()
+        # we pass the pid, since if there are multiple revisions it will delete all
+        fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
+      }
+      super$delete(delete_remote)
     }
   )
 )

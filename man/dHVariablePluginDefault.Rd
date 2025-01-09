@@ -27,7 +27,9 @@ NA
 \describe{
 \item{\code{name}}{what is it called}
 
-\item{\code{datasource}}{used to retrieve local and remote properties}
+\item{\code{object_class}}{model object type}
+
+\item{\code{entity_bundle}}{model object type}
 }
 \if{html}{\out{</div>}}
 }
@@ -45,14 +47,12 @@ NA
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$new(datasource = NULL, config = list())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$new(config = list())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{datasource}}{RESTful repository (optional)}
-
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
 }
 \if{html}{\out{</div>}}

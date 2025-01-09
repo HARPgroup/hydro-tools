@@ -85,26 +85,26 @@ RomDataSource <- R6Class(
         #if ()
       }
       # check local store, if not there, check remote
-      var_def <- fn_search_vardefs(config, self$var_defs)
-      if (is.logical(var_def)) {
+      vardef <- fn_search_vardefs(config, self$var_defs)
+      if (is.logical(vardef)) {
         # none exists locally, so query
         force_refresh = TRUE
       }
       if (!is.null(self$site) & force_refresh) {
         if (self$connection_type == 'odbc') {
           config$limit = 1
-          var_def <- self$get('dh_variabledefinition', 'hydroid', config)
-          var_def <- as.list(var_def[1,])
+          vardef <- self$get('dh_variabledefinition', 'hydroid', config)
+          vardef <- as.list(vardef[1,])
         } else {
-          var_def <- fn_get_vardef_view(varkey, self$site, private$token, debug)
+          vardef <- fn_get_vardef_view(varkey, self$site, private$token, debug)
           # TBD
-          # var_def <- RomVarDef$new(self,var_one)
-          # var_def <- var_def$to_list()
+          # vardef <- RomVarDef$new(self,var_one)
+          # vardef <- vardef$to_list()
         }
         # after retrieval, store locally
-        self$set_vardef(var_def)
+        self$set_vardef(vardef)
       }
-      return(var_def)
+      return(vardef)
     },
     # get properties
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -113,11 +113,10 @@ RomDataSource <- R6Class(
     #' @param obj optional object which can supply more specific query info for odbc
     #' @return nothing sets internal private token
     get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
-      props = FALSE
+      prop = FALSE
       # odbc has robust query handling so we don't need to do this
       if (self$connection_type == 'odbc') {
-        prop_obj = RomProperty$new(self)
-        propvalues <- self$get('dh_properties', 'pid', config, prop_obj)
+        propvalues <- self$get('dh_properties', 'pid', config, obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods
@@ -246,19 +245,7 @@ RomDataSource <- R6Class(
       # uniqueness is variable def related, not arbitrary 
       #message(prop)
       if (is.data.frame(prop)) {
-        name_check <- names(self$propvalues)[
-          which(!(names(self$propvalues) %in% names(prop)))
-        ]
-        # add missing columns if they exist
-        if (length(name_check) > 0) {
-          message("Warning: all property columns must be present in data frame to do batch insert.")
-          message("Adding", cat(names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))],sep=","))
-          for (n in names(self$propvalues)[which(!(names(self$propvalues) %in% names(prop)))]) {
-            prop[,n] <- NA
-          }
-        }
-        # eliminate superfluous and sort in the same order
-        prop <- prop[,names(self$propvalues)]
+        prop <- self$insure_cols(prop, self$propvalues)
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
         dsl <- sqldf(
@@ -278,9 +265,10 @@ RomDataSource <- R6Class(
             #message(prop_check)
           }
         }
+        prop <- self$insure_cols(as.data.frame(prop), self$propvalues)
         if (is.logical(prop_check)) {
           # not found, so add
-          #message("Storing prop")
+          message("Storing prop")
           self$propvalues <- rbind(self$propvalues, as.data.frame(prop))
         } else {
           # update 
@@ -289,56 +277,64 @@ RomDataSource <- R6Class(
         }
       }
     },
-    #' @param var_def = list(varid, varkey, varname, varunits, varcode,...)
+    #' @param src_df = df to verify/insure
+    #' @param dest_df = df template to supply valid names
     #' @return local df index?
-    set_vardef = function(var_def) {
+    insure_cols = function(src_df, dest_df) {
+      name_check <- names(dest_df)[
+        which(!(names(dest_df) %in% names(src_df)))
+      ]
+      # add missing columns if they exist
+      if (length(name_check) > 0) {
+        message("Warning: all src_dferty columns must be present in data frame to do batch insert.")
+        #message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
+        for (n in names(dest_df)[which(!(names(dest_df) %in% names(src_df)))]) {
+          src_df[,n] <- NA
+        }
+      }
+      # eliminate superfluous and sort in the same order
+      src_df <- src_df[,names(dest_df)]
+    },
+    #' @param vardef = list(varid, varkey, varname, varunits, varcode,...)
+    #' @return local df index?
+    set_vardef = function(vardef) {
       # check uniqueness
       # search for existing based on uniqueness
       # uniqueness is variable def related, not arbitrary 
       # Just return, the remainder is TBD (based on working ts value code)
-      if (is.data.frame(var_def)) {
-        name_check <- names(self$var_defs)[
-          which(!(names(self$var_defs) %in% names(var_def)))
-        ]
-        # add missing columns if they exist
-        if (length(name_check) > 0) {
-          message("Warning: all variable definition columns should be present in data frame to do batch insert.")
-          message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))],sep=","))
-          for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(var_def)))]) {
-            var_def[,n] <- NA
-          }
+      if (!is.data.frame(vardef)) {
+        vardef = as.data.frame(vardef)
+      }
+      name_check <- names(self$var_defs)[
+        which(!(names(self$var_defs) %in% names(vardef)))
+      ]
+      if (is.na(vardef$hydroid)) {
+        message("Bad vardef for variable")
+        return(FALSE)
+      }
+      # add missing columns if they exist
+      if (length(name_check) > 0) {
+        message("Warning: all variable definition columns should be present in data frame to do batch insert.")
+        # this is a useful message, but the use of the `cat` statement causes output
+        # to hit the console, which goofs up use as a script
+        #message("Adding", cat(names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))],sep=","))
+        for (n in names(self$var_defs)[which(!(names(self$var_defs) %in% names(vardef)))]) {
+          vardef[,n] <- NA
         }
-        # eliminate superfluous and sort in the same order
-        var_def <- var_def[,names(self$var_defs)]
-        var_defs <- self$var_defs
-        # we handle this a little differently, and it may have multiples
-        veq = "select * from var_def 
-           where hydroid not in (
-             select hydroid from var_defs
-          )"
-        dsl <- sqldf(
-          veq
-        )
+      }
+      # eliminate superfluous and sort in the same order
+      vardef <- vardef[,names(self$var_defs)]
+      var_defs <- self$var_defs
+      # we handle this a little differently, and it may have multiples
+      veq = "select * from vardef 
+         where hydroid not in (
+           select hydroid from var_defs
+        )"
+      dsl <- sqldf(
+        veq
+      )
+      if (nrow(dsl) > 0) {
         self$var_defs = rbind(self$var_defs, dsl)
-        
-      } else {
-        
-        var_check = FALSE
-        if (!is.na(var_def$varkey)) {
-          if (var_def$varkey > 0) {
-            var_check = fn_search_vardefs(list(varkey = var_def$varkey), self$var_defs)
-            #message(prop_check)
-          }
-        }
-        if (is.logical(var_check)) {
-          # not found, so add
-          #message("Storing prop")
-          self$var_defs <- rbind(self$var_defs, as.data.frame(var_def))
-        } else {
-          # update 
-          message("Found, trying to load")
-          self$var_defs[var_def$hydroid] <- var_def
-        }
       }
     },
     #' @param features = list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
@@ -395,21 +391,75 @@ RomDataSource <- R6Class(
     #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
     #' @return local df index?
     post = function(entity_type, pk, config) {
-      message(paste("site",self$site))
-      message(paste("token", private$token))
-      return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
+      if (self$connection_type == 'rest') {
+        return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        return_id = fn_post_odbc(entity_type, pk, config, self$connection)
+      }
       return(return_id)
+    },
+    #' @param entity_type = dh_feature, dh_properties, ...
+    #' @param pk = primary key column name, e.g. hydroid, pid, ...
+    #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
+    #' @param obj = (optional) object class calling this routine, can supply extra info
+    #' @return local df index?
+    delete = function(entity_type, pk, config, obj = FALSE) {
+      if (self$connection_type == 'rest') {
+        retvals = fn_delete_rest(entity_type, pk, config, self$site, private$token)
+      } else {
+        retvals = fn_delete_odbc(entity_type, pk, config, self$connection, obj)
+      }
+      
+      return(retvals)
     },
     #' @param pid = object pid
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
     get_json_prop = function(pid) {
-      model_obj_url <- paste(self$json_obj_url, pid, sep="/")
-      model_info <- self$auth_read(model_obj_url, "text/json", "")
-      if (!is.logical(model_info)) {
-        model <- jsonlite::fromJSON(model_info)[[1]]
-        self$prop_json_cache[[pid]] <- model
-        return(model)
+      if (self$connection_type == 'rest') {
+        model_obj_url <- paste(self$json_obj_url, pid, sep="/")
+        model_info <- self$auth_read(model_obj_url, "text/json", "")
+        if (!is.logical(model_info)) {
+          model <- jsonlite::fromJSON(model_info)[[1]]
+          self$prop_json_cache[[pid]] <- model
+          return(model)
+        } else {
+          return(FALSE)
+        }
       } else {
+        # use ODBC approach
+        model_tree <- RomPropertyTree$new(self, list(root_pid=pid), TRUE)
+        model <- self$get_nested_export(self, pid, model_tree$prop_list)
+        return(model)
+      }
+    },
+    #' @param ds = satasource object, kept for posterity, as this may not always live here
+    #' @param featureid = object pid
+    #' @param props = container for stashing
+    #' @param depth = depth limit for nesting (rarely used)
+    #' @return unserialized json as list, with object stored in ds$prop_json_cache
+    get_nested_export = function(ds, featureid, props, depth=0) {
+      propatts <- as.list(props[which(props$pid == featureid),])
+      thisobject = RomProperty$new(ds, propatts, FALSE )
+      export = list()
+      if (!is.null(thisobject$vardef)) {
+        plugin <- thisobject$vardef$get_plugin(thisobject)
+        export[[thisobject$propname]] = plugin$exportOpenMI(thisobject)
+        children = props[which(props$featureid == featureid),]
+        # note: this sqldf below is a version that uses sqldf to recursively trace the 
+        #       property tree.  This is hugely inefficient, like 3,000% increase in execution time.
+        #       This is kept for posterity and as an example of what not to do.
+        #children = sqldf(paste("select * from props where featureid =", featureid), method="raw")
+        if (nrow(children) > 0) {
+          for (i in 1:nrow(children)) {
+            thischild <- children[i,]
+            sub_export <- self$get_nested_export(ds, thischild$pid, props, depth)
+            export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+          }
+        }
+        return(export)
+        
+      } else {
+        message(paste("Cannot export", thisobject$base_entity_type, "object vardef is null"))
         return(FALSE)
       }
     },
@@ -454,6 +504,7 @@ RomDataSource <- R6Class(
       status=character(),
       module=character(),
       field_dh_matrix=character(),
+      data_matrix=character(),
       stringsAsFactors=FALSE
     ),
     #' @field features table of physical features

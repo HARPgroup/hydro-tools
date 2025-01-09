@@ -57,7 +57,7 @@ RomPropertyTree <- R6Class(
       }
       # first, change the sql to reflect the desired pid base, then proceed
       self$sql_select_from <- str_replace_all(self$sql_select_from, '\\[root_pid\\]', as.character(config$root_pid))
-      message(paste("Base Query:",self$sql_select_from))
+      #message(paste("Base Query:",self$sql_select_from))
       super$initialize(datasource, config, load_remote)
       # experimental support for automatic local caching
       #self$datasource$set_feature(self$to_list())
@@ -100,7 +100,7 @@ RomPropertyTree <- R6Class(
       #print("Loading vardefs")
       # now, load all associated variable definitions if possible
       vars <- sqldf("select varid from config group by varid", method = "raw")
-      print(vars)
+      #print(vars)
       for (v in 1:nrow(vars)) {
         vid <- as.integer(vars[v,])
         self$datasource$get_vardef(vid)
