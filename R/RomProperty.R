@@ -1,11 +1,18 @@
 #' Time Series data object
-#' @description Object for storing single time series value
-#' @details Has standard methods for managing data and meta data
-#' @importFrom R6 R6Class  
+#' @description Object for storing single time series value or a description of
+#'   another property or feature entity
+#' @details Has standard methods for managing data and meta data including post,
+#'   from_list, to_list, delete. See RomProperty code for all methods. Inherits
+#'   other methods from RomEntity
+#' @importFrom R6 R6Class
 #' @param datasource optional RomDataSource for remote and local storage
-#' @param config list of attributes to set
-#' @return reference class of type openmi.om.base.
-#' @seealso NA
+#' @param config list of attributes to set. Allowable fields listed in empty
+#'   propvalues data frame available in RomProperty after initialization e.g.
+#'   (RomProperty$new())
+#' @return reference class of type openmi.om.base e.g. a RomProperty that will
+#'   have its essential fields stored on itself with REST or ODBC methods to
+#'   post and delete base entity
+#' @seealso RomEntity, RomFeature, RomDatasource
 #' @examples NA
 #' @export RomProperty
 RomProperty <- R6Class(

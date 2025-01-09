@@ -1,13 +1,22 @@
-#' Post any entity to a RESTful web service
+#' Post any entity to via an ODBC connection. This allows users to insert or
+#' update entities within database.
 #'
 #' @param entity_type = dh_feature, dh_properties, ...
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
+#' @param inputs contents of record to post in list (pid, propname, propvalue,
+#'   ...). If missing essential values, post will fail. Required information may
+#'   be found in each table description on the postgres database. Contact OWS
+#'   WSPA data coordinator for more information
 #' @param con connection to ODBC server
 #' @param obj optional class with extra query info
-#' @seealso NA
+#' @seealso fn_get_odbc, fn_post_rest
 #' @export fn_post_odbc
-#' @examples NA
+#' @examples 
+#' \dontrun{
+#' fn_post_odbc('dh_properties','pid',
+#' inputs = list(pid = NA,bundle = NA, featureid = NA, etc.),
+#' con = datasource$connection, obj = FALSE)
+#' }
 fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
