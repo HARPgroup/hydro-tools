@@ -12,11 +12,7 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
-  for (j in 1:length(inputs)) {
-    if (is.na(inputs[j])) {
-      inputs[j] <- NULL
-    }
-  }
+  inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
   )
