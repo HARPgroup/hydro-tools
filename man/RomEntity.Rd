@@ -11,8 +11,6 @@ an updated config if necessary or FALSE if it fails
 loads the varid
 
 the data from the remote connection
-
-nothing, but loads the objects plugin
 }
 \description{
 Object for storing a single entity with attribute and timeseries related
@@ -224,6 +222,9 @@ object instance
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_plugin()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+nothing, but loads the objects plugin
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-to_list"></a>}}

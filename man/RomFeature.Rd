@@ -55,8 +55,10 @@ NA
 \item \href{#method-RomFeature-get_id}{\code{RomFeature$get_id()}}
 \item \href{#method-RomFeature-to_list}{\code{RomFeature$to_list()}}
 \item \href{#method-RomFeature-from_list}{\code{RomFeature$from_list()}}
+\item \href{#method-RomFeature-get_mps}{\code{RomFeature$get_mps()}}
 \item \href{#method-RomFeature-add_mp}{\code{RomFeature$add_mp()}}
 \item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
+\item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
 \item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
 }
 }
@@ -141,6 +143,18 @@ NULL
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-get_mps"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-get_mps}{}}}
+\subsection{Method \code{get_mps()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_mps()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+a dataframe of connected MPs
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-add_mp"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-add_mp}{}}}
 \subsection{Method \code{add_mp()}}{
@@ -176,6 +190,39 @@ add a connected MP. TBD
 }
 \subsection{Returns}{
 NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-find_spatial_relations"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-find_spatial_relations}{}}}
+\subsection{Method \code{find_spatial_relations()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$find_spatial_relations(
+  target_entity = "dh_feature",
+  inputs = list(bundle = NA, ftype = NA),
+  operator = "st_contains",
+  return_geoms = FALSE,
+  query_remote = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{target_entity}}{what type to relate to (default dh_feature)}
+
+\item{\code{inputs}}{criteria to search for (list key = value format)}
+
+\item{\code{operator}}{what type of spatial function,default = st_contains}
+
+\item{\code{return_geoms}}{FALSE will return a smaller dataframe}
+
+\item{\code{query_remote}}{FALSE will search on in local datasource}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+dataframe of spatially related entities
 }
 }
 \if{html}{\out{<hr>}}

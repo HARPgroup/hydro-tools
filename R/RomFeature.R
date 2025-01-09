@@ -119,19 +119,20 @@ RomFeature <- R6Class(
       }
     },
     #' @param target_entity what type to relate to (default dh_feature)
-    #' @param query_remote look for entiteies outside the local data store?
-    #' @param bundlewhat bundle (valid if target is dh_feature)
-    #' @param target_entity what type to relate to (default dh_feature)
+    #' @param inputs criteria to search for (list key = value format)
     #' @param operator what type of spatial function,default = st_contains
+    #' @param return_geoms FALSE will return a smaller dataframe
+    #' @param query_remote FALSE will search on in local datasource
     #' @return dataframe of spatially related entities
     find_spatial_relations = function(
-        target_entity = 'dh_feature', query_remote = TRUE, 
+        target_entity = 'dh_feature', 
         inputs = list(
           bundle = NA,
           ftype = NA
         ),
         operator = 'st_contains',
-        load_remote = TRUE, return_geoms = FALSE
+        return_geoms = FALSE,
+        query_remote = TRUE
       ) {
       # todo: should we move this to the ODBC functions?  Needs more generic handling.
       # currently only supports dh_feature, but could later support others
@@ -155,6 +156,9 @@ RomFeature <- R6Class(
              on ( ", spatial_join, ")",
              " WHERE ", input_where
       )
+      if (query_remote == FALSE) {
+        message("Warning: query_remote = FALSE is not yet supported for spatial relations")
+      }
       message(sql)
       related_entities <- sqldf::sqldf(sql, connection=self$datasource$connection)
       if (return_geoms == FALSE) {
