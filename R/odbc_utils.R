@@ -125,8 +125,18 @@ fn_guess_sql <- function(entity_type, pk, inputs) {
   return(sql_stuff)
 }
 
-fn_guess_sql_where <- function(entity_type, pk, inputs) {
+#' Guess an SQL query from a simple list of inputs
+#'
+#' @param entity_type = dh_feature, dh_properties, ...
+#' @param pk = primary key column name, e.g. hydroid, pid, ...
+#' @param inputs contents of record to post in list(pid=X, propname='nom', propvalue, ...)
+#' @export fn_guess_sql_where
+#' @examples NA
+fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
   get_where = ""
+  if (alias != "") {
+    alias = paste0(alias,".")
+  }
   pkid <- as.integer(as.character(inputs[pk]))
   if (is.na(pkid)) {
     pkid = NULL
@@ -137,11 +147,12 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
   if (!is.null(pkid)) {
     # Simple PK retrieval
     if (!is.na(pkid)) {
-      get_where = paste(pk,"=",pkid)
+      get_where = paste0(alias, pk," = ",pkid)
     }
   } else {
     get_where_glue = ""
-    #message(paste("inputs:", inputs))
+    message("inputs:")
+    print(inputs)
     for (col_name in names(inputs)) {
       if (is.na(inputs[col_name])) {
         inputs[col_name] <- NULL
@@ -156,7 +167,7 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
         get_where = paste(
           get_where, 
           get_where_glue, 
-          col_name,"=", col_val
+          paste0(alias, col_name)," = ", col_val
         )
         get_where_glue = "AND"
       }

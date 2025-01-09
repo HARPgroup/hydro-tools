@@ -86,6 +86,17 @@ RomFeature <- R6Class(
         }
       }
     },
+    #' @return a dataframe of connected MPs
+    get_mps = function () {
+      if (self$datasource$connection_type == 'odbc') {
+        sql = paste("select * from dh_feature_fielded where parent_id =",self$get_id())
+        mps <- sqldf(sql,connection = self$datasource$connection)
+        return(mps)
+      } else {
+        message("get_mps() is not enabled for non-ODBC data sources")
+        return(FALSE)
+      }
+    },
     #' @param thismp mp entity
     #' @return add a connected MP. TBD
     add_mp = function (thismp) {
@@ -106,6 +117,53 @@ RomFeature <- R6Class(
           self$hydroid = hydroid
         }
       }
+    },
+    #' @param target_entity what type to relate to (default dh_feature)
+    #' @param query_remote look for entiteies outside the local data store?
+    #' @param bundlewhat bundle (valid if target is dh_feature)
+    #' @param target_entity what type to relate to (default dh_feature)
+    #' @param operator what type of spatial function,default = st_contains
+    #' @return dataframe of spatially related entities
+    find_spatial_relations = function(
+        target_entity = 'dh_feature', query_remote = TRUE, 
+        inputs = list(
+          bundle = NA,
+          ftype = NA
+        ),
+        operator = 'st_contains',
+        load_remote = TRUE, return_geoms = FALSE
+      ) {
+      # todo: should we move this to the ODBC functions?  Needs more generic handling.
+      # currently only supports dh_feature, but could later support others
+      target_geomcol = 'dh_geofield_geom'
+      base_geomcol = 'dh_geofield_geom'
+      if (operator == 'overlaps') {
+        spatial_join = paste0(' (base.', base_geomcol, ' && target.', target_geomcol,') ')
+      } else if ( operator == 'st_contains' ) {
+        spatial_join = paste0(' (st_contains(base.', base_geomcol, ', target.', target_geomcol,')) ')
+      } else if ( operator == 'st_within' ) {
+        spatial_join = paste0(' (st_within(base.', target_geomcol, ', target.', base_geomcol,')) ')
+      }
+      # include this in inputs for odbc routines
+      input_where = paste0(
+        " base.hydroid = ", self$get_id(), " AND ",
+        fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
+      ) 
+      sql = paste0("select target.* 
+             from dh_feature_fielded as base
+             left outer join dh_feature_fielded as target
+             on ( ", spatial_join, ")",
+             " WHERE ", input_where
+      )
+      message(sql)
+      related_entities <- sqldf::sqldf(sql, connection=self$datasource$connection)
+      if (return_geoms == FALSE) {
+        retcols = names(related_entities)
+        retcols$dh_geofield = NULL
+        retcols$dh_geofield_geom = NULL
+        related_entities <- related_entities[,retcols]
+      }
+      return(related_entities)
     }
   )
 )

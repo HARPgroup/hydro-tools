@@ -6,20 +6,22 @@ library("stringr")
 basepath='/var/www/R';
 source("/var/www/R/config.R")
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/R/fac_utils.R")
-#ds <- RomDataSource$new(site, rest_uname = rest_uname)
-#ds$get_token(rest_pw = rest_pw)
-dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-dso$get_token(rest_pw = odbc_pw)
-## If testing on internal network http://192.168.0.21
-#dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-#dso$get_token(rest_pw = odbc_pw, odbc_port=5432) 
 
 fac_hydroid <- 72017
+feature <- RomFeature$new(ds, list(hydroid=fac_hydroid), TRUE)
+mps <- feature$get_mps()
+mp <- RomFeature$new(ds, list(hydroid=mps[1,]$hydroid), TRUE)
+riverseg = mp$find_spatial_relations(
+  inputs=list(bundle='watershed', ftype='vahydro'), 
+  operator='st_within',
+  return_geoms=TRUE
+)
+
 model_version = "vahydro-1.0"
 model <- RomProperty$new(
-  dso, list(
+  ds, list(
     propcode=model_version,
-    featureid=fac_hydroid,
+    featureid=feature$hydroid,
     entity_type='dh_feature'
   ), TRUE
 )
@@ -27,7 +29,7 @@ model <- RomProperty$new(
 ps_enabled <- RomProperty$new(
   dso, list(
     propname='ps_enabled', 
-    featureid=model_pid, 
+    featureid=model$pid, 
     entity_type='dh_properties'
   ), TRUE
 )
@@ -39,7 +41,7 @@ model_export_local <- dso$get_nested_export(dso, model_pid, dso$propvalues)
 # this goes to the database and insure that all properties under the parent
 # property have been downloaded, then exports:
 model_tree <- RomPropertyTree$new(dso, list(root_pid=model_pid), TRUE)
-model_export <- dso$get_json_prop(model_pid)
+model_export <- dso$get_json_prop(model$pid)
 
 blank_prop <- RomProperty$new(
   dso, list(featureid=model$pid, varkey='wd_mgy', propname='test_var', TRUE)

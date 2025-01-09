@@ -1,6 +1,7 @@
 create or replace view dh_feature_fielded as (
   select a.*, b.description_value as description,
     st_astext(geom.dh_geofield_geom) as dh_geofield,
+    geom.dh_geofield_geom as dh_geofield_geom,
     nd.dh_nextdown_id_target_id as nextdown_id,
     p.dh_link_facility_mps_target_id as parent_id
   from dh_feature as a
