@@ -16,12 +16,13 @@ RomPropertyTree <- R6Class(
     base_entity_type = 'dh_properties',
     #' @field pk_name the name of this entity's pk column
     pk_name = 'root_pid',
-    #' @field The raw property rows returned
+    #' @field prop_list The raw property rows returned
     prop_list = NA,
     #' @field mps linked features
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
+    #' @field sql_select_from Enhanced form of query overrides default SQL guess.
     sql_select_from = "
       WITH RECURSIVE prop_tree AS (
       SELECT [root_pid] as root_pid, p.pid, vp.varkey, p.featureid, 
@@ -91,7 +92,7 @@ RomPropertyTree <- R6Class(
         message("save() is not yet available")
       }
     },
-    #' @param config
+    #' @param config input attributes
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {

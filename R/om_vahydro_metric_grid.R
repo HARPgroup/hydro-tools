@@ -69,7 +69,7 @@ om_vahydro_metric_grid <- function (
         prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
         #message(prop_sql)
         message(paste("retrieving via ODBC"))
-        dat <- sqldf(prop_sql, connection = ds$connection)
+        dat <- dbGetQuery(conn = ds$connection, prop_sql)
         #message(paste("returned", nrow(dat),"rows"))
       } else {
         message(paste("retrieving ", url))

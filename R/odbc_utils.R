@@ -135,6 +135,7 @@ fn_guess_sql <- function(entity_type, pk, inputs) {
 #' @param entity_type = dh_feature, dh_properties, ...
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
 #' @param inputs contents of record to post in list(pid=X, propname='nom', propvalue, ...)
+#' @param alias assign an alias to a give table/view relation?
 #' @export fn_guess_sql_where
 #' @examples NA
 fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {

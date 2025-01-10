@@ -35,6 +35,10 @@ RomFeature <- R6Class(
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
+    #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
+    sql_select_from = "
+      select * from dh_feature_fielded
+    ",
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST dataa source for matches?
@@ -119,19 +123,20 @@ RomFeature <- R6Class(
       }
     },
     #' @param target_entity what type to relate to (default dh_feature)
-    #' @param query_remote look for entiteies outside the local data store?
-    #' @param bundlewhat bundle (valid if target is dh_feature)
-    #' @param target_entity what type to relate to (default dh_feature)
+    #' @param inputs criteria to search for (list key = value format)
     #' @param operator what type of spatial function,default = st_contains
+    #' @param return_geoms FALSE will return a smaller dataframe
+    #' @param query_remote FALSE will search on in local datasource
     #' @return dataframe of spatially related entities
     find_spatial_relations = function(
-        target_entity = 'dh_feature', query_remote = TRUE, 
+        target_entity = 'dh_feature', 
         inputs = list(
           bundle = NA,
           ftype = NA
         ),
         operator = 'st_contains',
-        load_remote = TRUE, return_geoms = FALSE
+        return_geoms = FALSE,
+        query_remote = TRUE
       ) {
       # todo: should we move this to the ODBC functions?  Needs more generic handling.
       # currently only supports dh_feature, but could later support others
@@ -149,18 +154,21 @@ RomFeature <- R6Class(
         " base.hydroid = ", self$get_id(), " AND ",
         fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
       ) 
-      sql = paste0("select target.* 
+      sql = paste0("select target.*
              from dh_feature_fielded as base
              left outer join dh_feature_fielded as target
              on ( ", spatial_join, ")",
              " WHERE ", input_where
       )
+      if (query_remote == FALSE) {
+        message("Warning: query_remote = FALSE is not yet supported for spatial relations")
+      }
       message(sql)
-      related_entities <- sqldf::sqldf(sql, connection=self$datasource$connection)
+      related_entities <- dbGetQuery(conn = self$datasource$connection, sql)
       if (return_geoms == FALSE) {
-        retcols = names(related_entities)
-        retcols$dh_geofield = NULL
-        retcols$dh_geofield_geom = NULL
+        retcols = unlist(names(related_entities))
+        retcols <- retcols[-which(retcols == "dh_geofield")]
+        retcols <- retcols[-which(retcols == "dh_geofield_geom")]
         related_entities <- related_entities[,retcols]
       }
       return(related_entities)

@@ -199,11 +199,10 @@ NULL
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$find_spatial_relations(
   target_entity = "dh_feature",
-  query_remote = TRUE,
   inputs = list(bundle = NA, ftype = NA),
   operator = "st_contains",
-  load_remote = TRUE,
-  return_geoms = FALSE
+  return_geoms = FALSE,
+  query_remote = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -212,13 +211,13 @@ NULL
 \describe{
 \item{\code{target_entity}}{what type to relate to (default dh_feature)}
 
-\item{\code{target_entity}}{what type to relate to (default dh_feature)}
-
-\item{\code{query_remote}}{look for entiteies outside the local data store?}
+\item{\code{inputs}}{criteria to search for (list key = value format)}
 
 \item{\code{operator}}{what type of spatial function,default = st_contains}
 
-\item{\code{bundlewhat}}{bundle (valid if target is dh_feature)}
+\item{\code{return_geoms}}{FALSE will return a smaller dataframe}
+
+\item{\code{query_remote}}{FALSE will search on in local datasource}
 }
 \if{html}{\out{</div>}}
 }
