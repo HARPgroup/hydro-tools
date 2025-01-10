@@ -4,21 +4,26 @@
 \alias{RomProperty}
 \title{Time Series data object}
 \value{
-reference class of type openmi.om.base.
+reference class of type openmi.om.base e.g. a RomProperty that will
+  have its essential fields stored on itself with REST or ODBC methods to
+  post and delete base entity
 
 an updated config if necessary or FALSE if it fails
 }
 \description{
-Object for storing single time series value
+Object for storing single time series value or a description of
+  another property or feature entity
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data including post,
+  from_list, to_list, delete. See RomProperty code for all methods. Inherits
+  other methods from RomEntity
 }
 \examples{
 NA
 }
 \seealso{
-NA
+RomEntity, RomFeature, RomDatasource
 }
 \section{Super class}{
 \code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomProperty}
