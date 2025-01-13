@@ -2,7 +2,8 @@
 % Please edit documentation in R/odbc_utils.R
 \name{fn_post_odbc}
 \alias{fn_post_odbc}
-\title{Post any entity to a RESTful web service}
+\title{Post any entity to via an ODBC connection. This allows users to insert or
+update entities within database.}
 \usage{
 fn_post_odbc(entity_type, pk, inputs, con, obj = FALSE)
 }
@@ -11,18 +12,26 @@ fn_post_odbc(entity_type, pk, inputs, con, obj = FALSE)
 
 \item{pk}{= primary key column name, e.g. hydroid, pid, ...}
 
-\item{inputs}{contents of record to post in list(pid, propname, propvalue, ...)}
+\item{inputs}{contents of record to post in list (pid, propname, propvalue,
+...). If missing essential values, post will fail. Required information may
+be found in each table description on the postgres database. Contact OWS
+WSPA data coordinator for more information}
 
 \item{con}{connection to ODBC server}
 
 \item{obj}{optional class with extra query info}
 }
 \description{
-Post any entity to a RESTful web service
+Post any entity to via an ODBC connection. This allows users to insert or
+update entities within database.
 }
 \examples{
-NA
+\dontrun{
+fn_post_odbc('dh_properties','pid',
+inputs = list(pid = NA,bundle = NA, featureid = NA, etc.),
+con = datasource$connection, obj = FALSE)
+}
 }
 \seealso{
-NA
+fn_get_odbc, fn_post_rest
 }

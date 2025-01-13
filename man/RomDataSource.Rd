@@ -228,6 +228,8 @@ nothing sets internal private token
 \item{\code{return_type}}{'data.frame' or 'list'}
 
 \item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+
+\item{\code{obj}}{optional object which can supply more specific query info for odbc}
 }
 \if{html}{\out{</div>}}
 }

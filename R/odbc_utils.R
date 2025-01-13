@@ -1,22 +1,27 @@
-#' Post any entity to a RESTful web service
+#' Post any entity to via an ODBC connection. This allows users to insert or
+#' update entities within database.
 #'
 #' @param entity_type = dh_feature, dh_properties, ...
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
+#' @param inputs contents of record to post in list (pid, propname, propvalue,
+#'   ...). If missing essential values, post will fail. Required information may
+#'   be found in each table description on the postgres database. Contact OWS
+#'   WSPA data coordinator for more information
 #' @param con connection to ODBC server
 #' @param obj optional class with extra query info
-#' @seealso NA
+#' @seealso fn_get_odbc, fn_post_rest
 #' @export fn_post_odbc
-#' @examples NA
+#' @examples 
+#' \dontrun{
+#' fn_post_odbc('dh_properties','pid',
+#' inputs = list(pid = NA,bundle = NA, featureid = NA, etc.),
+#' con = datasource$connection, obj = FALSE)
+#' }
 fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   pkid <- as.integer(as.character(inputs[pk]))
-  for (j in 1:length(inputs)) {
-    if (is.na(inputs[j])) {
-      inputs[j] <- NULL
-    }
-  }
+  inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
   )
@@ -125,8 +130,19 @@ fn_guess_sql <- function(entity_type, pk, inputs) {
   return(sql_stuff)
 }
 
-fn_guess_sql_where <- function(entity_type, pk, inputs) {
+#' Guess an SQL query from a simple list of inputs
+#'
+#' @param entity_type = dh_feature, dh_properties, ...
+#' @param pk = primary key column name, e.g. hydroid, pid, ...
+#' @param inputs contents of record to post in list(pid=X, propname='nom', propvalue, ...)
+#' @param alias assign an alias to a give table/view relation?
+#' @export fn_guess_sql_where
+#' @examples NA
+fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
   get_where = ""
+  if (alias != "") {
+    alias = paste0(alias,".")
+  }
   pkid <- as.integer(as.character(inputs[pk]))
   if (is.na(pkid)) {
     pkid = NULL
@@ -137,11 +153,12 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
   if (!is.null(pkid)) {
     # Simple PK retrieval
     if (!is.na(pkid)) {
-      get_where = paste(pk,"=",pkid)
+      get_where = paste0(alias, pk," = ",pkid)
     }
   } else {
     get_where_glue = ""
-    #message(paste("inputs:", inputs))
+    message("inputs:")
+    print(inputs)
     for (col_name in names(inputs)) {
       if (is.na(inputs[col_name])) {
         inputs[col_name] <- NULL
@@ -156,7 +173,7 @@ fn_guess_sql_where <- function(entity_type, pk, inputs) {
         get_where = paste(
           get_where, 
           get_where_glue, 
-          col_name,"=", col_val
+          paste0(alias, col_name)," = ", col_val
         )
         get_where_glue = "AND"
       }

@@ -163,7 +163,7 @@ RomEntity <- R6Class(
       }
       return(TRUE)
     },
-    #' @returns nothing, but loads the objects plugin
+    #' @return nothing, but loads the objects plugin
     load_plugin = function() {
       if (is.null(self$vardef)) {
         # this is only valid for types that have vardefs

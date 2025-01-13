@@ -90,6 +90,7 @@ dHOMEquation <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = 'Equation',
     
     #' @param config list of attributes to set, see also: to_list() for format
@@ -131,6 +132,7 @@ dHOMConstant <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = FALSE,
     
     #' @param config list of attributes to set, see also: to_list() for format
@@ -167,6 +169,7 @@ dHOMAlphanumericConstant <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = FALSE,
     
     #' @param config list of attributes to set, see also: to_list() for format
@@ -205,6 +208,7 @@ dHVarImage <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = FALSE,
     
     #' @param config list of attributes to set, see also: to_list() for format
@@ -258,6 +262,7 @@ dHOMDataMatrix <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = 'dataMatrix',
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
@@ -289,6 +294,7 @@ dHVarAnnotation <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = 'textField',
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
@@ -322,6 +328,7 @@ dHOMbroadCastObject <- R6Class(
   public = list(
     #' @field name what is it called
     name = NA,
+    #' @field object_class model object type
     object_class = 'broadCastObject',
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
