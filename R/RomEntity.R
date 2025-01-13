@@ -21,6 +21,8 @@ RomEntity <- R6Class(
     entity_id = NA,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = NA,
+    #' @field base_only - how to export to list in case of complex multi table entity and ODBC
+    base_only = FALSE,
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$entity_id)
@@ -80,6 +82,9 @@ RomEntity <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource = datasource 
+      if (self$datasource$connection_type == 'odbc') {
+        self$base_only = TRUE
+      }
       config <- self$handle_config(config)
       if (is.logical(config)) {
         message("Configuration information faild validation. Returning.")
@@ -173,7 +178,7 @@ RomEntity <- R6Class(
       self$plugin = self$vardef$get_plugin(self)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
-    to_list = function() {
+    to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(

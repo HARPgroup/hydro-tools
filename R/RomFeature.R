@@ -39,6 +39,8 @@ RomFeature <- R6Class(
     sql_select_from = "
       select * from dh_feature_fielded
     ",
+    #' @field base_only - how to export to list in case of complex multi table entity and ODBC
+    base_only = FALSE,
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST dataa source for matches?
@@ -55,7 +57,7 @@ RomFeature <- R6Class(
       return(self$hydroid)
     },
     #' @return list of object attributes suitable for input to new() and from_list() methods
-    to_list = function() {
+    to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(
@@ -67,6 +69,10 @@ RomFeature <- R6Class(
         bundle = self$bundle,
         geom = self$geom
       )
+      # accounts for ODBC
+      if (base_only == FALSE) {
+        t_list$geom = self$geom
+      }
       return(t_list)
     },
     #' @param config list of attributes to set, see also: to_list() for format
@@ -115,7 +121,7 @@ RomFeature <- R6Class(
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
       if (push_remote) {
-        finfo <- self$to_list()
+        finfo <- self$to_list(self$base_only)
         hydroid = self$datasource$post('dh_feature', 'hydroid', finfo)
         if (!is.logical(hydroid)) {
           self$hydroid = hydroid
