@@ -4,10 +4,10 @@
 #' @importFrom R6 R6Class  
 #' @param datasource optional RomDataSource for remote and local storage
 #' @param config list of attributes to set
-#' @return feature class of type RomFeature
+#' @return Entity class of type RomPropertyTree
 #' @seealso NA
 #' @examples NA
-#' @export RomFeature
+#' @export RomPropertyTree
 RomPropertyTree <- R6Class(
   "RomPropertyTree",
   inherit = RomDataGroup,
