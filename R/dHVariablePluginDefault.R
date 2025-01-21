@@ -241,7 +241,9 @@ dHOMObjectClass <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = entity$code
+      if ('propcode' %in% names(entity)) {
+        export = entity$propcode
+      }
       return(export)
     }
   )

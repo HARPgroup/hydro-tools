@@ -309,6 +309,22 @@ RomProperty <- R6Class(
         fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
       }
       super$delete(delete_remote)
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete_fields = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (delete_remote) {
+        finfo <- self$to_list()
+        # we pass the pid, since if there are multiple revisions it will delete all
+        fid = self$datasource$delete(
+          'field_data_dh_matrix', 'entity_id', 
+          list(entity_id=self$pid, entity_type='dh_property')
+        )
+      }
+      super$delete(delete_remote)
     }
   )
 )
