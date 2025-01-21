@@ -238,6 +238,12 @@ dHOMObjectClass <- R6Class(
   "dHOMObjectClass",
   inherit = dHOMAlphanumericConstant,
   public = list(
+    #' @param entity the local object to work on 
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = entity$code
+      return(export)
+    }
   )
 )
 
