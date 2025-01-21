@@ -27,7 +27,7 @@ dHVariablePluginDefault <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
       # creates an array that can later be serialized as json, xml, or whatever
-      export = super$exportOpenMIBase(entity);
+      export = self$exportOpenMIBase(entity);
       # # load subComponents 
       # # @todo: figure this out so that other chains work better.
       # children <- self$datasource$propvalues()
