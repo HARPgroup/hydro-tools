@@ -22,7 +22,8 @@ om_vahydro_metric_grid <- function (
   ftype = 'vahydro',
   model_version = 'vahydro-1.0',
   base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
-  ds = FALSE
+  ds = FALSE,
+  debug = FALSE
 ) {
   alldata = NULL
   mv_base = NULL
@@ -67,7 +68,9 @@ om_vahydro_metric_grid <- function (
       if (ds$connection_type == 'odbc') {
         #message("om_vahydro_metric_grid() called using ODBC ")
         prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
-        #message(prop_sql)
+        if (debug) {
+          message(prop_sql)
+        }
         message(paste("retrieving via ODBC"))
         dat <- dbGetQuery(conn = ds$connection, prop_sql)
         #message(paste("returned", nrow(dat),"rows"))

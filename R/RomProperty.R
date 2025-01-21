@@ -299,6 +299,10 @@ RomProperty <- R6Class(
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
+      for (pv in self$propvalues()) {
+        subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
+        subprop$delete(delete_remote)
+      }
       if (delete_remote) {
         finfo <- self$to_list()
         # we pass the pid, since if there are multiple revisions it will delete all
