@@ -60,16 +60,28 @@ dHVariablePluginDefault <- R6Class(
       return(export)
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = list(
         id=entity$pid,
         name=entity$propname,
+        object_class=self$object_class, 
+        plugin=class(self)[1],
         value=entity$propvalue,
         code=entity$propcode
       )
       return(export)
+    },
+    #' @param om_list the open MI export array/list to work on
+    #' @returns a Rom importable config or FALSE if it fails
+    fromOpenMIBase = function(om_list) {
+      rom_list = list(
+        pid=om_list$id,
+        propname=om_list$name,
+        propvalue=om_list$value,
+        propcode=om_list$code
+      )
+      return(rom_list)
     }
   )
 )
@@ -99,17 +111,13 @@ dHOMEquation <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        value=entity$propcode,
-        equation=list(
-          name='equation',
-          value=entity$propcode
-        )
+      export = self$exportOpenMIBase(entity)
+      export$value = entity$propcode
+      export$equation = list(
+        name='equation',
+        value=entity$propcode
       )
       return(export)
     }
@@ -141,14 +149,9 @@ dHOMConstant <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        value=entity$propvalue
-      )
+      export = self$exportOpenMIBase(entity)
       return(export)
     }
   )
@@ -178,14 +181,10 @@ dHOMAlphanumericConstant <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        value=entity$propcode
-      )
+      export = self$exportOpenMIBase(entity)
+      export$value = entity$propcode
       return(export)
     }
   )
@@ -209,24 +208,19 @@ dHVarImage <- R6Class(
     #' @field name what is it called
     name = NA,
     #' @field object_class model object type
-    object_class = FALSE,
-    
+    object_class = "dHVarImage",
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
     initialize = function(config = list()) {
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       # note: we export 'code' attribute but should deprecate in favor of 'value'
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        value=entity$propcode,
-        code=entity$propcode
-      )
+      export = self$exportOpenMIBase(entity)
+      export$code = entity$propcode
+      export$value = entity$propcode
       return(export)
     }
   )
@@ -265,15 +259,10 @@ dHOMDataMatrix <- R6Class(
     #' @field object_class model object type
     object_class = 'dataMatrix',
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      #print(paste("Entity matrix:", entity$propname))
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        value=entity$data_matrix
-      )
+      export = self$exportOpenMIBase(entity)
+      export$value = entity$data_matrix
       return(export)
     }
   )
@@ -297,16 +286,10 @@ dHVarAnnotation <- R6Class(
     #' @field object_class model object type
     object_class = 'textField',
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      #print(paste("Entity matrix:", entity$propname))
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        object_class='textField', 
-        value=entity$proptext
-      )
+      export = self$exportOpenMIBase(entity)
+      export$value = entity$proptext
       return(export)
     }
   )
@@ -331,21 +314,15 @@ dHOMbroadCastObject <- R6Class(
     #' @field object_class model object type
     object_class = 'broadCastObject',
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       #print(paste("Entity matrix:", entity$propname))
       export = super$exportOpenMIBase(entity)
-      export = list(
-        id=entity$pid,
-        name=entity$propname,
-        object_class=self$object_class, 
-        value=NULL,
-        broadcast_params = list(
-          name='broadcast_params',
-          object_class='array',
-          value=entity$data_matrix
-        )
+      export$value=NULL
+      export$broadcast_params = list(
+        name='broadcast_params',
+        object_class='array',
+        value=entity$data_matrix
       )
       return(export)
     }
@@ -353,7 +330,7 @@ dHOMbroadCastObject <- R6Class(
 )
 
 
-# 'This is heare because there is no way to instantiate a dynamic class using 
+# 'This is here because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
 #'
