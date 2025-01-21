@@ -27,7 +27,7 @@ dHVariablePluginDefault <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
       # creates an array that can later be serialized as json, xml, or whatever
-      export = self$exportOpenMIBase(entity);
+      export = super$exportOpenMIBase(entity);
       # # load subComponents 
       # # @todo: figure this out so that other chains work better.
       # children <- self$datasource$propvalues()
@@ -113,7 +113,7 @@ dHOMEquation <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       export$value = entity$propcode
       export$equation = list(
         name='equation',
@@ -151,7 +151,7 @@ dHOMConstant <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       return(export)
     }
   )
@@ -183,7 +183,7 @@ dHOMAlphanumericConstant <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       export$value = entity$propcode
       return(export)
     }
@@ -218,7 +218,7 @@ dHVarImage <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       # note: we export 'code' attribute but should deprecate in favor of 'value'
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       export$code = entity$propcode
       export$value = entity$propcode
       return(export)
@@ -261,7 +261,7 @@ dHOMDataMatrix <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       export$value = entity$data_matrix
       return(export)
     }
@@ -288,7 +288,7 @@ dHVarAnnotation <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = self$exportOpenMIBase(entity)
+      export = super$exportOpenMIBase(entity)
       export$value = entity$proptext
       return(export)
     }
