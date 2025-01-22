@@ -183,8 +183,12 @@ dHOMAlphanumericConstant <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = super$exportOpenMIBase(entity)
-      export$value = entity$propcode
+      # NOTE: this one does not use the parent, as it is handled oddly by OM if we do
+      export = list(
+        id=entity$pid,
+        name=entity$propname,
+        value=entity$propcode
+      )
       return(export)
     }
   )
@@ -270,7 +274,7 @@ dHOMDataMatrix <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
-      export$value = entity$data_matrix
+      export$value=I(entity$data_matrix)
       return(export)
     }
   )
@@ -303,6 +307,32 @@ dHVarAnnotation <- R6Class(
   )
 )
 
+#' dHOMtextField meta-model object
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMtextField
+dHOMtextField <- R6Class(
+  "dHVarAnnotation",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'textField',
+    #' @param entity the local object to work on 
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = super$exportOpenMIBase(entity)
+      export$value = entity$propcode
+      return(export)
+    }
+  )
+)
 
 #' Broadcast meta-model object
 #' @description Simple class to hold tabular values
@@ -330,7 +360,7 @@ dHOMbroadCastObject <- R6Class(
       export$broadcast_params = list(
         name='broadcast_params',
         object_class='array',
-        value=entity$data_matrix
+        value=I(entity$data_matrix)
       )
       return(export)
     }
