@@ -370,3 +370,16 @@ get_plugin_class <- function(plugin_name, entity) {
   }
   return(plugin)
 }
+
+# Is this useful?
+# give an element and it loads it from the plugin?
+# can't we just use the id field which is pid, to load it instead?
+# however, if we have modified the tree element in place, then
+# this would effectively preseve those changes/sending them to RomProperty
+# also, if we were loading a new element that was created in the tree
+# but this is hypothetical use case
+load_tree_prop <- function(ds, tree_element) {
+  omid_plugin <- get_plugin_class(tree_element$plugin, tree_element)
+  prop <- RomProperty$new(ds, omid_plugin$fromOpenMIBase(tree_element))
+  return(prop)
+}
