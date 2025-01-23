@@ -71,7 +71,7 @@ RomProperty <- R6Class(
     get_id = function() {
       return(self$pid)
     },
-    #' @param site URL of some RESTful repository
+    #' @param datasource URL of some RESTful repository
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
     #' @return object instance
@@ -183,6 +183,7 @@ RomProperty <- R6Class(
         }
       }
     },
+    #' @param base_only whether to only use base columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 

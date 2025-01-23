@@ -127,6 +127,7 @@ RomEntity <- R6Class(
     },
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param refresh automatically refresh var info?
+    #' @returns the variable definition object for this entity
     get_vardef = function(config = FALSE, refresh=FALSE) {
       if (!self$has_vardef) {
         return(FALSE)
@@ -177,6 +178,7 @@ RomEntity <- R6Class(
       # get_plugin method is 
       self$plugin = self$vardef$get_plugin(self)
     },
+    #' @param base_only whether to only use base columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 

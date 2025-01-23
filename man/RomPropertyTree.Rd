@@ -4,7 +4,7 @@
 \alias{RomPropertyTree}
 \title{Nested Property Object}
 \value{
-feature class of type RomFeature
+Entity class of type RomPropertyTree
 
 the data from the remote connection
 }

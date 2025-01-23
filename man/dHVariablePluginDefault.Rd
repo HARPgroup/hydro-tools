@@ -9,6 +9,8 @@ reference class of type openmi.om.base.
 an updated config if necessary or FALSE if it fails
 
 an updated config if necessary or FALSE if it fails
+
+a Rom importable config or FALSE if it fails
 }
 \description{
 Handler class for property entities (and timeseries if needed)
@@ -39,6 +41,7 @@ NA
 \item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
 }
 }
@@ -91,8 +94,22 @@ object instance
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{entity}}{the local object to work on}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-fromOpenMIBase"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOpenMIBase}{}}}
+\subsection{Method \code{fromOpenMIBase()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOpenMIBase(om_list)}\if{html}{\out{</div>}}
+}
 
-\item{\code{load_remote}}{automatically query REST data source for matches?}
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{om_list}}{the open MI export array/list to work on}
 }
 \if{html}{\out{</div>}}
 }

@@ -9,6 +9,7 @@
 #' @param model_version character default 'vahydro-1.0'
 #' @param base_url character deprecated to be replaced by global datasource
 #' @param ds datasource object of class RomDataSource
+#' @param debug prints out sql of query
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export om_vahydro_metric_grid
