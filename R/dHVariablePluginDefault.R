@@ -389,6 +389,8 @@ dHOMbroadCastObject <- R6Class(
 get_plugin_class <- function(plugin_name, entity) {
   if (is.na(plugin_name) ) {
     plugin = dHVariablePluginDefault$new(entity)
+  } else if (plugin_name == "dHOMConstant") {
+    plugin = dHOMConstant$new(entity)
   } else if (plugin_name == "dHOMEquation") {
     plugin = dHOMEquation$new(entity)
   } else if (plugin_name == "dHOMAlphanumericConstant") {
@@ -401,6 +403,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHVarImage$new(entity)
   } else if (plugin_name == "dHVarAnnotation") {
     plugin = dHVarAnnotation$new(entity)
+  } else if (plugin_name == "dHOMtextField") {
+    plugin = dHOMtextField$new(entity)
   } else if (plugin_name == "dHOMbroadCastObject") {
     plugin = dHOMbroadCastObject$new(entity)
   } else {
