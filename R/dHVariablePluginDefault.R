@@ -407,6 +407,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMEquation$new(entity)
   } else if (plugin_name == "dHOMAlphanumericConstant") {
     plugin = dHOMAlphanumericConstant$new(entity)
+  } else if (plugin_name == "dHOMPublicVars") {
+    plugin = dHOMPublicVars$new(entity)
   } else if (plugin_name == "dHOMObjectClass") {
     plugin = dHOMObjectClass$new(entity)
   } else if (plugin_name == "dHOMDataMatrix") {
