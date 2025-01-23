@@ -274,7 +274,11 @@ dHOMDataMatrix <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
-      export$matrix=I(entity$data_matrix)
+      export$matrix=list(
+        name="matrix",
+        object_class="array",
+        value=I(entity$data_matrix)
+      )
       return(export)
     }
   )
