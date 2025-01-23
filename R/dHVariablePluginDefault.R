@@ -151,7 +151,11 @@ dHOMConstant <- R6Class(
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export = super$exportOpenMIBase(entity)
+      export = list(
+        id=config$pid,
+        name=entity$name,
+        value=entity$propcode
+      )
       return(export)
     }
   )
