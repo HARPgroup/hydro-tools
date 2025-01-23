@@ -154,7 +154,7 @@ dHOMConstant <- R6Class(
       export = list(
         id=config$pid,
         name=entity$name,
-        value=entity$propcode
+        value=entity$propvalue
       )
       return(export)
     }
