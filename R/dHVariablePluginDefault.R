@@ -199,6 +199,18 @@ dHOMAlphanumericConstant <- R6Class(
 )
 
 
+#' @description Text that can be any of public vars list
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMAlphanumericConstant
+dHOMPublicVars <- R6Class(
+  "dHVarImage",
+  inherit = dHOMAlphanumericConstant
+)
 
 #' Image URL pointer
 #' @description Simple class to hold string values
