@@ -153,7 +153,7 @@ dHOMConstant <- R6Class(
     exportOpenMIBase = function(entity) {
       export = list(
         id=entity$pid,
-        name=entity$name,
+        name=entity$propname,
         value=entity$propvalue
       )
       return(export)
