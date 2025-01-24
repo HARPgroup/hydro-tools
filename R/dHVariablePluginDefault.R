@@ -419,6 +419,9 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHVarAnnotation$new(entity)
   } else if (plugin_name == "dHOMtextField") {
     plugin = dHOMtextField$new(entity)
+  } else if (plugin_name == "dHOMWaterSystemPermitStatus") {
+    # note dHOMWaterSystemPermitStatus is currently handled by dHOMAlphanumericConstant
+    plugin = dHOMAlphanumericConstant$new(entity)
   } else if (plugin_name == "dHOMbroadCastObject") {
     plugin = dHOMbroadCastObject$new(entity)
   } else {
