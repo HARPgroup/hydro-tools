@@ -45,6 +45,8 @@ NA
 \item{\code{mps}}{linked features}
 
 \item{\code{geom}}{feature geometry WKT}
+
+\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,9 +116,16 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$to_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$to_list(base_only)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 list of object attributes suitable for input to new() and from_list() methods
 }

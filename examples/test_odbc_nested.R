@@ -75,12 +75,6 @@ fac_demand_prop <- RomProperty$new(
 )
 fac_demand_prop$data_matrix
 
-object_class <- RomProperty$new(ds, list(pid=fac_model_export$object_class$id), TRUE)
-Saving to local db
-Warning: all src_dferty columns must be present in data frame to do batch insert.
-Found, trying to load
-> object_class$propcode = 'waterSupplyElement'
-> object_class$save()
 
 vardef <- FALSE
 vardef <- RomVariableDefinition$new(dso, list(varkey='wd_mgy'), TRUE)

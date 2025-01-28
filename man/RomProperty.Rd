@@ -74,6 +74,8 @@ RomEntity, RomFeature, RomDatasource
 \item{\code{tree_loaded}}{- this is a switch to enable fast loading of export tree from local storage}
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+
+\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
 }
 \if{html}{\out{</div>}}
 }
@@ -88,6 +90,7 @@ RomEntity, RomFeature, RomDatasource
 \item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
 \item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
+\item \href{#method-RomProperty-delete_fields}{\code{RomProperty$delete_fields()}}
 \item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
 }
 }
@@ -126,13 +129,11 @@ get_id the id of this entity alias to remote pkid, subclassed as function
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{datasource}}{optional RomDataSource for remote and local storage}
+\item{\code{datasource}}{URL of some RESTful repository}
 
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
 
 \item{\code{load_remote}}{automatically query REST data source for matches?}
-
-\item{\code{site}}{URL of some RESTful repository}
 }
 \if{html}{\out{</div>}}
 }
@@ -180,9 +181,16 @@ NULL
 \if{latex}{\out{\hypertarget{method-RomProperty-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomProperty$to_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{base_only}}{whether to only use base columns (TRUE) or add fields (FALSE)}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 list of object attributes suitable for input to new() and from_list() methods
 }
@@ -235,6 +243,25 @@ boolean TRUE on success, FALSE on failure
 \subsection{Method \code{delete()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-delete_fields"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-delete_fields}{}}}
+\subsection{Method \code{delete_fields()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$delete_fields(delete_remote = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

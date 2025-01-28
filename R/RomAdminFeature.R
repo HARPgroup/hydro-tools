@@ -35,6 +35,8 @@ RomAdminFeature <- R6Class(
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
+    #' @field base_only - how to export to list in case of complex multi table entity and ODBC
+    base_only = FALSE,
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
@@ -47,8 +49,9 @@ RomAdminFeature <- R6Class(
     get_id = function() {
       return(self$adminid)
     },
+    #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
-    to_list = function() {
+    to_list = function(base_only) {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(

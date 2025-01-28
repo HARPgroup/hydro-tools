@@ -65,11 +65,13 @@ RomProperty <- R6Class(
     sql_select_from = "
       select * from dh_properties_fielded
     ",
+    #' @field base_only - how to export to list in case of complex multi table entity and ODBC
+    base_only = FALSE,
     #' @return get_id the id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$pid)
     },
-    #' @param site URL of some RESTful repository
+    #' @param datasource URL of some RESTful repository
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
     #' @return object instance
@@ -79,6 +81,10 @@ RomProperty <- R6Class(
       # todo: some of this can be handled by the RomDataSource?
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
+      # since we do not call the super class for this method we need to handle this setting
+      if (self$datasource$connection_type == 'odbc') {
+        self$base_only = TRUE
+      }
       config <- self$handle_config(config)
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
@@ -177,8 +183,9 @@ RomProperty <- R6Class(
         }
       }
     },
+    #' @param base_only whether to only use base columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
-    to_list = function() {
+    to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(
@@ -193,7 +200,6 @@ RomProperty <- R6Class(
         startdate = as.character(self$startdate),
         enddate = as.character(self$enddate),
         propvalue = as.numeric(as.character(self$propvalue)),
-        proptext = as.character(self$proptext),
         propcode = as.character(self$propcode)
         # todo
         #modified = self$modified,
@@ -204,14 +210,18 @@ RomProperty <- R6Class(
         # todo:
         # bundle = self$bundle
       )
-      if (is.list(self$data_matrix)) {
-        t_list$data_matrix = as.character(jsonlite::toJSON(self$data_matrix))
-      }
-      if (is.null(self$bundle)) {
-        self$bundle <- 'dh_properties'
-      }
-      if (!nchar(self$bundle) > 0) {
-        self$bundle <- 'dh_properties'
+      # accounts for ODBC
+      if (base_only == FALSE) {
+        t_list$proptext = as.character(self$proptext)
+        if (is.list(self$data_matrix)) {
+          t_list$data_matrix = as.character(jsonlite::toJSON(self$data_matrix))
+        }
+        if (is.null(self$bundle)) {
+          self$bundle <- 'dh_properties'
+        }
+        if (!nchar(self$bundle) > 0) {
+          self$bundle <- 'dh_properties'
+        }
       }
       return(t_list)
     },
@@ -233,7 +243,7 @@ RomProperty <- R6Class(
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
       if (push_remote) {
-        pl <- self$to_list()
+        pl <- self$to_list(self$base_only)
         if (!is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL
@@ -281,6 +291,7 @@ RomProperty <- R6Class(
         #    select vid from dh_properties_revision where pid = 7685242;
         # update dh_properties set vid = 8332550 where pid = 7685242;
       }
+      # we call set_prop without base_only because the local Datasource handles complex fields
       self$datasource$set_prop(self$to_list())
     },
     #' @param delete_remote update locally only or push to remote database
@@ -289,10 +300,30 @@ RomProperty <- R6Class(
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
+      for (pv in self$propvalues()) {
+        subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
+        subprop$delete(delete_remote)
+      }
       if (delete_remote) {
         finfo <- self$to_list()
         # we pass the pid, since if there are multiple revisions it will delete all
         fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
+      }
+      super$delete(delete_remote)
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete_fields = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available 
+      if (delete_remote) {
+        finfo <- self$to_list()
+        # we pass the pid, since if there are multiple revisions it will delete all
+        fid = self$datasource$delete(
+          'field_data_dh_matrix', 'entity_id', 
+          list(entity_id=self$pid, entity_type='dh_property')
+        )
       }
       super$delete(delete_remote)
     }
