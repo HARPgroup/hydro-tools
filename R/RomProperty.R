@@ -148,7 +148,7 @@ RomProperty <- R6Class(
                 data_header <- raw_data$tabledata[[1]]
                 n <- 1
                 for (h in data_header) {
-                  if(is.null(h) | is.na(h)) {
+                  if(is.null(h) || is.na(h)) {
                     data_header[[n]] <- paste0("V",n)
                   }
                   n <- n + 1
