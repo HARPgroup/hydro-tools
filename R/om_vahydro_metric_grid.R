@@ -9,6 +9,7 @@
 #' @param model_version character default 'vahydro-1.0'
 #' @param base_url character deprecated to be replaced by global datasource
 #' @param ds datasource object of class RomDataSource
+#' @param debug prints out sql of query
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export om_vahydro_metric_grid
@@ -22,7 +23,8 @@ om_vahydro_metric_grid <- function (
   ftype = 'vahydro',
   model_version = 'vahydro-1.0',
   base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
-  ds = FALSE
+  ds = FALSE,
+  debug = FALSE
 ) {
   alldata = NULL
   mv_base = NULL
@@ -67,9 +69,11 @@ om_vahydro_metric_grid <- function (
       if (ds$connection_type == 'odbc') {
         #message("om_vahydro_metric_grid() called using ODBC ")
         prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
-        #message(prop_sql)
+        if (debug) {
+          message(prop_sql)
+        }
         message(paste("retrieving via ODBC"))
-        dat <- sqldf(prop_sql, connection = ds$connection)
+        dat <- dbGetQuery(conn = ds$connection, prop_sql)
         #message(paste("returned", nrow(dat),"rows"))
       } else {
         message(paste("retrieving ", url))

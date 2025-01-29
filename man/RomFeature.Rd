@@ -45,6 +45,10 @@ NA
 \item{\code{mps}}{linked features}
 
 \item{\code{geom}}{feature geometry WKT}
+
+\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+
+\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
 }
 \if{html}{\out{</div>}}
 }
@@ -116,9 +120,16 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \if{latex}{\out{\hypertarget{method-RomFeature-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$to_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 list of object attributes suitable for input to new() and from_list() methods
 }
@@ -199,11 +210,10 @@ NULL
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$find_spatial_relations(
   target_entity = "dh_feature",
-  query_remote = TRUE,
   inputs = list(bundle = NA, ftype = NA),
   operator = "st_contains",
-  load_remote = TRUE,
-  return_geoms = FALSE
+  return_geoms = FALSE,
+  query_remote = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -212,13 +222,13 @@ NULL
 \describe{
 \item{\code{target_entity}}{what type to relate to (default dh_feature)}
 
-\item{\code{target_entity}}{what type to relate to (default dh_feature)}
-
-\item{\code{query_remote}}{look for entiteies outside the local data store?}
+\item{\code{inputs}}{criteria to search for (list key = value format)}
 
 \item{\code{operator}}{what type of spatial function,default = st_contains}
 
-\item{\code{bundlewhat}}{bundle (valid if target is dh_feature)}
+\item{\code{return_geoms}}{FALSE will return a smaller dataframe}
+
+\item{\code{query_remote}}{FALSE will search on in local datasource}
 }
 \if{html}{\out{</div>}}
 }

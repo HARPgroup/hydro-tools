@@ -10,9 +10,9 @@ an updated config if necessary or FALSE if it fails
 
 loads the varid
 
-the data from the remote connection
+the variable definition object for this entity
 
-nothing, but loads the objects plugin
+the data from the remote connection
 }
 \description{
 Object for storing a single entity with attribute and timeseries related
@@ -38,6 +38,8 @@ NA
 \item{\code{entity_id}}{unique ID of entity}
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+
+\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
 
 \item{\code{has_vardef}}{is pluggable?}
 
@@ -224,15 +226,25 @@ object instance
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_plugin()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+nothing, but loads the objects plugin
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{base_only}}{whether to only use base columns (TRUE) or add fields (FALSE)}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 list of object attributes suitable for input to new() and from_list() methods
 }

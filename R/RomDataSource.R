@@ -156,6 +156,7 @@ RomDataSource <- R6Class(
     #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
     #' @param return_type 'data.frame' or 'list'
     #' @param force_refresh if this ds has a remote source, whether to pull anew
+    #' @param obj optional object which can supply more specific query info for odbc
     #' @return nothing sets internal private token
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       # return_type = 'list', or 'data.frame'
@@ -428,7 +429,7 @@ RomDataSource <- R6Class(
       } else {
         # use ODBC approach
         model_tree <- RomPropertyTree$new(self, list(root_pid=pid), TRUE)
-        model <- self$get_nested_export(self, pid, model_tree$prop_list)
+        model <- self$get_nested_export(self, pid, model_tree$prop_list)[[1]]
         return(model)
       }
     },

@@ -5,6 +5,8 @@
 \title{Object class of meta-model object}
 \value{
 reference class of type openmi.om.base.
+
+an updated config if necessary or FALSE if it fails
 }
 \description{
 Simple class to hold text values
@@ -24,6 +26,7 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-dHOMObjectClass-exportOpenMIBase}{\code{dHOMObjectClass$exportOpenMIBase()}}
 \item \href{#method-dHOMObjectClass-clone}{\code{dHOMObjectClass$clone()}}
 }
 }
@@ -31,11 +34,27 @@ NA
 <details open><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="exportOpenMIBase"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-exportOpenMIBase'><code>hydrotools::dHOMAlphanumericConstant$exportOpenMIBase()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="initialize"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-initialize'><code>hydrotools::dHOMAlphanumericConstant$initialize()</code></a></span></li>
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMObjectClass-exportOpenMIBase"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMObjectClass-exportOpenMIBase}{}}}
+\subsection{Method \code{exportOpenMIBase()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMObjectClass$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity}}{the local object to work on}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMObjectClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMObjectClass-clone}{}}}

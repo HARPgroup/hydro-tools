@@ -18,6 +18,22 @@ riverseg = mp$find_spatial_relations(
 )
 
 model_version = "vahydro-1.0"
+
+# get the river segment model
+riverseg_feature <- RomFeature$new(ds, list(hydroid=as.integer(riverseg$hydroid)), TRUE)
+rseg_model <- RomProperty$new(
+  ds, list(
+    propcode=model_version,
+    featureid=riverseg_feature$hydroid,
+    entity_type='dh_feature'
+  ), TRUE
+)
+rseg_model_export <- dso$get_json_prop(rseg_model$pid)
+# remove the outer name on the list to make access easier
+# TBD: this should be done in the datasource. 
+rseg_model_export <- rseg_model_export[[(as.character(names(rseg_model_export)))]]
+
+# get the facility model
 model <- RomProperty$new(
   ds, list(
     propcode=model_version,
@@ -25,6 +41,8 @@ model <- RomProperty$new(
     entity_type='dh_feature'
   ), TRUE
 )
+
+
 # this loads a single property under this model
 ps_enabled <- RomProperty$new(
   dso, list(
@@ -56,6 +74,7 @@ fac_demand_prop <- RomProperty$new(
   ), TRUE
 )
 fac_demand_prop$data_matrix
+
 
 vardef <- FALSE
 vardef <- RomVariableDefinition$new(dso, list(varkey='wd_mgy'), TRUE)

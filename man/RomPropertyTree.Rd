@@ -4,7 +4,7 @@
 \alias{RomPropertyTree}
 \title{Nested Property Object}
 \value{
-feature class of type RomFeature
+Entity class of type RomPropertyTree
 
 the data from the remote connection
 }
@@ -30,18 +30,13 @@ NA
 
 \item{\code{pk_name}}{the name of this entity's pk column}
 
-\item{\code{The}}{raw property rows returned}
+\item{\code{prop_list}}{The raw property rows returned}
 
 \item{\code{mps}}{linked features}
 
 \item{\code{geom}}{feature geometry WKT}
-}
-\if{html}{\out{</div>}}
-}
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{The}}{raw property rows returned}
+
+\item{\code{sql_select_from}}{Enhanced form of query overrides default SQL guess.}
 }
 \if{html}{\out{</div>}}
 }
@@ -166,7 +161,7 @@ NULL
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{list of attributes to set}
+\item{\code{config}}{input attributes}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }

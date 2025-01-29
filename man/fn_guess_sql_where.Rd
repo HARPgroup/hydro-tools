@@ -12,6 +12,8 @@ fn_guess_sql_where(entity_type, pk, inputs, alias = "")
 \item{pk}{= primary key column name, e.g. hydroid, pid, ...}
 
 \item{inputs}{contents of record to post in list(pid=X, propname='nom', propvalue, ...)}
+
+\item{alias}{assign an alias to a give table/view relation?}
 }
 \description{
 Guess an SQL query from a simple list of inputs

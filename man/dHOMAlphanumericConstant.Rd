@@ -27,6 +27,8 @@ NA
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{name}}{what is it called}
+
+\item{\code{object_class}}{model object type}
 }
 \if{html}{\out{</div>}}
 }
@@ -42,6 +44,7 @@ NA
 <details open><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -76,8 +79,6 @@ object instance
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{entity}}{the local object to work on}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
 }
 \if{html}{\out{</div>}}
 }
