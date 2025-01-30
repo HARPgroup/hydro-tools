@@ -38,7 +38,7 @@ RomEntity <- R6Class(
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
-    propvalues = function(propname = NULL, varid = NULL) {
+    propvalues = function(propname = NULL, varid = NULL, propcode = NULL) {
       prop_obj = RomProperty$new(self$datasource)
       config <- list(
         featureid = self$get_id(), 
@@ -46,6 +46,7 @@ RomEntity <- R6Class(
       )
       if (!is.null(varid)) { config$varid = varid } 
       if (!is.null(propname)) { config$propname = propname } 
+      if (!is.null(propcode)) { config$propcode = propcode } 
       ps <- self$datasource$get_prop(
         config
       )
