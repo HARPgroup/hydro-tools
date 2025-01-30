@@ -110,6 +110,13 @@ RomProperty <- R6Class(
         self$bundle = 'dh_properties'
       }
     },
+    #' @returns TRUE/FALSE if it was successful
+    create = function() {
+      # this is called from the save method after initial creation of pid
+      # load the plugin
+      # add default properties as children
+      return(TRUE)
+    },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
@@ -119,6 +126,7 @@ RomProperty <- R6Class(
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return NULL
     from_list = function(config) {
+      self$conf_list = config # stash for later reference.
       for (i in names(config)) {
         if (i == "pid") {
           self$pid = as.integer(as.character(config$pid))
@@ -154,7 +162,7 @@ RomProperty <- R6Class(
                 data_header <- raw_data$tabledata[[1]]
                 n <- 1
                 for (h in data_header) {
-                  if(is.null(h) | is.na(h)) {
+                  if(is.null(h) || is.na(h)) {
                     data_header[[n]] <- paste0("V",n)
                   }
                   n <- n + 1
@@ -242,6 +250,10 @@ RomProperty <- R6Class(
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
+      is_new = FALSE
+      if (is.na(self$pid)) {
+        is_new = TRUE
+      }
       if (push_remote) {
         pl <- self$to_list(self$base_only)
         if (!is.Date(pl$startdate) & !is.integer(pl$startdate)) {
@@ -293,6 +305,14 @@ RomProperty <- R6Class(
       }
       # we call set_prop without base_only because the local Datasource handles complex fields
       self$datasource$set_prop(self$to_list())
+      # add attached subprops
+      if (is_new) {
+        if (typeof(self$plugin) == "environment") {
+          if ("create" %in% names(self$plugin)) {
+            self$plugin$create(self, push_remote)
+          }
+        }
+      }
     },
     #' @param delete_remote update locally only or push to remote database
     #' @return NULL

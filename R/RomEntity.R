@@ -23,6 +23,8 @@ RomEntity <- R6Class(
     sql_select_from = NA,
     #' @field base_only - how to export to list in case of complex multi table entity and ODBC
     base_only = FALSE,
+    #' @field conf_list - cache of the config list used to instantiate this variable 
+    conf_list = list(),
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$entity_id)
@@ -106,6 +108,16 @@ RomEntity <- R6Class(
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
       return(config)
+    },
+    #' @param item look into the stash conf_list
+    #' @param default if missing use this 
+    #' @returns an updated config if necessary or FALSE if it fails
+    get_conf_item = function(item,default=NULL) {
+      if (item %in% names(self$conf_list)) {
+        return(self$conf_list[[item]])
+      } else {
+        return(default)
+      }
     },
     #' @param config 
     #' @returns loads the varid

@@ -46,12 +46,12 @@ dHVariablePluginDefault <- R6Class(
       #     } else {
       #       $has_plug = FALSE;
       #       $sub_export = array(
-      #         $sub_entity->propname => array(
-      #           'host' => $_SERVER['HTTP_HOST'], 
-      #           'id' => $sub_entity->pid, 
-      #           'name' => $sub_entity->propname, 
-      #           'value' => $sub_entity->propvalue, 
-      #           'code' => $sub_entity->propcode, 
+      #         $sub_entity->propname = array(
+      #           'host' = $_SERVER['HTTP_HOST'], 
+      #           'id' = $sub_entity->pid, 
+      #           'name' = $sub_entity->propname, 
+      #           'value' = $sub_entity->propvalue, 
+      #           'code' = $sub_entity->propcode, 
       #         )
       #       );
       #     }
@@ -82,6 +82,24 @@ dHVariablePluginDefault <- R6Class(
         propcode=om_list$code
       )
       return(rom_list)
+    },
+    #' @param entity the local object to work on 
+    #' @returns a list of attached sub-entities
+    getDefaults = function(entity) {
+      # if the entity
+      defaults = list(
+      )
+      return(defaults)
+    },
+    #' @param entity the local object to work on 
+    #' @returns TRUE/FALSE on success
+    create = function(entity, push_remote) {
+      # add extra things here, specifically the attachment of children from default
+      defaults = self$getDefaults(entity)
+      for (thisdef in defaults) {
+        thisprop = RomProperty$new(entity$ds, thisdef, TRUE)
+        thisprop$save(push_remote)
+      }
     }
   )
 )
@@ -120,9 +138,59 @@ dHOMEquation <- R6Class(
         value=entity$propcode
       )
       return(export)
+    },
+    #' @param entity the local object to work on 
+    #' @returns a list of attached sub-entities
+    getDefaults = function(entity) {
+      # if the entity
+      defaults = super$getDefaults(entity)
+      defaults$defaultval = list(
+        entity_type = entity$base_entity_type,
+        propcode_default = NULL,
+        propname = 'defaultval',
+        singularity = 'name_singular',
+        featureid = entity$get_id(),
+        vardesc = 'Default Value.',
+        title = 'Default Value',
+        varkey = 'om_class_AlphanumericConstant'
+      )
+      defaults$nonnegative = list(
+        entity_type = entity$base_entity_type,
+        propcode_default = NULL,
+        propvalue_default = entity$get_conf_item('nonnegative',0),
+        datatype = 'boolean',
+        propname = 'nonnegative',
+        singularity = 'name_singular',
+        featureid = entity$get_id(),
+        title = 'Non-Negative?',
+        vardesc = 'Select TRUE to cause any negative result to be returned as default minimum value.',
+        varkey = 'om_class_Constant'
+      )
+      defaults$minvalue = list(
+        entity_type = entity$base_entity_type,
+        propcode_default = entity$get_conf_item('minvalue',0),
+        propname = 'minvalue',
+        singularity = 'name_singular',
+        featureid = entity$get_id(),
+        vardesc = 'Value to use if variable is type Non-Negative.',
+        title = 'Non-Negative Default Value',
+        varkey = 'om_class_Constant'
+      )
+      defaults$engine = list(
+        entity_type = entity$base_entity_type,
+        propcode_default = 'mathProcessor2',
+        propname = 'engine',
+        singularity = 'name_singular',
+        featureid = entity$get_id(),
+        vardesc = 'Parser.',
+        varname = 'Which Equation Parser to Use?',
+        varkey = 'om_class_AlphanumericConstant'
+      )
+      return(defaults)
     }
   )
 )
+
 
 
 #' Numeric Constant meta-model object

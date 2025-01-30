@@ -13,7 +13,7 @@ RomAdminFeature <- R6Class(
   inherit = RomEntity,
   public = list(
     #' @field base_entity_type kind of entity
-    base_entity_type = 'dh_adminreg_feature',
+    base_entity_type = 'dh_adminreg_feature_fielded',
     #' @field pk_name the name of this entity's pk column
     pk_name = 'adminid',
     #' @field name of this entity
