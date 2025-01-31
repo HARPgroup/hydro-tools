@@ -95,6 +95,9 @@ RomDataSource <- R6Class(
           config$limit = 1
           vardef <- self$get('dh_variabledefinition', 'hydroid', config)
           vardef <- as.list(vardef[1,])
+          if ('hydroid' %in% names(vardef)) {
+            vardef$varid <- vardef$hydroid
+          }
         } else {
           vardef <- fn_get_vardef_view(varkey, self$site, private$token, debug)
           # TBD
