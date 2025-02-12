@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHVariablePluginDefault}
 \alias{dHVariablePluginDefault}
-\title{Base entity data object}
+\title{dHVariablePluginDefault}
 \value{
 reference class of type openmi.om.base.
 
@@ -16,6 +16,8 @@ a Rom importable config or FALSE if it fails
 Handler class for property entities (and timeseries if needed)
 }
 \details{
+Base entity data object
+
 Has standard methods for managing data and meta data
 }
 \examples{

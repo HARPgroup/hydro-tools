@@ -4,6 +4,12 @@ suppressPackageStartupMessages(library('zoo'))
 suppressPackageStartupMessages(library('IHA'))
 suppressPackageStartupMessages(library(PearsonDS))
 
+# fn_iha_7q10 
+#' @description provide the 7q10 from a given flow timeseries
+#' @param zoots a timeseries flormatted in zoo (required by IHA)
+#' @return singel numeric value for 7q10
+#' @import IHA, PearsonDS
+#' @export fn_iha_7q10
 fn_iha_7q10 <- function(zoots) {
   g2 <- group2(zoots) 
   #print("Group 2, 7-day low flow results ")
@@ -28,14 +34,21 @@ fn_iha_7q10 <- function(zoots) {
   }
 }
 
-fn_iha_mlf <- function(zoots, targetmo) {
+
+# fn_iha_mlf 
+#' @description provide the quantile of minimum observed monthly flow for the month over a period of years
+#' @param zoots a timeseries flormatted in zoo (required by IHA)
+#' @return singel numeric value for 7q10
+#' @import IHA
+#' @export fn_iha_7q10
+fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
   modat <- group1(zoots,'water','min')  # IHA function that calculates minimum monthly statistics for our data by water year	 
-  print(paste("Grabbing ", targetmo, " values ", sep=''))
+  message(paste("Grabbing ", targetmo, " values ", sep=''))
   g1vec <- as.vector(as.matrix(modat[,targetmo]))  # gives only August statistics
   
   # calculates the 50th percentile - this is the August Low Flow
   # August Low Flow = median flow of the annual minimum flows in August for a chosen time period
-  print("Performing quantile analysis")
-  x <- quantile(g1vec, 0.5, na.rm = TRUE);
+  message("Performing quantile analysis")
+  x <- quantile(g1vec, q, na.rm = TRUE);
   return(as.numeric(x));
 }

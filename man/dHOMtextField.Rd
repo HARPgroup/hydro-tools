@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHOMtextField}
 \alias{dHOMtextField}
-\title{dHOMtextField meta-model object}
+\title{dHOMtextField}
 \value{
 reference class of type openmi.om.base.
 
@@ -12,6 +12,8 @@ an updated config if necessary or FALSE if it fails
 Simple class to hold tabular values
 }
 \details{
+dHOMtextField meta-model object
+
 Has standard methods for managing data and meta data
 }
 \examples{

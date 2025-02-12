@@ -88,7 +88,7 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \if{latex}{\out{\hypertarget{method-RomEntity-propvalues}{}}}
 \subsection{Method \code{propvalues()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL, propcode = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -97,6 +97,8 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \item{\code{propname}}{optional name to filter}
 
 \item{\code{varid}}{option variable to filter}
+
+\item{\code{propcode}}{optional code to filter}
 }
 \if{html}{\out{</div>}}
 }

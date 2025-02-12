@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHOMEquation}
 \alias{dHOMEquation}
-\title{Equation meta-model object}
+\title{dHOMEquation}
 \value{
 reference class of type openmi.om.base.
 
@@ -12,6 +12,8 @@ an updated config if necessary or FALSE if it fails
 Handler class for property entities (and timeseries if needed)
 }
 \details{
+Equation meta-model object
+
 Has standard methods for managing data and meta data
 }
 \examples{

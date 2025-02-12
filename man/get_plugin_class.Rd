@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{get_plugin_class}
 \alias{get_plugin_class}
-\title{Retrieve Plugin object for a variable entity}
+\title{get_plugin_class}
 \usage{
 get_plugin_class(plugin_name, entity)
 }

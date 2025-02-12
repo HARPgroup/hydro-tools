@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHOMConstant}
 \alias{dHOMConstant}
-\title{Numeric Constant meta-model object}
+\title{dHOMConstant}
 \value{
 reference class of type openmi.om.base.
 
@@ -12,6 +12,8 @@ an updated config if necessary or FALSE if it fails
 Simple class to hold numeric values
 }
 \details{
+Numeric Constant meta-model object
+
 Has standard methods for managing data and meta data
 }
 \examples{

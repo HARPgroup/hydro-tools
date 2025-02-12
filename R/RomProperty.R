@@ -299,8 +299,10 @@ RomProperty <- R6Class(
     delete = function(delete_remote=FALSE) {
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
-      #   fail if these required elemenprop are not available 
-      for (pv in self$propvalues()) {
+      #   fail if these required elemenprop are not available
+      subprops <- self$propvalues()
+      for (pvi in 1:nrow(subprops)) {
+        pv <- subprop[pvi,]
         subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
         subprop$delete(delete_remote)
       }

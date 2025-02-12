@@ -38,6 +38,7 @@ RomEntity <- R6Class(
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
+    #' @param propcode optional code to filter
     propvalues = function(propname = NULL, varid = NULL, propcode = NULL) {
       prop_obj = RomProperty$new(self$datasource)
       config <- list(

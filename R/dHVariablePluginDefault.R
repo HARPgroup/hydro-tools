@@ -1,4 +1,5 @@
 #' Base entity data object
+#' @title dHVariablePluginDefault
 #' @description Handler class for property entities (and timeseries if needed)
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -88,6 +89,7 @@ dHVariablePluginDefault <- R6Class(
 
 
 #' Equation meta-model object
+#' @title dHOMEquation
 #' @description Handler class for property entities (and timeseries if needed)
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -126,6 +128,7 @@ dHOMEquation <- R6Class(
 
 
 #' Numeric Constant meta-model object
+#' @title dHOMConstant
 #' @description Simple class to hold numeric values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -133,7 +136,7 @@ dHOMEquation <- R6Class(
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples NA
-#' @export dHOMEquation
+#' @export dHOMConstant
 dHOMConstant <- R6Class(
   "dHOMConstant",
   inherit = dHVariablePluginDefault,
@@ -162,6 +165,7 @@ dHOMConstant <- R6Class(
 )
 
 #' Text Constant meta-model object
+#' @title dHOMAlphanumericConstant
 #' @description Simple class to hold string values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -199,6 +203,7 @@ dHOMAlphanumericConstant <- R6Class(
 )
 
 
+#' @title dHOMPublicVars
 #' @description Text that can be any of public vars list
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -213,6 +218,7 @@ dHOMPublicVars <- R6Class(
 )
 
 #' Image URL pointer
+#' @title dHVarImage
 #' @description Simple class to hold string values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -246,6 +252,7 @@ dHVarImage <- R6Class(
   )
 )
 #' Object class of meta-model object
+#' @title dHOMObjectClass
 #' @description Simple class to hold text values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -270,6 +277,7 @@ dHOMObjectClass <- R6Class(
 )
 
 #' Matrix meta-model object
+#' @title dHOMDataMatrix
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -301,6 +309,7 @@ dHOMDataMatrix <- R6Class(
 )
 
 #' Annotation meta-model object
+#' @title dHVarAnnotation
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -328,6 +337,7 @@ dHVarAnnotation <- R6Class(
 )
 
 #' dHOMtextField meta-model object
+#' @title dHOMtextField
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -355,6 +365,7 @@ dHOMtextField <- R6Class(
 )
 
 #' Broadcast meta-model object
+#' @title dHVarAnnotation
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -392,11 +403,12 @@ dHOMbroadCastObject <- R6Class(
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
 #'
+#' @title get_plugin_class
 #' @param plugin_name the actual class name
 #' @param entity the object to apply the plugin to
 #' @return class matching plugin or default generic plugin
 #' @seealso NA
-#' @export fn_search_vardefs
+#' @export get_plugin_class
 #' @examples NA
 get_plugin_class <- function(plugin_name, entity) {
   if (is.na(plugin_name) ) {
