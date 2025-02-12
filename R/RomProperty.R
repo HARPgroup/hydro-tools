@@ -302,7 +302,7 @@ RomProperty <- R6Class(
       #   fail if these required elemenprop are not available
       subprops <- self$propvalues()
       for (pvi in 1:nrow(subprops)) {
-        pv <- subprop[pvi,]
+        pv <- subprops[pvi,]
         subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
         subprop$delete(delete_remote)
       }
