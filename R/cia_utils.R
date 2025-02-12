@@ -653,3 +653,36 @@ fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
   x <- quantile(g1vec, q, na.rm = TRUE);
   return(as.numeric(x));
 }
+
+# fn_iha_flow_extreme 
+#'
+#' @name fn_iha_flow_extreme
+#' @title fn_iha_flow_extreme
+#' @description provide the quantile of annual period 
+#' @param flows a timeseries flormatted in zoo (required by IHA)
+#' @param metric the flow period and type (min/max)
+#' @param stat default=min, options: max, median
+#' @param wyear_type water year default=calendar, options: water
+#' @return singel numeric value for the selected index/stat
+#' @import IHA
+#' @export fn_iha_flow_extreme
+fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar') {
+  g2flows <- group2(flows, year = wyear_type);
+  metric_flows <- g2flows[metric];
+  if (stat == 'min') {
+    ndx = which.min(as.numeric(metric_flows[,metric]));
+  } else if (stat == 'max') {
+    ndx = which.max(as.numeric(metric_flows[,metric]));
+  } else if (stat == 'median') {
+    ndx = which(as.numeric(metric_flows[,metric]) == median(as.numeric(metric_flows[,metric])))
+  }
+  
+  metric_flows_Qout = round(g2flows[ndx,metric],6);
+  extreme_year = g2flows[ndx,]$"year";
+  
+  if (is.na(metric_flows_Qout)) {
+    metric_flows_Qout = 0.0
+    extreme_year = 0
+  }
+  return(c(metric_flows_Qout, extreme_year))
+}
