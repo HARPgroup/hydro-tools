@@ -301,10 +301,12 @@ RomProperty <- R6Class(
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available
       subprops <- self$propvalues()
-      for (pvi in 1:nrow(subprops)) {
-        pv <- subprops[pvi,]
-        subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
-        subprop$delete(delete_remote)
+      if (nrow(subprops) > 0) {
+        for (pvi in 1:nrow(subprops)) {
+          pv <- subprops[pvi,]
+          subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
+          subprop$delete(delete_remote)
+        }
       }
       if (delete_remote) {
         finfo <- self$to_list()
