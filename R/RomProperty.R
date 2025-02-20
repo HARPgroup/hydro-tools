@@ -329,7 +329,6 @@ RomProperty <- R6Class(
           )
           if (nrow(matrix_check) == 0) {
             pk <- NA # forces insert
-            message("Tryingto force insert of matrix")
           }
           self$matrix_revision_id = self$datasource$post(
             'field_data_field_dh_matrix', pk, 

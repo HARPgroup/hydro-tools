@@ -20,13 +20,11 @@
 fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
-  message(paste("fn_post_odbc called for", entity_type, pk))
   if (!is.na(pk)) {
     pkid <- as.integer(as.character(inputs[[pk]]))
   } else {
     pkid = NULL
   }
-  message("Looking for PK")
   inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
@@ -38,7 +36,7 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     message(paste0("----- Updating ", entity_type, "..."))
     odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
-  message(odbc_sql)
+  #message(odbc_sql)
   pkid <- sqldf(as.character(odbc_sql), connection = con)
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
