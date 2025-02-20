@@ -67,6 +67,8 @@ RomEntity, RomFeature, RomDatasource
 
 \item{\code{module}}{related module (optional?)}
 
+\item{\code{matrix_revision_id}}{pk for foreign table}
+
 \item{\code{modified}}{timestamp}
 
 \item{\code{datasource}}{RomDataSource}
@@ -87,9 +89,10 @@ RomEntity, RomFeature, RomDatasource
 \item \href{#method-RomProperty-handle_config}{\code{RomProperty$handle_config()}}
 \item \href{#method-RomProperty-from_list}{\code{RomProperty$from_list()}}
 \item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
-\item \href{#method-RomProperty-set_prop}{\code{RomProperty$set_prop()}}
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
+\item \href{#method-RomProperty-save_matrix}{\code{RomProperty$save_matrix()}}
 \item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
+\item \href{#method-RomProperty-set_matrix}{\code{RomProperty$set_matrix()}}
 \item \href{#method-RomProperty-delete_fields}{\code{RomProperty$delete_fields()}}
 \item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
 }
@@ -97,11 +100,13 @@ RomEntity, RomFeature, RomDatasource
 \if{html}{\out{
 <details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>hydrotools::RomEntity$set_prop()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
 </ul>
 </details>
@@ -196,29 +201,6 @@ list of object attributes suitable for input to new() and from_list() methods
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomProperty-set_prop"></a>}}
-\if{latex}{\out{\hypertarget{method-RomProperty-set_prop}{}}}
-\subsection{Method \code{set_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomProperty$set_prop(name, value, format = "default")}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{name}}{attribute name}
-
-\item{\code{value}}{attribute value}
-
-\item{\code{format}}{type of data being sent (default, json, ...)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomProperty-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomProperty-save}{}}}
 \subsection{Method \code{save()}}{
@@ -238,6 +220,18 @@ boolean TRUE on success, FALSE on failure
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-save_matrix"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-save_matrix}{}}}
+\subsection{Method \code{save_matrix()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$save_matrix()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomProperty-delete"></a>}}
 \if{latex}{\out{\hypertarget{method-RomProperty-delete}{}}}
 \subsection{Method \code{delete()}}{
@@ -249,6 +243,25 @@ boolean TRUE on success, FALSE on failure
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-set_matrix"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-set_matrix}{}}}
+\subsection{Method \code{set_matrix()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$set_matrix(row_cols)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{set_matrix}}{update the matrix}
 }
 \if{html}{\out{</div>}}
 }

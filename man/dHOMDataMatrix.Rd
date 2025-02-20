@@ -31,6 +31,8 @@ NA
 \item{\code{name}}{what is it called}
 
 \item{\code{object_class}}{model object type}
+
+\item{\code{entity_bundle}}{model object type}
 }
 \if{html}{\out{</div>}}
 }

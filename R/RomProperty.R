@@ -351,7 +351,7 @@ RomProperty <- R6Class(
       }
       super$delete(delete_remote)
     },
-    #' @param set_matrix update the matrix
+    #' @param row_cols update the matrix
     #' @return NULL
     set_matrix = function(row_cols) {
       # expects a set of rows like this:
