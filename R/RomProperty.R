@@ -307,6 +307,7 @@ RomProperty <- R6Class(
             field_dh_matrix_json=dhm_json, 
             entity_id = self$pid,
             bundle = self$bundle,
+            entity_type = self$base_entity_type,
             language = 'und',
             delta = 0,
             revision_id=self$vid

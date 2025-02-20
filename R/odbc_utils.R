@@ -153,7 +153,7 @@ fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
     alias = paste0(alias,".")
   }
   pkid <- as.integer(as.character(inputs[pk]))
-  if (is.na(pkid)) {
+  if (is.na(pkid) | is.null(pkid)) {
     pkid = NULL
   }
   # remove special things that are not part of the columns
