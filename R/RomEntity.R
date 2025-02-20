@@ -180,6 +180,7 @@ RomEntity <- R6Class(
     ) {
       # first, see if it exists to load and update
       # then, change/set the varid and values
+      message(paste("set_prop() called with for propname,varkey",propname,varkey))
       child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
       if (is.na(child_prop$pid)) {
         # this is new, so we do an update, 
