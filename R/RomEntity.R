@@ -180,16 +180,7 @@ RomEntity <- R6Class(
     ) {
       # first, see if it exists to load and update
       # then, change/set the varid and values
-      plist = list(
-        featureid=self$get_id(), 
-        entity_type=self$base_entity_type,
-        propname=propname
-      )
-      child_prop = RomProperty$new(
-        self$datasource,
-        plist,
-        remote
-      )
+      child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
       if (is.na(child_prop$pid)) {
         # this is new, so we do an update, 
         if(is.null(varkey)) {
@@ -205,7 +196,7 @@ RomEntity <- R6Class(
       }
       if(!is.null(varkey)) {
         # this may be a create request, populate varkey
-        child_prop$varid=self$datasource$get_vardef(varkey)
+        child_prop$varid=self$datasource$get_vardef(varkey)$hydroid
       }
       if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
       if (!is.null(propcode)) {child_prop$propcode = propcode}

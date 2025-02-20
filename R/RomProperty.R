@@ -263,6 +263,15 @@ RomProperty <- R6Class(
             vl$vid <- NULL # removes it from list
           }
         }
+        # note: we must quit if given a bad varid
+        if (is.na(pl$varid)) {
+          message(
+            paste0(
+              "Error: bad varid given in", pl$propname,"$save(). Returning."
+            )
+          )
+          return(FALSE)
+        }
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
           self$pid = pid
