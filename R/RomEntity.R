@@ -196,7 +196,9 @@ RomEntity <- R6Class(
       }
       if(!is.null(varkey)) {
         # this may be a create request, populate varkey
+        message(paste("searching for varkey",varkey))
         child_prop$varid=self$datasource$get_vardef(varkey)$hydroid
+        message(paste("Found ID",child_prop$varid))
       }
       if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
       if (!is.null(propcode)) {child_prop$propcode = propcode}
