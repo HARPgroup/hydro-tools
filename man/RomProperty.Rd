@@ -261,7 +261,7 @@ NULL
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{set_matrix}}{update the matrix}
+\item{\code{row_cols}}{update the matrix}
 }
 \if{html}{\out{</div>}}
 }

@@ -221,6 +221,8 @@ object instance
 \describe{
 \item{\code{propname}}{list of attributes to set, see also: to_list() for format}
 
+\item{\code{varkey}}{specify varkey? (in case of new prop creation)}
+
 \item{\code{remote}}{look at remote datasource?}
 }
 \if{html}{\out{</div>}}
