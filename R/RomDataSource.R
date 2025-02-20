@@ -290,7 +290,7 @@ RomDataSource <- R6Class(
       ]
       # add missing columns if they exist
       if (length(name_check) > 0) {
-        message("Warning: all src_dferty columns must be present in data frame to do batch insert.")
+        #message("Warning: all src columns must be present in data frame to do batch insert.")
         #message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
         for (n in names(dest_df)[which(!(names(dest_df) %in% names(src_df)))]) {
           src_df[,n] <- NA
