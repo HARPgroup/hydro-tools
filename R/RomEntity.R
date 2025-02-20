@@ -146,6 +146,26 @@ RomEntity <- R6Class(
       self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
       return(self$vardef)
     },
+    #' @param propname list of attributes to set, see also: to_list() for format
+    #' @param remote look at remote datasource?
+    #' @returns the property object for this entity
+    get_prop = function(propname, varkey=NULL, remote=TRUE) {
+      plist = list(
+        featureid=self$get_id(), 
+        entity_type=self$base_entity_type,
+        propname=propname
+      )
+      if(!is.null(varkey)) {
+        # this may be a create request, populate varkey
+        plist$varkey=varkey
+      }
+      child_prop = RomProperty$new(
+        self$datasource,
+        plist,
+        remote
+      )
+      return(child_prop)
+    },
     #' @param config 
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection

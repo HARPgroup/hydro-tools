@@ -55,6 +55,8 @@ RomProperty <- R6Class(
     vid = NA,
     #' @field module related module (optional?) 
     module = NA,
+    #' @field matrix_revision_id pk for foreign table 
+    matrix_revision_id = NA,
     #' @field modified timestamp 
     modified = NA,
     #' @field datasource RomDataSource
@@ -107,7 +109,9 @@ RomProperty <- R6Class(
       if (!is.logical(self$plugin$entity_bundle)) {
         self$bundle = self$plugin$entity_bundle
       } else {
-        self$bundle = 'dh_properties'
+        if (is.na(self$bundle)) {
+          self$bundle = 'dh_properties'
+        }
       }
     },
     #' @param config 
@@ -147,6 +151,9 @@ RomProperty <- R6Class(
           self$bundle = as.character(config$bundle)
         } else if (i == "data_matrix") {
           if (is.character(config$data_matrix)) {
+            if (!is.null(config$matrix_revision_id)) {
+              self$matrix_revision_id = as.integer(config$matrix_revision_id)
+            } 
             mvalid <- jsonlite::validate(config$data_matrix)
             if (mvalid[1] == TRUE) {
               raw_data = jsonlite::fromJSON(config$data_matrix)
@@ -172,6 +179,8 @@ RomProperty <- R6Class(
                 }
                 names(data_table) <- NULL
               } else {
+                # assume the table is just raw json without the 
+                # tabledata sub-array (and other stuff)
                 data_table = raw_data
               }
               self$data_matrix = data_table
@@ -218,10 +227,13 @@ RomProperty <- R6Class(
         }
         if (is.null(self$bundle)) {
           self$bundle <- 'dh_properties'
+          t_list$bundle <- 'dh_properties'
         }
         if (!nchar(self$bundle) > 0) {
           self$bundle <- 'dh_properties'
+          t_list$bundle <- 'dh_properties'
         }
+        t_list$matrix_revision_id = self$matrix_revision_id
       }
       return(t_list)
     },
@@ -242,6 +254,7 @@ RomProperty <- R6Class(
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
+      pid = FALSE
       if (push_remote) {
         pl <- self$to_list(self$base_only)
         if (!is.Date(pl$startdate) & !is.integer(pl$startdate)) {
@@ -276,6 +289,8 @@ RomProperty <- R6Class(
             status = self$datasource$post('dh_properties', 'pid', list(pid=pid, vid=vid))
           }
         }
+        # update fields
+        self$save_matrix()
         # otherwise, update revisions, especially now that we are no longer 
         # dooing revisions.  THis is likely *not* important as drupal is 
         # the only thing that needs revisions, but since drupal will break if 
@@ -293,6 +308,37 @@ RomProperty <- R6Class(
       }
       # we call set_prop without base_only because the local Datasource handles complex fields
       self$datasource$set_prop(self$to_list())
+    },
+    #' @return NULL
+    save_matrix = function() {
+      if (!is.logical(self$vid) & (self$datasource$connection_type == 'odbc')) {
+        if ( is.data.frame(self$data_matrix)) {
+          dhm_json <- as.character(jsonlite::toJSON(self$data_matrix))
+          params <- list(
+            field_dh_matrix_json=dhm_json, 
+            entity_id = self$pid,
+            bundle = self$bundle,
+            language = 'und',
+            delta = 0,
+            revision_id=self$vid
+          )
+          pk = "revision_id" 
+          # check the table to see if a record exists, if not nullify the rev id
+          matrix_check <- self$datasource$get(
+            'field_data_field_dh_matrix','revision_id',list(revision_id = self$vid)
+          )
+          if (nrow(matrix_check) == 0) {
+            pk <- NA # forces insert
+          }
+          self$matrix_revision_id = self$datasource$post(
+            'field_data_field_dh_matrix', pk, 
+            params
+          )
+        }
+      }
+      if (is.na(self$vid) | is.logical(self$vid)) {
+        message("Cannot save data matrix because property vid is null")
+      }
     },
     #' @param delete_remote update locally only or push to remote database
     #' @return NULL
@@ -314,6 +360,15 @@ RomProperty <- R6Class(
         fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
       }
       super$delete(delete_remote)
+    },
+    #' @param set_matrix update the matrix
+    #' @return NULL
+    set_matrix = function(row_cols) {
+      # expects a set of rows like this:
+      # data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))
+      row_cols <- data.frame(t(row_cols),row.names=NULL)
+      names(row_cols) <- NULL
+      self$data_matrix = row_cols
     },
     #' @param delete_remote update locally only or push to remote database
     #' @return NULL

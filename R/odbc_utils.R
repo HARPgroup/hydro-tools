@@ -20,19 +20,23 @@
 fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
-  pkid <- as.integer(as.character(inputs[pk]))
+  if (!is.na(pk)) {
+    pkid <- as.integer(as.character(inputs[[pk]]))
+  } else {
+    pkid = NULL
+  }
   inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
   )
-  if ( is.na(pkid) | is.null(pkid) ) {
+  if ( is.null(pkid) ) {
     message(paste0("----- Creating ", entity_type, "..."))
     odbc_sql = fn_guess_insert(entity_type, pk, inputs)
   } else {
     message(paste0("----- Updating ", entity_type, "..."))
     odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
-  #print(odbc_sql)
+  #message(odbc_sql)
   pkid <- sqldf(as.character(odbc_sql), connection = con)
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
@@ -213,9 +217,15 @@ fn_guess_insert <- function(entity_type, pk, inputs) {
   }
   in_sql = paste(
     "INSERT INTO", entity_type, "(", col_sql, ")", 
-    "VALUES", "(", val_sql, ")",
-    "RETURNING", pk
+    "VALUES", "(", val_sql, ")"
   )
+  if (!is.null(pk)) {
+    if (!is.na(pk)) {
+      in_sql = paste(
+        in_sql, "RETURNING", pk
+      )
+    }
+  }
   return(in_sql)
 }
 
@@ -248,4 +258,28 @@ fn_guess_update <- function(entity_type, pk, inputs) {
     "WHERE", pk, "=", pk_val
   )
   return(up_sql)
+}
+
+fn_pk_clause <- function(pk, inputs) {
+  pk_clause = ""
+  if (typeof(pk) == "character") {
+    if (!is.null(inputs[[pk]])) {
+      pk_clause = paste(pk, "=", inputs[[pk]])
+    }
+  } else {
+    if (typeof(pk) == "list") {
+      pk_glue = ""
+      for (i in pk) {
+        if (!is.null(inputs[[i]])) {
+          ival = inputs[[i]]
+          if (typeof(ival) == 'character') {
+            ival = paste0("'",ival,"'")
+          }
+          pk_clause = paste(pk_clause, pk_glue, i, "=", ival)
+          pk_glue = "AND"
+        }
+      }
+    }
+  }
+  return(pk_clause)
 }

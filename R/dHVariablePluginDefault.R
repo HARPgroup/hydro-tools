@@ -294,6 +294,8 @@ dHOMDataMatrix <- R6Class(
     name = NA,
     #' @field object_class model object type
     object_class = 'dataMatrix',
+    #' @field entity_bundle model object type
+    entity_bundle = 'om_data_matrix',
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
