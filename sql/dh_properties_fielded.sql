@@ -1,11 +1,22 @@
 create or replace view dh_properties_fielded as (
   select a.*, b.proptext_value as proptext,
     CASE
+      WHEN c.field_dh_matrix_json IS NOT NULL THEN c.revision_id
+      WHEN d.field_projection_table_value IS NOT NULL THEN d.revision_id
+      WHEN c.field_dh_matrix_value IS NOT NULL THEN c.revision_id
+      WHEN d.field_projection_table_value IS NOT NULL THEN d.revision_id
+      ELSE NULL
+    END as matrix_revision_id,
+    CASE
+      WHEN c.field_dh_matrix_json IS NOT NULL THEN c.field_dh_matrix_json::text
+      WHEN d.field_projection_table_value IS NOT NULL THEN d.field_projection_table_value::text
       WHEN c.field_dh_matrix_value IS NOT NULL THEN php_unserialize_to_json(c.field_dh_matrix_value )::text
       WHEN d.field_projection_table_value IS NOT NULL THEN php_unserialize_to_json(d.field_projection_table_value )::text
       ELSE NULL
     END as data_matrix,
     CASE
+      WHEN c.field_dh_matrix_json IS NOT NULL THEN c.field_dh_matrix_json::text
+      WHEN d.field_projection_table_value IS NOT NULL THEN d.field_projection_table_value::text
       WHEN c.field_dh_matrix_value IS NOT NULL THEN (php_unserialize_to_json(c.field_dh_matrix_value ) -> 'tabledata')::text
       WHEN d.field_projection_table_value IS NOT NULL THEN (php_unserialize_to_json(d.field_projection_table_value ) -> 'tabledata')::text
       ELSE NULL
