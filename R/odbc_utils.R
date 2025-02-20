@@ -26,9 +26,6 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   } else {
     pkid = NULL
   }
-  if (is.na(pkid)) {
-    pkid = NULL
-  }
   message("Looking for PK")
   inputs <- inputs[!is.na(inputs)]
   this_result <- list(
