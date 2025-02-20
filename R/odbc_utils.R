@@ -24,14 +24,17 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   if (!is.na(pk)) {
     pkid <- as.integer(as.character(inputs[[pk]]))
   } else {
-    pkid = NA
+    pkid = NULL
+  }
+  if (is.na(pkid)) {
+    pkid = NULL
   }
   message("Looking for PK")
   inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
   )
-  if ( is.na(pkid) | is.null(pkid) ) {
+  if ( is.null(pkid) ) {
     message(paste0("----- Creating ", entity_type, "..."))
     odbc_sql = fn_guess_insert(entity_type, pk, inputs)
   } else {
@@ -222,9 +225,11 @@ fn_guess_insert <- function(entity_type, pk, inputs) {
     "VALUES", "(", val_sql, ")"
   )
   if (!is.null(pk)) {
-    in_sql = paste(
-      in_sql, "RETURNING", pk
-    )
+    if (!is.na(pk)) {
+      in_sql = paste(
+        in_sql, "RETURNING", pk
+      )
+    }
   }
   return(in_sql)
 }
