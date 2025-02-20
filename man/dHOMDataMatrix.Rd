@@ -40,6 +40,7 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
+\item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
 \item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
 }
 }
@@ -67,6 +68,15 @@ NA
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMDataMatrix-param_info"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMDataMatrix-param_info}{}}}
+\subsection{Method \code{param_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$param_info()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-clone"></a>}}

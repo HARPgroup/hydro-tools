@@ -44,6 +44,7 @@ NA
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
 \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
 }
 }
@@ -115,6 +116,15 @@ object instance
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-param_info"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-param_info}{}}}
+\subsection{Method \code{param_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$param_info()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-clone"></a>}}
