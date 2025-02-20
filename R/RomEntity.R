@@ -166,6 +166,52 @@ RomEntity <- R6Class(
       )
       return(child_prop)
     },
+    #' @param propname name or property
+    #' @param propcode if alpha property use this
+    #' @param propvalue if numeric property use this
+    #' @param varkey which varkey? defaults to guess Constant and AlphanumericConstant
+    #' @param data_matrix dataframe contained rows/cols
+    #' @param remote look at remote datasource?
+    #' @returns the property object for this entity
+    set_prop = function(
+    propname, propcode=NULL,propvalue=NULL,varkey=NULL,
+    data_matrix=NULL, remote=TRUE
+    ) {
+      # first, see if it exists to load and update
+      # then, change/set the varid and values
+      plist = list(
+        featureid=self$get_id(), 
+        entity_type=self$base_entity_type,
+        propname=propname
+      )
+      child_prop = RomProperty$new(
+        self$datasource,
+        plist,
+        remote
+      )
+      if (is.na(child_prop$pid)) {
+        # this is new, so we do an update, 
+        if(is.null(varkey)) {
+          # guess the varkey
+          if (!is.null(propcode)) {
+            varkey = 'om_class_AlphanumericConstant'
+          } else if (!is.null(data_matrix)) {
+            varkey = 'om_class_DataMatrix'
+          } else {
+            varkey = 'om_class_Constant'
+          }
+        }
+      }
+      if(!is.null(varkey)) {
+        # this may be a create request, populate varkey
+        child_prop$varid=self$datasource$get_vardef(varkey)
+      }
+      if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
+      if (!is.null(propcode)) {child_prop$propcode = propcode}
+      if (!is.null(data_matrix)) {child_prop$set_matrix(data_matrix) }
+      child_prop$save(remote)
+      return(child_prop)
+    },
     #' @param config 
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection

@@ -237,17 +237,6 @@ RomProperty <- R6Class(
       }
       return(t_list)
     },
-    #' @param name attribute name
-    #' @param value attribute value
-    #' @param format type of data being sent (default, json, ...)
-    #' @return object instance
-    set_prop = function(name, value, format='default') {
-      # this should be at the base class, should not have to subclass
-      # @tbd: can this even be done on a local object field? 
-      # it may not be necessary, we may only implement 
-      # calls to set RomProperties linked to it?
-      # self$hair <- val
-    },
     #' @param push_remote whether to automatically propagate changes to remote data source
     #' @return boolean TRUE on success, FALSE on failure
     save = function(push_remote=FALSE) {

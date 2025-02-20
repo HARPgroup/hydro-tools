@@ -22,6 +22,9 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
   #print(inputs)
   if (!is.na(pk)) {
     pkid <- as.integer(as.character(inputs[[pk]]))
+    if (is.na(pkid)) {
+      pkid = NULL
+    }
   } else {
     pkid = NULL
   }
