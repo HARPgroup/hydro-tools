@@ -64,24 +64,33 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
 #' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
 #' @param con connection to ODBC server
 #' @param obj optional class with extra query info
+#' @param debug Print out debug info if true
 #' @seealso NA
 #' @export fn_post_odbc
 #' @examples NA
-fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
+fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
-  # note: we do not currently support non-integer pk columns
-  pkid <- as.integer(as.character(inputs[pk]))
-  if ( is.na(pkid) | is.null(pkid) ) {
-    message(paste0("----- Warning: cannot delete entity", entity_type, "without ", pk))
-    return(FALSE)
+  # try to enable multiple key matches
+  if (pk == "") {
+    # try to use list of inputs
+    dwhere = fn_guess_sql_where(entity_type, pk, inputs)
+    odbc_sql = paste("DELETE from", entity_type, "WHERE", dwhere)
   } else {
-    #message(paste0("----- deleting ", entity_type, "..."))
-    odbc_sql = paste("DELETE from", entity_type, "WHERE", pk, "=", pkid)
+    # note: we do not currently support non-integer pk columns
+    pkid <- as.integer(as.character(inputs[pk]))
+    if ( is.na(pkid) | is.null(pkid) ) {
+      message(paste0("----- Warning: cannot delete entity", entity_type, "without ", pk))
+      return(FALSE)
+    } else {
+      #message(paste0("----- deleting ", entity_type, "..."))
+      odbc_sql = paste("DELETE from", entity_type, "WHERE", pk, "=", pkid)
+    }
   }
-  #print(odbc_sql)
+  if (debug == TRUE) {
+    message(paste("ODBC returned", odbc_sql))
+  }
   result <- sqldf(as.character(odbc_sql), connection = con)
-  #message(paste("ODBC returned", result))
   return(result)
 }
 
@@ -92,11 +101,14 @@ fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
 #' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
 #' @param con connection to ODBC server
 #' @param obj optional class with extra query info
+#' @param debug Print out debug info if true
 #' @export fn_get_odbc
 #' @examples NA
-fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
+fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
-  #message(entity_type)
+  #if (debug == TRUE) {
+  #  message(entity_type)
+  #}
   #message(paste(inputs))
   get_sql = FALSE
   #print(obj)
@@ -120,7 +132,9 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     where_pre = "WHERE"
   }
   get_sql = paste(get_sql, where_pre, get_where, limits)
-  #message(get_sql)
+  if (debug == TRUE) {
+    message(get_sql)
+  }
   entities = sqldf(get_sql, connection = con, method = "raw")
   if (is.logical(entities)) {
     message("----- This entity does not exist")
