@@ -433,6 +433,7 @@ RomDataSource <- R6Class(
         # use ODBC approach
         model_tree <- RomPropertyTree$new(self, list(root_pid=pid), TRUE)
         model <- self$get_nested_export(self, pid, model_tree$prop_list)[[1]]
+        self$prop_json_cache[[pid]] <- model
         return(model)
       }
     },
