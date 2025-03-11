@@ -2,7 +2,7 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHOMDataMatrix}
 \alias{dHOMDataMatrix}
-\title{Matrix meta-model object}
+\title{dHOMDataMatrix}
 \value{
 reference class of type openmi.om.base.
 
@@ -12,6 +12,8 @@ an updated config if necessary or FALSE if it fails
 Simple class to hold tabular values
 }
 \details{
+Matrix meta-model object
+
 Has standard methods for managing data and meta data
 }
 \examples{
@@ -29,6 +31,8 @@ NA
 \item{\code{name}}{what is it called}
 
 \item{\code{object_class}}{model object type}
+
+\item{\code{entity_bundle}}{model object type}
 }
 \if{html}{\out{</div>}}
 }
@@ -36,6 +40,7 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
+\item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
 \item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
 }
 }
@@ -63,6 +68,15 @@ NA
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMDataMatrix-param_info"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMDataMatrix-param_info}{}}}
+\subsection{Method \code{param_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$param_info()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-clone"></a>}}

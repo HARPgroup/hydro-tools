@@ -21,4 +21,6 @@ Imports:
     rapportools,
     graphics,
     flextable,
-    bit64
+    bit64,
+    IHA,
+    PearsonDS

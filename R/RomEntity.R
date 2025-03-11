@@ -38,7 +38,8 @@ RomEntity <- R6Class(
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
-    propvalues = function(propname = NULL, varid = NULL) {
+    #' @param propcode optional code to filter
+    propvalues = function(propname = NULL, varid = NULL, propcode = NULL) {
       prop_obj = RomProperty$new(self$datasource)
       config <- list(
         featureid = self$get_id(), 
@@ -46,6 +47,7 @@ RomEntity <- R6Class(
       )
       if (!is.null(varid)) { config$varid = varid } 
       if (!is.null(propname)) { config$propname = propname } 
+      if (!is.null(propcode)) { config$propcode = propcode } 
       ps <- self$datasource$get_prop(
         config
       )
@@ -143,6 +145,67 @@ RomEntity <- R6Class(
       #message("vardef retrieved, creating RomVar object")
       self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
       return(self$vardef)
+    },
+    #' @param propname list of attributes to set, see also: to_list() for format
+    #' @param varkey specify varkey? (in case of new prop creation)
+    #' @param remote look at remote datasource?
+    #' @returns the property object for this entity
+    get_prop = function(propname, varkey=NULL, remote=TRUE) {
+      plist = list(
+        featureid=self$get_id(), 
+        entity_type=self$base_entity_type,
+        propname=propname
+      )
+      if(!is.null(varkey)) {
+        # this may be a create request, populate varkey
+        plist$varkey=varkey
+      }
+      child_prop = RomProperty$new(
+        self$datasource,
+        plist,
+        remote
+      )
+      return(child_prop)
+    },
+    #' @param propname name or property
+    #' @param propcode if alpha property use this
+    #' @param propvalue if numeric property use this
+    #' @param varkey which varkey? defaults to guess Constant and AlphanumericConstant
+    #' @param data_matrix dataframe contained rows/cols
+    #' @param remote look at remote datasource?
+    #' @returns the property object for this entity
+    set_prop = function(
+    propname, propcode=NULL,propvalue=NULL,varkey=NULL,
+    data_matrix=NULL, remote=TRUE
+    ) {
+      # first, see if it exists to load and update
+      # then, change/set the varid and values
+      message(paste("set_prop() called with for propname,varkey",propname,varkey))
+      child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
+      if (is.na(child_prop$pid)) {
+        # this is new, so we do an update, 
+        if(is.null(varkey)) {
+          # guess the varkey
+          if (!is.null(propcode)) {
+            varkey = 'om_class_AlphanumericConstant'
+          } else if (!is.null(data_matrix)) {
+            varkey = 'om_class_DataMatrix'
+          } else {
+            varkey = 'om_class_Constant'
+          }
+        }
+      }
+      if(!is.null(varkey)) {
+        # this may be a create request, populate varkey
+        message(paste("searching for varkey",varkey))
+        child_prop$varid=self$datasource$get_vardef(varkey)$hydroid
+        message(paste("Found ID",child_prop$varid))
+      }
+      if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
+      if (!is.null(propcode)) {child_prop$propcode = propcode}
+      if (!is.null(data_matrix)) {child_prop$set_matrix(data_matrix) }
+      child_prop$save(remote)
+      return(child_prop)
     },
     #' @param config 
     #' @param load_remote automatically query remote data source for matches?
