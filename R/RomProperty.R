@@ -237,17 +237,6 @@ RomProperty <- R6Class(
       }
       return(t_list)
     },
-    #' @param name attribute name
-    #' @param value attribute value
-    #' @param format type of data being sent (default, json, ...)
-    #' @return object instance
-    set_prop = function(name, value, format='default') {
-      # this should be at the base class, should not have to subclass
-      # @tbd: can this even be done on a local object field? 
-      # it may not be necessary, we may only implement 
-      # calls to set RomProperties linked to it?
-      # self$hair <- val
-    },
     #' @param push_remote whether to automatically propagate changes to remote data source
     #' @return boolean TRUE on success, FALSE on failure
     save = function(push_remote=FALSE) {
@@ -274,6 +263,15 @@ RomProperty <- R6Class(
             vl$vid <- NULL # removes it from list
           }
         }
+        # note: we must quit if given a bad varid
+        if (is.na(pl$varid)) {
+          message(
+            paste0(
+              "Error: bad varid given in", pl$propname,"$save(). Returning."
+            )
+          )
+          return(FALSE)
+        }
         pid = self$datasource$post('dh_properties', 'pid', pl)
         if (!is.logical(pid)) {
           self$pid = pid
@@ -291,6 +289,10 @@ RomProperty <- R6Class(
         }
         # update fields
         self$save_matrix()
+        self$save_field(
+          "proptext", "field_data_proptext", 
+          list(proptext_format = "plain_text", proptext_value = self$proptext)
+        )
         # otherwise, update revisions, especially now that we are no longer 
         # dooing revisions.  THis is likely *not* important as drupal is 
         # the only thing that needs revisions, but since drupal will break if 
@@ -318,6 +320,7 @@ RomProperty <- R6Class(
             field_dh_matrix_json=dhm_json, 
             entity_id = self$pid,
             bundle = self$bundle,
+            entity_type = self$base_entity_type,
             language = 'und',
             delta = 0,
             revision_id=self$vid
@@ -332,6 +335,65 @@ RomProperty <- R6Class(
           }
           self$matrix_revision_id = self$datasource$post(
             'field_data_field_dh_matrix', pk, 
+            params
+          )
+        }
+      }
+      if (is.na(self$vid) | is.logical(self$vid)) {
+        message("Cannot save data matrix because property vid is null")
+      }
+    },
+    #' @param class_field_name what is this field called on this object (deprecated)
+    #' @param field_table table to insert into
+    #' @param value_pairs attriutes to add to insert above the basic entity info (field value here)
+    #' @param pkeys whether to automatically propagate changes to remote data source
+    #' @return NULL
+    save_field = function(class_field_name, field_table, value_pairs, pkeys=c('entity_type', 'entity_id')) {
+      if (!is.logical(self$vid) & (self$datasource$connection_type == 'odbc')) {
+        if (!(class_field_name %in% names(obj))) {
+          message(
+            paste(
+              "Warning: cannot set field named", value_col_name, 
+              "because local property ", class_field_name, 
+              "does not exist on object")
+          )
+          return(FALSE)
+        }
+        if ( !is.na(self[[class_field_name]])) {
+          params <- list(
+            entity_id = self$pid,
+            bundle = self$bundle,
+            entity_type = self$base_entity_type,
+            language = 'und',
+            delta = 0,
+            revision_id=self$vid
+          )
+          for (k in names(value_pairs)) {
+            params[[k]] = value_pairs[[k]]
+          }
+          check_list = list()
+          for (k in pkeys) {
+            check_list[[k]] = params[[k]]
+          }
+          #message("Check list:")
+          #message(check_list)
+          # check the table to see if a record exists, if not nullify the rev id
+          field_check <- self$datasource$get(
+            field_table,"", check_list
+          )
+          if (nrow(field_check) == 0) {
+            pk <- NA # forces insert
+          } else {
+            # must delete first because our odbc updates are not sophisticated 
+            # enough to handle multiple key matches
+            pk <- NA # forces insert
+            #message("Deleting old")
+            fn_delete_odbc(field_table,"", check_list, self$datasource$connection, FALSE, TRUE)
+            #self$datasource$delete(field_table,"", check_list)
+          }
+          #message("Inserting new")
+          self$matrix_revision_id = self$datasource$post(
+            field_table, pk, 
             params
           )
         }
@@ -361,7 +423,7 @@ RomProperty <- R6Class(
       }
       super$delete(delete_remote)
     },
-    #' @param set_matrix update the matrix
+    #' @param row_cols update the matrix
     #' @return NULL
     set_matrix = function(row_cols) {
       # expects a set of rows like this:

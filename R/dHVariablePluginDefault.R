@@ -83,6 +83,12 @@ dHVariablePluginDefault <- R6Class(
         propcode=om_list$code
       )
       return(rom_list)
+    },
+    param_info = function() {
+      info = "Information about object and it's parameters
+      - propname: name of the object
+      - propvalue: numeric value "
+      return(info)
     }
   )
 )
@@ -306,6 +312,17 @@ dHOMDataMatrix <- R6Class(
         value=I(entity$data_matrix)
       )
       return(export)
+    },
+    #' @returns info regarding the needs and capabilities of this object
+    param_info = function() {
+      info = "- eval_type = 'auto'; // auto, numeric, string, reference 
+      - valuetype = 1; // 0 - returns entire array (normal), 1 - single column lookup (col), 2 - 2 column lookup (col & row)
+      - value_dbcolumntype = ''; // can be a db type, or an equation, which resolves to numeric in db storage
+      - keycol1 = ''; // key for 1st lookup variable
+      - lutype1 = 0; // lookup type for first lookup variable: 0 - exact match; 1 - interpolate values; 2 - stair step
+      - keycol2 = ''; // key for 2nd lookup variable
+      - lutype2 = 0; // lookup type for second lookup variable"
+      return(info)
     }
   )
 )

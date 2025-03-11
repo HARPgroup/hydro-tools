@@ -147,6 +147,7 @@ RomEntity <- R6Class(
       return(self$vardef)
     },
     #' @param propname list of attributes to set, see also: to_list() for format
+    #' @param varkey specify varkey? (in case of new prop creation)
     #' @param remote look at remote datasource?
     #' @returns the property object for this entity
     get_prop = function(propname, varkey=NULL, remote=TRUE) {
@@ -164,6 +165,46 @@ RomEntity <- R6Class(
         plist,
         remote
       )
+      return(child_prop)
+    },
+    #' @param propname name or property
+    #' @param propcode if alpha property use this
+    #' @param propvalue if numeric property use this
+    #' @param varkey which varkey? defaults to guess Constant and AlphanumericConstant
+    #' @param data_matrix dataframe contained rows/cols
+    #' @param remote look at remote datasource?
+    #' @returns the property object for this entity
+    set_prop = function(
+    propname, propcode=NULL,propvalue=NULL,varkey=NULL,
+    data_matrix=NULL, remote=TRUE
+    ) {
+      # first, see if it exists to load and update
+      # then, change/set the varid and values
+      message(paste("set_prop() called with for propname,varkey",propname,varkey))
+      child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
+      if (is.na(child_prop$pid)) {
+        # this is new, so we do an update, 
+        if(is.null(varkey)) {
+          # guess the varkey
+          if (!is.null(propcode)) {
+            varkey = 'om_class_AlphanumericConstant'
+          } else if (!is.null(data_matrix)) {
+            varkey = 'om_class_DataMatrix'
+          } else {
+            varkey = 'om_class_Constant'
+          }
+        }
+      }
+      if(!is.null(varkey)) {
+        # this may be a create request, populate varkey
+        message(paste("searching for varkey",varkey))
+        child_prop$varid=self$datasource$get_vardef(varkey)$hydroid
+        message(paste("Found ID",child_prop$varid))
+      }
+      if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
+      if (!is.null(propcode)) {child_prop$propcode = propcode}
+      if (!is.null(data_matrix)) {child_prop$set_matrix(data_matrix) }
+      child_prop$save(remote)
       return(child_prop)
     },
     #' @param config 
