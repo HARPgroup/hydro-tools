@@ -353,7 +353,7 @@ RomProperty <- R6Class(
         if (!(class_field_name %in% names(obj))) {
           message(
             paste(
-              "Warning: cannot set field named", value_col_name, 
+              "Warning: cannot set field named", class_field_name, 
               "because local property ", class_field_name, 
               "does not exist on object")
           )
