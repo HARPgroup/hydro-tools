@@ -366,8 +366,37 @@ dHVarAnnotation <- R6Class(
 #' @examples NA
 #' @export dHOMtextField
 dHOMtextField <- R6Class(
-  "dHVarAnnotation",
-  inherit = dHVariablePluginDefault,
+  "dHOMtextField",
+  inherit = dHVarAnnotation,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'textField',
+    #' @param entity the local object to work on 
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = super$exportOpenMIBase(entity)
+      export$value = entity$propcode
+      return(export)
+    }
+  )
+)
+
+
+#' dHOMConsumptiveUseFractionsPWS meta-model object
+#' @title dHOMConsumptiveUseFractionsPWS
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMConsumptiveUseFractionsPWS
+dHOMConsumptiveUseFractionsPWS <- R6Class(
+  "dHOMConsumptiveUseFractionsPWS",
+  inherit = dHOMDataMatrix,
   public = list(
     #' @field name what is it called
     name = NA,
@@ -384,7 +413,7 @@ dHOMtextField <- R6Class(
 )
 
 #' Broadcast meta-model object
-#' @title dHVarAnnotation
+#' @title dHOMbroadCastObject
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -392,7 +421,7 @@ dHOMtextField <- R6Class(
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples NA
-#' @export dHVarAnnotation
+#' @export dHOMbroadCastObject
 dHOMbroadCastObject <- R6Class(
   "dHOMbroadCastObject",
   inherit = dHVariablePluginDefault,
