@@ -131,7 +131,7 @@ RomEntity <- R6Class(
     #' @param refresh automatically refresh var info?
     #' @returns the variable definition object for this entity
     get_vardef = function(config = FALSE, refresh=FALSE) {
-      if (!self$has_vardef) {
+      if (self$has_vardef == FALSE) {
         return(FALSE)
       }
       if (!is.null(self$vardef) & !refresh) {
@@ -207,15 +207,23 @@ RomEntity <- R6Class(
       child_prop$save(remote)
       return(child_prop)
     },
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return NULL
+    from_list = function(config) {
+      return(TRUE)
+    },
     #' @param config 
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
+      #message(paste("load_data() called "))
       self$from_list(config)
-      #print(paste("Loaded object: "))
-      #print(self)
+      #message(paste("Loaded object: "))
+      #message(self)
       self$get_vardef()
+      #message(paste("Loaded vardef: "))
       self$load_plugin()
+      #message(paste("Loaded plugin: "))
       # this should be handled better.  We need to decide if we want to 
       # still use the local datasource as a repository for remote data
       # at first the thinking was no with ODBC, but maybe that's not correct?
@@ -275,6 +283,65 @@ RomEntity <- R6Class(
       if (delete_remote) {
         finfo <- self$to_list()
         fid = self$datasource$delete(self$base_entity_type, self$pk_name, finfo)
+      }
+    },
+    #' @param class_field_name what is this field called on this object (deprecated)
+    #' @param field_table table to insert into
+    #' @param value_pairs attriutes to add to insert above the basic entity info (field value here)
+    #' @param pkeys whether to automatically propagate changes to remote data source
+    #' @return NULL
+    save_field = function(class_field_name, field_table, value_pairs, pkeys=c('entity_type', 'entity_id')) {
+      if (!is.logical(self$get_id()) & (self$datasource$connection_type == 'odbc')) {
+        if (!(class_field_name %in% names(self))) {
+          message(
+            paste(
+              "Warning: cannot set field named", class_field_name, 
+              "because local property ", class_field_name, 
+              "does not exist on object")
+          )
+          return(FALSE)
+        }
+        if ( !is.na(self[[class_field_name]])) {
+          params <- list(
+            entity_id = self$get_id(),
+            bundle = self$bundle,
+            entity_type = self$base_entity_type,
+            language = 'und',
+            delta = 0,
+            revision_id=self$get_id()
+          )
+          for (k in names(value_pairs)) {
+            params[[k]] = value_pairs[[k]]
+          }
+          check_list = list()
+          for (k in pkeys) {
+            check_list[[k]] = params[[k]]
+          }
+          #message("Check list:")
+          #message(check_list)
+          # check the table to see if a record exists, if not nullify the rev id
+          field_check <- self$datasource$get(
+            field_table,"", check_list
+          )
+          if (nrow(field_check) == 0) {
+            pk <- NA # forces insert
+          } else {
+            # must delete first because our odbc updates are not sophisticated 
+            # enough to handle multiple key matches
+            pk <- NA # forces insert
+            #message("Deleting old")
+            fn_delete_odbc(field_table,"", check_list, self$datasource$connection, FALSE, TRUE)
+            #self$datasource$delete(field_table,"", check_list)
+          }
+          #message("Inserting new")
+          self$matrix_revision_id = self$datasource$post(
+            field_table, pk, 
+            params
+          )
+        }
+      }
+      if (is.na(self$get_id()) | is.logical(self$get_id())) {
+        message("Cannot save field because property id is null")
       }
     }
   )

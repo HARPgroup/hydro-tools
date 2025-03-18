@@ -350,10 +350,10 @@ RomProperty <- R6Class(
     #' @return NULL
     save_field = function(class_field_name, field_table, value_pairs, pkeys=c('entity_type', 'entity_id')) {
       if (!is.logical(self$vid) & (self$datasource$connection_type == 'odbc')) {
-        if (!(class_field_name %in% names(obj))) {
+        if (!(class_field_name %in% names(self))) {
           message(
             paste(
-              "Warning: cannot set field named", value_col_name, 
+              "Warning: cannot set field named", class_field_name, 
               "because local property ", class_field_name, 
               "does not exist on object")
           )
