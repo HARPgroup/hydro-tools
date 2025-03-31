@@ -137,9 +137,9 @@ group1 <- function (
 #'The group 2 statistics measure the magnitude of monthly water condition and
 #'include 12 parameters. This will calculate several metrics for each year of
 #'the 1-D zoo input x. This function divides the zoo by water or calendar year
-#'and finds the 1, 3, 7, and 90 day rolling averages of the zoo. Then, it finds
-#'the range, base index, and days of zero flow of each year, with base index
-#'defined as the minimum 7-day flow divided by the average flow
+#'and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it 
+#'finds the range, base index, and days of zero flow of each year, with base 
+#'index defined as the minimum 7-day flow divided by the average flow
 #'
 #'@inheritParams group5
 #'@param mimic.tnc should the function perform the calculation like the TNC IHA software?
@@ -258,8 +258,8 @@ group2Funs <- function (x) {
   #Combine metrics
   ans <- c(rng, zeros, baseindex)
   #Label the ranges appropriately
-  nms <- sprintf(c("%1$s Day Min", "%1$s Day Max"), rep(c(1, 
-                                                          3, 7, 30, 90), each = 2))
+  nms <- sprintf(c("%1$s Day Min", "%1$s Day Max"), 
+                 rep(c(1, 3, 7, 30, 90), each = 2))
   #Set the names for the metrics, include the zero flow days and the base index
   names(ans) <- c(nms, "Zero flow days", "Base index")
   return(ans)
