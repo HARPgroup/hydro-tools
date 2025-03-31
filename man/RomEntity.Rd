@@ -12,6 +12,10 @@ loads the varid
 
 the variable definition object for this entity
 
+the property object for this entity
+
+the property object for this entity
+
 the data from the remote connection
 }
 \description{
@@ -63,6 +67,8 @@ NA
 \item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
 \item \href{#method-RomEntity-insure_varid}{\code{RomEntity$insure_varid()}}
 \item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
+\item \href{#method-RomEntity-get_prop}{\code{RomEntity$get_prop()}}
+\item \href{#method-RomEntity-set_prop}{\code{RomEntity$set_prop()}}
 \item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
 \item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
@@ -198,6 +204,59 @@ object instance
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
 
 \item{\code{refresh}}{automatically refresh var info?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-get_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-get_prop}{}}}
+\subsection{Method \code{get_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(propname, varkey = NULL, remote = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{propname}}{list of attributes to set, see also: to_list() for format}
+
+\item{\code{varkey}}{specify varkey? (in case of new prop creation)}
+
+\item{\code{remote}}{look at remote datasource?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-set_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-set_prop}{}}}
+\subsection{Method \code{set_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$set_prop(
+  propname,
+  propcode = NULL,
+  propvalue = NULL,
+  varkey = NULL,
+  data_matrix = NULL,
+  remote = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{propname}}{name or property}
+
+\item{\code{propcode}}{if alpha property use this}
+
+\item{\code{propvalue}}{if numeric property use this}
+
+\item{\code{varkey}}{which varkey? defaults to guess Constant and AlphanumericConstant}
+
+\item{\code{data_matrix}}{dataframe contained rows/cols}
+
+\item{\code{remote}}{look at remote datasource?}
 }
 \if{html}{\out{</div>}}
 }

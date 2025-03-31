@@ -83,6 +83,12 @@ dHVariablePluginDefault <- R6Class(
         propcode=om_list$code
       )
       return(rom_list)
+    },
+    param_info = function() {
+      info = "Information about object and it's parameters
+      - propname: name of the object
+      - propvalue: numeric value "
+      return(info)
     }
   )
 )
@@ -294,6 +300,8 @@ dHOMDataMatrix <- R6Class(
     name = NA,
     #' @field object_class model object type
     object_class = 'dataMatrix',
+    #' @field entity_bundle model object type
+    entity_bundle = 'om_data_matrix',
     #' @param entity the local object to work on 
     #' @returns an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
@@ -304,6 +312,17 @@ dHOMDataMatrix <- R6Class(
         value=I(entity$data_matrix)
       )
       return(export)
+    },
+    #' @returns info regarding the needs and capabilities of this object
+    param_info = function() {
+      info = "- eval_type = 'auto'; // auto, numeric, string, reference 
+      - valuetype = 1; // 0 - returns entire array (normal), 1 - single column lookup (col), 2 - 2 column lookup (col & row)
+      - value_dbcolumntype = ''; // can be a db type, or an equation, which resolves to numeric in db storage
+      - keycol1 = ''; // key for 1st lookup variable
+      - lutype1 = 0; // lookup type for first lookup variable: 0 - exact match; 1 - interpolate values; 2 - stair step
+      - keycol2 = ''; // key for 2nd lookup variable
+      - lutype2 = 0; // lookup type for second lookup variable"
+      return(info)
     }
   )
 )
@@ -347,8 +366,37 @@ dHVarAnnotation <- R6Class(
 #' @examples NA
 #' @export dHOMtextField
 dHOMtextField <- R6Class(
-  "dHVarAnnotation",
-  inherit = dHVariablePluginDefault,
+  "dHOMtextField",
+  inherit = dHVarAnnotation,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'textField',
+    #' @param entity the local object to work on 
+    #' @returns an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export = super$exportOpenMIBase(entity)
+      export$value = entity$propcode
+      return(export)
+    }
+  )
+)
+
+
+#' dHOMConsumptiveUseFractionsPWS meta-model object
+#' @title dHOMConsumptiveUseFractionsPWS
+#' @description Simple class to hold tabular values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMConsumptiveUseFractionsPWS
+dHOMConsumptiveUseFractionsPWS <- R6Class(
+  "dHOMConsumptiveUseFractionsPWS",
+  inherit = dHOMDataMatrix,
   public = list(
     #' @field name what is it called
     name = NA,
@@ -365,7 +413,7 @@ dHOMtextField <- R6Class(
 )
 
 #' Broadcast meta-model object
-#' @title dHVarAnnotation
+#' @title dHOMbroadCastObject
 #' @description Simple class to hold tabular values
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
@@ -373,7 +421,7 @@ dHOMtextField <- R6Class(
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples NA
-#' @export dHVarAnnotation
+#' @export dHOMbroadCastObject
 dHOMbroadCastObject <- R6Class(
   "dHOMbroadCastObject",
   inherit = dHVariablePluginDefault,

@@ -290,7 +290,7 @@ RomDataSource <- R6Class(
       ]
       # add missing columns if they exist
       if (length(name_check) > 0) {
-        message("Warning: all src_dferty columns must be present in data frame to do batch insert.")
+        #message("Warning: all src columns must be present in data frame to do batch insert.")
         #message("Adding", cat(names(dest_df)[which(!(names(dest_df) %in% names(src_df)))],sep=","))
         for (n in names(dest_df)[which(!(names(dest_df) %in% names(src_df)))]) {
           src_df[,n] <- NA
@@ -433,6 +433,7 @@ RomDataSource <- R6Class(
         # use ODBC approach
         model_tree <- RomPropertyTree$new(self, list(root_pid=pid), TRUE)
         model <- self$get_nested_export(self, pid, model_tree$prop_list)[[1]]
+        self$prop_json_cache[[pid]] <- model
         return(model)
       }
     },
