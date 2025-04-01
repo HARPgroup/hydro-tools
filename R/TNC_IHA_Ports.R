@@ -12,8 +12,6 @@
 #'  returns an ordered factor indicating the equivalent month of the water year.
 #'  Otherwise, returns only the numeric that represents the month.
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
-#'@S3method water.month default
-#'@S3method water.month numeric
 #'@importFrom lubridate month
 #'@export water.month
 water.month <- function(x, label = FALSE, abbr = TRUE){
@@ -26,6 +24,7 @@ water.month <- function(x, label = FALSE, abbr = TRUE){
 #e.g. water.month(4, TRUE) returns January 
 #Returns x is label is not TRUE, otherwise returns the abbr or full name of
 #month
+#'@export water.month.numeric
 water.month.numeric <- function (
     #Month number of interest  
   x, 
@@ -53,6 +52,7 @@ water.month.numeric <- function (
 
 #A function that uses water.month.numeric() to find the water month for an input
 #Date x. This function takes similar arguments to water.month.numeric()
+#'@export water.month.default
 water.month.default <- function (    
     #Date of interest  
   x, 
@@ -279,7 +279,7 @@ runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
 #'Calculates group2 statistics from a matrix of rolling means. This include
 #'range, base index (minimum 7-day flow divided by mean daily flow), and the
 #'number of days with zero flow.
-#'#'@return a named vector containing the group2 statistics, including the range
+#'@return a named vector containing the group2 statistics, including the range
 #'of the 1-, 3-, 7-, 30-, and 90-day flows and the base index and days of zero
 #'flow
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
