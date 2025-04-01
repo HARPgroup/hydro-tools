@@ -1,10 +1,17 @@
 #'Extract the month of the water year from a date or time object.
 #'
 #'Extract the month of the water year from a date or time object.  Can be returned
-#'as a number 1:12, for October through September respectively, or an ordered factor.
-#'@param x a date or time object
-#'@param label logical TRUE will return an ordered factor for month with the month name as labels
+#'as a number 1:12, for October through September respectively, or an ordered factor. 
+#'A user may alternatively enter a calendar year month as a numeric to return
+#'the equivalent water year month
+#'@param x a date or time object or a numeric representing a calendar year month
+#'@param label logical TRUE will return an ordered factor for month with the
+#'  month name as labels, FALSE will return a numeric
 #'@param abbr logical. FALSE will abbreviate the name of the month in the ordered factor.
+#'@return If x is numeric, then returns a numeric. Otherwise, if label is TRUE,
+#'  returns an ordered factor indicating the equivalent month of the water year.
+#'  Otherwise, returns only the numeric that represents the month.
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@S3method water.month default
 #'@S3method water.month numeric
 #'@importFrom lubridate month
@@ -47,7 +54,7 @@ water.month.numeric <- function (
 #A function that uses water.month.numeric() to find the water month for an input
 #Date x. This function takes similar arguments to water.month.numeric()
 water.month.default <- function (    
-  #Month number of interest  
+  #Date of interest  
   x, 
   #Should result be labeled as a month (TRUE) or a number (FALSE, returns x)?
   label = FALSE, 
@@ -65,6 +72,8 @@ water.month.default <- function (
 #'Returns a number specifying the water year (\code{2010}) for a date. Water year is hardcoded here as Oct 1 - Sept
 #'30
 #'@param x a date-time object which can be handled by lubridate
+#'@return Returns the equivalent water year of the date x input by the uee
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@importFrom lubridate month year
 #'@export
 #
@@ -82,15 +91,19 @@ water.year <- function (x) {
 #'
 #'Calculates the IHA parameter group 1: Magnitude of montly water conditions
 #'group1() applies an input function FUN to a 1-D zoo x, grouping by water
-#'month/water year or calendar month/calendar year depending on user input
+#'month+water year or calendar month+calendar year depending on user input
 #'
 #'See IHA documentation:
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'
-#'@inheritParams group5
-#'@param FUN the function to be applied to the monthly values.  TNC uses median which is the default here.
-#'@return A matrix with monthly medians.
-#'@author jason.e.law@@gmail.com
+#'@param x A zoo timeseries object containing the flow series
+#'@param year The type of year factor to be used when determining statistcs,
+#'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
+#'@param FUN the function to be applied to the monthly values.  Median is the
+#'  default here. This can be a character string of a function name but should
+#'  ideally be a closure
+#'@return A matrix with the monthly results of FUN over each year
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@references
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'@importFrom zoo index coredata is.zoo
@@ -136,16 +149,25 @@ group1 <- function (
 #'
 #'The group 2 statistics measure the magnitude of monthly water condition and
 #'include 12 parameters. This will calculate several metrics for each year of
-#'the 1-D zoo input x. This function divides the zoo by water or calendar year
+#'the 1-D zoo input x.
+#'
+#'This function divides the zoo by water or calendar year
 #'and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it 
 #'finds the range, base index, and days of zero flow of each year, with base 
 #'index defined as the minimum 7-day flow divided by the average flow
 #'
-#'@inheritParams group5
-#'@param mimic.tnc should the function perform the calculation like the TNC IHA software?
-#'@param ... additional arguments passed to ddply
+#'@param x A zoo timeseries object containing the flow series
+#'@param yearType The type of year factor to be used when determining statistcs,
+#'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
+#'@param mimic.tnc should the function perform the calculation like the TNC IHA
+#'software? If mimic.tnc is TRUE, then running means will be calculated for each
+#'year individually and will not use data from the previous or next year, thereby
+#treating each year independently of the others. group2 statistics will then be
+#calcualted from these running means
+#'@param ... additional arguments passed to ddply. Likely not used without
+#'  modificiation to this function
 #'@return a data frame with the group 2 statistics for each year
-#'@author jason.e.law@@gmail.com
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@references \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}
 #'@importFrom plyr ddply '.'
 #'@importFrom zoo coredata index
@@ -190,16 +212,28 @@ group2 <- function (
 
 #'Calculate rolling means for group2 statistics
 #'
-#'Calculate rolling means four group2 statsistics.  Uses runmean from caTools
-#'to quickly get rolling averages for a time series. If mimic.tnc is TRUE, it
-#'will calculate running means for each year independtly of the others (thereby
-#'not using data from the next or previous year), If mimic.tnc is TRUE,
-#'yearVector must be provided as a vector of the year for each entry in x
+#'Calculate centered rolling means four group2 statsistics.  Uses runmean from caTools
+#'to quickly get rolling averages for a time series. 
+#'
+#'If mimic.tnc is TRUE, it will calculate running means for each year
+#'independtly of the others (thereby not using data from the next or previous
+#'year), If mimic.tnc is TRUE, yearVector must be provided as a vector of the
+#'year for each entry in x. Rolling means are calculated as centered means,
+#'using data that occurs before and after a given day to compute the rolling
+#'mean
 #'@param x a numeric vector
-#'@param year a vector of year (calendar or water year identifiers; necessary 
-#'for mimic.tnc = T
+#'@param yearVector a vector of years (calendar or water year identifiers; necessary 
+#'for mimic.tnc = TRUE)
 #'@param mimic.tnc logical should the years be split before the running mean is 
-#'calculated
+#'calculated e.g. should running means for each year be calculated
+#'independently? If mimic.tnc is TRUE, then yearVector must be provided and
+#'running means will be calculated for each year of data without using data from
+#'the following or previous year
+#'@return a matrix with the rolling means of all the data combined into columns.
+#'  Each column represents a different rolling average and is either the 1-day,
+#'  3-day, 7-day, 30-day, or 90-day average. NAs will be present at the start and
+#'  end of each year if \code{mimic.tnc = TRUE}
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@importFrom caTools runmean
 #'@export
 runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
@@ -242,6 +276,10 @@ runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
 #'Calculates group2 statistics from a matrix of rolling means. This include
 #'range, base index (minimum 7-day flow divided by mean daily flow), and the
 #'number of days with zero flow.
+#'#'@return a named vector containing the group2 statistics, including the range
+#'of the 1-, 3-, 7-, 30-, and 90-day flows and the base index and days of zero
+#'flow
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
 #'@param x a matrix of rolling means
 #'@export
 group2Funs <- function (x) {
