@@ -54,7 +54,7 @@ water.month.numeric <- function (
 #A function that uses water.month.numeric() to find the water month for an input
 #Date x. This function takes similar arguments to water.month.numeric()
 water.month.default <- function (    
-  #Date of interest  
+    #Date of interest  
   x, 
   #Should result be labeled as a month (TRUE) or a number (FALSE, returns x)?
   label = FALSE, 
@@ -110,10 +110,12 @@ water.year <- function (x) {
 #'@importFrom lubridate year month
 #'@export
 #'@examples
-#'data(bullrun)
-#'group1(bullrun, 'water')
+#'library(dataRetrieval)
+#'gageData <- dataRetrieval::readNWISdv("01634500","00060")
+#'gageFlow <- zoo(test[,4],order.by = test$Date)
+#'group1(gageFlow,'water',mean)
 group1 <- function (
-  #A zoo timeseries  
+    #A zoo timeseries  
   x, 
   #Whether statistics should be applied on a water or calendar year basis
   yearType = c("water", "calendar"), 
@@ -133,7 +135,7 @@ group1 <- function (
   #switch and the yearType input by user
   yr <- switch(yearType, water = water.year(idx), calendar = year(idx))
   mo <- switch(yearType, water = water.month(idx, label = TRUE, 
-                                         abbr = FALSE),
+                                             abbr = FALSE),
                calendar = month(idx, label = TRUE, abbr = FALSE))
   #Apply the input function FUN to the unique combination of mo and yr. Since
   #zoos are inherently ordered, no other ordering is needed to group by month
@@ -174,11 +176,12 @@ group1 <- function (
 #'@importFrom lubridate year
 #'@export
 #'@examples
-#'data(bullrun)
-#'group2(bullrun, 'water')
-#'
+#'library(dataRetrieval)
+#'gageData <- dataRetrieval::readNWISdv("01634500","00060")
+#'gageFlow <- zoo(test[,4],order.by = test$Date)
+#'group2(gageFlow,'water',TRUE)
 group2 <- function ( 
-  #A zoo timeseries  
+    #A zoo timeseries  
   x, 
   #Whether statistics should be applied on a water or calendar year basis
   yearType = c("water", "calendar"), 
@@ -205,7 +208,7 @@ group2 <- function (
   #grouping variable year e.g. apply group2Funs() to each year of data in xd and
   #combine results into one data.frame
   res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]), 
-               ...)
+                     ...)
   return(res)
 }
 
@@ -302,5 +305,3 @@ group2Funs <- function (x) {
   names(ans) <- c(nms, "Zero flow days", "Base index")
   return(ans)
 }
-
-
