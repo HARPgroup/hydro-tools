@@ -31,7 +31,7 @@ See IHA documentation:
 \examples{
 library(dataRetrieval)
 gageData <- dataRetrieval::readNWISdv("01634500","00060")
-gageFlow <- zoo(test[,4],order.by = test$Date)
+gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 group1(gageFlow,'water',mean)
 }
 \references{

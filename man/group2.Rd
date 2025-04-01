@@ -36,7 +36,7 @@ index defined as the minimum 7-day flow divided by the average flow
 \examples{
 library(dataRetrieval)
 gageData <- dataRetrieval::readNWISdv("01634500","00060")
-gageFlow <- zoo(test[,4],order.by = test$Date)
+gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 group2(gageFlow,'water',TRUE)
 }
 \references{
