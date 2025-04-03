@@ -1,5 +1,7 @@
+#' @name Hydro Data Source
 #' Global object store holds references to all objects of a given domain
 #' and pointers to remote data source if applicable.
+#' 
 #' if remote data source is set, all data can be synched back to it
 #' no mixing of data sources is allowed
 #' @description Data Source containing tables and methods of Model data objects

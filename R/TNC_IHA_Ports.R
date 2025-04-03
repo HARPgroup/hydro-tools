@@ -66,7 +66,7 @@ water.month.default <- function (
                       label, abbr)
 }
 
-
+#'@name Water Year
 #'Return a numeric giving the water year for a date
 #'
 #'Returns a number specifying the water year (\code{2010}) for a date. Water year is hardcoded here as Oct 1 - Sept
