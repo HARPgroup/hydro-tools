@@ -16,7 +16,7 @@ pothab_plot <- function (
     adat,
     wua_dat, flow_pct,
     "ifim_da_sqmi" = ifim_da_sqmi,
-    runid_a = "6",
+    runid_a = scenario,
     metric_a = "Qbaseline",
     runid_b = "6",metric_b = "Qout"
   )
