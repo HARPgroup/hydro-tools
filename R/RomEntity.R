@@ -99,7 +99,9 @@ RomEntity <- R6Class(
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
-          config <- feature
+          if (nrow(feature) >= 1) {
+            config <- as.list(feature[1,])
+          }
         }
       }
       self$load_data(config, load_remote)
