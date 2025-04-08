@@ -101,8 +101,8 @@ RomPropertyTree <- R6Class(
       #print("Loading vardefs")
       # now, load all associated variable definitions if possible
       if ('varid' %in% names(config)) {
-        vars <- unique(config$varid)
-        message(vars)
+        vars <- as.data.frame(unique(config$varid))
+        #message(vars)
         for (v in 1:nrow(vars)) {
           vid <- as.integer(vars[v,])
           self$datasource$get_vardef(vid)
