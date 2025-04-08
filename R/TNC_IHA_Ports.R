@@ -12,8 +12,6 @@
 #'  returns an ordered factor indicating the equivalent month of the water year.
 #'  Otherwise, returns only the numeric that represents the month.
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
-#'@S3method water.month default
-#'@S3method water.month numeric
 #'@importFrom lubridate month
 #'@export water.month
 water.month <- function(x, label = FALSE, abbr = TRUE){
@@ -26,6 +24,7 @@ water.month <- function(x, label = FALSE, abbr = TRUE){
 #e.g. water.month(4, TRUE) returns January 
 #Returns x is label is not TRUE, otherwise returns the abbr or full name of
 #month
+#'@export water.month.numeric
 water.month.numeric <- function (
     #Month number of interest  
   x, 
@@ -53,8 +52,9 @@ water.month.numeric <- function (
 
 #A function that uses water.month.numeric() to find the water month for an input
 #Date x. This function takes similar arguments to water.month.numeric()
+#'@export water.month.default
 water.month.default <- function (    
-  #Date of interest  
+    #Date of interest  
   x, 
   #Should result be labeled as a month (TRUE) or a number (FALSE, returns x)?
   label = FALSE, 
@@ -110,10 +110,12 @@ water.year <- function (x) {
 #'@importFrom lubridate year month
 #'@export
 #'@examples
-#'data(bullrun)
-#'group1(bullrun, 'water')
+#'library(dataRetrieval)
+#'gageData <- dataRetrieval::readNWISdv("01634500","00060")
+#'gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
+#'group1(gageFlow,'water',mean)
 group1 <- function (
-  #A zoo timeseries  
+    #A zoo timeseries  
   x, 
   #Whether statistics should be applied on a water or calendar year basis
   yearType = c("water", "calendar"), 
@@ -133,7 +135,7 @@ group1 <- function (
   #switch and the yearType input by user
   yr <- switch(yearType, water = water.year(idx), calendar = year(idx))
   mo <- switch(yearType, water = water.month(idx, label = TRUE, 
-                                         abbr = FALSE),
+                                             abbr = FALSE),
                calendar = month(idx, label = TRUE, abbr = FALSE))
   #Apply the input function FUN to the unique combination of mo and yr. Since
   #zoos are inherently ordered, no other ordering is needed to group by month
@@ -144,71 +146,6 @@ group1 <- function (
   attr(res, "FUN") <- deparse(substitute(FUN))
   return(t(res))
 }
-
-#'Calculates the group2 IHA statistics
-#'
-#'The group 2 statistics measure the magnitude of monthly water condition and
-#'include 12 parameters. This will calculate several metrics for each year of
-#'the 1-D zoo input x.
-#'
-#'This function divides the zoo by water or calendar year
-#'and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it 
-#'finds the range, base index, and days of zero flow of each year, with base 
-#'index defined as the minimum 7-day flow divided by the average flow
-#'
-#'@param x A zoo timeseries object containing the flow series
-#'@param yearType The type of year factor to be used when determining statistcs,
-#'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
-#'@param mimic.tnc should the function perform the calculation like the TNC IHA
-#'software? If mimic.tnc is TRUE, then running means will be calculated for each
-#'year individually and will not use data from the previous or next year, thereby
-#treating each year independently of the others. group2 statistics will then be
-#calcualted from these running means
-#'@param ... additional arguments passed to ddply. Likely not used without
-#'  modificiation to this function
-#'@return a data frame with the group 2 statistics for each year
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
-#'@references \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}
-#'@importFrom plyr ddply '.'
-#'@importFrom zoo coredata index
-#'@importFrom lubridate year
-#'@export
-#'@examples
-#'data(bullrun)
-#'group2(bullrun, 'water')
-#'
-group2 <- function ( 
-  #A zoo timeseries  
-  x, 
-  #Whether statistics should be applied on a water or calendar year basis
-  yearType = c("water", "calendar"), 
-  mimic.tnc = T, ...) {
-  
-  #x must be a zoo:
-  stopifnot(is.zoo(x))
-  #Get the yearType argument of the function input (either water or calendar)
-  yearType <- match.arg(yearType)
-  if(!(yearType %in% c('water','calendar'))){
-    stop(paste0("'yearType' argument must be either 'water' or 'calendar'.
-    ",yearType," has not yet been implemented"))
-  }
-  #Get the year as either water year or calendar year based using switch and the
-  #yearType input by user and getting the timeseries from zoo using index
-  yr <- switch(yearType, water = water.year(index(x)), calendar = year(index(x)))
-  #Calculate the rolling average of all data, treating years independently (not
-  #allowing running averages to use data outside of the current year)
-  #(controlled by mimic.tnc)
-  rollx <- runmean.iha(x, year = yr, mimic.tnc = mimic.tnc)
-  #Add the years as the first column to rollx
-  xd <- cbind(year = yr, as.data.frame(rollx))
-  #Use plyr::ddply to apply group2Funs() to each subset of xd based on the
-  #grouping variable year e.g. apply group2Funs() to each year of data in xd and
-  #combine results into one data.frame
-  res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]), 
-               ...)
-  return(res)
-}
-
 
 #'Calculate rolling means for group2 statistics
 #'
@@ -276,7 +213,7 @@ runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
 #'Calculates group2 statistics from a matrix of rolling means. This include
 #'range, base index (minimum 7-day flow divided by mean daily flow), and the
 #'number of days with zero flow.
-#'#'@return a named vector containing the group2 statistics, including the range
+#'@return a named vector containing the group2 statistics, including the range
 #'of the 1-, 3-, 7-, 30-, and 90-day flows and the base index and days of zero
 #'flow
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
@@ -304,3 +241,67 @@ group2Funs <- function (x) {
 }
 
 
+#'Calculates the group2 IHA statistics
+#'
+#'The group 2 statistics measure the magnitude of monthly water condition and
+#'include 12 parameters. This will calculate several metrics for each year of
+#'the 1-D zoo input x.
+#'
+#'This function divides the zoo by water or calendar year
+#'and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it 
+#'finds the range, base index, and days of zero flow of each year, with base 
+#'index defined as the minimum 7-day flow divided by the average flow
+#'
+#'@param x A zoo timeseries object containing the flow series
+#'@param yearType The type of year factor to be used when determining statistcs,
+#'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
+#'@param mimic.tnc should the function perform the calculation like the TNC IHA
+#'software? If mimic.tnc is TRUE, then running means will be calculated for each
+#'year individually and will not use data from the previous or next year, thereby
+#treating each year independently of the others. group2 statistics will then be
+#calcualted from these running means
+#'@param ... additional arguments passed to ddply. Likely not used without
+#'  modificiation to this function
+#'@return a data frame with the group 2 statistics for each year
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@references \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}
+#'@importFrom plyr ddply '.'
+#'@importFrom zoo coredata index
+#'@importFrom lubridate year
+#'@export
+#'@examples
+#'library(dataRetrieval)
+#'gageData <- dataRetrieval::readNWISdv("01634500","00060")
+#'gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
+#'group2(gageFlow,'water',TRUE)
+group2 <- function ( 
+    #A zoo timeseries  
+  x, 
+  #Whether statistics should be applied on a water or calendar year basis
+  yearType = c("water", "calendar"), 
+  mimic.tnc = T, ...) {
+  
+  #x must be a zoo:
+  stopifnot(is.zoo(x))
+  #Get the yearType argument of the function input (either water or calendar)
+  yearType <- match.arg(yearType)
+  if(!(yearType %in% c('water','calendar'))){
+    stop(paste0("'yearType' argument must be either 'water' or 'calendar'.
+    ",yearType," has not yet been implemented"))
+  }
+  #Get the year as either water year or calendar year based using switch and the
+  #yearType input by user and getting the timeseries from zoo using index
+  yr <- switch(yearType, water = water.year(index(x)), calendar = year(index(x)))
+  #Calculate the rolling average of all data, treating years independently (not
+  #allowing running averages to use data outside of the current year)
+  #(controlled by mimic.tnc)
+  rollx <- runmean.iha(x, year = yr, mimic.tnc = mimic.tnc)
+  #Add the years as the first column to rollx
+  xd <- cbind(year = yr, as.data.frame(rollx))
+  #Use plyr::ddply to apply group2Funs() to each subset of xd based on the
+  #grouping variable year e.g. apply group2Funs() to each year of data in xd and
+  #combine results into one data.frame
+  res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]), 
+                     ...)
+  return(res)
+}

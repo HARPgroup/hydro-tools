@@ -22,8 +22,8 @@ NA
 \seealso{
 NA
 }
-\section{Super class}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{dHVarAnnotation}
+\section{Super classes}{
+\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHVarAnnotation]{hydrotools::dHVarAnnotation}} -> \code{dHOMtextField}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -37,8 +37,8 @@ NA
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-dHVarAnnotation-exportOpenMIBase}{\code{dHOMtextField$exportOpenMIBase()}}
-\item \href{#method-dHVarAnnotation-clone}{\code{dHOMtextField$clone()}}
+\item \href{#method-dHOMtextField-exportOpenMIBase}{\code{dHOMtextField$exportOpenMIBase()}}
+\item \href{#method-dHOMtextField-clone}{\code{dHOMtextField$clone()}}
 }
 }
 \if{html}{\out{
@@ -52,8 +52,8 @@ NA
 </details>
 }}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-dHVarAnnotation-exportOpenMIBase"></a>}}
-\if{latex}{\out{\hypertarget{method-dHVarAnnotation-exportOpenMIBase}{}}}
+\if{html}{\out{<a id="method-dHOMtextField-exportOpenMIBase"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMtextField-exportOpenMIBase}{}}}
 \subsection{Method \code{exportOpenMIBase()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{dHOMtextField$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
@@ -68,8 +68,8 @@ NA
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-dHVarAnnotation-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-dHVarAnnotation-clone}{}}}
+\if{html}{\out{<a id="method-dHOMtextField-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMtextField-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

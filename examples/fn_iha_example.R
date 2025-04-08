@@ -1,7 +1,7 @@
 ###################################################################
 hydro_tools <- 'C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\hydro-tools'
 source(paste(hydro_tools,"USGS","usgs_gage_functions.R", sep = "\\")) #load USGS functions
-source(paste(hydro_tools,"LowFlow","fn_iha.R", sep = "\\")) #load IHA functions
+source(paste(hydro_tools,"R","cia_utils.R", sep = "\\")) #load IHA functions
 
 # https://va.water.usgs.gov/duration_plots/daily/dp01668000.htm
 # USGS Gage number

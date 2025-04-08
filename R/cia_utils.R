@@ -602,7 +602,7 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
 #' @description provide the 7q10 from a given flow timeseries
 #' @param zoots a timeseries flormatted in zoo (required by IHA)
 #' @return singel numeric value for 7q10
-#' @import IHA PearsonDS
+#' @import PearsonDS
 #' @export fn_iha_7q10
 #' @examples NA
 #' @seealso NA
@@ -640,7 +640,6 @@ fn_iha_7q10 <- function(zoots) {
 #' @param targetmo month in title case string
 #' @param q numeric what quantile to return (default median/0.5)
 #' @return singel numeric value for 7q10
-#' @import IHA
 #' @export fn_iha_mlf
 fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
   modat <- group1(zoots,'water','min')  # IHA function that calculates minimum monthly statistics for our data by water year	 
@@ -664,7 +663,6 @@ fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
 #' @param stat default=min, options: max, median
 #' @param wyear_type water year default=calendar, options: water
 #' @return singel numeric value for the selected index/stat
-#' @import IHA
 #' @export fn_iha_flow_extreme
 fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar') {
   g2flows <- group2(flows, year = wyear_type);
