@@ -1,16 +1,26 @@
-#' @name Hydro Data Source
-#' Global object store holds references to all objects of a given domain
-#' and pointers to remote data source if applicable.
-#' 
-#' if remote data source is set, all data can be synched back to it
-#' no mixing of data sources is allowed
-#' @description Data Source containing tables and methods of Model data objects
-#' @details Provides integrated, queryable universe of features, observations and meta data
-#' @importFrom R6 R6Class  
+#' @name Hydro Data Source Data Source Bin
+#' @description RomDataSource is an object that contains tables and methods of
+#'   model data objects. It serves as a global object store that references to
+#'   all objects of a given domain and pointers to remote data source if
+#'   applicable. It offers the flexibility of synching (via POST or
+#'   INSERT/UPDATE) to a remote data source OR allows users to update local data
+#'   bases or sources. It does not permit a mix of these data streams, keeping
+#'   the RomDataSource object consistent.
+#' @details Provides integrated, queryable universe of features, observations
+#'   and meta data
+#' @importFrom R6 R6Class
 #' @param baseurl URL of remote data store with REST capabilities, optional
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
-#' @examples NA
+#' @examples 
+#' #Get new datasource via odbc
+#' ds <- RomDataSource$new(site,
+#'                         rest_uname = odbc_uname,
+#'                         connection_type = 'odbc',
+#'                         dbname = databaseName)
+#' ds$get_token(rest_pw = odbc_pw)
+#' #Pointer to external db
+#' ds$connection
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
@@ -31,11 +41,18 @@ RomDataSource <- R6Class(
     rest_uname = NULL,
     #' @field dbname DATABASE TO USE IN odbC CONNECTION
     dbname = NULL,
-    #' @param site URL of some RESTful repository
-    #' @param rest_uname username to connect to RESTful repository
-    #' @param connection_type supported rest or odbc
-    #' @param dbname supported odbc dbname
-    #' @return object instance
+    #' @param site URL of some RESTful repository or the host of the target
+    #'   database. At DEQ, this is defined in the default config files.
+    #' @param rest_uname username to connect to RESTful repository or database.
+    #'   At DEQ, this should be defined within local config files
+    #' @param connection_type String, either 'rest' or 'odbc' depending on
+    #'   target database
+    #' @param dbname Used only when connection_type = 'odbc'. This is the
+    #'   database name of the database that supports the ODBC connection. At
+    #'   DEQ, this should generally target the active dbase, not alpha, although
+    #'   both are supported
+    #' @return Instance of RomDataSource, now with populated site, rest_uname,
+    #'   connection_type, and dbname data
     initialize = function(site, rest_uname = NULL, connection_type = 'rest', dbname = NULL) {
       self$site = site
       self$rest_uname = rest_uname

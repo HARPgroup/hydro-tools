@@ -5,15 +5,17 @@ Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("a
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Depends: 
     R (>= 3.5),
-    R6
+    R6,
+	sqldf,
+	zoo,
+	RPostGres
+	
 License: GPL
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Imports: 
     stringr,
-    sqldf,
     getPass,
-    zoo,
     utils,
     jsonlite,
     ggplot2,
