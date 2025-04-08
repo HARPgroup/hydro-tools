@@ -31,6 +31,13 @@ Features have several descriptors:
 *bundle* = The class of information stored in the property. The majority of properties have a bundle of 'dh_properties', but there are a few special bundles used when a large number of properties exist with a single purpose, such as WSP projections.  
 
 
+**dh_timeseries** = A table of supporting information about features or properties. dh_properties has a start and end time field, so this table is only for time series, repeating data where each point has a time element. Many of the fields from this table are similar to dh_properties, such as the featureid, entity_type, and varid to indicate what the record is attached to and what its data represents. 
+*tid* = Unique identifier for each timeseries record  
+*tstime* = The time associated with this record. If this record indicates a stretch of time, such as a week, the tstime represents the beginning of that period  
+*tsendtime* = The end time of this record. If this record represents an instantaneous event or the end point is irrelevant, this can be left blank.  
+
+
+
 **dh_variabledefinition** = This table defines the variables used in both the dh_properties and dh_timeseries table (linked by the varid field). This table essentially works to explain what the values in dh_properties and timeseries represent  
 *hydroid* = Unique ID of the variable. This is also labeled hydroid, but is independent of the primary key of dh_feature  
 *varname* = The name of the variable. This is a descriptor field that generally lines up with the propname field in dh_properties, but they can vary for object modelling properties  
@@ -38,6 +45,13 @@ Features have several descriptors:
 *varkey* = Abbreviated alias of what this variable represents. This will match up with propname in dh_properties (except in the above discussed special cases)  
 
 
+**field_data_dh_geofield** = Often referred to conversationally as dh_geofield, this is the table that links features (from dh_feature) to their physical location. It has the syntax of a linking table, but it links features directly to their geometry  
+*entity_type* = The origin table of the record  
+*entity_id* = The primary key of the feature (the hydroid)  
+*dh_geofield_geom* = The geometry of the feature. This is in WKB, and can be a multipolygon of any size  
+*dh_geofield_lat/dh_geofield_lon* = Latitude and Longitude. For points, i.e. wells, these are the coordinates. For polygons, i.e. watersheds, this is the centroid coordinates.  
+
+	
 **hydroid** = Primary key of the dh_feature table. This table contains facilities, measuring points, and watersheds, the most commonly referenced records.  
 **pk** = Primary Key, the unique identifier for a table.  
 **hydrocode** =  A code that may relate a feature from dh_feature to other databases or data sources e.g. a feature used to represent a USGS gage may have a hydrocode related to its USGS gage number. This is an important field in features like watersheds or USGS gages, but is not commonly used for other feature types like facilities and measuring points. This field was once a unique identifier in previous databases. Generally encouraged this field be unique, but not required (can also be blank).  
