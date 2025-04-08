@@ -102,7 +102,7 @@ RomPropertyTree <- R6Class(
       # now, load all associated variable definitions if possible
       if ('varid' %in% names(config)) {
         vars <- unique(config$varid)
-        #print(vars)
+        message(vars)
         for (v in 1:nrow(vars)) {
           vid <- as.integer(vars[v,])
           self$datasource$get_vardef(vid)
