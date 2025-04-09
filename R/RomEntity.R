@@ -98,8 +98,9 @@ RomEntity <- R6Class(
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         #message("Found")
+        config = feature
       }
-      self$load_data(feature, load_remote)
+      self$load_data(config, load_remote)
     },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
