@@ -99,7 +99,7 @@ RomEntity <- R6Class(
         # merge config with prop
         #message("Found")
       }
-      self$load_data(config, load_remote)
+      self$load_data(feature, load_remote)
     },
     #' @param config 
     #' @returns an updated config if necessary or FALSE if it fails
