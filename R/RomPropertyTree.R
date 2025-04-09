@@ -58,7 +58,7 @@ RomPropertyTree <- R6Class(
       }
       # first, change the sql to reflect the desired pid base, then proceed
       self$sql_select_from <- str_replace_all(self$sql_select_from, '\\[root_pid\\]', as.character(config$root_pid))
-      message(paste("Base Query:",self$sql_select_from))
+      #message(paste("Base Query:",self$sql_select_from))
       super$initialize(datasource, config, load_remote)
       # experimental support for automatic local caching
       #self$datasource$set_feature(self$to_list())
