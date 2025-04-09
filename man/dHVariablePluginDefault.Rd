@@ -2,18 +2,22 @@
 % Please edit documentation in R/dHVariablePluginDefault.R
 \name{dHVariablePluginDefault}
 \alias{dHVariablePluginDefault}
-\title{Base entity data object}
+\title{dHVariablePluginDefault}
 \value{
 reference class of type openmi.om.base.
 
 an updated config if necessary or FALSE if it fails
 
 an updated config if necessary or FALSE if it fails
+
+a Rom importable config or FALSE if it fails
 }
 \description{
 Handler class for property entities (and timeseries if needed)
 }
 \details{
+Base entity data object
+
 Has standard methods for managing data and meta data
 }
 \examples{
@@ -39,6 +43,8 @@ NA
 \item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
 \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
 }
 }
@@ -91,11 +97,34 @@ object instance
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{entity}}{the local object to work on}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-fromOpenMIBase"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOpenMIBase}{}}}
+\subsection{Method \code{fromOpenMIBase()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOpenMIBase(om_list)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{om_list}}{the open MI export array/list to work on}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-param_info"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-param_info}{}}}
+\subsection{Method \code{param_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$param_info()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-clone"></a>}}

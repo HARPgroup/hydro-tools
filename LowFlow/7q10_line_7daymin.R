@@ -3,7 +3,6 @@ rm(list = ls())   # clear variables
 # Load necessary libraries
 suppressPackageStartupMessages(library('lubridate'))
 suppressPackageStartupMessages(library('zoo'))
-suppressPackageStartupMessages(library('IHA'))
 suppressPackageStartupMessages(library('stringr'))
 suppressPackageStartupMessages(library('PearsonDS'))
 suppressPackageStartupMessages(library('plyr'))

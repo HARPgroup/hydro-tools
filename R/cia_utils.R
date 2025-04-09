@@ -593,3 +593,94 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
   )
   return(rets)
 }
+
+
+# fn_iha_7q10 
+#'
+#' @name fn_iha_7q10
+#' @title fn_iha_7q10
+#' @description provide the 7q10 from a given flow timeseries
+#' @param zoots a timeseries flormatted in zoo (required by IHA)
+#' @return singel numeric value for 7q10
+#' @import PearsonDS
+#' @export fn_iha_7q10
+#' @examples NA
+#' @seealso NA
+fn_iha_7q10 <- function(zoots) {
+  g2 <- group2(zoots) 
+  #print("Group 2, 7-day low flow results ")
+  #print(g2["7 Day Min"])
+  x <- as.vector(as.matrix(g2["7 Day Min"]))
+  # fudge 0 values
+  # correct for zeroes?? If so, use this loop:
+  # This is not an "approved" method - we need to see how the GS/other authorities handles this
+  for (k in 1:length(x)) {
+    if (x[k] <= 0) {
+      x[k] <- 0.00000001
+      print (paste("Found 0.0 average in year", g2["year"], sep = " "))
+    }
+  }
+  x <- log(x)
+  if (length(x) <= 1) {
+    return(exp(x[1]))
+  } else {
+    pars <- PearsonDS:::pearsonIIIfitML(x)
+    x7q10 <- exp(qpearsonIII(0.1, params = pars$par))
+    return(x7q10);
+  }
+}
+
+
+# fn_iha_mlf 
+#'
+#' @name fn_iha_mlf
+#' @title fn_iha_mlf
+#' @description provide the quantile of minimum observed monthly flow for the month over a period of years
+#' @param zoots a timeseries flormatted in zoo (required by IHA)
+#' @param targetmo month in title case string
+#' @param q numeric what quantile to return (default median/0.5)
+#' @return singel numeric value for 7q10
+#' @export fn_iha_mlf
+fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
+  modat <- group1(zoots,'water','min')  # IHA function that calculates minimum monthly statistics for our data by water year	 
+  message(paste("Grabbing ", targetmo, " values ", sep=''))
+  g1vec <- as.vector(as.matrix(modat[,targetmo]))  # gives only August statistics
+  
+  # calculates the 50th percentile - this is the August Low Flow
+  # August Low Flow = median flow of the annual minimum flows in August for a chosen time period
+  message("Performing quantile analysis")
+  x <- quantile(g1vec, q, na.rm = TRUE);
+  return(as.numeric(x));
+}
+
+# fn_iha_flow_extreme 
+#'
+#' @name fn_iha_flow_extreme
+#' @title fn_iha_flow_extreme
+#' @description provide the quantile of annual period 
+#' @param flows a timeseries flormatted in zoo (required by IHA)
+#' @param metric the flow period and type (min/max)
+#' @param stat default=min, options: max, median
+#' @param wyear_type water year default=calendar, options: water
+#' @return singel numeric value for the selected index/stat
+#' @export fn_iha_flow_extreme
+fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar') {
+  g2flows <- group2(flows, year = wyear_type);
+  metric_flows <- g2flows[metric];
+  if (stat == 'min') {
+    ndx = which.min(as.numeric(metric_flows[,metric]));
+  } else if (stat == 'max') {
+    ndx = which.max(as.numeric(metric_flows[,metric]));
+  } else if (stat == 'median') {
+    ndx = which(as.numeric(metric_flows[,metric]) == median(as.numeric(metric_flows[,metric])))
+  }
+  
+  metric_flows_Qout = round(g2flows[ndx,metric],6);
+  extreme_year = g2flows[ndx,]$"year";
+  
+  if (is.na(metric_flows_Qout)) {
+    metric_flows_Qout = 0.0
+    extreme_year = 0
+  }
+  return(c(metric_flows_Qout, extreme_year))
+}

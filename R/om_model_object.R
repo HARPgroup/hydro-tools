@@ -27,7 +27,7 @@ om_model_object <- function(
       model_name <- paste(feature$name, model_version)
     }
     model$propname = model_name
-    model$varid = ds$get_vardef(model_varkey)$varid
+    model$varid = ds$get_vardef(model_varkey)$hydroid
     message(paste("Creating new feature model", model$propname, model$varid, model$featureid, model$propcode))
     model$save(TRUE)
   }

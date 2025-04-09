@@ -10,6 +10,12 @@ an updated config if necessary or FALSE if it fails
 
 loads the varid
 
+the variable definition object for this entity
+
+the property object for this entity
+
+the property object for this entity
+
 the data from the remote connection
 }
 \description{
@@ -37,6 +43,8 @@ NA
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
+\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
+
 \item{\code{has_vardef}}{is pluggable?}
 
 \item{\code{varid}}{(optional) integer field for pluggable entities}
@@ -59,11 +67,15 @@ NA
 \item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
 \item \href{#method-RomEntity-insure_varid}{\code{RomEntity$insure_varid()}}
 \item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
+\item \href{#method-RomEntity-get_prop}{\code{RomEntity$get_prop()}}
+\item \href{#method-RomEntity-set_prop}{\code{RomEntity$set_prop()}}
+\item \href{#method-RomEntity-from_list}{\code{RomEntity$from_list()}}
 \item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
 \item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
 \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
 \item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
+\item \href{#method-RomEntity-save_field}{\code{RomEntity$save_field()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
@@ -84,7 +96,7 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \if{latex}{\out{\hypertarget{method-RomEntity-propvalues}{}}}
 \subsection{Method \code{propvalues()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL, propcode = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -93,6 +105,8 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \item{\code{propname}}{optional name to filter}
 
 \item{\code{varid}}{option variable to filter}
+
+\item{\code{propcode}}{optional code to filter}
 }
 \if{html}{\out{</div>}}
 }
@@ -197,6 +211,78 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-get_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-get_prop}{}}}
+\subsection{Method \code{get_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(propname, varkey = NULL, remote = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{propname}}{list of attributes to set, see also: to_list() for format}
+
+\item{\code{varkey}}{specify varkey? (in case of new prop creation)}
+
+\item{\code{remote}}{look at remote datasource?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-set_prop"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-set_prop}{}}}
+\subsection{Method \code{set_prop()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$set_prop(
+  propname,
+  propcode = NULL,
+  propvalue = NULL,
+  varkey = NULL,
+  data_matrix = NULL,
+  remote = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{propname}}{name or property}
+
+\item{\code{propcode}}{if alpha property use this}
+
+\item{\code{propvalue}}{if numeric property use this}
+
+\item{\code{varkey}}{which varkey? defaults to guess Constant and AlphanumericConstant}
+
+\item{\code{data_matrix}}{dataframe contained rows/cols}
+
+\item{\code{remote}}{look at remote datasource?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-from_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-from_list}{}}}
+\subsection{Method \code{from_list()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$from_list(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-load_data}{}}}
 \subsection{Method \code{load_data()}}{
@@ -231,9 +317,16 @@ nothing, but loads the objects plugin
 \if{latex}{\out{\hypertarget{method-RomEntity-to_list}{}}}
 \subsection{Method \code{to_list()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{base_only}}{whether to only use base columns (TRUE) or add fields (FALSE)}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 list of object attributes suitable for input to new() and from_list() methods
 }
@@ -269,6 +362,36 @@ NULL
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-save_field"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-save_field}{}}}
+\subsection{Method \code{save_field()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$save_field(
+  class_field_name,
+  field_table,
+  value_pairs,
+  pkeys = c("entity_type", "entity_id")
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{class_field_name}}{what is this field called on this object (deprecated)}
+
+\item{\code{field_table}}{table to insert into}
+
+\item{\code{value_pairs}}{attriutes to add to insert above the basic entity info (field value here)}
+
+\item{\code{pkeys}}{whether to automatically propagate changes to remote data source}
 }
 \if{html}{\out{</div>}}
 }

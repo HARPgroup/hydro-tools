@@ -49,6 +49,7 @@ RomAdminFeature <- R6Class(
     get_id = function() {
       return(self$adminid)
     },
+    #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function(base_only) {
       # returns as a list, which can be set and fed back to 

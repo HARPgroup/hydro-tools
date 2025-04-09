@@ -2,7 +2,6 @@
 rm(list = ls()) # clear variables
 ## Load necessary libraries
 suppressPackageStartupMessages(library('zoo'))
-suppressPackageStartupMessages(library('IHA'))
 suppressPackageStartupMessages(library("stringr"))
 
 #update to file location of config.local.private
