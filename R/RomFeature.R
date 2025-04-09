@@ -48,6 +48,11 @@ RomFeature <- R6Class(
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       #col.names(self$properties <-
       super$initialize(datasource, config, load_remote)
+      if (!is.logical(feature)) {
+        if (nrow(feature) >= 1) {
+          config <- as.list(feature[1,])
+        }
+      }
       # experimental support for automatic local caching
       self$datasource$set_feature(self$to_list())
       self$mps = list()

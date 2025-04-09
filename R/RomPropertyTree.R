@@ -94,7 +94,7 @@ RomPropertyTree <- R6Class(
     },
     #' @param config input attributes
     #' @param load_remote automatically query remote data source for matches?
-    #' @returns the data from the remote connection
+    #' @return the data from the remote connection
     load_data = function(config, load_remote) {
       self$prop_list = config
       self$datasource$set_prop(config)
