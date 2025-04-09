@@ -5,6 +5,9 @@
 \title{dHOMDataMatrix}
 \value{
 reference class of type openmi.om.base.
+an updated config if necessary or FALSE if it fails
+
+info regarding the needs and capabilities of this object
 }
 \description{
 Simple class to hold tabular values
