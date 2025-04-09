@@ -81,7 +81,11 @@ RomFeature <- R6Class(
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "hydroid") {
-          self$hydroid = as.integer(as.character(config$hydroid))
+          if (is.na(config$hydroid)) {
+            self$hydroid = NA
+          } else {
+            self$hydroid = as.integer(as.character(config$hydroid))
+          }
         } else if (i == "name") {
           self$name = as.character(config$name)
         } else if (i == "hydrocode") {
