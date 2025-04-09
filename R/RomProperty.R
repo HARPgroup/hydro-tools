@@ -125,12 +125,11 @@ RomProperty <- R6Class(
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "pid") {
-          #if (is.na(config$pid)) {
-          #  self$pid = NA
-          #} else {
-          #  self$pid = as.integer(as.character(config$pid))
-          #}
-          self$pid = as.integer(as.character(config$pid))
+          if (is.na(config$pid)) {
+            self$pid = NA
+          } else {
+            self$pid = as.integer(as.character(config$pid))
+          }
         } else if (i == "vid") {
           self$vid = as.integer(as.character(config$vid))
         } else if (i == "varid") {
