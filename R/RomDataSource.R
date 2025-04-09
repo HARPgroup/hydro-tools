@@ -443,7 +443,7 @@ RomDataSource <- R6Class(
     #' @param depth = depth limit for nesting (rarely used)
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
     get_nested_export = function(ds, featureid, props, depth=0) {
-      message(paste("searching for featureid",featureid,"in prop list of length", length(props)))
+      message(paste("searching for featureid",featureid,"in prop df of length", nrow(props)))
       propatts <- as.list(props[which(props$pid == featureid),])
       thisobject = RomProperty$new(ds, propatts, FALSE )
       export = list()
