@@ -69,11 +69,13 @@ NA
 \item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
 \item \href{#method-RomEntity-get_prop}{\code{RomEntity$get_prop()}}
 \item \href{#method-RomEntity-set_prop}{\code{RomEntity$set_prop()}}
+\item \href{#method-RomEntity-from_list}{\code{RomEntity$from_list()}}
 \item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
 \item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
 \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
 \item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
+\item \href{#method-RomEntity-save_field}{\code{RomEntity$save_field()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
 }
@@ -262,6 +264,25 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-from_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-from_list}{}}}
+\subsection{Method \code{from_list()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$from_list(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-load_data}{}}}
 \subsection{Method \code{load_data()}}{
@@ -341,6 +362,36 @@ NULL
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-save_field"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-save_field}{}}}
+\subsection{Method \code{save_field()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$save_field(
+  class_field_name,
+  field_table,
+  value_pairs,
+  pkeys = c("entity_type", "entity_id")
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{class_field_name}}{what is this field called on this object (deprecated)}
+
+\item{\code{field_table}}{table to insert into}
+
+\item{\code{value_pairs}}{attriutes to add to insert above the basic entity info (field value here)}
+
+\item{\code{pkeys}}{whether to automatically propagate changes to remote data source}
 }
 \if{html}{\out{</div>}}
 }

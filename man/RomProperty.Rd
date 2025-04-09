@@ -91,6 +91,7 @@ RomEntity, RomFeature, RomDatasource
 \item \href{#method-RomProperty-to_list}{\code{RomProperty$to_list()}}
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
 \item \href{#method-RomProperty-save_matrix}{\code{RomProperty$save_matrix()}}
+\item \href{#method-RomProperty-save_field}{\code{RomProperty$save_field()}}
 \item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
 \item \href{#method-RomProperty-set_matrix}{\code{RomProperty$set_matrix()}}
 \item \href{#method-RomProperty-delete_fields}{\code{RomProperty$delete_fields()}}
@@ -227,6 +228,36 @@ boolean TRUE on success, FALSE on failure
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$save_matrix()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomProperty-save_field"></a>}}
+\if{latex}{\out{\hypertarget{method-RomProperty-save_field}{}}}
+\subsection{Method \code{save_field()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomProperty$save_field(
+  class_field_name,
+  field_table,
+  value_pairs,
+  pkeys = c("entity_type", "entity_id")
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{class_field_name}}{what is this field called on this object (deprecated)}
+
+\item{\code{field_table}}{table to insert into}
+
+\item{\code{value_pairs}}{attriutes to add to insert above the basic entity info (field value here)}
+
+\item{\code{pkeys}}{whether to automatically propagate changes to remote data source}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 NULL
 }

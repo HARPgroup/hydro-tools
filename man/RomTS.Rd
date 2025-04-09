@@ -83,6 +83,7 @@ NA
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
 </ul>
 </details>
