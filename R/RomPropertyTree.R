@@ -103,9 +103,11 @@ RomPropertyTree <- R6Class(
       if ('varid' %in% names(config)) {
         vars <- as.data.frame(unique(config$varid))
         #message(vars)
-        for (v in 1:nrow(vars)) {
-          vid <- as.integer(vars[v,])
-          self$datasource$get_vardef(vid)
+        if (nrow(vars) > 0) {
+          for (v in 1:nrow(vars)) {
+            vid <- as.integer(vars[v,])
+            self$datasource$get_vardef(vid)
+          }
         }
       }
       #print(vars)

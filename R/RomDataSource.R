@@ -261,9 +261,8 @@ RomDataSource <- R6Class(
         self$propvalues = rbind(self$propvalues, dsl)
         
       } else {
-        
         prop_check = FALSE
-        if (!is.na(prop$pid)) {
+        if (!is.null(prop$pid) && !is.na(prop$pid) ) {
           if (prop$pid > 0) {
             prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
             #message(prop_check)

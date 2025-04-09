@@ -52,6 +52,18 @@ RomFeature <- R6Class(
       self$datasource$set_feature(self$to_list())
       self$mps = list()
     },
+    #' @param config 
+    #' @param load_remote automatically query remote data source for matches?
+    #' @returns the data from the remote connection
+    load_data = function(config, load_remote) {
+      #message(paste("load_data() called "))
+      if (is.data.frame(config)) {
+        if (nrow(config) >= 1) {
+          config <- as.list(config[1,])
+        }
+      }
+      super$load_data(config, load_remote)
+    },
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$hydroid)

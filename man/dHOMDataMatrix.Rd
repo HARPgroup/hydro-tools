@@ -5,7 +5,6 @@
 \title{dHOMDataMatrix}
 \value{
 reference class of type openmi.om.base.
-
 an updated config if necessary or FALSE if it fails
 
 info regarding the needs and capabilities of this object
@@ -70,6 +69,9 @@ NA
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+an updated config if necessary or FALSE if it fails
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-param_info"></a>}}
@@ -79,6 +81,9 @@ NA
 \if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$param_info()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+info regarding the needs and capabilities of this object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-clone"></a>}}
