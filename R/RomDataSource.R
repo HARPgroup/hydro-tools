@@ -171,6 +171,7 @@ RomDataSource <- R6Class(
       # or return 
       # search first in 
       # odbc has robust query handling so we don't need to us fn_get_timeseries
+      ts <- FALSE
       if (self$connection_type == 'odbc') {
         ts_obj = RomTS$new(self)
         tsvalues <- self$get('dh_timeseries', 'tid', config, ts_obj)
@@ -181,7 +182,6 @@ RomDataSource <- R6Class(
         #       using it's names as an environment.  We can make the propvalues
         #       point to dh_properties on the datasource
         #       and also tsvalues point to dh_timeseries_values
-        ts = FALSE
         tsvalues <- fn_search_tsvalues(config, self$tsvalues)
         if (is.logical(tsvalues)) {
           # none exists locally, so query
@@ -387,7 +387,6 @@ RomDataSource <- R6Class(
       } else {
         retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj)
       }
-      
       return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...
