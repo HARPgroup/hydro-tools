@@ -129,12 +129,12 @@ RomTS <- R6Class(
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(
-        tid = self$tid,
+        tid = as.integer(self$tid),
         entity_type = self$entity_type,
-        varid = self$varid,
-        featureid = self$featureid,
-        tstime = self$tstime,
-        tsendtime = self$tsendtime,
+        varid = as.integer(self$varid),
+        featureid = as.integer(self$featureid),
+        tstime = as.integer(self$tstime),
+        tsendtime = as.integer(self$tsendtime),
         tsvalue = self$tsvalue,
         tscode = self$tscode 
         # todo
