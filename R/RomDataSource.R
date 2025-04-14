@@ -172,8 +172,8 @@ RomDataSource <- R6Class(
       # search first in 
       # odbc has robust query handling so we don't need to us fn_get_timeseries
       if (self$connection_type == 'odbc') {
-        ts_obj = RomTS$new(self)
-        tsvalues <- self$get('dh_timeseries', 'tid', config, ts_obj)
+        # ts_obj = RomTS$new(self)
+        tsvalues <- self$get('dh_timeseries', 'tid', config, obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods

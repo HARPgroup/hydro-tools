@@ -88,7 +88,7 @@ RomTS <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        ts <- self$datasource$get_ts(config, 'list', TRUE)
+        ts <- self$datasource$get_ts(config, 'list', TRUE, self)
         # merge config with ts
         #message("Found")
         if (!is.logical(ts)) {
