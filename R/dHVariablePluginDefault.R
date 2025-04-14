@@ -25,7 +25,7 @@ dHVariablePluginDefault <- R6Class(
     },
     #' @param entity the local object to work on 
     #' @param load_remote automatically query REST data source for matches?
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
       # creates an array that can later be serialized as json, xml, or whatever
       export = self$exportOpenMIBase(entity);
@@ -61,7 +61,7 @@ dHVariablePluginDefault <- R6Class(
       return(export)
     },
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = list(
         id=entity$pid,
@@ -74,7 +74,7 @@ dHVariablePluginDefault <- R6Class(
       return(export)
     },
     #' @param om_list the open MI export array/list to work on
-    #' @returns a Rom importable config or FALSE if it fails
+    #' @return a Rom importable config or FALSE if it fails
     fromOpenMIBase = function(om_list) {
       rom_list = list(
         pid=om_list$id,
@@ -84,6 +84,7 @@ dHVariablePluginDefault <- R6Class(
       )
       return(rom_list)
     },
+    #' @return detailed information about this object in markdown list format
     param_info = function() {
       info = "Information about object and it's parameters
       - propname: name of the object
@@ -119,7 +120,7 @@ dHOMEquation <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
       export$value = entity$propcode
@@ -158,7 +159,7 @@ dHOMConstant <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = list(
         id=entity$pid,
@@ -195,7 +196,7 @@ dHOMAlphanumericConstant <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       # NOTE: this one does not use the parent, as it is handled oddly by OM if we do
       export = list(
@@ -247,7 +248,7 @@ dHVarImage <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       # note: we export 'code' attribute but should deprecate in favor of 'value'
       export = super$exportOpenMIBase(entity)
@@ -272,7 +273,7 @@ dHOMObjectClass <- R6Class(
   inherit = dHOMAlphanumericConstant,
   public = list(
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       if ('propcode' %in% names(entity)) {
         export = entity$propcode
@@ -303,7 +304,7 @@ dHOMDataMatrix <- R6Class(
     #' @field entity_bundle model object type
     entity_bundle = 'om_data_matrix',
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
       export$matrix=list(
@@ -313,7 +314,7 @@ dHOMDataMatrix <- R6Class(
       )
       return(export)
     },
-    #' @returns info regarding the needs and capabilities of this object
+    #' @return info regarding the needs and capabilities of this object
     param_info = function() {
       info = "- eval_type = 'auto'; // auto, numeric, string, reference 
       - valuetype = 1; // 0 - returns entire array (normal), 1 - single column lookup (col), 2 - 2 column lookup (col & row)
@@ -346,7 +347,7 @@ dHVarAnnotation <- R6Class(
     #' @field object_class model object type
     object_class = 'textField',
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
       export$value = entity$proptext
@@ -374,7 +375,7 @@ dHOMtextField <- R6Class(
     #' @field object_class model object type
     object_class = 'textField',
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
       export$value = entity$propcode
@@ -403,7 +404,7 @@ dHOMConsumptiveUseFractionsPWS <- R6Class(
     #' @field object_class model object type
     object_class = 'textField',
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       export = super$exportOpenMIBase(entity)
       export$value = entity$propcode
@@ -431,7 +432,7 @@ dHOMbroadCastObject <- R6Class(
     #' @field object_class model object type
     object_class = 'broadCastObject',
     #' @param entity the local object to work on 
-    #' @returns an updated config if necessary or FALSE if it fails
+    #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
       #print(paste("Entity matrix:", entity$propname))
       export = super$exportOpenMIBase(entity)
