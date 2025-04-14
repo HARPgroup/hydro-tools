@@ -17,7 +17,7 @@
 #' inputs = list(pid = NA,bundle = NA, featureid = NA, etc.),
 #' con = datasource$connection, obj = FALSE)
 #' }
-fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
+fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug = FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
   #print(inputs)
   if (!is.na(pk)) {
@@ -46,7 +46,9 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE){
     message(paste0("----- Updating ", entity_type, "..."))
     odbc_sql = fn_guess_update(entity_type, pk, inputs)
   }
-  #message(odbc_sql)
+  if (debug == TRUE) {
+    message(paste("Debug: ODBC update/insert:", odbc_sql))
+  }
   pkid <- sqldf(as.character(odbc_sql), connection = con)
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
@@ -88,7 +90,7 @@ fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE)
     }
   }
   if (debug == TRUE) {
-    message(paste("ODBC returned", odbc_sql))
+    message(paste("Debug: ODBC DELETE", odbc_sql))
   }
   result <- sqldf(as.character(odbc_sql), connection = con)
   return(result)
