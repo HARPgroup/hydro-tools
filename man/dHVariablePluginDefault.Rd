@@ -5,12 +5,6 @@
 \title{dHVariablePluginDefault}
 \value{
 reference class of type openmi.om.base.
-
-an updated config if necessary or FALSE if it fails
-
-an updated config if necessary or FALSE if it fails
-
-a Rom importable config or FALSE if it fails
 }
 \description{
 Handler class for property entities (and timeseries if needed)
@@ -84,6 +78,9 @@ object instance
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+an updated config if necessary or FALSE if it fails
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-exportOpenMIBase"></a>}}
@@ -99,6 +96,9 @@ object instance
 \item{\code{entity}}{the local object to work on}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+an updated config if necessary or FALSE if it fails
 }
 }
 \if{html}{\out{<hr>}}
@@ -116,6 +116,9 @@ object instance
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+a Rom importable config or FALSE if it fails
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-param_info"></a>}}
@@ -125,6 +128,9 @@ object instance
 \if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$param_info()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+detailed information about this object in markdown list format
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-clone"></a>}}
