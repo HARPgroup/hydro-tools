@@ -56,6 +56,16 @@ RomFeature <- R6Class(
     get_id = function() {
       return(self$hydroid)
     },
+    #' @param config 
+    #' @param load_remote automatically query remote data source for matches?
+    #' @returns the data from the remote connection
+    load_data = function(config, load_remote) {
+      if (is.data.frame(config)) {
+        if (nrow(config) > 1) {
+          config = as.list(config[1,])
+        }
+      }
+    }
     #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function(base_only=FALSE) {
