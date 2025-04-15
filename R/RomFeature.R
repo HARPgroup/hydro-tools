@@ -67,7 +67,7 @@ RomFeature <- R6Class(
         config = as.list(config)
       }
       super$load_data(config, load_remote)
-    }
+    },
     #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
     to_list = function(base_only=FALSE) {
