@@ -62,9 +62,11 @@ RomFeature <- R6Class(
     load_data = function(config, load_remote) {
       if (is.data.frame(config)) {
         if (nrow(config) > 1) {
-          config = as.list(config[1,])
+          config = config[1,]
         }
+        config = as.list(config)
       }
+      super$load_data(config, load_remote)
     }
     #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
