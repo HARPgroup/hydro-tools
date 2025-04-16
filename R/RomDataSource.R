@@ -60,6 +60,7 @@ RomDataSource <- R6Class(
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
         self$connection <- dbConnect(
+          bigint = "integer",
           RPostgres::Postgres(),
           dbname = self$dbname,
           host = httr::parse_url(self$site)$hostname,
