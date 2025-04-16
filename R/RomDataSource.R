@@ -29,6 +29,8 @@ RomDataSource <- R6Class(
     rest_uname = NULL,
     #' @field dbname DATABASE TO USE IN odbC CONNECTION
     dbname = NULL,
+    #' @field debug show debug info for queries
+    debug = FALSE,
     #' @param site URL of some RESTful repository
     #' @param rest_uname username to connect to RESTful repository
     #' @param connection_type supported rest or odbc
@@ -172,6 +174,7 @@ RomDataSource <- R6Class(
       # or return 
       # search first in 
       # odbc has robust query handling so we don't need to us fn_get_timeseries
+      ts = FALSE
       if (self$connection_type == 'odbc') {
         # ts_obj = RomTS$new(self)
         tsvalues <- self$get('dh_timeseries', 'tid', config, obj)
@@ -182,7 +185,6 @@ RomDataSource <- R6Class(
         #       using it's names as an environment.  We can make the propvalues
         #       point to dh_properties on the datasource
         #       and also tsvalues point to dh_timeseries_values
-        ts = FALSE
         tsvalues <- fn_search_tsvalues(config, self$tsvalues)
         if (is.logical(tsvalues)) {
           # none exists locally, so query
@@ -385,7 +387,7 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj)
+        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj, self$debug)
       }
       
       return(retvals)
@@ -398,7 +400,7 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        return_id = fn_post_odbc(entity_type, pk, config, self$connection)
+        return_id = fn_post_odbc(entity_type, pk, config, self$connection, FALSE, self$debug)
       }
       return(return_id)
     },
