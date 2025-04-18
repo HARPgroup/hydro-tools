@@ -174,9 +174,14 @@ RomFeature <- R6Class(
       }
       # include this in inputs for odbc routines
       input_where = paste0(
-        " base.hydroid = ", self$get_id(), " AND ",
-        fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
+        " base.hydroid = ", self$get_id()
       ) 
+      if (length(inputs[!is.na(inputs)]) > 0) {
+        input_where = paste0(
+          " AND ",
+          fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
+        )
+      }
       sql = paste0("select target.*
              from dh_feature_fielded as base
              left outer join dh_feature_fielded as target

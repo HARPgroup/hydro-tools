@@ -150,11 +150,12 @@ RomEntity <- R6Class(
     #' @param varkey specify varkey? (in case of new prop creation)
     #' @param remote look at remote datasource?
     #' @returns the property object for this entity
-    get_prop = function(propname, varkey=NULL, remote=TRUE) {
+    get_prop = function(propname, varkey=NULL, propcode=NULL, remote=TRUE) {
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
-        propname=propname
+        propname=propname,
+        propcode=propcode
       )
       if(!is.null(varkey)) {
         # this may be a create request, populate varkey
