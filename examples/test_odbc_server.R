@@ -52,6 +52,7 @@ ts2 <- RomTS$new(
 )
 ts2$save(TRUE)
 prev2$delete(TRUE)
+ds$debug = TRUE
 ts2retrieve <- RomTS$new(
   ds, list(
     featureid=prev$pid, 
