@@ -4,16 +4,14 @@ Version: 0.0.0.1
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Depends: 
-    R (>= 3.5),
-    R6
+    R (>= 3.5)
 License: GPL
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Imports: 
     stringr,
-    sqldf,
-    getPass,
     zoo,
+    getPass,
     utils,
     jsonlite,
     ggplot2,
@@ -22,4 +20,9 @@ Imports:
     graphics,
     flextable,
     bit64,
-    PearsonDS
+    PearsonDS,
+    RPostgres,
+    R6,
+    sqldf,
+    plyr,
+    lubridate
