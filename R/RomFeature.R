@@ -35,6 +35,10 @@ RomFeature <- R6Class(
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
+    #' @field nextdown_id feature geometry WKT
+    nextdown_id = NA,
+    #' @field parent_id feature geometry WKT
+    parent_id = NA,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = "
       select * from dh_feature_fielded
@@ -178,6 +182,7 @@ RomFeature <- R6Class(
       ) 
       if (length(inputs[!is.na(inputs)]) > 0) {
         input_where = paste0(
+          input_where,
           " AND ",
           fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
         )
