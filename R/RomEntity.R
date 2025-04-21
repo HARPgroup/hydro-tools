@@ -99,7 +99,7 @@ RomEntity <- R6Class(
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
-          config <- feature
+          config = feature
         }
       }
       self$load_data(config, load_remote)
@@ -148,13 +148,15 @@ RomEntity <- R6Class(
     },
     #' @param propname list of attributes to set, see also: to_list() for format
     #' @param varkey specify varkey? (in case of new prop creation)
+    #' @param propcode specify propcode? (in case of new prop creation)
     #' @param remote look at remote datasource?
     #' @returns the property object for this entity
-    get_prop = function(propname, varkey=NULL, remote=TRUE) {
+    get_prop = function(propname=NULL, varkey=NULL, propcode=NULL, remote=TRUE) {
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
-        propname=propname
+        propname=propname,
+        propcode=propcode
       )
       if(!is.null(varkey)) {
         # this may be a create request, populate varkey

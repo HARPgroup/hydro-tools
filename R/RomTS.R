@@ -88,7 +88,7 @@ RomTS <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        ts <- self$datasource$get_ts(config, 'list', TRUE)
+        ts <- self$datasource$get_ts(config, 'list', TRUE, self)
         # merge config with ts
         #message("Found")
         if (!is.logical(ts)) {
@@ -102,23 +102,23 @@ RomTS <- R6Class(
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "tid") {
-          self$tid = config$tid
+          self$tid = as.integer(as.character(config$tid))
         } else if (i == "varid") {
-          self$varid = config$varid
+          self$varid = as.integer(as.character(config$varid))
         } else if (i == "entity_type") {
           self$entity_type = config$entity_type
         } else if (i == "featureid") {
-          self$featureid = config$featureid
+          self$featureid = as.integer(as.character(config$featureid))
         } else if (i == "tstime") {
-          self$tstime = config$tstime
+          self$tstime = as.integer(as.character(config$tstime))
         } else if (i == "tsendtime") {
-          self$tsendtime = config$tsendtime
+          self$tsendtime = as.integer(as.character(config$tsendtime))
         } else if (i == "tsvalue") {
           self$tsvalue = config$tsvalue
         } else if (i == "tscode") {
           self$tscode = config$tscode
         } else if (i == "tlid") {
-          self$tlid = config$tlid
+          self$tlid = as.integer(as.character(config$tlid))
         } else if (i == "bundle") {
           self$bundle = config$bundle
         }
@@ -129,12 +129,12 @@ RomTS <- R6Class(
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
       t_list <- list(
-        tid = self$tid,
+        tid = as.integer(self$tid),
         entity_type = self$entity_type,
-        varid = self$varid,
-        featureid = self$featureid,
-        tstime = self$tstime,
-        tsendtime = self$tsendtime,
+        varid = as.integer(self$varid),
+        featureid = as.integer(self$featureid),
+        tstime = as.integer(self$tstime),
+        tsendtime = as.integer(self$tsendtime),
         tsvalue = self$tsvalue,
         tscode = self$tscode 
         # todo

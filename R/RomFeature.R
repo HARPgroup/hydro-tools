@@ -35,6 +35,10 @@ RomFeature <- R6Class(
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
+    #' @field nextdown_id feature geometry WKT
+    nextdown_id = NA,
+    #' @field parent_id feature geometry WKT
+    parent_id = NA,
     #' @field sql_select_from syntax to use to select via an odbc or other SQL based datasource
     sql_select_from = "
       select * from dh_feature_fielded
@@ -55,6 +59,18 @@ RomFeature <- R6Class(
     #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
     get_id = function() {
       return(self$hydroid)
+    },
+    #' @param config 
+    #' @param load_remote automatically query remote data source for matches?
+    #' @return the data from the remote connection
+    load_data = function(config, load_remote) {
+      #message(paste("load_data() called "))
+      if (is.data.frame(config)) {
+        if (nrow(config) >= 1) {
+          config <- as.list(config[1,])
+        }
+      }
+      super$load_data(config, load_remote)
     },
     #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
     #' @return list of object attributes suitable for input to new() and from_list() methods
@@ -81,7 +97,11 @@ RomFeature <- R6Class(
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "hydroid") {
-          self$hydroid = as.integer(as.character(config$hydroid))
+          if (is.na(config$hydroid)) {
+            self$hydroid = NA
+          } else {
+            self$hydroid = as.integer(as.character(config$hydroid))
+          }
         } else if (i == "name") {
           self$name = as.character(config$name)
         } else if (i == "hydrocode") {
@@ -158,9 +178,15 @@ RomFeature <- R6Class(
       }
       # include this in inputs for odbc routines
       input_where = paste0(
-        " base.hydroid = ", self$get_id(), " AND ",
-        fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
+        " base.hydroid = ", self$get_id()
       ) 
+      if (length(inputs[!is.na(inputs)]) > 0) {
+        input_where = paste0(
+          input_where,
+          " AND ",
+          fn_guess_sql_where(self$base_entity_type, self$pk_name, inputs, "target")
+        )
+      }
       sql = paste0("select target.*
              from dh_feature_fielded as base
              left outer join dh_feature_fielded as target

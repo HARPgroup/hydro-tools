@@ -6,16 +6,11 @@ library("stringr")
 basepath='/var/www/R';
 source("/var/www/R/config.R")
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/R/fac_utils.R")
-dso <- RomDataSource$new(site, rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-dso$get_token(rest_pw = odbc_pw)
-
-dso <- RomDataSource$new("http://192.168.0.21", rest_uname = odbc_uname, connection_type = 'odbc', dbname = 'drupal.dh03')
-dso$get_token(rest_pw = odbc_pw, odbc_port=5432) 
 
 model_pid = 4824696
 
 prev <- RomProperty$new(
-  dso, list(
+  ds, list(
     propname='test_variable', 
     featureid=model_pid, 
     entity_type='dh_properties'
@@ -44,4 +39,30 @@ prev$save(TRUE)
 
 upsql = "UPDATE dh_properties SET   vid = 8332550 , entity_type = 'dh_properties' , varid = 1 , bundle = 'dh_properties' , featureid = 4824696 , propname = 'test_variable' , propvalue = 13000 WHERE pid = 7685242"
 sqldf(upsql, connection=dso$connection)
-  
+
+prev$tsvalues()
+ts2 <- RomTS$new(
+  ds, list(
+    featureid=prev$pid, 
+    varkey = 'om_class_Constant',
+    tstime = as.numeric(as.POSIXct("2025-01-01", tz="America/New_York")),
+    entity_type='dh_properties',
+    tsvalue = 100.0
+  ), TRUE
+)
+ts2$save(TRUE)
+prev2$delete(TRUE)
+ds$debug = TRUE
+ts2retrieve <- RomTS$new(
+  ds, list(
+    featureid=prev$pid, 
+    varkey = 'om_class_Constant',
+    tstime = as.numeric(as.POSIXct("2025-01-01", tz="America/New_York")),
+    entity_type='dh_properties'
+  ), TRUE
+)
+ts2retrieve$tsvalue = 101.5
+ts2retrieve$save(TRUE)
+ts2rtid = ts2retrieve$tid
+fn$sqldf("select tsvalue from dh_timeseries where tid = $ts2rtid", connection=ds$connection)
+
