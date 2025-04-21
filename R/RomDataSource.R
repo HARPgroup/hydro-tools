@@ -62,6 +62,7 @@ RomDataSource <- R6Class(
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
         self$connection <- dbConnect(
+          bigint = "integer",
           RPostgres::Postgres(),
           dbname = self$dbname,
           host = httr::parse_url(self$site)$hostname,
@@ -173,9 +174,10 @@ RomDataSource <- R6Class(
       # or return 
       # search first in 
       # odbc has robust query handling so we don't need to us fn_get_timeseries
+      ts = FALSE
       if (self$connection_type == 'odbc') {
-        ts_obj = RomTS$new(self)
-        tsvalues <- self$get('dh_timeseries', 'tid', config, ts_obj)
+        # ts_obj = RomTS$new(self)
+        tsvalues <- self$get('dh_timeseries', 'tid', config, obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods
@@ -183,7 +185,6 @@ RomDataSource <- R6Class(
         #       using it's names as an environment.  We can make the propvalues
         #       point to dh_properties on the datasource
         #       and also tsvalues point to dh_timeseries_values
-        ts = FALSE
         tsvalues <- fn_search_tsvalues(config, self$tsvalues)
         if (is.logical(tsvalues)) {
           # none exists locally, so query
@@ -263,9 +264,8 @@ RomDataSource <- R6Class(
         self$propvalues = rbind(self$propvalues, dsl)
         
       } else {
-        
         prop_check = FALSE
-        if (!is.na(prop$pid)) {
+        if (!is.null(prop$pid) && !is.na(prop$pid) ) {
           if (prop$pid > 0) {
             prop_check = fn_search_properties(list(pid = prop$pid), self$propvalues)
             #message(prop_check)
