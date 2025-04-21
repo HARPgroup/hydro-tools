@@ -1,5 +1,10 @@
+#'@title Water Month
+#'@name
+#'Water Month
+#'@description
 #'Extract the month of the water year from a date or time object.
 #'
+#'@details
 #'Extract the month of the water year from a date or time object.  Can be returned
 #'as a number 1:12, for October through September respectively, or an ordered factor. 
 #'A user may alternatively enter a calendar year month as a numeric to return
@@ -82,10 +87,13 @@ water.month.default <- function (
                       label, abbr)
 }
 
-
-#'Return a numeric giving the water year for a date
+#'@title
+#'Water Year
+#'@name 
+#'Water Year
+#'@description Return a numeric giving the water year for a date
 #'
-#'Returns a number specifying the water year (\code{2010}) for a date. Water year is hardcoded here as Oct 1 - Sept
+#'@details Returns a number specifying the water year (\code{2010}) for a date. Water year is hardcoded here as Oct 1 - Sept
 #'30
 #'@param x a date-time object which can be handled by lubridate
 #'@return Returns the equivalent water year of the date x input by the uee
@@ -102,13 +110,15 @@ water.year <- function (x) {
 }
 
 
-
+#'@title group1
+#'@name 
+#'group1
+#'@description
 #'Magnitude of monthly water conditions
-#'
+#'@details
 #'Calculates the IHA parameter group 1: Magnitude of montly water conditions
 #'group1() applies an input function FUN to a 1-D zoo x, grouping by water
 #'month+water year or calendar month+calendar year depending on user input
-#'
 #'See IHA documentation:
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'

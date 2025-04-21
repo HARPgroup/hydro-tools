@@ -716,23 +716,30 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   return(propvals)
 }
 
-#' Retrieve Property data from propvalues style data frame
-#'
+#' @title fn_search_vardefs
+#' @name fn_search_vardefs
+#' @description Retrieve Property data from propvalues style data frame provided by user
 #' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+#' Definitions for these items are defined in the hydrotools readme.
 #' @param var_defs_tmp data frame to search
 #' @return data frame of propvalue or FALSE
-#' @seealso NA
 #' @export fn_search_vardefs
 #' @examples NA
+#'ds <- RomDataSource$new()
+#'fn_search_vardefs(config = list(hydroid = 1456),)
 fn_search_vardefs <- function(config, var_defs_tmp) {
   # TBD, return false now, which means no local store, must retrieve
+  #If any variable information for this ID is in var_defs_tmp, return it. Else
+  #return 0
   vardef = FALSE
+  #If a variable hydroid has been provided, search for definitions
   if (!is.null(config$hydroid)) {
-    vardef = var_defs_tmp[which(var_defs_tmp$hydroid == config$hydroid),]
+    vardef = var_defs_tmp[var_defs_tmp$hydroid == config$hydroid,]
     if (nrow(vardef) == 0) { vardef = FALSE}
   }
+  #If a variable varkey has been provided, search for definitions
   if (!is.null(config$varkey)) {
-    vardef = var_defs_tmp[which(var_defs_tmp$varkey == config$varkey),]
+    vardef = var_defs_tmp[var_defs_tmp$varkey == config$varkey,]
     if (nrow(vardef) == 0) { vardef = FALSE}
   }
   return(vardef)
