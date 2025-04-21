@@ -2,7 +2,7 @@
 % Please edit documentation in R/TNC_IHA_Ports.R
 \name{group1}
 \alias{group1}
-\title{Magnitude of monthly water conditions}
+\title{group1}
 \usage{
 group1(x, yearType = c("water", "calendar"), FUN = median)
 }
@@ -20,11 +20,12 @@ ideally be a closure}
 A matrix with the monthly results of FUN over each year
 }
 \description{
+Magnitude of monthly water conditions
+}
+\details{
 Calculates the IHA parameter group 1: Magnitude of montly water conditions
 group1() applies an input function FUN to a 1-D zoo x, grouping by water
 month+water year or calendar month+calendar year depending on user input
-}
-\details{
 See IHA documentation:
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 }

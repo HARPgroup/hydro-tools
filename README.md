@@ -87,6 +87,9 @@ A config file may be provided by the package managers for database integration.
 ``` r
 install.packages("devtools")
 library("devtools")
+#Make sure it hasn't been called, but if it has we can unload it
+unloadNamespace('hydrotools')
+#Get the master branch deployment of the package
 install_github("HARPgroup/hydro-tools")
 # alternate, install a development branch for testing:
 install_github("HARPgroup/hydro-tools", ref = "odbc", force=TRUE)

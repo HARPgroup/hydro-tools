@@ -1,16 +1,28 @@
-#' @name Hydro Data Source
-#' Global object store holds references to all objects of a given domain
-#' and pointers to remote data source if applicable.
-#' 
-#' if remote data source is set, all data can be synched back to it
-#' no mixing of data sources is allowed
-#' @description Data Source containing tables and methods of Model data objects
-#' @details Provides integrated, queryable universe of features, observations and meta data
-#' @importFrom R6 R6Class  
+#'@title RomDataSource
+#' @name
+#' Hydro Data Source Data Source Bin
+#' @description RomDataSource is an object that contains tables and methods of
+#'   model data objects. It serves as a global object store that references to
+#'   all objects of a given domain and pointers to remote data source if
+#'   applicable. It offers the flexibility of synching (via POST or
+#'   INSERT/UPDATE) to a remote data source OR allows users to update local data
+#'   bases or sources. It does not permit a mix of these data streams, keeping
+#'   the RomDataSource object consistent.
+#' @details Provides integrated, queryable universe of features, observations
+#'   and meta data
+#' @importFrom R6 R6Class
 #' @param baseurl URL of remote data store with REST capabilities, optional
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
-#' @examples NA
+#' @examples 
+#' #Get new datasource via odbc
+#' ds <- RomDataSource$new(site,
+#'                         rest_uname = odbc_uname,
+#'                         connection_type = 'odbc',
+#'                         dbname = databaseName)
+#' ds$get_token(rest_pw = odbc_pw)
+#' #Pointer to external db
+#' ds$connection
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
@@ -31,33 +43,59 @@ RomDataSource <- R6Class(
     rest_uname = NULL,
     #' @field dbname DATABASE TO USE IN odbC CONNECTION
     dbname = NULL,
-    #' @param site URL of some RESTful repository
-    #' @param rest_uname username to connect to RESTful repository
-    #' @param connection_type supported rest or odbc
-    #' @param dbname supported odbc dbname
-    #' @return object instance
+    #' @description
+        #' Initialize a RomDataSource, returning a RomDataSource R6 object that is
+        #' now populated with site, username, connection type, database name, and
+        #' any connection string details if using ODBC. This object will also have numerous methods that are
+        #' described in \code{?RomDataSource}
+    #' @param site URL of some RESTful repository or the host of the target
+    #'   database. At DEQ, this is defined in the default config files.
+    #' @param rest_uname username to connect to RESTful repository or database.
+    #'   At DEQ, this should be defined within local config files
+    #' @param connection_type String, either 'rest' or 'odbc' depending on
+    #'   target database
+    #' @param dbname Used only when connection_type = 'odbc'. This is the
+    #'   database name of the database that supports the ODBC connection. At
+    #'   DEQ, this should generally target the active dbase, not alpha, although
+    #'   both are supported
+    #' @return Instance of RomDataSource, now with populated site, rest_uname,
+    #'   connection_type, and dbname data
     initialize = function(site, rest_uname = NULL, connection_type = 'rest', dbname = NULL) {
       self$site = site
       self$rest_uname = rest_uname
       self$connection_type = connection_type
       self$dbname = dbname
     },
-    #' @param table which table. Default 'all'
-    #' @return nothing clears data tables
+    #'@name reset
+    #'@description 
+    #'Clear entries and reset tables stored in RomDataSource. Used to clean out
+    #'features, properties, tsvalues, or variable definitions
+    #' @param table Which table(s) should be cleared? . Defaults to 'all', but will
+    #' also accept a vector that contains any or all of: \code{c('props', 'features', 'tsvalues', 'var_defs')}
+    #' @return nothing, but will clear requested data tables stored on this object
     reset = function(table) {
+      t_options <- 
       for (t in c('props', 'features', 'tsvalues', 'var_defs')) {
-        if ( (table == 'all') | (t == table) ) {
+        if ( (table == 'all') | (t %in% table) ) {
           self[[t]] <- self[[t]][0,]
         }
       }
     },
-    #' @param rest_pw to use, if NULL will prompt
-    #' @param odbc_port to use, if NULL will prompt
-    #' @return nothing sets internal private token
+    #' @name get_token
+    #' @param rest_pw Password to REST/odbc service requested. Will prompt user
+    #'   for entry if not provided
+    #' @param odbc_port If using odbc, which port should be used? Will prompt
+    #'   user for entry if not provided. Defaults to DEQ port approved by OIS
+    #' @return Nothing, but sets internal private token. Private fields are not
+    #'   visible via \code{RomDataSource$token} notation and are hidden for
+    #'   security
     get_token = function(rest_pw = NULL, odbc_port = 5431) {
+      #Check to ensure user has set site on RomDataSource - should be done
+      #already via initialize but user may alter
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
+      #Connect to either VA Hydro rest (offline ~2025) or ODBC
       if (self$connection_type == 'rest') {
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
@@ -72,19 +110,23 @@ RomDataSource <- R6Class(
       }
     },
     # this could actually live in the RomTS object
-    #' @param varkey = variable key
-    #' @param force_refresh Check remote repository for new info? 
-    #' @param debug show info
-    #' @return nothing sets internal private token
+    #' @name get_vardef
+    #' @param varkey = Variable key as defined in dh_variabledefinition as
+    #'   varkey. See Hydrotools readme for more information, but represents an
+    #'   abbreviated variable name to define a property or timeseries.
+    #' @param force_refresh Should the remote repository be checked for new info? 
+    #' @param debug Show relevant debugging info
+    #' @return Nothing, but sets variable definitions on RomDataSource
     get_vardef = function(varkey, force_refresh = FALSE, debug = FALSE) {
       # NOt yet tested,
       config = list()
       #print(paste("Handling ", varkey))
+      #Set either the varkey or variable hydroid based on if the user has
+      #provided character (varkey) or integer data (hydroid)
       if (is.na(as.integer(varkey))) {
         config$varkey = varkey
       } else {
         config$hydroid = as.integer(varkey)
-        #if ()
       }
       # check local store, if not there, check remote
       vardef <- fn_search_vardefs(config, self$var_defs)
