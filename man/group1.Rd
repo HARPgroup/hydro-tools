@@ -30,13 +30,11 @@ See IHA documentation:
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 }
 \examples{
-#'\dontrun{
 library(dataRetrieval)
 library(zoo)
 gageData <- dataRetrieval::readNWISdv("01634500","00060")
 gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 group1(gageFlow,'water',mean)
-}
 }
 \references{
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}

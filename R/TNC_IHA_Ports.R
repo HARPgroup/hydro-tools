@@ -136,13 +136,11 @@ water.year <- function (x) {
 #'@importFrom lubridate year month
 #'@export
 #'@examples
-#'#'\dontrun{
 #'library(dataRetrieval)
 #'library(zoo)
 #'gageData <- dataRetrieval::readNWISdv("01634500","00060")
 #'gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 #'group1(gageFlow,'water',mean)
-#'}
 group1 <- function (
     #A zoo timeseries  
   x, 
@@ -300,13 +298,11 @@ group2Funs <- function (x) {
 #'@importFrom lubridate year
 #'@export
 #'@examples
-#'\dontrun{
 #'#'library(dataRetrieval)
 #'library(zoo)
 #'gageData <- dataRetrieval::readNWISdv("01634500","00060")
 #'gageFlow <- zoo::zoo(gageData[,4],order.by = gageData$Date)
 #'#group2(gageFlow,'water',TRUE)
-#'}
 group2 <- function ( 
     #A zoo timeseries  
   x, 

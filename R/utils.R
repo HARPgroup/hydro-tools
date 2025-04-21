@@ -725,8 +725,8 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
 #' @return data frame of propvalue or FALSE
 #' @export fn_search_vardefs
 #' @examples NA
-#'ds <- RomDataSource$new()
-#'fn_search_vardefs(config = list(hydroid = 1456),)
+#'#ds <- RomDataSource$new()
+#'#fn_search_vardefs(config = list(hydroid = 1456),)
 fn_search_vardefs <- function(config, var_defs_tmp) {
   # TBD, return false now, which means no local store, must retrieve
   #If any variable information for this ID is in var_defs_tmp, return it. Else

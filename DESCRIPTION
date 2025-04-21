@@ -23,7 +23,7 @@ Imports:
     PearsonDS,
     caTools,
     lubridate,
-    plyr
+    plyr,
     RPostgres,
     R6,
     sqldf

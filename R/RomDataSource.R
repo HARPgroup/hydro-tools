@@ -1,6 +1,5 @@
 #'@title RomDataSource
-#' @name
-#' Hydro Data Source Data Source Bin
+#' @name Hydro Data Source Data Source Bin
 #' @description RomDataSource is an object that contains tables and methods of
 #'   model data objects. It serves as a global object store that references to
 #'   all objects of a given domain and pointers to remote data source if
@@ -15,14 +14,14 @@
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples 
-#' #Get new datasource via odbc
-#' ds <- RomDataSource$new(site,
-#'                         rest_uname = odbc_uname,
-#'                         connection_type = 'odbc',
-#'                         dbname = databaseName)
-#' ds$get_token(rest_pw = odbc_pw)
-#' #Pointer to external db
-#' ds$connection
+#' ##Get new datasource via odbc
+#' #ds <- RomDataSource$new(site,
+#'#                         rest_uname = odbc_uname,
+#'#                         connection_type = 'odbc',
+#'#                         dbname = databaseName)
+#'# ds$get_token(rest_pw = odbc_pw)
+#' ##Pointer to external db
+#'# ds$connection
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
@@ -68,7 +67,6 @@ RomDataSource <- R6Class(
       self$connection_type = connection_type
       self$dbname = dbname
     },
-    #'@name reset
     #'@description 
     #'Clear entries and reset tables stored in RomDataSource. Used to clean out
     #'features, properties, tsvalues, or variable definitions
@@ -83,7 +81,6 @@ RomDataSource <- R6Class(
         }
       }
     },
-    #' @name get_token
     #' @param rest_pw Password to REST/odbc service requested. Will prompt user
     #'   for entry if not provided
     #' @param odbc_port If using odbc, which port should be used? Will prompt
@@ -113,7 +110,6 @@ RomDataSource <- R6Class(
       }
     },
     # this could actually live in the RomTS object
-    #' @name get_vardef
     #' @param varkey = Variable key as defined in dh_variabledefinition as
     #'   varkey. See Hydrotools readme for more information, but represents an
     #'   abbreviated variable name to define a property or timeseries.
