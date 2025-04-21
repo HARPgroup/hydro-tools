@@ -148,9 +148,10 @@ RomEntity <- R6Class(
     },
     #' @param propname list of attributes to set, see also: to_list() for format
     #' @param varkey specify varkey? (in case of new prop creation)
+    #' @param propcode specify propcode? (in case of new prop creation)
     #' @param remote look at remote datasource?
     #' @returns the property object for this entity
-    get_prop = function(propname, varkey=NULL, propcode=NULL, remote=TRUE) {
+    get_prop = function(propname=NULL, varkey=NULL, propcode=NULL, remote=TRUE) {
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
