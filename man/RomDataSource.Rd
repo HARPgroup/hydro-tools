@@ -36,6 +36,8 @@ NA
 
 \item{\code{dbname}}{DATABASE TO USE IN odbC CONNECTION}
 
+\item{\code{debug}}{show debug info for queries}
+
 \item{\code{timeline}}{for default time series data}
 
 \item{\code{tsvalues}}{table of time series data}

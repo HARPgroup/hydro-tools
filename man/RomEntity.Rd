@@ -215,7 +215,12 @@ object instance
 \if{latex}{\out{\hypertarget{method-RomEntity-get_prop}{}}}
 \subsection{Method \code{get_prop()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(propname, varkey = NULL, remote = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(
+  propname = NULL,
+  varkey = NULL,
+  propcode = NULL,
+  remote = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -224,6 +229,8 @@ object instance
 \item{\code{propname}}{list of attributes to set, see also: to_list() for format}
 
 \item{\code{varkey}}{specify varkey? (in case of new prop creation)}
+
+\item{\code{propcode}}{specify propcode? (in case of new prop creation)}
 
 \item{\code{remote}}{look at remote datasource?}
 }

@@ -665,7 +665,7 @@ fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
 #' @return singel numeric value for the selected index/stat
 #' @export fn_iha_flow_extreme
 fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar') {
-  g2flows <- group2(flows, year = wyear_type);
+  g2flows <- group2(flows, yearType = wyear_type);
   metric_flows <- g2flows[metric];
   if (stat == 'min') {
     ndx = which.min(as.numeric(metric_flows[,metric]));

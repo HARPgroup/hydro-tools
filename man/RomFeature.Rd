@@ -5,8 +5,6 @@
 \title{Feature entity data object}
 \value{
 feature class of type RomFeature
-
-the data from the remote connection
 }
 \description{
 Object for storing a single feature with attribute and timeseries related
@@ -48,6 +46,10 @@ NA
 
 \item{\code{geom}}{feature geometry WKT}
 
+\item{\code{nextdown_id}}{feature geometry WKT}
+
+\item{\code{parent_id}}{feature geometry WKT}
+
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
 \item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
@@ -58,8 +60,8 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-RomFeature-new}{\code{RomFeature$new()}}
-\item \href{#method-RomFeature-load_data}{\code{RomFeature$load_data()}}
 \item \href{#method-RomFeature-get_id}{\code{RomFeature$get_id()}}
+\item \href{#method-RomFeature-load_data}{\code{RomFeature$load_data()}}
 \item \href{#method-RomFeature-to_list}{\code{RomFeature$to_list()}}
 \item \href{#method-RomFeature-from_list}{\code{RomFeature$from_list()}}
 \item \href{#method-RomFeature-get_mps}{\code{RomFeature$get_mps()}}
@@ -109,6 +111,18 @@ object instance
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-get_id"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-get_id}{}}}
+\subsection{Method \code{get_id()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_id()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+get_id the unique id of this entity alias to remote pkid, subclassed as function
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-load_data}{}}}
 \subsection{Method \code{load_data()}}{
@@ -125,17 +139,8 @@ object instance
 }
 \if{html}{\out{</div>}}
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomFeature-get_id"></a>}}
-\if{latex}{\out{\hypertarget{method-RomFeature-get_id}{}}}
-\subsection{Method \code{get_id()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_id()}\if{html}{\out{</div>}}
-}
-
 \subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid, subclassed as function
+the data from the remote connection
 }
 }
 \if{html}{\out{<hr>}}

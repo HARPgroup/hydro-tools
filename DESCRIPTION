@@ -22,4 +22,7 @@ Imports:
     graphics,
     flextable,
     bit64,
-    PearsonDS
+    PearsonDS,
+    caTools,
+    lubridate,
+    plyr
