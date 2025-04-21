@@ -5,8 +5,6 @@
 \title{dHVarImage}
 \value{
 reference class of type openmi.om.base.
-
-an updated config if necessary or FALSE if it fails
 }
 \description{
 Simple class to hold string values
@@ -84,6 +82,9 @@ object instance
 \item{\code{entity}}{the local object to work on}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+an updated config if necessary or FALSE if it fails
 }
 }
 \if{html}{\out{<hr>}}

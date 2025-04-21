@@ -5,6 +5,8 @@
 \title{Feature entity data object}
 \value{
 feature class of type RomFeature
+
+the data from the remote connection
 }
 \description{
 Object for storing a single feature with attribute and timeseries related
@@ -56,6 +58,7 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-RomFeature-new}{\code{RomFeature$new()}}
+\item \href{#method-RomFeature-load_data}{\code{RomFeature$load_data()}}
 \item \href{#method-RomFeature-get_id}{\code{RomFeature$get_id()}}
 \item \href{#method-RomFeature-to_list}{\code{RomFeature$to_list()}}
 \item \href{#method-RomFeature-from_list}{\code{RomFeature$from_list()}}
@@ -74,7 +77,6 @@ NA
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
@@ -104,6 +106,24 @@ NA
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-load_data"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-load_data}{}}}
+\subsection{Method \code{load_data()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$load_data(config, load_remote)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+
+\item{\code{load_remote}}{automatically query remote data source for matches?}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

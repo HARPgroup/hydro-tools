@@ -5,8 +5,6 @@
 \title{Nested Property Object}
 \value{
 Entity class of type RomPropertyTree
-
-the data from the remote connection
 }
 \description{
 Object for storing a single feature with attribute and timeseries related
@@ -169,6 +167,9 @@ NULL
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+the data from the remote connection
 }
 }
 \if{html}{\out{<hr>}}
