@@ -4,6 +4,27 @@
 
 The R developers at DEQ's Office of Water Supply Planning and Analysis have developed an R package called `hydrotools` to support data base connections to OWSPA data sources and ensure consistent handling of common data base requests. The `rom` objects offered in hydrotools serve as a quasi-REST service for the VA Hydro databases, offering DEQ staff convenient means of getting properties and features or posting such entities. Installation instructions are offered below. Development issues, pull requests, and more are tracked on the hydrotools [GitHub repository](https://github.com/HARPgroup/hydro-tools) or on the internal [GitLab](https://gitlab.deq.virginia.gov/) server. 
 
+## Installation
+
+### DEQ Users (coming soon!)
+This package will soon be available for internal distribution on the DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). A config file may be provided by the package managers for database integration.
+
+### All Other Users
+A config file may be provided by the package managers for database integration.
+``` r
+install.packages("devtools")
+library("devtools")
+#Make sure it hasn't been called, but if it has we can unload it
+unloadNamespace('hydrotools')
+#Get the master branch deployment of the package
+devtools::install_github("HARPgroup/hydro-tools")
+# alternate, install a development branch for testing:
+devtools::install_github("HARPgroup/hydro-tools", ref = "odbc", force=TRUE)
+
+#EXAMPLE FUNCTION DOCUMENTATION
+??om_vahydro_metric_grid
+```
+
 ## Revelant Data Base Terms
 **dh_feature** = A table containing physically grounded "features" that include wells, intakes, and more. Each entry in *dh_feature* should have an actual lat/long or geometry associated with it.   
 Features have several descriptors:  
@@ -75,28 +96,6 @@ Begin by cloning the [hydrotools package](https://github.com/HARPgroup/hydro-too
 Connor Brogan ([connor.brogan\@deq.virginia.gov](mailto:connor.brogan@deq.virginia.gov){.email}) <br/>
 Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@deq.virginia.gov){.email})<br/> 
 
-
-
-## Installation
-
-### DEQ Users (coming soon!)
-This package will soon be available for internal distribution on the DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). A config file may be provided by the package managers for database integration.
-
-### All Other Users
-A config file may be provided by the package managers for database integration.
-``` r
-install.packages("devtools")
-library("devtools")
-#Make sure it hasn't been called, but if it has we can unload it
-unloadNamespace('hydrotools')
-#Get the master branch deployment of the package
-install_github("HARPgroup/hydro-tools")
-# alternate, install a development branch for testing:
-install_github("HARPgroup/hydro-tools", ref = "odbc", force=TRUE)
-
-#EXAMPLE FUNCTION DOCUMENTATION
-??om_vahydro_metric_grid
-```
 
 ## Project status
 
