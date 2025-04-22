@@ -1,7 +1,9 @@
 #' Post any entity to via an ODBC connection. This allows users to insert or
 #' update entities within database.
 #'
-#' @param entity_type = dh_feature, dh_properties, ...
+#' @param entity_type Most often dh_feature or dh_properties. Indicates which 
+#'   table to retrieve data from. This will be the target table for the query
+#'   constructed from user inputs input list
 #' @param pk = primary key column name, e.g. hydroid, pid, ...
 #' @param inputs contents of record to post in list (pid, propname, propvalue,
 #'   ...). If missing essential values, post will fail. Required information may
@@ -96,14 +98,30 @@ fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE)
   return(result)
 }
 
-#' Get any entity from a RESTful web service
+#' Get any entity from a remote database, often dbase2/3 via ODBC connection
+#' (often set in an instance of RomDataSource)
 #'
-#' @param entity_type = dh_feature, dh_properties, ...
-#' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs contents of record to post in list(pid, propname, propvalue, ...)
-#' @param con connection to ODBC server
-#' @param obj optional class with extra query info
+#' @param entity_type Most often dh_feature or dh_properties. Indicates which 
+#'   table to retrieve data from. This will be the target table for the query
+#'   constructed from user inputs input list
+#' @param pk Primary key column name, often hydroid or pid. See Readme for
+#'   additional information or contact OWSPA Data Coordinatory if you do not
+#'   know the appropriate primary key for the table of interest
+#' @param inputs A list of values that includes query constructors. Each entry
+#'   in this list and its corresponding value will be added to the WHERE clause
+#'   of a query that queries the table specified in entity_type with the
+#'   exception of "limit", which will only be used to generate the LIMIT clause
+#'   for the query. May include a primary key ID, in which case it will be all
+#'   that is used in the WHERE clause. Relevant data for list may include
+#'   propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+#'   Readme e.g. list(pid, propname, propvalue, ...)
+#' @param con connection to ODBC server, usually provided via
+#'   RomDataSource$connection()
+#' @param obj optional class with extra query info specified via sql_select_from
+#'   field
 #' @param debug Print out debug info if true
+#' @return The results of the query constructed based on inputs and pk from
+#'   entity_type, typically a data.frame
 #' @export fn_get_odbc
 #' @examples NA
 fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
@@ -114,6 +132,9 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   #message(paste(inputs))
   get_sql = FALSE
   #print(obj)
+  #If an object (some Rom instance) has been provided, get additional
+  #information that user may have provided via sql_select_from field. Should be
+  #a base query in the form of fn_guess_sql()
   if (!is.logical(obj)) {
     if ("sql_select_from" %in% names(obj) 
         & (length(obj[["sql_select_from"]]) > 0)
@@ -121,32 +142,44 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
       get_sql = obj$sql_select_from
     }
   }
+  #If user has not provided sql_select_from field on obj, get the query
   if (is.logical(get_sql)) {
+    #With no additional information, return a base query of SELECT * FROM
+    #entity_type, ignoring limits and pk for now
     sql_stuff <- fn_guess_sql(entity_type, pk, inputs)
     get_sql = sql_stuff$get_sql
   }
+  #Construct the WHERE clause of the query based on information provided by user
   get_where = fn_guess_sql_where(entity_type, pk, inputs)
+  #Construct the LIMIT clause of the query if user has provided "limit" in inputs
   limits = fn_guess_limits(entity_type, pk, inputs)
-  # put it all together
+  # put it all together, pasting the base query with any where or limit query
   if (nchar(trimws(get_where)) == 0) {
-    where_pre = ""
+    where_pre <- ""
   } else {
-    where_pre = "WHERE"
+    where_pre <- "WHERE"
   }
-  get_sql = paste(get_sql, where_pre, get_where, limits)
+  #Create query by pasting all clauses together
+  get_sql <- paste(get_sql, where_pre, get_where, limits)
   if (debug == TRUE) {
     message(get_sql)
   }
-  entities = sqldf(get_sql, connection = con, method = "raw")
+  #GET the query from the database, sending the SQL directly to the database via
+  #the ODBC connection
+  entities <- sqldf(get_sql, connection = con, method = "raw")
+  #If nothing is returned, a logical is returned.
   if (is.logical(entities)) {
     message("----- This entity does not exist")
     entities = FALSE
   } else {
     #message(paste("Total =", nrow(entities)))
   }
+  #Returns the "raw" data from query
   return(entities)
 }
 
+#Return a very basic SELECT * FROM entity_type, ignoring pk and inputs
+#Here, inputs is irrelevant but it is checked for a limit
 fn_guess_sql <- function(entity_type, pk, inputs) {
   sql_stuff <- list()
   if (is.null(inputs$limit)) {
@@ -160,26 +193,44 @@ fn_guess_sql <- function(entity_type, pk, inputs) {
   return(sql_stuff)
 }
 
-#' Guess an SQL query from a simple list of inputs
+#' Guess an SQL query with a WHERE clasue from a simple list of inputs, using
+#' all inputs to construct WHERE
 #'
-#' @param entity_type = dh_feature, dh_properties, ...
-#' @param pk = primary key column name, e.g. hydroid, pid, ...
-#' @param inputs contents of record to post in list(pid=X, propname='nom', propvalue, ...)
+#' @param entity_type Most often dh_feature or dh_properties. Indicates which 
+#'   table to retrieve data from. This will be the target table for the query
+#'   constructed from user inputs input list
+#' @param pk Primary key column name, often hydroid or pid. See Readme for
+#'   additional information or contact OWSPA Data Coordinatory if you do not
+#'   know the appropriate primary key for the table of interest
+#' @param inputs contents of record to post in list(pid=X, propname='nom',
+#'   propvalue, ...). The pk column may (optional) be one of the entries in this
+#'   list and this should serve as the primary key ID that the user is
+#'   interested in identifying. If a primary key is found, it is the only item
+#'   added to the WHERE clause. Otherwise, all contents of inputs will be added
+#'   into the WHERE clause constructed from this query
 #' @param alias assign an alias to a give table/view relation?
 #' @export fn_guess_sql_where
+#' @return A WHERE clasue to be added to an SQL query, perhaps generated via
+#'   fn_guess_sql
 #' @examples NA
 fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
   get_where = ""
+  #If an alias has been provided, append with a literal period e.g "alias."
   if (alias != "") {
     alias = paste0(alias,".")
   }
+  #Convert the primary key to an integer
   pkid <- as.integer(as.character(inputs[pk]))
-  if (is.na(pkid) | is.null(pkid)) {
+  #If no primary key ID was provided, set to NULL
+  if (is.na(pkid) || is.null(pkid)) {
     pkid = NULL
   }
-  # remove special things that are not part of the columns
+  # remove special things that are not relevant to this function or are
+  # referenced in futrue SQL constructors
   inputs$limit <- NULL
   inputs$page <- NULL
+  #If a primary key has been provided, set WHERE clause on SQL query to be the
+  #primary key field equal the primary key ID
   if (!is.null(pkid)) {
     # Simple PK retrieval
     if (!is.na(pkid)) {
@@ -189,30 +240,40 @@ fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
     get_where_glue = ""
     #message("inputs:")
     #print(inputs)
+    #For each name in the inputs list, create a WHERE statement that is the name
+    #of that input (adjusted for alias as needed) is equal to the value of that
+    #input
     for (col_name in names(inputs)) {
+      #Skip if the input value is NA
       if (is.na(inputs[col_name])) {
         inputs[col_name] <- NULL
         next
       }
+      #Value associated with this list entry
       col_val = inputs[[col_name]]
       #message(paste(col_name,'=',typeof(col_val)))
       if (is.character(col_val)) {
         col_val = paste0("'",col_val,"'")
       }
+      #If the value is set, paste into get_where, pasting onto the previous loop
       if (!is.null(inputs[col_name]) & !is.na(inputs[col_name])) {
         get_where = paste(
           get_where, 
           get_where_glue, 
           paste0(alias, col_name)," = ", col_val
         )
+        #For all future iterations, set the "glue" to AND to allow for the
+        #construction of a single WHERE clause
         get_where_glue = "AND"
       }
     }
   }
+  #Return the SQL WHERE clause
   return(get_where)
 }
 
-
+#If user has provided any limits, return a LIMIT SQL clause that can be added to
+#the bottom of any query. Returns either an empty charactor or the limit clause
 fn_guess_limits <- function(entity_type, pk, inputs) {
   if (is.null(inputs$limit)) {
     limit = ""
