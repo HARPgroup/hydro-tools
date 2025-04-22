@@ -29,6 +29,14 @@ water.month <- function(x, label = FALSE, abbr = TRUE){
 #e.g. water.month(4, TRUE) returns January 
 #Returns x is label is not TRUE, otherwise returns the abbr or full name of
 #month
+#'water.month.numeric
+#'@param x a date or time object or a numeric representing a calendar year month
+#'@param label logical TRUE will return an ordered factor for month with the
+#'  month name as labels, FALSE will return a numeric
+#'@param abbr logical. FALSE will abbreviate the name of the month in the ordered factor.
+#'@return Returns the month in the water year that would be that number away
+#from the beginning of the water year (October 1st). e.g. water.month(4, TRUE)
+#returns January
 #'@export water.month.numeric
 water.month.numeric <- function (
     #Month number of interest  
@@ -57,6 +65,14 @@ water.month.numeric <- function (
 
 #A function that uses water.month.numeric() to find the water month for an input
 #Date x. This function takes similar arguments to water.month.numeric()
+#'water.month.default
+#'@param x a date or time object or a numeric representing a calendar year month
+#'@param label logical TRUE will return an ordered factor for month with the
+#'  month name as labels, FALSE will return a numeric
+#'@param abbr logical. FALSE will abbreviate the name of the month in the ordered factor.
+#'@return Returns the month in the water year that would be that number away
+#from the beginning of the water year (October 1st). e.g. water.month(4, TRUE)
+#returns January
 #'@export water.month.default
 water.month.default <- function (    
     #Date of interest  
@@ -107,7 +123,7 @@ water.year <- function (x) {
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'
 #'@param x A zoo timeseries object containing the flow series
-#'@param year The type of year factor to be used when determining statistcs,
+#'@param yearType The type of year factor to be used when determining statistcs,
 #'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
 #'@param FUN the function to be applied to the monthly values.  Median is the
 #'  default here. This can be a character string of a function name but should
@@ -121,6 +137,7 @@ water.year <- function (x) {
 #'@export
 #'@examples
 #'library(dataRetrieval)
+#'library(zoo)
 #'gageData <- dataRetrieval::readNWISdv("01634500","00060")
 #'gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 #'group1(gageFlow,'water',mean)
@@ -223,6 +240,7 @@ runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
 #'Calculates group2 statistics from a matrix of rolling means. This include
 #'range, base index (minimum 7-day flow divided by mean daily flow), and the
 #'number of days with zero flow.
+#'
 #'@return a named vector containing the group2 statistics, including the range
 #'of the 1-, 3-, 7-, 30-, and 90-day flows and the base index and days of zero
 #'flow
@@ -280,10 +298,11 @@ group2Funs <- function (x) {
 #'@importFrom lubridate year
 #'@export
 #'@examples
-#'library(dataRetrieval)
+#'#'library(dataRetrieval)
+#'library(zoo)
 #'gageData <- dataRetrieval::readNWISdv("01634500","00060")
-#'gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
-#'group2(gageFlow,'water',TRUE)
+#'gageFlow <- zoo::zoo(gageData[,4],order.by = gageData$Date)
+#'#group2(gageFlow,'water',TRUE)
 group2 <- function ( 
     #A zoo timeseries  
   x, 
@@ -305,7 +324,7 @@ group2 <- function (
   #Calculate the rolling average of all data, treating years independently (not
   #allowing running averages to use data outside of the current year)
   #(controlled by mimic.tnc)
-  rollx <- runmean.iha(x, year = yr, mimic.tnc = mimic.tnc)
+  rollx <- runmean.iha(x, yearVector = yr, mimic.tnc = mimic.tnc)
   #Add the years as the first column to rollx
   xd <- cbind(year = yr, as.data.frame(rollx))
   #Use plyr::ddply to apply group2Funs() to each subset of xd based on the
@@ -315,3 +334,5 @@ group2 <- function (
                      ...)
   return(res)
 }
+
+

@@ -1,6 +1,5 @@
 #'@title RomDataSource
-#' @name
-#' Hydro Data Source Data Source Bin
+#' @name Hydro Data Source Data Source Bin
 #' @description RomDataSource is an object that contains tables and methods of
 #'   model data objects. It serves as a global object store that references to
 #'   all objects of a given domain and pointers to remote data source if
@@ -15,14 +14,14 @@
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
 #' @examples 
-#' #Get new datasource via odbc
-#' ds <- RomDataSource$new(site,
-#'                         rest_uname = odbc_uname,
-#'                         connection_type = 'odbc',
-#'                         dbname = databaseName)
-#' ds$get_token(rest_pw = odbc_pw)
-#' #Pointer to external db
-#' ds$connection
+#' ##Get new datasource via odbc
+#' #ds <- RomDataSource$new(site,
+#'#                         rest_uname = odbc_uname,
+#'#                         connection_type = 'odbc',
+#'#                         dbname = databaseName)
+#'# ds$get_token(rest_pw = odbc_pw)
+#' ##Pointer to external db
+#'# ds$connection
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
@@ -68,7 +67,6 @@ RomDataSource <- R6Class(
       self$connection_type = connection_type
       self$dbname = dbname
     },
-    #'@name reset
     #'@description 
     #'Clear entries and reset tables stored in RomDataSource. Used to clean out
     #'features, properties, tsvalues, or variable definitions

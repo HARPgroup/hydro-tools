@@ -9,12 +9,12 @@ group1(x, yearType = c("water", "calendar"), FUN = median)
 \arguments{
 \item{x}{A zoo timeseries object containing the flow series}
 
+\item{yearType}{The type of year factor to be used when determining statistcs,
+\code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively}
+
 \item{FUN}{the function to be applied to the monthly values.  Median is the
 default here. This can be a character string of a function name but should
 ideally be a closure}
-
-\item{year}{The type of year factor to be used when determining statistcs,
-\code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively}
 }
 \value{
 A matrix with the monthly results of FUN over each year
@@ -31,6 +31,7 @@ See IHA documentation:
 }
 \examples{
 library(dataRetrieval)
+library(zoo)
 gageData <- dataRetrieval::readNWISdv("01634500","00060")
 gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
 group1(gageFlow,'water',mean)

@@ -736,8 +736,8 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
 #'   provided by user. Returns FALSE if nothing found
 #' @export fn_search_vardefs
 #' @examples NA
-#'ds <- RomDataSource$new()
-#'fn_search_vardefs(config = list(hydroid = 1456),)
+#'#ds <- RomDataSource$new()
+#'#fn_search_vardefs(config = list(hydroid = 1456),)
 fn_search_vardefs <- function(config, var_defs_tmp) {
   #Function return false if no variable found, meaning nothing found in
   #var_defs_tmp on a RomDataSource instance or similar object. Usually indicates

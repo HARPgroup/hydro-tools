@@ -21,8 +21,9 @@ Imports:
     flextable,
     bit64,
     PearsonDS,
+    caTools,
+    lubridate,
+    plyr,
     RPostgres,
     R6,
-    sqldf,
-    plyr,
-    lubridate
+    sqldf
