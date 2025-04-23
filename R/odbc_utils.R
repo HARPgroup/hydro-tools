@@ -37,6 +37,10 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug = FALSE)
   } else {
     pkid = NULL
   }
+  # this seems to be the only case where using a double bracket [[ ]]
+  # is NOT the way to go.  This fails with double brackets, but is.null() tests
+  # fail with single brackets.  is.na() appears to work correctly regardless of single
+  # or double brackets.
   inputs <- inputs[!is.na(inputs)]
   this_result <- list(
     status = FALSE
@@ -245,8 +249,8 @@ fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
     #input
     for (col_name in names(inputs)) {
       #Skip if the input value is NA
-      if (is.na(inputs[col_name])) {
-        inputs[col_name] <- NULL
+      if (is.na(inputs[[col_name]])) {
+        inputs[[col_name]] <- NULL
         next
       }
       #Value associated with this list entry
@@ -256,7 +260,7 @@ fn_guess_sql_where <- function(entity_type, pk, inputs, alias="") {
         col_val = paste0("'",col_val,"'")
       }
       #If the value is set, paste into get_where, pasting onto the previous loop
-      if (!is.null(inputs[col_name]) & !is.na(inputs[col_name])) {
+      if (!is.null(col_val) && !is.na(col_val)) {
         get_where = paste(
           get_where, 
           get_where_glue, 
@@ -290,8 +294,8 @@ fn_guess_insert <- function(entity_type, pk, inputs) {
   in_sql = ""
   in_sep = ""
   for (col_name in names(inputs)) {
-    if (is.na(inputs[col_name])) {
-      inputs[col_name] <- NULL
+    if (is.na(inputs[[col_name]])) {
+      inputs[[col_name]] <- NULL
       next
     }
     col_val = inputs[[col_name]]
@@ -323,8 +327,8 @@ fn_guess_update <- function(entity_type, pk, inputs) {
   pk_val = NULL
   for (col_name in names(inputs)) {
     #print(paste("handling ", col_name))
-    if (is.na(inputs[col_name])) {
-      inputs[col_name] <- NULL
+    if (is.na(inputs[[col_name]])) {
+      inputs[[col_name]] <- NULL
       next
     }
     col_val = inputs[[col_name]]
