@@ -716,24 +716,44 @@ fn_search_properties <- function(config, propvalues_tmp, multiplicity = 'default
   return(propvals)
 }
 
-#' Retrieve Property data from propvalues style data frame
-#'
-#' @param config = list(entity_type, featureid, pid = NULL, varid = NULL, startdate = NULL, enddate = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-#' @param var_defs_tmp data frame to search
-#' @return data frame of propvalue or FALSE
-#' @seealso NA
+#' @title fn_search_vardefs
+#' @name fn_search_vardefs
+#' @description Retrieve variable or property data from
+#'   RomDataSource$propvalues() or RomProperty$propvalues() style data frame
+#'   provided by user. Original intended use is to search local variable
+#'   definitions for a provided hydroid or varkey, but may apply to any
+#'   propvalues() style dataframe that has a hydroid primary key field
+#' @param config A list that contains either a target dh_variabledefinition
+#'   hydroid or varkey. The varkey is given preference. Hydroids from other
+#'   tables (dh_properties) may be provided but user must provide appropriate
+#'   table in var_defs_tmp
+#' Definitions for these items are defined in the hydrotools readme.
+#' @param var_defs_tmp data frame to search, often those of variable definitions
+#'   with hydroid and varkeys at least, but may also be a similar table from
+#'   dh_properties or other table maybe generated through
+#'   RomProperty$propvalues()
+#' @return data frame subset from var_defs_tmp based on the hydroid or varkey
+#'   provided by user. Returns FALSE if nothing found
 #' @export fn_search_vardefs
 #' @examples NA
+#'#ds <- RomDataSource$new()
+#'#fn_search_vardefs(config = list(hydroid = 1456),)
 fn_search_vardefs <- function(config, var_defs_tmp) {
-  # TBD, return false now, which means no local store, must retrieve
+  #Function return false if no variable found, meaning nothing found in
+  #var_defs_tmp on a RomDataSource instance or similar object. Usually indicates
+  #the variable must be retrieved from remote databse (dbase2/3). If any variable
+  #information for this ID is in var_defs_tmp, return it. Else return FALSE.
+  #Note that varkey is given priority if somehow both varid and hydroid exist
   vardef = FALSE
+  #If a variable hydroid has been provided, search for definitions
   if (!is.null(config$hydroid)) {
-    vardef = var_defs_tmp[which(var_defs_tmp$hydroid == config$hydroid),]
-    if (nrow(vardef) == 0) { vardef = FALSE}
+    vardef = var_defs_tmp[var_defs_tmp$hydroid == config$hydroid,]
+    if (nrow(vardef) == 0) { vardef = FALSE }
   }
+  #If a variable varkey has been provided, search for definitions
   if (!is.null(config$varkey)) {
-    vardef = var_defs_tmp[which(var_defs_tmp$varkey == config$varkey),]
-    if (nrow(vardef) == 0) { vardef = FALSE}
+    vardef = var_defs_tmp[var_defs_tmp$varkey == config$varkey,]
+    if (nrow(vardef) == 0) { vardef = FALSE }
   }
   return(vardef)
 }

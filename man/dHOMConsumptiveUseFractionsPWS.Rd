@@ -5,7 +5,6 @@
 \title{dHOMConsumptiveUseFractionsPWS}
 \value{
 reference class of type openmi.om.base.
-an updated config if necessary or FALSE if it fails
 }
 \description{
 Simple class to hold tabular values

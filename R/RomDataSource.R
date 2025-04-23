@@ -1,14 +1,27 @@
-#' Global object store holds references to all objects of a given domain
-#' and pointers to remote data source if applicable.
-#' if remote data source is set, all data can be synched back to it
-#' no mixing of data sources is allowed
-#' @description Data Source containing tables and methods of Model data objects
-#' @details Provides integrated, queryable universe of features, observations and meta data
-#' @importFrom R6 R6Class  
+#'@title RomDataSource
+#' @name Hydro Data Source Data Source Bin
+#' @description RomDataSource is an object that contains tables and methods of
+#'   model data objects. It serves as a global object store that references to
+#'   all objects of a given domain and pointers to remote data source if
+#'   applicable. It offers the flexibility of synching (via POST or
+#'   INSERT/UPDATE) to a remote data source OR allows users to update local data
+#'   bases or sources. It does not permit a mix of these data streams, keeping
+#'   the RomDataSource object consistent.
+#' @details Provides integrated, queryable universe of features, observations
+#'   and meta data
+#' @importFrom R6 R6Class
 #' @param baseurl URL of remote data store with REST capabilities, optional
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
-#' @examples NA
+#' @examples 
+#' ##Get new datasource via odbc
+#' #ds <- RomDataSource$new(site,
+#'#                         rest_uname = odbc_uname,
+#'#                         connection_type = 'odbc',
+#'#                         dbname = databaseName)
+#'# ds$get_token(rest_pw = odbc_pw)
+#' ##Pointer to external db
+#'# ds$connection
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",
@@ -29,35 +42,63 @@ RomDataSource <- R6Class(
     rest_uname = NULL,
     #' @field dbname DATABASE TO USE IN odbC CONNECTION
     dbname = NULL,
+    #' @description
+        #' Initialize a RomDataSource, returning a RomDataSource R6 object that is
+        #' now populated with site, username, connection type, database name, and
+        #' any connection string details if using ODBC. This object will also have numerous methods that are
+        #' described in \code{?RomDataSource}
+    #' @param site URL of some RESTful repository or the host of the target
+    #'   database. At DEQ, this is defined in the default config files.
+    #' @param rest_uname username to connect to RESTful repository or database.
+    #'   At DEQ, this should be defined within local config files
+    #' @param connection_type String, either 'rest' or 'odbc' depending on
+    #'   target database
+    #' @param dbname Used only when connection_type = 'odbc'. This is the
+    #'   database name of the database that supports the ODBC connection. At
+    #'   DEQ, this should generally target the active dbase, not alpha, although
+    #'   both are supported
+    #' @return Instance of RomDataSource, now with populated site, rest_uname,
+    #'   connection_type, and dbname data
     #' @field debug show debug info for queries
     debug = FALSE,
-    #' @param site URL of some RESTful repository
-    #' @param rest_uname username to connect to RESTful repository
-    #' @param connection_type supported rest or odbc
-    #' @param dbname supported odbc dbname
-    #' @return object instance
     initialize = function(site, rest_uname = NULL, connection_type = 'rest', dbname = NULL) {
       self$site = site
       self$rest_uname = rest_uname
       self$connection_type = connection_type
       self$dbname = dbname
     },
-    #' @param table which table. Default 'all'
-    #' @return nothing clears data tables
+    #'@description 
+    #'Clear entries and reset tables stored in RomDataSource. Used to clean out
+    #'features, properties, tsvalues, or variable definitions
+    #' @param table Which table(s) should be cleared? . Defaults to 'all', but will
+    #' also accept a vector that contains any or all of: \code{c('props', 'features', 'tsvalues', 'var_defs')}
+    #' @return nothing, but will clear requested data tables stored on this object
     reset = function(table) {
+      t_options <- 
       for (t in c('props', 'features', 'tsvalues', 'var_defs')) {
-        if ( (table == 'all') | (t == table) ) {
+        if ( (table == 'all') | (t %in% table) ) {
           self[[t]] <- self[[t]][0,]
         }
       }
     },
-    #' @param rest_pw to use, if NULL will prompt
-    #' @param odbc_port to use, if NULL will prompt
-    #' @return nothing sets internal private token
+    #' @name get_token
+    #' #'@description 
+    #'Set the connection to either the database via ODBC or to a REST service
+    #'(through the act of obtaining a token). OFten done in DEQ config.R files.
+    #' @param rest_pw Password to REST/odbc service requested. Will prompt user
+    #'   for entry if not provided
+    #' @param odbc_port If using odbc, which port should be used? Will prompt
+    #'   user for entry if not provided. Defaults to DEQ port approved by OIS
+    #' @return Nothing, but sets internal private token. Private fields are not
+    #'   visible via \code{RomDataSource$token} notation and are hidden for
+    #'   security
     get_token = function(rest_pw = NULL, odbc_port = 5431) {
+      #Check to ensure user has set site on RomDataSource - should be done
+      #already via initialize but user may alter
       if (!is.character(self$site) ) {
         warning("Base URL to REST repository not supplied.")
       }
+      #Connect to either VA Hydro rest (offline ~2025) or ODBC
       if (self$connection_type == 'rest') {
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
@@ -73,35 +114,52 @@ RomDataSource <- R6Class(
       }
     },
     # this could actually live in the RomTS object
-    #' @param varkey = variable key
-    #' @param force_refresh Check remote repository for new info? 
-    #' @param debug show info
-    #' @return nothing sets internal private token
+    #' @name get_vardef
+    #' @description 
+    #'Queries first local variable definitions and if necessary
+    #'dh_variabledefinition for a varkey, setting the varid within RomDataSource
+    #'instance
+    #' @param varkey Variable key as defined in dh_variabledefinition as
+    #'   varkey. See Hydrotools readme for more information, but represents an
+    #'   abbreviated variable name to define a property or timeseries.
+    #' @param force_refresh Should the remote database be checked for new info? 
+    #' @param debug Show relevant debugging info
+    #' @return Nothing, but sets variable definitions on RomDataSource
     get_vardef = function(varkey, force_refresh = FALSE, debug = FALSE) {
-      # NOt yet tested,
       config = list()
       #print(paste("Handling ", varkey))
+      #Set either the varkey or variable hydroid based on if the user has
+      #provided character (varkey) or integer data (hydroid). Varkey is given
+      #the preference
       if (is.na(as.integer(varkey))) {
         config$varkey = varkey
       } else {
         config$hydroid = as.integer(varkey)
-        #if ()
       }
-      # check local store, if not there, check remote
+      # check local store (var_defs on RomDataSource) for definition, if not
+      # there, check remote
       vardef <- fn_search_vardefs(config, self$var_defs)
       if (is.logical(vardef)) {
         # none exists locally, so query
         force_refresh = TRUE
       }
+      #If no data was returned and remote is to be checked, query remote dbase
+      #for relevant variable definitions 
       if (!is.null(self$site) & force_refresh) {
+        #For ODBC connections, find the variable definition from
+        #dh_variabledefinition, limiting return to 1
         if (self$connection_type == 'odbc') {
+          #Limit to only the first variable, as used by self$get() method
           config$limit = 1
+          #Use get to query dh_variabledefinition using the varkey or hydroid
+          #with the primary key of hydroid
           vardef <- self$get('dh_variabledefinition', 'hydroid', config)
           vardef <- as.list(vardef[1,])
           if ('hydroid' %in% names(vardef)) {
             vardef$varid <- vardef$hydroid
           }
         } else {
+          #For REST service, get definition from View
           vardef <- fn_get_vardef_view(varkey, self$site, private$token, debug)
           # TBD
           # vardef <- RomVarDef$new(self,var_one)
@@ -113,17 +171,39 @@ RomDataSource <- R6Class(
       return(vardef)
     },
     # get properties
-    #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
+    #' @name get_prop
+    #'Queries first local properties and if needed or requested dh_property for
+    #'the properties specified in the user config file. This method creates a
+    #'WHERE clause from the config file for an SQL query of the user input for
+    #'entity_type provided by user. Will only return the first found property.
+    #' @param config A list of values that includes query constructors. Each entry
+    #'   in this list and its corresponding value will be added to the WHERE clause
+    #'   of a query that queries the table specified in entity_type with the
+    #'   exception of "limit", which will only be used to generate the LIMIT clause
+    #'   for the query. May include a primary key ID, in which case it will be all
+    #'   that is used in the WHERE clause. Relevant data for list may include
+    #'   propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+    #'   Readme e.g. list(entity_type, featureid, pid, varid, tstime,
+    #'   tsendtime). See Readme for more options
     #' @param return_type 'data.frame' or 'list'
-    #' @param force_refresh if this ds has a remote source, whether to pull anew
-    #' @param obj optional object which can supply more specific query info for odbc
-    #' @return nothing sets internal private token
+    #' @param force_refresh Should the remote data source be queried (TRUE) or
+    #'   just local properties stored on the RomDataSource instance
+    #' @param obj (optional) object class calling this routine, can supply a
+    #'   base query via sql_select_from field as would otherwise be returned via
+    #'   hydrotools:::fn_guess_sql()
+    #' @return Data frame of the first property returned from query of
+    #'   properties based on data provided in config
     get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       prop = FALSE
-      # odbc has robust query handling so we don't need to do this
+      # odbc has robust query handling so we don't need more than self$get()
       if (self$connection_type == 'odbc') {
+        #Use the get() method on RomDataSource to query dh_properties using pid
+        #as teh primary key, with any WHERE provided by config or optional SQL
+        #in the obj provided
         propvalues <- self$get('dh_properties', 'pid', config, obj)
       } else {
+        #NOTE: This portion is not under active development after the
+        #deprecation of VAHydro REST services
         # todo: all entities should be able to be searched by the odbc methods
         #       so eventually all this will be phased out, since the odbc methods
         #       have robust querying, and should be able to query against the datasource
@@ -140,6 +220,7 @@ RomDataSource <- R6Class(
           propvalues <- fn_get_rest('dh_properties', 'pid', config, self$site, private$token)
         }
       }
+      #If data was returned from teh query, return only the first property
       if (!is.logical(propvalues)) {
         if (nrow(propvalues) >= 1) {
           prop <- as.list(propvalues[1,])
@@ -148,7 +229,7 @@ RomDataSource <- R6Class(
         prop <- propvalues
       }
       # return either the raw fn_get_timeseries/fn_search_propvalues 
-      # or a the first found item
+      # or a the first found item. Will be FALSE if no data was returned
       if (return_type != 'data.frame') {
         return(prop)
       } else {
@@ -159,11 +240,24 @@ RomDataSource <- R6Class(
     # load_object - load entity single object config
     # get_ts method description
     # this could actually live in the RomTS object
-    #' @param config = list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)
-    #' @param return_type 'data.frame' or 'list'
-    #' @param force_refresh if this ds has a remote source, whether to pull anew
-    #' @param obj optional object which can supply more specific query info for odbc
-    #' @return nothing sets internal private token
+    #' @param config A list of values that includes query constructors. Each entry
+    #'   in this list and its corresponding value will be added to the WHERE clause
+    #'   of a query that queries the table specified in entity_type with the
+    #'   exception of "limit", which will only be used to generate the LIMIT clause
+    #'   for the query. May include a primary key ID, in which case it will be all
+    #'   that is used in the WHERE clause. Relevant data for list may include
+    #'   propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+    #'   Readme e.g. list(entity_type, featureid, tid = NULL, varid = NULL,
+    #'   tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline
+    #'   ID (not yet used). See Readme for more options
+    #' @param return_type 'data.frame' or 'list', but will default to data.frame
+    #' @param force_refresh Should the remote data source be queried (TRUE) or
+    #'   just local properties stored on the RomDataSource instance
+    #' @param obj (optional) object class calling this routine, can supply a
+    #'   base query via sql_select_from field as would otherwise be returned via
+    #'   hydrotools:::fn_guess_sql()
+    #' @return Data frame of the first TS returned from query of dh_timeseries
+    #'   based on data provided in config
     get_ts = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
       # return_type = 'list', or 'data.frame'
       # default to data.frame to maintain compatibility with getTimeseries
@@ -176,7 +270,8 @@ RomDataSource <- R6Class(
       # odbc has robust query handling so we don't need to us fn_get_timeseries
       ts = FALSE
       if (self$connection_type == 'odbc') {
-        # ts_obj = RomTS$new(self)
+        # Query dh_timeseries using a WHERE constructed by values in config with
+        # base query optionally in obj. Primary key here will be tid
         tsvalues <- self$get('dh_timeseries', 'tid', config, obj)
       } else {
         # todo: all entities should be able to be searched by the odbc methods
@@ -195,6 +290,7 @@ RomDataSource <- R6Class(
           tsvalues <- fn_get_timeseries(config, self$site, private$token)
         }
       }
+      #If tsvalues were returned, only return the first intance
       if (!is.logical(tsvalues)) {
         if (nrow(tsvalues) >= 1) {
           # stash the first one in case we only want a single
@@ -211,6 +307,8 @@ RomDataSource <- R6Class(
       }
       
     },
+    #' @description Used to read vews from a REST service. Deprecated upon ODBC
+    #'   connection development
     #' @param uri remote address to retrieve data
     #' @param content_type http content-type
     #' @param delim delimiter
@@ -378,18 +476,32 @@ RomDataSource <- R6Class(
         self$features[feature$ID] <- feature
       }
     },
-    #' @param entity_type = dh_feature, dh_properties, ...
-    #' @param pk = primary key column name, e.g. hydroid, pid, ...
-    #' @param config = contents of record to post in list(pid, propname, propvalue, ...)
-    #' @param obj = (optional) object class calling this routine, can supply extra info
-    #' @return local df index?
+    #' @param entity_type Most often dh_feature or dh_properties. Indicates which 
+    #'   table to retrieve data from. This will be the target table for the query
+    #'   constructed from user inputs input list
+    #' @param pk Primary key column name, often hydroid or pid. See Readme for
+    #'   additional information or contact OWSPA Data Coordinatory if you do not
+    #'   know the appropriate primary key for the table of interest. If
+    #'   referenced in config, will be the only item in the WHERE clause of the
+    #'   user query
+    #' @param config A list of potential values to be added to an SQL query that
+    #'   targets entity_type. This list will be iterated through and added to a
+    #'   WHERE clause to ensure user query operates. If a primary key id is
+    #'   provided named the same as the user input pk, the WHERE clause will
+    #'   only contain a statement on this key id. "limit" may also be in this
+    #'   list to limit query results
+    #' @param obj (optional) object class calling this routine, can supply a
+    #'   base query via sql_select_from field as would otherwise be returned via
+    #'   hydrotools:::fn_guess_sql()
+    #' @return Results of the query of entity_type constructed from the config
+    #'   supplied by user. Typically a data frame.
     get = function(entity_type, pk, config, obj = FALSE) {
       if (self$connection_type == 'rest') {
         retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
       } else {
         retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj, self$debug)
       }
-      
+      #Return data.frame of the results
       return(retvals)
     },
     #' @param entity_type = dh_feature, dh_properties, ...

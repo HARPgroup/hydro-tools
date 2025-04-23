@@ -5,7 +5,7 @@
 \title{Post any entity to via an ODBC connection. This allows users to insert or
 update entities within database.}
 \usage{
-fn_post_odbc(entity_type, pk, inputs, con, obj = FALSE)
+fn_post_odbc(entity_type, pk, inputs, con, obj = FALSE, debug = FALSE)
 }
 \arguments{
 \item{entity_type}{= dh_feature, dh_properties, ...}
