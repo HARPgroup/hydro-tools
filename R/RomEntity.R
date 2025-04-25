@@ -155,12 +155,15 @@ RomEntity <- R6Class(
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
-        propname=propname,
-        propcode=propcode
+        propname=propname
       )
       if(!is.null(varkey)) {
         # this may be a create request, populate varkey
         plist$varkey=varkey
+      }
+      if(!is.null(propcode)) {
+        # this may be a create request, populate varkey
+        plist$propcode=propcode
       }
       child_prop = RomProperty$new(
         self$datasource,
