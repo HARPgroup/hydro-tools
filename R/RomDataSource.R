@@ -81,7 +81,6 @@ RomDataSource <- R6Class(
         }
       }
     },
-    #' @name get_token
     #' #'@description 
     #'Set the connection to either the database via ODBC or to a REST service
     #'(through the act of obtaining a token). OFten done in DEQ config.R files.
@@ -114,7 +113,6 @@ RomDataSource <- R6Class(
       }
     },
     # this could actually live in the RomTS object
-    #' @name get_vardef
     #' @description 
     #'Queries first local variable definitions and if necessary
     #'dh_variabledefinition for a varkey, setting the varid within RomDataSource
@@ -171,7 +169,6 @@ RomDataSource <- R6Class(
       return(vardef)
     },
     # get properties
-    #' @name get_prop
     #'Queries first local properties and if needed or requested dh_property for
     #'the properties specified in the user config file. This method creates a
     #'WHERE clause from the config file for an SQL query of the user input for
