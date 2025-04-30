@@ -234,7 +234,7 @@ RomEntity <- R6Class(
       # still use the local datasource as a repository for remote data
       # at first the thinking was no with ODBC, but maybe that's not correct?
       # in other words, it was thought that ODBC replaced the local storage...
-      if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
+      if (!is.na(self[[self$pk_name]]) && (load_remote == TRUE) ) {
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
         message("Saving to local db")
