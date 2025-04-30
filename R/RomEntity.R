@@ -40,7 +40,6 @@ RomEntity <- R6Class(
     #' @param varid option variable to filter
     #' @param propcode optional code to filter
     propvalues = function(propname = NULL, varid = NULL, propcode = NULL) {
-      prop_obj = RomProperty$new(self$datasource)
       config <- list(
         featureid = self$get_id(), 
         entity_type=self$base_entity_type

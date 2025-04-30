@@ -166,6 +166,10 @@ dHOMConstant <- R6Class(
         name=entity$propname,
         value=entity$propvalue
       )
+      if (is.na(export$value)) {
+        # NA is not always handled outside R
+        export$value = 0.0
+      }
       return(export)
     }
   )
