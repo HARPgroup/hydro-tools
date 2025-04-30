@@ -190,6 +190,9 @@ Nothing, but sets internal private token. Private fields are not
 \if{html}{\out{<a id="method-RomDataSource-get_vardef"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_vardef}{}}}
 \subsection{Method \code{get_vardef()}}{
+Queries first local variable definitions and if necessary
+dh_variabledefinition for a varkey, setting the varid within RomDataSource
+instance
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_refresh = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
 }
@@ -197,11 +200,11 @@ Nothing, but sets internal private token. Private fields are not
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{varkey}}{= Variable key as defined in dh_variabledefinition as
+\item{\code{varkey}}{Variable key as defined in dh_variabledefinition as
 varkey. See Hydrotools readme for more information, but represents an
 abbreviated variable name to define a property or timeseries.}
 
-\item{\code{force_refresh}}{Should the remote repository be checked for new info?}
+\item{\code{force_refresh}}{Should the remote database be checked for new info?}
 
 \item{\code{debug}}{Show relevant debugging info}
 }
@@ -227,18 +230,30 @@ Nothing, but sets variable definitions on RomDataSource
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+\item{\code{config}}{A list of values that includes query constructors. Each entry
+in this list and its corresponding value will be added to the WHERE clause
+of a query that queries the table specified in entity_type with the
+exception of "limit", which will only be used to generate the LIMIT clause
+for the query. May include a primary key ID, in which case it will be all
+that is used in the WHERE clause. Relevant data for list may include
+propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+Readme e.g. list(entity_type, featureid, pid, varid, tstime,
+tsendtime). See Readme for more options}
 
 \item{\code{return_type}}{'data.frame' or 'list'}
 
-\item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+\item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
+just local properties stored on the RomDataSource instance}
 
-\item{\code{obj}}{optional object which can supply more specific query info for odbc}
+\item{\code{obj}}{(optional) object class calling this routine, can supply a
+base query via sql_select_from field as would otherwise be returned via
+hydrotools:::fn_guess_sql()}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-nothing sets internal private token
+Data frame of the first property returned from query of
+  properties based on data provided in config
 }
 }
 \if{html}{\out{<hr>}}
@@ -257,24 +272,39 @@ nothing sets internal private token
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+\item{\code{config}}{A list of values that includes query constructors. Each entry
+in this list and its corresponding value will be added to the WHERE clause
+of a query that queries the table specified in entity_type with the
+exception of "limit", which will only be used to generate the LIMIT clause
+for the query. May include a primary key ID, in which case it will be all
+that is used in the WHERE clause. Relevant data for list may include
+propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+Readme e.g. list(entity_type, featureid, tid = NULL, varid = NULL,
+tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline
+ID (not yet used). See Readme for more options}
 
-\item{\code{return_type}}{'data.frame' or 'list'}
+\item{\code{return_type}}{'data.frame' or 'list', but will default to data.frame}
 
-\item{\code{force_refresh}}{if this ds has a remote source, whether to pull anew}
+\item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
+just local properties stored on the RomDataSource instance}
 
-\item{\code{obj}}{optional object which can supply more specific query info for odbc}
+\item{\code{obj}}{(optional) object class calling this routine, can supply a
+base query via sql_select_from field as would otherwise be returned via
+hydrotools:::fn_guess_sql()}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-nothing sets internal private token
+Data frame of the first TS returned from query of dh_timeseries
+  based on data provided in config
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-auth_read"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-auth_read}{}}}
 \subsection{Method \code{auth_read()}}{
+Used to read vews from a REST service. Deprecated upon ODBC
+  connection development
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$auth_read(
   uri,
@@ -428,18 +458,32 @@ nothing seprop internal private token
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+\item{\code{entity_type}}{Most often dh_feature or dh_properties. Indicates which 
+table to retrieve data from. This will be the target table for the query
+constructed from user inputs input list}
 
-\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+\item{\code{pk}}{Primary key column name, often hydroid or pid. See Readme for
+additional information or contact OWSPA Data Coordinatory if you do not
+know the appropriate primary key for the table of interest. If
+referenced in config, will be the only item in the WHERE clause of the
+user query}
 
-\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+\item{\code{config}}{A list of potential values to be added to an SQL query that
+targets entity_type. This list will be iterated through and added to a
+WHERE clause to ensure user query operates. If a primary key id is
+provided named the same as the user input pk, the WHERE clause will
+only contain a statement on this key id. "limit" may also be in this
+list to limit query results}
 
-\item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
+\item{\code{obj}}{(optional) object class calling this routine, can supply a
+base query via sql_select_from field as would otherwise be returned via
+hydrotools:::fn_guess_sql()}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-local df index?
+Results of the query of entity_type constructed from the config
+  supplied by user. Typically a data frame.
 }
 }
 \if{html}{\out{<hr>}}

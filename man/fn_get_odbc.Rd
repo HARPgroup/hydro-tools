@@ -2,25 +2,44 @@
 % Please edit documentation in R/odbc_utils.R
 \name{fn_get_odbc}
 \alias{fn_get_odbc}
-\title{Get any entity from a RESTful web service}
+\title{Get any entity from a remote database, often dbase2/3 via ODBC connection
+(often set in an instance of RomDataSource)}
 \usage{
 fn_get_odbc(entity_type, pk, inputs, con, obj = FALSE, debug = FALSE)
 }
 \arguments{
-\item{entity_type}{= dh_feature, dh_properties, ...}
+\item{entity_type}{Most often dh_feature or dh_properties. Indicates which 
+table to retrieve data from. This will be the target table for the query
+constructed from user inputs input list}
 
-\item{pk}{= primary key column name, e.g. hydroid, pid, ...}
+\item{pk}{Primary key column name, often hydroid or pid. See Readme for
+additional information or contact OWSPA Data Coordinatory if you do not
+know the appropriate primary key for the table of interest}
 
-\item{inputs}{contents of record to post in list(pid, propname, propvalue, ...)}
+\item{inputs}{A list of values that includes query constructors. Each entry
+in this list and its corresponding value will be added to the WHERE clause
+of a query that queries the table specified in entity_type with the
+exception of "limit", which will only be used to generate the LIMIT clause
+for the query. May include a primary key ID, in which case it will be all
+that is used in the WHERE clause. Relevant data for list may include
+propname, propvalue, hydrocode, or other fields shown in the Hydrotools
+Readme e.g. list(pid, propname, propvalue, ...)}
 
-\item{con}{connection to ODBC server}
+\item{con}{connection to ODBC server, usually provided via
+RomDataSource$connection()}
 
-\item{obj}{optional class with extra query info}
+\item{obj}{optional class with extra query info specified via sql_select_from
+field}
 
 \item{debug}{Print out debug info if true}
 }
+\value{
+The results of the query constructed based on inputs and pk from
+  entity_type, typically a data.frame
+}
 \description{
-Get any entity from a RESTful web service
+Get any entity from a remote database, often dbase2/3 via ODBC connection
+(often set in an instance of RomDataSource)
 }
 \examples{
 NA

@@ -16,7 +16,7 @@
 #'@return If x is numeric, then returns a numeric. Otherwise, if label is TRUE,
 #'  returns an ordered factor indicating the equivalent month of the water year.
 #'  Otherwise, returns only the numeric that represents the month.
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@importFrom lubridate month
 #'@export water.month
 water.month <- function(x, label = FALSE, abbr = TRUE){
@@ -97,7 +97,7 @@ water.month.default <- function (
 #'30
 #'@param x a date-time object which can be handled by lubridate
 #'@return Returns the equivalent water year of the date x input by the uee
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@importFrom lubridate month year
 #'@export
 #
@@ -129,7 +129,7 @@ water.year <- function (x) {
 #'  default here. This can be a character string of a function name but should
 #'  ideally be a closure
 #'@return A matrix with the monthly results of FUN over each year
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@references
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'@importFrom zoo index coredata is.zoo
@@ -197,7 +197,7 @@ group1 <- function (
 #'  Each column represents a different rolling average and is either the 1-day,
 #'  3-day, 7-day, 30-day, or 90-day average. NAs will be present at the start and
 #'  end of each year if \code{mimic.tnc = TRUE}
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@importFrom caTools runmean
 #'@export
 runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
@@ -244,7 +244,7 @@ runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
 #'@return a named vector containing the group2 statistics, including the range
 #'of the 1-, 3-, 7-, 30-, and 90-day flows and the base index and days of zero
 #'flow
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@param x a matrix of rolling means
 #'@export
 group2Funs <- function (x) {
@@ -291,7 +291,7 @@ group2Funs <- function (x) {
 #'@param ... additional arguments passed to ddply. Likely not used without
 #'  modificiation to this function
 #'@return a data frame with the group 2 statistics for each year
-#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@deq.virginia.gov)
+#'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@references \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}
 #'@importFrom plyr ddply '.'
 #'@importFrom zoo coredata index
@@ -330,8 +330,8 @@ group2 <- function (
   #Use plyr::ddply to apply group2Funs() to each subset of xd based on the
   #grouping variable year e.g. apply group2Funs() to each year of data in xd and
   #combine results into one data.frame
-  res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]), 
-                     ...)
+  res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]),
+   ...)
   return(res)
 }
 

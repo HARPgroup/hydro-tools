@@ -2,21 +2,36 @@
 % Please edit documentation in R/odbc_utils.R
 \name{fn_guess_sql_where}
 \alias{fn_guess_sql_where}
-\title{Guess an SQL query from a simple list of inputs}
+\title{Guess an SQL query with a WHERE clasue from a simple list of inputs, using
+all inputs to construct WHERE}
 \usage{
 fn_guess_sql_where(entity_type, pk, inputs, alias = "")
 }
 \arguments{
-\item{entity_type}{= dh_feature, dh_properties, ...}
+\item{entity_type}{Most often dh_feature or dh_properties. Indicates which 
+table to retrieve data from. This will be the target table for the query
+constructed from user inputs input list}
 
-\item{pk}{= primary key column name, e.g. hydroid, pid, ...}
+\item{pk}{Primary key column name, often hydroid or pid. See Readme for
+additional information or contact OWSPA Data Coordinatory if you do not
+know the appropriate primary key for the table of interest}
 
-\item{inputs}{contents of record to post in list(pid=X, propname='nom', propvalue, ...)}
+\item{inputs}{contents of record to post in list(pid=X, propname='nom',
+propvalue, ...). The pk column may (optional) be one of the entries in this
+list and this should serve as the primary key ID that the user is
+interested in identifying. If a primary key is found, it is the only item
+added to the WHERE clause. Otherwise, all contents of inputs will be added
+into the WHERE clause constructed from this query}
 
 \item{alias}{assign an alias to a give table/view relation?}
 }
+\value{
+A WHERE clasue to be added to an SQL query, perhaps generated via
+  fn_guess_sql
+}
 \description{
-Guess an SQL query from a simple list of inputs
+Guess an SQL query with a WHERE clasue from a simple list of inputs, using
+all inputs to construct WHERE
 }
 \examples{
 NA
