@@ -220,14 +220,16 @@ RomEntity <- R6Class(
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {
-      #message(paste("load_data() called "))
+      message(paste("load_data() called "))
       self$from_list(config)
-      #message(paste("Loaded object: "))
+      message(paste("Loaded object: "))
       #message(self)
       self$get_vardef()
-      #message(paste("Loaded vardef: "))
+      message(paste("Loaded vardef: "))
       self$load_plugin()
-      #message(paste("Loaded plugin: "))
+      message(paste("Loaded plugin: "))
+      message("self$pk_name=(below)")
+      message(self$pk_name)
       # this should be handled better.  We need to decide if we want to 
       # still use the local datasource as a repository for remote data
       # at first the thinking was no with ODBC, but maybe that's not correct?
