@@ -139,7 +139,7 @@ RomEntity <- R6Class(
       if ( !('varkey' %in% names(config)) && !('varid' %in% names(config)) ) {
         return(FALSE)
       }
-      message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
+      #message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
       if (!is.logical(config)) {
         vardef = self$datasource$get_vardef(config$varkey)
       } else {
@@ -158,6 +158,10 @@ RomEntity <- R6Class(
     #' @param remote look at remote datasource?
     #' @returns the property object for this entity
     get_prop = function(propname=NULL, varkey=NULL, propcode=NULL, remote=TRUE) {
+      if (is.na(self$get_id())) {
+        # An object whose id is not set has not been saved and cannot have properties
+        return(FALSE)
+      }
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
@@ -191,7 +195,11 @@ RomEntity <- R6Class(
     ) {
       # first, see if it exists to load and update
       # then, change/set the varid and values
-      message(paste("set_prop() called with for propname,varkey",propname,varkey))
+      if (is.na(self$get_id())) {
+        # An object whose id is not set has not been saved and cannot have properties
+        message(paste("Properties without IDs cannot have properties. Returnin FALSE from set_prop() called with for propname,varkey",propname,varkey))
+        return(FALSE)
+      }
       child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
       if (is.na(child_prop$pid)) {
         # this is new, so we do an update, 
