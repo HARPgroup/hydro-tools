@@ -129,6 +129,9 @@ RomDataSource <- R6Class(
       #Set either the varkey or variable hydroid based on if the user has
       #provided character (varkey) or integer data (hydroid). Varkey is given
       #the preference
+      if (is.null(varkey)) {
+        return(FALSE)
+      }
       if (is.na(as.integer(varkey))) {
         config$varkey = varkey
       } else {
