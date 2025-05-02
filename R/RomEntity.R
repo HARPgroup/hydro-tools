@@ -136,6 +136,9 @@ RomEntity <- R6Class(
       if (!is.null(self$vardef) & !refresh) {
         return(self$vardef)
       }
+      if ( !('varkey' %in% names(config)) && !('varid' %in% names(config)) ) {
+        return(FALSE)
+      }
       message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
       if (!is.logical(config)) {
         vardef = self$datasource$get_vardef(config$varkey)
