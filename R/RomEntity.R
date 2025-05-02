@@ -136,10 +136,14 @@ RomEntity <- R6Class(
       if (!is.null(self$vardef) & !refresh) {
         return(self$vardef)
       }
+      message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
       if (!is.logical(config)) {
         vardef = self$datasource$get_vardef(config$varkey)
       } else {
         vardef = self$datasource$get_vardef(self$varid)
+      }
+      if (is.logical(vardef)) {
+        return(FALSE)
       }
       #message("vardef retrieved, creating RomVar object")
       self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
