@@ -106,11 +106,10 @@ RomProperty <- R6Class(
         }
       }
       self$load_data(config, load_remote)
-      if (!is.logical(self$plugin$entity_bundle)) {
-        self$bundle = self$plugin$entity_bundle
-      } else {
-        if (is.na(self$bundle)) {
-          self$bundle = 'dh_properties'
+      self$bundle = 'dh_properties'
+      if (!is.logical(self$plugin)) {
+        if (!is.logical(self$plugin$entity_bundle)) {
+          self$bundle = self$plugin$entity_bundle
         }
       }
     },
