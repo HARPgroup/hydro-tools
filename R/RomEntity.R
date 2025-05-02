@@ -136,14 +136,18 @@ RomEntity <- R6Class(
       if (!is.null(self$vardef) & !refresh) {
         return(self$vardef)
       }
-      if ( !('varkey' %in% names(config)) && !('varid' %in% names(config)) ) {
-        return(FALSE)
-      }
       #message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
       if (!is.logical(config)) {
+        if ( !('varkey' %in% names(config)) && !('varid' %in% names(config)) ) {
+          return(FALSE)
+        }
         vardef = self$datasource$get_vardef(config$varkey)
       } else {
-        vardef = self$datasource$get_vardef(self$varid)
+        if (is.null(self$varid) || is.na(self$varid)) {
+          vardef = self$datasource$get_vardef(self$varkey)
+        } else {
+          vardef = self$datasource$get_vardef(self$varid)
+        }
       }
       if (is.logical(vardef)) {
         return(FALSE)
