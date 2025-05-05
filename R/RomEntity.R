@@ -102,6 +102,7 @@ RomEntity <- R6Class(
         #exists with these WHERE clause conditions
         if (!is.logical(feature)) {
           if(is.data.frame(feature) && nrow(feature) > 0){
+            #Only grab first feature
             config <- feature[1,]
           }
         }
