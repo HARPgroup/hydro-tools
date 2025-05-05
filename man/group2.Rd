@@ -4,12 +4,12 @@
 \alias{group2}
 \title{Calculates the group2 IHA statistics}
 \usage{
-group2(x, yearType = c("water", "calendar"), mimic.tnc = T, ...)
+group2(x, year = c("water", "calendar"), mimic.tnc = T, ...)
 }
 \arguments{
 \item{x}{A zoo timeseries object containing the flow series}
 
-\item{yearType}{The type of year factor to be used when determining statistcs,
+\item{year}{The type of year factor to be used when determining statistcs,
 \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively}
 
 \item{mimic.tnc}{should the function perform the calculation like the TNC IHA
