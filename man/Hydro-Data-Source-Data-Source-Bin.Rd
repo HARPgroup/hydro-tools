@@ -159,6 +159,9 @@ also accept a vector that contains any or all of: \code{c('props', 'features', '
 }
 \subsection{Returns}{
 nothing, but will clear requested data tables stored on this object
+#'@description 
+Set the connection to either the database via ODBC or to a REST service
+(through the act of obtaining a token). OFten done in DEQ config.R files.
 }
 }
 \if{html}{\out{<hr>}}
@@ -212,6 +215,10 @@ abbreviated variable name to define a property or timeseries.}
 }
 \subsection{Returns}{
 Nothing, but sets variable definitions on RomDataSource
+Queries first local properties and if needed or requested dh_property for
+the properties specified in the user config file. This method creates a
+WHERE clause from the config file for an SQL query of the user input for
+entity_type provided by user. Will only return the first found property.
 }
 }
 \if{html}{\out{<hr>}}

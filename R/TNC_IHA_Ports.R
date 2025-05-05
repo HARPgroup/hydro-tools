@@ -134,7 +134,7 @@ water.year <- function (x) {
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 #'@importFrom zoo index coredata is.zoo
 #'@importFrom lubridate year month
-#'@importFrom stats median
+#'@importFrom rapportools median
 #'@export
 group1 <- function (
     #A zoo timeseries

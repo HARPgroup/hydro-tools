@@ -29,16 +29,9 @@ the 1-D zoo input x.
 }
 \details{
 This function divides the zoo by water or calendar year
-and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it 
-finds the range, base index, and days of zero flow of each year, with base 
+and finds the 1, 3, 7, 30, and 90 day rolling averages of the zoo. Then, it
+finds the range, base index, and days of zero flow of each year, with base
 index defined as the minimum 7-day flow divided by the average flow
-}
-\examples{
-#'library(dataRetrieval)
-library(zoo)
-gageData <- dataRetrieval::readNWISdv("01634500","00060")
-gageFlow <- zoo::zoo(gageData[,4],order.by = gageData$Date)
-#group2(gageFlow,'water',TRUE)
 }
 \references{
 \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}

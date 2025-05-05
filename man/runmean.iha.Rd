@@ -9,10 +9,10 @@ runmean.iha(x, yearVector = NULL, mimic.tnc = F)
 \arguments{
 \item{x}{a numeric vector}
 
-\item{yearVector}{a vector of years (calendar or water year identifiers; necessary 
+\item{yearVector}{a vector of years (calendar or water year identifiers; necessary
 for mimic.tnc = TRUE)}
 
-\item{mimic.tnc}{logical should the years be split before the running mean is 
+\item{mimic.tnc}{logical should the years be split before the running mean is
 calculated e.g. should running means for each year be calculated
 independently? If mimic.tnc is TRUE, then yearVector must be provided and
 running means will be calculated for each year of data without using data from

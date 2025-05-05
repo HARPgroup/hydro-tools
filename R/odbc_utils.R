@@ -11,6 +11,7 @@
 #'   WSPA data coordinator for more information
 #' @param con connection to ODBC server
 #' @param obj optional class with extra query info
+#' @param debug optional show query pieces
 #' @seealso fn_get_odbc, fn_post_rest
 #' @export fn_post_odbc
 #' @examples 

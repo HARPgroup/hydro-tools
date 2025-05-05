@@ -22,6 +22,8 @@ WSPA data coordinator for more information}
 \item{con}{connection to ODBC server}
 
 \item{obj}{optional class with extra query info}
+
+\item{debug}{optional show query pieces}
 }
 \description{
 Post any entity to via an ODBC connection. This allows users to insert or
