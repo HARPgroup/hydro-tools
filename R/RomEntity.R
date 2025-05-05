@@ -97,8 +97,13 @@ RomEntity <- R6Class(
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
+        #If a data frame with data is returned, set config equal to the returned
+        #data. Otherwise, keep config as the user supplied data since no feature
+        #exists with these WHERE clause conditions
         if (!is.logical(feature)) {
-          config = feature
+          if(is.data.frame(feature) && nrow(feature) > 0){
+            config <- feature[1,]
+          }
         }
       }
       self$load_data(config, load_remote)
