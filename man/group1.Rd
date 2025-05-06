@@ -4,7 +4,7 @@
 \alias{group1}
 \title{group1}
 \usage{
-group1(x, yearType = c("water", "calendar"), FUN = median)
+group1(x, yearType = c("water", "calendar"), FUN = stats::median)
 }
 \arguments{
 \item{x}{A zoo timeseries object containing the flow series}

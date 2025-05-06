@@ -4,17 +4,17 @@
 \alias{runmean.iha}
 \title{Calculate rolling means for group2 statistics}
 \usage{
-runmean.iha(x, year = NULL, mimic.tnc = F)
+runmean.iha(x, yearVector = NULL, mimic.tnc = F)
 }
 \arguments{
 \item{x}{a numeric vector}
 
-\item{year}{a vector of years (calendar or water year identifiers; necessary
+\item{yearVector}{a vector of years (calendar or water year identifiers; necessary
 for mimic.tnc = TRUE)}
 
 \item{mimic.tnc}{logical should the years be split before the running mean is
 calculated e.g. should running means for each year be calculated
-independently? If mimic.tnc is TRUE, then year must be provided and
+independently? If mimic.tnc is TRUE, then yearVector must be provided and
 running means will be calculated for each year of data without using data from
 the following or previous year}
 }
@@ -31,7 +31,7 @@ to quickly get rolling averages for a time series.
 \details{
 If mimic.tnc is TRUE, it will calculate the running mean for each year
 independtly of the others (thereby not using data from the next or previous
-year), If mimic.tnc is TRUE, year must be provided as a vector of the
+year), If mimic.tnc is TRUE, yearVector must be provided as a vector of the
 year for each entry in x. Rolling means are calculated as centered means,
 using data that occurs before and after a given day to compute the rolling
 mean

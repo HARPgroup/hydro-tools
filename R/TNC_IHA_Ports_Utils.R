@@ -13,12 +13,12 @@
 group2Funs <- function (x) {
   #Apply range over the second matrix margin (columns), ignoring NAs. This
   #returns a vector of length 2*ncol(x)
-  rng <- as.numeric(apply(x, 2, range, na.rm = T))
+  rng <- as.numeric(apply(x, 2, base::range, na.rm = T))
   #Calculate the minimum 7-day average flow divided by the mean flow. Note that
   #the columns may change and thus this may not be accurate if the third column
   #is not 7-day flow and first column is not 1-day flow, but windows are
   #hard-coded in group2()
-  baseindex <- min(x[, 3], na.rm = T) / mean(x[, 1], na.rm = T)
+  baseindex <- base::min(x[, 3], na.rm = T) / base::mean(x[, 1], na.rm = T)
   #Find the number of days of zero flow (daily flow ONLY)
   zeros <- length(which(x[, 1] == 0))
   #Combine metrics
@@ -41,16 +41,16 @@ group2Funs <- function (x) {
 #'@details
 #'If mimic.tnc is TRUE, it will calculate the running mean for each year
 #'independtly of the others (thereby not using data from the next or previous
-#'year), If mimic.tnc is TRUE, year must be provided as a vector of the
+#'year), If mimic.tnc is TRUE, yearVector must be provided as a vector of the
 #'year for each entry in x. Rolling means are calculated as centered means,
 #'using data that occurs before and after a given day to compute the rolling
 #'mean
 #'@param x a numeric vector
-#'@param year a vector of years (calendar or water year identifiers; necessary
+#'@param yearVector a vector of years (calendar or water year identifiers; necessary
 #'for mimic.tnc = TRUE)
 #'@param mimic.tnc logical should the years be split before the running mean is
 #'calculated e.g. should running means for each year be calculated
-#'independently? If mimic.tnc is TRUE, then year must be provided and
+#'independently? If mimic.tnc is TRUE, then yearVector must be provided and
 #'running means will be calculated for each year of data without using data from
 #'the following or previous year
 #'@return a matrix with the rolling means of all the data combined into columns.
@@ -60,7 +60,7 @@ group2Funs <- function (x) {
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@importFrom caTools runmean
 #'@export
-runmean.iha <- function (x, year = NULL, mimic.tnc = F) {
+runmean.iha <- function (x, yearVector = NULL, mimic.tnc = F) {
   #Typical hydrology low flow periods
   window <- c(1, 3, 7, 30, 90)
   #Create a function wrapper for runmean that vectorizes the argument k for
@@ -74,7 +74,7 @@ runmean.iha <- function (x, year = NULL, mimic.tnc = F) {
   if (mimic.tnc) {
     #Divide the coredata by the year, creating a list where each entry
     #represents a separate year
-    sx <- split(coredata(x), year)
+    sx <- split(coredata(x), yearVector)
     #Use the vectorized running mean function and the 'fast' c algorithim to
     #calculate the rolling average of each entry in sx (each year) leaving NAs
     #at the start and end of each year since the caTools::runMean defaults to

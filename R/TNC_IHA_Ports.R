@@ -142,7 +142,7 @@ group1 <- function (
   #Whether statistics should be applied on a water or calendar year basis
   yearType = c("water", "calendar"),
   #The name of a function (character) OR a function (closure)
-  FUN = median) {
+  FUN = stats::median) {
   #x must be a zoo:
   stopifnot(is.zoo(x))
   #Get the yearType argument of the function input (either water or calendar)
@@ -181,7 +181,7 @@ group1 <- function (
 #'index defined as the minimum 7-day flow divided by the average flow
 #'
 #'@param x A zoo timeseries object containing the flow series
-#'@param year The type of year factor to be used when determining statistcs,
+#'@param yearType The type of year factor to be used when determining statistcs,
 #'  \code{yr = 'water'} or \code{yr ='calendar'} for water years and calculated years respectively
 #'@param mimic.tnc should the function perform the calculation like the TNC IHA
 #'software? If mimic.tnc is TRUE, then running means will be calculated for each
@@ -201,33 +201,32 @@ group2 <- function (
     #A zoo timeseries
   x,
   #Whether statistics should be applied on a water or calendar year basis
-  year = c("water", "calendar"),
+  yearType = c("water", "calendar"),
   mimic.tnc = T, ...) {
   
   #x must be a zoo:
   stopifnot(is.zoo(x))
   #Get the yearType argument of the function input (either water or calendar)
-  year <- match.arg(year)
-  if(!(year %in% c('water','calendar'))){
+  yearType <- match.arg(yearType)
+  if(!(yearType %in% c('water','calendar'))){
     stop(paste0("'yearType' argument must be either 'water' or 'calendar'.
-    ",year," has not yet been implemented"))
+    ",yearType," has not yet been implemented"))
   }
-  #Get the year as either water year or calendar year based using switch and the
-  #yearType input by user and getting the timeseries from zoo using index
-  yr <- switch(year, water = water.year(index(x)), calendar = year(index(x)))
+  #Get the yearType as either water year or calendar year based using switch and
+  #the yearType input by user and getting the timeseries from zoo using index
+  yr <- switch(yearType, water = water.year(index(x)), calendar = year(index(x)))
   #Calculate the rolling average of all data, treating years independently (not
   #allowing running averages to use data outside of the current year)
   #(controlled by mimic.tnc)
-  rollx <- runmean.iha(x, year = yr, mimic.tnc = mimic.tnc)
+  rollx <- runmean.iha(x, yearVector = yr, mimic.tnc = mimic.tnc)
   #Add the years as the first column to rollx
   xd <- cbind(year = yr, as.data.frame(rollx))
   #Use plyr::ddply to apply group2Funs() to each subset of xd based on the
   #grouping variable year e.g. apply group2Funs() to each year of data in xd and
   #combine results into one data.frame
-  return(xd[, -1])
-  # res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]),
-  #                    ...)
-  # return(res)
+  res <- plyr::ddply(xd, .(year), function(x) group2Funs(x[, -1]),
+                     ...)
+  return(res)
 }
 
 
