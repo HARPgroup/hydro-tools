@@ -65,3 +65,15 @@ import(rapportools)
 import(sqldf)
 import(stringr)
 importFrom(R6,R6Class)
+<<<<<<< HEAD
+=======
+importFrom(caTools,runmean)
+importFrom(lubridate,month)
+importFrom(lubridate,year)
+importFrom(plyr,'.')
+importFrom(plyr,ddply)
+importFrom(rapportools,median)
+importFrom(zoo,coredata)
+importFrom(zoo,index)
+importFrom(zoo,is.zoo)
+>>>>>>> odbcnew
