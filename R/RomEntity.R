@@ -358,13 +358,16 @@ RomEntity <- R6Class(
             # enough to handle multiple key matches
             pk <- NA # forces insert
             #message("Deleting old")
+            fn_delete_odbc(entity_type = field_table, pk = "", 
+                           inputs = check_list, con = self$datasource$connection,
+                           obj = FALSE, debug = TRUE)
             fn_delete_odbc(field_table,"", check_list, self$datasource$connection, FALSE, TRUE)
             #self$datasource$delete(field_table,"", check_list)
           }
           #message("Inserting new")
           self$matrix_revision_id = self$datasource$post(
-            field_table, pk, 
-            params
+            entity_type = field_table, pk = pk,
+            config = params
           )
         }
       }
