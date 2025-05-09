@@ -67,11 +67,14 @@ NA
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{datasource}}{RESTful repository object}
+\item{\code{datasource}}{URL of some RESTful repository or the host of the
+target database. At DEQ, this is defined in the default config files.}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to get, see also: to_list() for format.
+These are passed to RomDataSource$get()}
 
-\item{\code{load_remote}}{automatically query REST dataa source for matches?}
+\item{\code{load_remote}}{automatically query REST data source or remote
+datasource for matches?}
 }
 \if{html}{\out{</div>}}
 }

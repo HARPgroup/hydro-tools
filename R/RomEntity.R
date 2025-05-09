@@ -91,17 +91,15 @@ RomEntity <- R6Class(
         message("Configuration information faild validation. Returning.")
         return(FALSE)
       }
-      # if requested, we try to load
-      # will return multiple if that is what is returned
+      # if requested, we try to load will return first feature if multiple are
+      # preliminaryily returned from get()
       if (load_remote) {
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
-          if(is.data.frame(feature) && nrow(feature) > 0){
-            #Grab ALL features
-            config = feature
-          }
+            #Grab only the first feature returned
+            config = feature[1,]
         }
       }
       self$load_data(config, load_remote)

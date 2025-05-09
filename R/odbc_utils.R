@@ -173,7 +173,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   #the ODBC connection
   entities <- sqldf(get_sql, connection = con, method = "raw")
   #If nothing is returned, a logical is returned.
-  if (is.logical(entities)) {
+  if (is.logical(entities) || nrow(entities) == 0) {
     message("----- This entity does not exist")
     entities = FALSE
   } else {
