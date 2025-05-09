@@ -92,15 +92,15 @@ RomEntity <- R6Class(
         return(FALSE)
       }
       # if requested, we try to load
-      # only the last one returned will be sent back to user if multiple
+      # will return multiple if that is what is returned
       if (load_remote) {
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
           if(is.data.frame(feature) && nrow(feature) > 0){
-            #Only grab first feature
-            config <- feature[1,]
+            #Grab ALL features
+            config = feature
           }
         }
       }
