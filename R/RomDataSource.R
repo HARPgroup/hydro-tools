@@ -193,14 +193,16 @@ RomDataSource <- R6Class(
     #'   hydrotools:::fn_guess_sql()
     #' @return Data frame of the first property returned from query of
     #'   properties based on data provided in config
-    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
+    get_prop = function(config, return_type = 'data.frame',
+                        force_refresh = FALSE, obj = FALSE) {
       prop = FALSE
       # odbc has robust query handling so we don't need more than self$get()
       if (self$connection_type == 'odbc') {
         #Use the get() method on RomDataSource to query dh_properties using pid
         #as teh primary key, with any WHERE provided by config or optional SQL
         #in the obj provided
-        propvalues <- self$get('dh_properties', 'pid', config, obj)
+        propvalues <- self$get(entity_type = 'dh_properties',pk =  'pid', 
+                               config = config, obj = obj)
       } else {
         #NOTE: This portion is not under active development after the
         #deprecation of VAHydro REST services
@@ -499,7 +501,8 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj, self$debug)
+        retvals = fn_get_odbc(entity_type = entity_type, pk = pk, inputs = config,
+                              con = self$connection, obj = obj, debug = self$debug)
       }
       #Return data.frame of the results
       return(retvals)
