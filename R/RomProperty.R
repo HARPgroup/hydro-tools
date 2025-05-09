@@ -91,7 +91,9 @@ RomProperty <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
+        prop <- self$datasource$get_prop(
+          config = config, return_type = 'list',
+          force_refresh = TRUE, obj = self)
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
             prop <- as.list(prop[1,])

@@ -151,7 +151,8 @@ RomFeature <- R6Class(
     },
     #' @param target_entity what type to relate to (default dh_feature)
     #' @param inputs criteria to search for (list key = value format)
-    #' @param operator what type of spatial function,default = st_contains
+    #' @param operator what type of spatial function, default = st_contains.
+    #'   Other options are 'overlaps' or 'st_within'
     #' @param return_geoms FALSE will return a smaller dataframe
     #' @param query_remote FALSE will search on in local datasource
     #' @return dataframe of spatially related entities

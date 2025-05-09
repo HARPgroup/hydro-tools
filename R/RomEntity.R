@@ -162,33 +162,49 @@ RomEntity <- R6Class(
       self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
       return(self$vardef)
     },
-    #' @param propname list of attributes to set, see also: to_list() for format
-    #' @param varkey specify varkey? (in case of new prop creation)
-    #' @param propcode specify propcode? (in case of new prop creation)
-    #' @param remote look at remote datasource?
-    #' @returns the property object for this entity
-    get_prop = function(propname=NULL, varkey=NULL, propcode=NULL, remote=TRUE) {
+    #' @description
+        #' Get a 1st order property from this entity (assuming this entities
+        #' \code{entity_type}. This method will search for a user propname,
+        #' varkey, or propcode from dh_properties using this entity's id
+        #' (derived from \code{RomEntity$get_id()} as the featureid. If the
+        #' property is not set locally (if remote = FALSE) or in the DB (if
+        #' remote = TRUE), then it will return an instance of RomProperty with
+        #' the specified user inputs and this entity's ID.
+    #' @param propname Propname of the first order property
+    #' @param varkey varkey of the first order property (usually used in case of
+    #'   new prop creation)
+    #' @param propcode propcode of the first order property (usually used in
+    #'   case of new prop creation)
+    #' @param remote look at remote datasource for properties?
+    #' @returns A property object for this entity derived from the local or
+    #'   remote DB OR populated by user inputs if property does not exist
+    get_prop = function(propname = NULL, varkey = NULL,
+                        propcode = NULL, remote = TRUE) {
       if (is.na(self$get_id())) {
         # An object whose id is not set has not been saved and cannot have properties
         return(FALSE)
       }
+      #If user provides no data, warn them that only one property will be returned
+      if(all(is.null(propname),is.null(propcode),is.null(varkey))) {
+        message("No identifying data provided for property, will return the first 1st order property found in db")
+      }
+      #Create a config for RomProperty using self id as feature id and self
+      #entity type
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
-        propname=propname
+        propname=propname,
+        # these may be a create request, populate varkey
+        propcode=propcode,
+        varkey=varkey
       )
-      if(!is.null(varkey)) {
-        # this may be a create request, populate varkey
-        plist$varkey=varkey
-      }
-      if(!is.null(propcode)) {
-        # this may be a create request, populate varkey
-        plist$propcode=propcode
-      }
+      #Remove any NULLs where user has not provided data
+      plist[!sapply(plist,is.null)]
+      #Get (and return) the user specified property
       child_prop = RomProperty$new(
-        self$datasource,
-        plist,
-        remote
+        datasource = self$datasource,
+        config = plist[!sapply(plist,is.null)],
+        load_remote = remote
       )
       return(child_prop)
     },
