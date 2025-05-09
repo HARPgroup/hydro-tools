@@ -98,7 +98,10 @@ RomEntity <- R6Class(
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
-          config = feature
+          if(is.data.frame(feature) && nrow(feature) > 0){
+            #Only grab first feature
+            config <- feature[1,]
+          }
         }
       }
       self$load_data(config, load_remote)
