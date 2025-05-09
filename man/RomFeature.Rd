@@ -252,7 +252,8 @@ NULL
 
 \item{\code{inputs}}{criteria to search for (list key = value format)}
 
-\item{\code{operator}}{what type of spatial function,default = st_contains}
+\item{\code{operator}}{what type of spatial function, default = st_contains.
+Other options are 'overlaps' or 'st_within'}
 
 \item{\code{return_geoms}}{FALSE will return a smaller dataframe}
 

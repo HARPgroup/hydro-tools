@@ -310,8 +310,7 @@ Data frame of the first TS returned from query of dh_timeseries
 \if{html}{\out{<a id="method-RomDataSource-auth_read"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-auth_read}{}}}
 \subsection{Method \code{auth_read()}}{
-Used to read vews from a REST service. Deprecated upon ODBC
-  connection development
+Used to read views from a REST service.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomDataSource$auth_read(
   uri,

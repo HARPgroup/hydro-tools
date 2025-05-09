@@ -309,8 +309,7 @@ RomDataSource <- R6Class(
       }
       
     },
-    #' @description Used to read vews from a REST service. Deprecated upon ODBC
-    #'   connection development
+    #' @description Used to read views from a REST service.
     #' @param uri remote address to retrieve data
     #' @param content_type http content-type
     #' @param delim delimiter
