@@ -19,7 +19,7 @@ unloadNamespace('hydrotools')
 #Get the master branch deployment of the package
 devtools::install_github("HARPgroup/hydro-tools")
 # alternate, install a development branch for testing:
-devtools::install_github("HARPgroup/hydro-tools", ref = "odbc", force=TRUE)
+devtools::install_github("HARPgroup/hydro-tools", ref = "odbcnew", force=TRUE)
 
 #EXAMPLE FUNCTION DOCUMENTATION
 ??om_vahydro_metric_grid
