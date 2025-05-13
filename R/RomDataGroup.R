@@ -11,6 +11,8 @@
 RomDataGroup <- R6Class(
   "RomDataGroup",
   public = list(
+    #' @field datasource RomDataSource
+    datasource = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = 'id',
     #' @param datasource  URL of some RESTful repository or the host of the
@@ -22,10 +24,7 @@ RomDataGroup <- R6Class(
     #' @return object instance
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       stopifnot(class(datasource)[[1]] == "RomDataSource")
-      self$datasource = datasource 
-      if (self$datasource$connection_type == 'odbc') {
-        self$base_only = TRUE
-      }
+      self$datasource <- datasource 
       config <- self$handle_config(config)
       if (is.logical(config)) {
         message("Configuration information faild validation. Returning.")
