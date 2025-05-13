@@ -15,6 +15,8 @@ RomEntity <- R6Class(
     name = NA,
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
+    #' @field datasource connection to use for saving and retrieving data
+    datasource = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
     #' @field entity_id unique ID of entity
