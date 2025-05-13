@@ -580,7 +580,11 @@ RomDataSource <- R6Class(
           for (i in 1:nrow(children)) {
             thischild <- children[i,]
             sub_export <- self$get_nested_export(ds, thischild$pid, props, depth)
-            export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            if (!(thischild$propname %in% names(sub_export))) {
+              message(paste("Cannot find ", thischild$propname, "in", names(sub_export)))
+            } else {
+              export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            }
           }
         }
         return(export)
