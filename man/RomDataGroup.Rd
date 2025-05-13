@@ -4,7 +4,8 @@
 \alias{RomDataGroup}
 \title{Nested Property Object}
 \value{
-feature class of type RomFeature
+Instance of RomDataGroup or, more likely, RomPropertyTree which is
+  the only Rom object to inherit this object class
 
 an updated config if necessary or FALSE if it fails
 
@@ -13,10 +14,12 @@ the data from the remote connection
 the variable definition object for this entity
 }
 \description{
-Object for storing a single feature with attribute and timeseries related
+Object for storing a group of properties
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data related to
+  groups of related properties (e.g. children and parents). Typically called
+  from RomPropertyTree, which inherits this object class
 }
 \examples{
 NA
@@ -27,9 +30,11 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{datasource}}{RomDataSource}
+\item{\code{datasource}}{RomDataSource typically estbalished via the DEQ config
+file and should contain any relevant database connections}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+\item{\code{pk_name}}{the name of this entity's primary key column. Most often
+root_pid, but consult the Hydrotools ReadMe for more information}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,7 +73,9 @@ datasource for matches?}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-object instance
+object instance of RomDataGroup or instance of whatever object
+  inherited this class, most likely RomPropertyTree. It will be populated
+  with relevant fields.
 }
 }
 \if{html}{\out{<hr>}}
@@ -82,7 +89,7 @@ object instance
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{}
+\item{\code{config}}{#A list of requests to pass to RomDataSource$get()}
 }
 \if{html}{\out{</div>}}
 }

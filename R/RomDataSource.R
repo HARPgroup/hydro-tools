@@ -354,6 +354,7 @@ RomDataSource <- R6Class(
         prop <- self$insure_cols(prop, self$propvalues)
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
+        # as this is intended to work with RomProperty and RomPropertyTree
         dsl <- sqldf(
           "select * from prop 
            where pid not in (

@@ -4,13 +4,16 @@
 \alias{RomPropertyTree}
 \title{Nested Property Object}
 \value{
-Entity class of type RomPropertyTree
+Instance of type RomPropertyTree
 }
 \description{
-Object for storing a single feature with attribute and timeseries related
+Object for storing a property and all of its sub-properties.
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data. This object
+  class will use a recursive query to navigate a graph style database (e.g.
+  VA Hydro) to get the requested property and all first-, second-, etc. order
+  proerpties below it.
 }
 \examples{
 NA
@@ -26,15 +29,19 @@ NA
 \describe{
 \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+\item{\code{pk_name}}{the name of this entity's pk column, always root_pid}
 
-\item{\code{prop_list}}{The raw property rows returned}
+\item{\code{prop_list}}{The raw property rows returned. This will contain all
+subproperties of the property requested upon initialization of this
+instance}
 
 \item{\code{mps}}{linked features}
 
 \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{sql_select_from}}{Enhanced form of query overrides default SQL guess.}
+\item{\code{sql_select_from}}{Enhanced form of query overrides default SQL guess
+from hydrotools:::fn_guess_sql(). This will use a recurvsive query to
+get property and all subproperties}
 }
 \if{html}{\out{</div>}}
 }
@@ -72,14 +79,18 @@ NA
 \describe{
 \item{\code{datasource}}{RESTful repository object}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, see also: to_list() for format.
+These should contain identifying information about the requested
+property and will ultimatley be passed to RomDataGroup$new() and to
+RomDataSource$get()}
 
 \item{\code{load_remote}}{automatically query REST dataa source for matches?}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-object instance
+object instance of RomPropertyTree, populated with details of
+  requested property and all subproperties (in propvalues())
 }
 }
 \if{html}{\out{<hr>}}
@@ -117,7 +128,7 @@ list of object attributes suitable for input to new() and from_list() methods
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of properties to set, see also: to_list() for format}
 }
 \if{html}{\out{</div>}}
 }
@@ -155,14 +166,16 @@ NULL
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{input attributes}
+\item{\code{config}}{list of properties from RomDataGroup$new()}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-the data from the remote connection
+Nothing, but will set the properties on this instance of
+  RomPropertyTree with appropriate variable definitions in prop_list()
+  and propvalues() via self$datasource$set_prop()
 }
 }
 \if{html}{\out{<hr>}}

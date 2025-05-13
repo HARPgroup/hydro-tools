@@ -1,19 +1,24 @@
 #' Nested Property Object
-#' @description Object for storing a single feature with attribute and timeseries related
-#' @details Has standard methods for managing data and meta data
+#' @description Object for storing a group of properties
+#' @details Has standard methods for managing data and meta data related to
+#'   groups of related properties (e.g. children and parents). Typically called
+#'   from RomPropertyTree, which inherits this object class
 #' @importFrom R6 R6Class  
 #' @param datasource optional RomDataSource for remote and local storage
 #' @param config list of attributes to set
-#' @return feature class of type RomFeature
+#' @return Instance of RomDataGroup or, more likely, RomPropertyTree which is
+#'   the only Rom object to inherit this object class
 #' @seealso NA
 #' @examples NA
 #' @export RomDataGroup
 RomDataGroup <- R6Class(
   "RomDataGroup",
   public = list(
-    #' @field datasource RomDataSource
+    #' @field datasource RomDataSource typically estbalished via the DEQ config
+    #'   file and should contain any relevant database connections
     datasource = NA,
-    #' @field pk_name the name of this entity's pk column
+    #' @field pk_name the name of this entity's primary key column. Most often
+    #'   root_pid, but consult the Hydrotools ReadMe for more information
     pk_name = 'id',
     #' @param datasource  URL of some RESTful repository or the host of the
     #'   target database. At DEQ, this is defined in the default config files.
@@ -21,7 +26,9 @@ RomDataGroup <- R6Class(
     #'   These are passed to RomDataSource$get()
     #' @param load_remote automatically query REST data source or remote
     #'   datasource for matches?
-    #' @return object instance
+    #' @return object instance of RomDataGroup or instance of whatever object
+    #'   inherited this class, most likely RomPropertyTree. It will be populated
+    #'   with relevant fields.
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       stopifnot(class(datasource)[[1]] == "RomDataSource")
       self$datasource <- datasource 
@@ -42,7 +49,7 @@ RomDataGroup <- R6Class(
       }
       self$load_data(config, load_remote)
     },
-    #' @param config 
+    #' @param config #A list of requests to pass to RomDataSource$get()
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
       return(config)
