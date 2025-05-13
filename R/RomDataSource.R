@@ -155,6 +155,11 @@ RomDataSource <- R6Class(
           #Use get to query dh_variabledefinition using the varkey or hydroid
           #with the primary key of hydroid
           vardef <- self$get('dh_variabledefinition', 'hydroid', config)
+          #If no matching variable was found, return FALSE
+          if(is.logical(vardef)){
+            return(FALSE)
+          }
+          
           vardef <- as.list(vardef[1,])
           if ('hydroid' %in% names(vardef)) {
             vardef$varid <- vardef$hydroid
