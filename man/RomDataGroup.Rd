@@ -5,6 +5,12 @@
 \title{Nested Property Object}
 \value{
 feature class of type RomFeature
+
+an updated config if necessary or FALSE if it fails
+
+the data from the remote connection
+
+the variable definition object for this entity
 }
 \description{
 Object for storing a single feature with attribute and timeseries related
@@ -18,12 +24,11 @@ NA
 \seealso{
 NA
 }
-\section{Super class}{
-\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomDataGroup}
-}
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{datasource}}{RomDataSource}
+
 \item{\code{pk_name}}{the name of this entity's pk column}
 }
 \if{html}{\out{</div>}}
@@ -32,30 +37,14 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-RomDataGroup-new}{\code{RomDataGroup$new()}}
+\item \href{#method-RomDataGroup-handle_config}{\code{RomDataGroup$handle_config()}}
+\item \href{#method-RomDataGroup-from_list}{\code{RomDataGroup$from_list()}}
+\item \href{#method-RomDataGroup-load_data}{\code{RomDataGroup$load_data()}}
+\item \href{#method-RomDataGroup-get_vardef}{\code{RomDataGroup$get_vardef()}}
+\item \href{#method-RomDataGroup-load_plugin}{\code{RomDataGroup$load_plugin()}}
 \item \href{#method-RomDataGroup-clone}{\code{RomDataGroup$clone()}}
 }
 }
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
-<ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="from_list"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-from_list'><code>hydrotools::RomEntity$from_list()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_id"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_id'><code>hydrotools::RomEntity$get_id()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save'><code>hydrotools::RomEntity$save()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>hydrotools::RomEntity$set_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="to_list"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-to_list'><code>hydrotools::RomEntity$to_list()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
-</ul>
-</details>
-}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-new"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-new}{}}}
@@ -80,6 +69,89 @@ datasource for matches?}
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataGroup-handle_config"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-handle_config}{}}}
+\subsection{Method \code{handle_config()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$handle_config(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataGroup-from_list"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-from_list}{}}}
+\subsection{Method \code{from_list()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$from_list(config)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataGroup-load_data"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-load_data}{}}}
+\subsection{Method \code{load_data()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$load_data(config, load_remote)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{}
+
+\item{\code{load_remote}}{automatically query remote data source for matches?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataGroup-get_vardef"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-get_vardef}{}}}
+\subsection{Method \code{get_vardef()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$get_vardef(config = FALSE, refresh = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+
+\item{\code{refresh}}{automatically refresh var info?}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomDataGroup-load_plugin"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-load_plugin}{}}}
+\subsection{Method \code{load_plugin()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$load_plugin()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+nothing, but loads the objects plugin
 }
 }
 \if{html}{\out{<hr>}}

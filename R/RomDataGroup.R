@@ -47,6 +47,8 @@ RomDataGroup <- R6Class(
     handle_config = function(config) {
       return(config)
     },
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return NULL
     from_list = function(config) {
       return(TRUE)
     },

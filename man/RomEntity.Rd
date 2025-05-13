@@ -38,6 +38,8 @@ NA
 
 \item{\code{base_entity_type}}{kind of entity}
 
+\item{\code{datasource}}{RomDataSource}
+
 \item{\code{pk_name}}{the name of this entity's pk column}
 
 \item{\code{entity_id}}{unique ID of entity}
@@ -53,8 +55,6 @@ NA
 \item{\code{vardef}}{(optional) full RomVariableDefinition}
 
 \item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
-
-\item{\code{datasource}}{RomDataSource}
 }
 \if{html}{\out{</div>}}
 }
