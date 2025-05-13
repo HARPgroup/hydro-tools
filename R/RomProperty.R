@@ -335,7 +335,7 @@ RomProperty <- R6Class(
           matrix_check <- self$datasource$get(
             'field_data_field_dh_matrix','revision_id',list(revision_id = self$vid)
           )
-          if (nrow(matrix_check) == 0) {
+          if (is.logical(matrix_check) || (nrow(matrix_check) == 0)) {
             pk <- NA # forces insert
           }
           self$matrix_revision_id = self$datasource$post(
