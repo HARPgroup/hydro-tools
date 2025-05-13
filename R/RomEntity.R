@@ -15,7 +15,7 @@ RomEntity <- R6Class(
     name = NA,
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
-    #' @field datasource connection to use for saving and retrieving data
+    #' @field datasource RomDataSource
     datasource = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
@@ -73,8 +73,6 @@ RomEntity <- R6Class(
       ts <- self$datasource$get_ts(config)
       return(ts)
     },
-    #' @field datasource RomDataSource
-    datasource = NA,
     #' @param datasource RESTful repository (optional)
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
