@@ -1,19 +1,28 @@
 # Facility Utilities
-om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1) {
+om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1, probs=c(0,0.05,0.1,0.25, 0.3, 0.5)) {
   # Expects a data frame, df2sum with Qout, month columns
   if (is.zoo(df2sum)) {
     df2sum <- as.data.frame(df2sum)
   }
   intake_summary_tbl = data.frame(
-    "Month" = character(), 
-    'Min' = numeric(),
-    '5%' = numeric(),
-    '10%' = numeric(),
-    '25%' = numeric(), 
-    '30%' = numeric(),
-    '50%' = numeric(),
-    'Mean' = numeric(),
-    stringsAsFactors = FALSE) ;
+    "Month" = character(),
+    stringsAsFactors = FALSE
+  )
+  q_cols = c()
+  q_labs = c()
+  for (p in probs) {
+    if (p == 0) {
+      plab <- "Min"
+    } else if (p == 1.0) {
+      plab = "Max"
+    } else {
+      plab = paste0(round(100.0 * p), '%')
+    }
+    q_cols <- c(q_cols, p)
+    q_labs <- c(q_labs, plab)
+    intake_summary_tbl[,plab] <- numeric()
+  }
+  intake_summary_tbl[,"Mean"] <- numeric()
   if (rdigits > 1) {
     mrdigits = rdigits - 1
   } else {
@@ -22,22 +31,29 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
   for (i in index(month.abb)) {
     moname <- month.abb[i]
     drows <- sqldf(paste("select * from df2sum where ", mo_col, " = ", i))
-    q_drows <- quantile(drows[,q_col], probs=c(0,0.05,0.1,0.25, 0.3, 0.5), na.rm=TRUE)
+    q_drows <- quantile(drows[,q_col], probs=probs, na.rm=TRUE)
     q_mean <- mean(drows[,q_col])
     newline = data.frame(
-      "Month" = moname,
-      'Min' = round(as.numeric(q_drows["0%"]),rdigits),
-      '5%' = round(as.numeric(q_drows["5%"]),rdigits),
-      '10%' = round(as.numeric(q_drows["10%"]),rdigits),
-      '25%' = round(as.numeric(q_drows["25%"]),rdigits), 
-      '30%' = round(as.numeric(q_drows["30%"]),rdigits),
-      '50%' = round(as.numeric(q_drows["50%"]),rdigits),
-      'Mean' = round(q_mean,mrdigits),
-      stringsAsFactors = FALSE
+     "Month" = moname
     )
+    # newline = data.frame(
+    #   "Month" = moname,
+    #   'Min' = round(as.numeric(q_drows["0%"]),rdigits),
+    #   '5%' = round(as.numeric(q_drows["5%"]),rdigits),
+    #   '10%' = round(as.numeric(q_drows["10%"]),rdigits),
+    #   '25%' = round(as.numeric(q_drows["25%"]),rdigits), 
+    #   '30%' = round(as.numeric(q_drows["30%"]),rdigits),
+    #   '50%' = round(as.numeric(q_drows["50%"]),rdigits),
+    #   'Mean' = round(q_mean,mrdigits),
+    #   stringsAsFactors = FALSE
+    # )
+    for (i in length(q_cols)) {
+      newline[,q_labs[i]] = round(as.numeric(q_drows[q_cols[i]]),rdigits)
+    }
+    newline[,'Mean'] = round(q_mean,mrdigits)
     intake_summary_tbl <- rbind(intake_summary_tbl, newline)
   }
-  names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%', 'Mean')
+  #names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%', 'Mean')
   return(intake_summary_tbl)
 }
 
