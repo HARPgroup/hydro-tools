@@ -251,11 +251,11 @@ RomProperty <- R6Class(
       pid = FALSE
       if (push_remote) {
         pl <- self$to_list(self$base_only)
-        if (!is.Date(pl$startdate) & !is.integer(pl$startdate)) {
+        if (!lubridate::is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL
         }
-        if (!is.Date(pl$enddate) & !is.integer(pl$enddate)) {
+        if (!lubridate::is.Date(pl$enddate) & !is.integer(pl$enddate)) {
           # remove 
           pl[[which(names(pl) == 'enddate')]] <- NULL
         }
