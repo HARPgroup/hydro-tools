@@ -155,6 +155,9 @@ RomDataSource <- R6Class(
           #Use get to query dh_variabledefinition using the varkey or hydroid
           #with the primary key of hydroid
           vardef <- self$get('dh_variabledefinition', 'hydroid', config)
+          if (is.logical(vardef) || (length(vardef) == 0)) {
+            return(FALSE)
+          }
           vardef <- as.list(vardef[1,])
           if ('hydroid' %in% names(vardef)) {
             vardef$varid <- vardef$hydroid
@@ -577,7 +580,11 @@ RomDataSource <- R6Class(
           for (i in 1:nrow(children)) {
             thischild <- children[i,]
             sub_export <- self$get_nested_export(ds, thischild$pid, props, depth)
-            export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            if (!(thischild$propname %in% names(sub_export))) {
+              message(paste("Cannot find ", thischild$propname, "in", names(sub_export)))
+            } else {
+              export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            }
           }
         }
         return(export)

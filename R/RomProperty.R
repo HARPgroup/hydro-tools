@@ -335,7 +335,7 @@ RomProperty <- R6Class(
           matrix_check <- self$datasource$get(
             'field_data_field_dh_matrix','revision_id',list(revision_id = self$vid)
           )
-          if (nrow(matrix_check) == 0) {
+          if (is.logical(matrix_check) || (nrow(matrix_check) == 0)) {
             pk <- NA # forces insert
           }
           self$matrix_revision_id = self$datasource$post(
@@ -414,7 +414,7 @@ RomProperty <- R6Class(
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available
       subprops <- self$propvalues()
-      if (nrow(subprops) > 0) {
+      if (!is.logical(subprops) && nrow(subprops) > 0) {
         for (pvi in 1:nrow(subprops)) {
           pv <- subprops[pvi,]
           subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
