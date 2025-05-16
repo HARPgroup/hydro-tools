@@ -56,7 +56,10 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug = FALSE)
   if (debug == TRUE) {
     message(paste("Debug: ODBC update/insert:", odbc_sql))
   }
-  pkid <- sqldf(as.character(odbc_sql), connection = con)
+  # temporarily use DBI until we understand more fully what sqldf might be doing
+  # see also: 
+  pkid <- sqldf(as.character(odbc_sql), connection = con, envir = environment())
+  #pkid <- DBI::dbGetQuery(con, as.character(odbc_sql))
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
   } else {
