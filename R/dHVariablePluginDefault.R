@@ -452,6 +452,42 @@ dHOMbroadCastObject <- R6Class(
 )
 
 
+#' Basic runnable meta-model object
+#' @title dHOMModelObject
+#' @description TBD advanced model object helper functions
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMbroadCastObject
+dHOMModelObject <- R6Class(
+  "dHOMModelObject",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'ModelObject',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      return(export)
+    },
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    getReport = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      # Check for existence of om elementid
+      # if so, look for URL for elementid
+      report = FALSE
+      return(report)
+    }
+  )
+)
 # 'This is here because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
