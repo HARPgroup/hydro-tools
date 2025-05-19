@@ -66,8 +66,6 @@ RomVariableDefinition <- R6Class(
           self$hydroid = as.integer(config$hydroid)
         } else if (i == "varcode") {
           self$varcode = as.character(config$varcode)
-        } else if (i == "module") {
-          self$module = as.character(config$module)
         } else if (i == "datatype") {
           self$datatype = as.character(config$datatype)
         } else if (i == "vardesc") {
