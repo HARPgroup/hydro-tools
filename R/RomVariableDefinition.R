@@ -78,22 +78,8 @@ RomVariableDefinition <- R6Class(
           self$varunits = as.character(config$varunits)
         } else if (i == "varkey") {
           self$varkey = as.character(config$varkey)
-        } else if (i == "isregular") {
-          self$isregular = as.character(config$isregular)
-        } else if (i == "timestep") {
-          self$timestep = as.integer(config$timestep)
-        } else if (i == "timeunits") {
-          self$timeunits = as.character(config$timeunits)
-        } else if (i == "nodataval") {
-          self$nodataval = as.character(config$nodataval)
-        } else if (i == "status") {
-          self$status = as.character(config$status)
-        } else if (i == "data_entry") {
-          self$data_entry = as.character(config$data_entry)
         } else if (i == "plugin") {
           self$plugin = as.character(config$plugin)
-        } else if (i == "varabbrev") {
-          self$varabbrev = as.character(config$varabbrev)
         } else if (i == "multiplicity") {
           self$multiplicity = as.character(config$multiplicity)
         }
