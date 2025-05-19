@@ -60,9 +60,42 @@ RomVariableDefinition <- R6Class(
     #' @return NULL
     from_list = function(config) {
       for (i in names(config)) {
-        if (typeof(self[[i]]) != 'closure') {
-          # this is not a function, so we can set it
-          self[[i]] = config[[i]]
+        if (i == "varname") {
+          self$varname = as.character(config$varname)
+        } else if (i == "hydroid") {
+          self$hydroid = as.integer(config$hydroid)
+        } else if (i == "varcode") {
+          self$varcode = as.character(config$varcode)
+        } else if (i == "module") {
+          self$module = as.character(config$module)
+        } else if (i == "datatype") {
+          self$datatype = as.character(config$datatype)
+        } else if (i == "vardesc") {
+          self$vardesc = as.character(config$vardesc)
+        } else if (i == "vocabulary") {
+          self$vocabulary = as.character(config$vocabulary)
+        } else if (i == "varunits") {
+          self$varunits = as.character(config$varunits)
+        } else if (i == "varkey") {
+          self$varkey = as.character(config$varkey)
+        } else if (i == "isregular") {
+          self$isregular = as.character(config$isregular)
+        } else if (i == "timestep") {
+          self$timestep = as.integer(config$timestep)
+        } else if (i == "timeunits") {
+          self$timeunits = as.character(config$timeunits)
+        } else if (i == "nodataval") {
+          self$nodataval = as.character(config$nodataval)
+        } else if (i == "status") {
+          self$status = as.character(config$status)
+        } else if (i == "data_entry") {
+          self$data_entry = as.character(config$data_entry)
+        } else if (i == "plugin") {
+          self$plugin = as.character(config$plugin)
+        } else if (i == "varabbrev") {
+          self$varabbrev = as.character(config$varabbrev)
+        } else if (i == "multiplicity") {
+          self$multiplicity = as.character(config$multiplicity)
         }
       }
     },
