@@ -368,7 +368,7 @@ RomEntity <- R6Class(
           field_check <- self$datasource$get(
             field_table,"", check_list
           )
-          if (nrow(field_check) == 0) {
+          if (is.logical(field_check) || nrow(field_check) == 0) {
             pk <- NA # forces insert
           } else {
             # must delete first because our odbc updates are not sophisticated 
