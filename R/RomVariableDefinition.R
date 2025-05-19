@@ -60,11 +60,9 @@ RomVariableDefinition <- R6Class(
     #' @return NULL
     from_list = function(config) {
       for (i in names(config)) {
-        if (i %in% names(self)) {
-          if (typeof(self[[i]]) != 'closure') {
-            # this is not a function, so we can set it
-            self[[i]] = config[[i]]
-          }
+        if (typeof(self[[i]]) != 'closure') {
+          # this is not a function, so we can set it
+          self[[i]] = config[[i]]
         }
       }
     },
