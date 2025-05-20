@@ -55,6 +55,10 @@ NA
 \item{\code{vardef}}{(optional) full RomVariableDefinition}
 
 \item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
+
+\item{\code{matrix_revision_id}}{Populated by any use of this object's
+save_field() method to indicate the revision ID of this change to the
+field table. Used to match Drupal 7's now deprecated revision system.}
 }
 \if{html}{\out{</div>}}
 }

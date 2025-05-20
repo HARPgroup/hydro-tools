@@ -37,6 +37,10 @@ RomEntity <- R6Class(
     vardef = NULL,
     #' @field plugin (optional) instance of dHVariablePlugin class
     plugin = NA,
+    #'@field matrix_revision_id Populated by any use of this object's
+    #'  save_field() method to indicate the revision ID of this change to the
+    #'  field table. Used to match Drupal 7's now deprecated revision system.
+    matrix_revision_id = NA,
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
