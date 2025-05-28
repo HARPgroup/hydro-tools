@@ -143,6 +143,8 @@ RomFeature <- R6Class(
       #   fail if these required elemenprop are not available 
       if (push_remote) {
         finfo <- self$to_list(self$base_only)
+        #Dont send geometry to dh_feature, won't exist as a field
+        finfo <- finfo[names(finfo) != 'geom']
         hydroid = self$datasource$post('dh_feature', 'hydroid', finfo)
         if (!is.logical(hydroid)) {
           self$hydroid = hydroid
