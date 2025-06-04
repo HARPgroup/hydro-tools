@@ -148,7 +148,7 @@ RomFeature <- R6Class(
         finfo <- self$to_list(self$base_only)
         #Dont send geometry to dh_feature, won't exist as a field
         finfo <- finfo[names(finfo) != 'geom']
-        finfo <- finfo[names(finfo) != 'nextdown_id']
+        #finfo <- finfo[names(finfo) != 'nextdown_id']
         hydroid = self$datasource$post('dh_feature', 'hydroid', finfo)
         if (!is.logical(hydroid)) {
           self$hydroid = hydroid
