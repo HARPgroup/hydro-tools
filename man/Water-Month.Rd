@@ -25,7 +25,7 @@ Extract the month of the water year from a date or time object.
 }
 \details{
 Extract the month of the water year from a date or time object.  Can be returned
-as a number 1:12, for October through September respectively, or an ordered factor. 
+as a number 1:12, for October through September respectively, or an ordered factor.
 A user may alternatively enter a calendar year month as a numeric to return
 the equivalent water year month
 }

@@ -84,6 +84,7 @@ RomFeature <- R6Class(
         ftype = self$ftype,
         fstatus = self$fstatus,
         bundle = self$bundle,
+        nextdown_id = self$nextdown_id,
         geom = self$geom
       )
       # accounts for ODBC
@@ -114,6 +115,8 @@ RomFeature <- R6Class(
           self$fstatus = as.character(config$fstatus)
         } else if (i == "dh_geofield") {
           self$geom = as.character(config$dh_geofield)
+        } else if (i == "nextdown_id") {
+          self$nextdown_id = as.integer(config$nextdown_id)
         }
       }
     },
@@ -143,6 +146,9 @@ RomFeature <- R6Class(
       #   fail if these required elemenprop are not available 
       if (push_remote) {
         finfo <- self$to_list(self$base_only)
+        #Dont send geometry to dh_feature, won't exist as a field
+        finfo <- finfo[names(finfo) != 'geom']
+        finfo <- finfo[names(finfo) != 'nextdown_id']
         hydroid = self$datasource$post('dh_feature', 'hydroid', finfo)
         if (!is.logical(hydroid)) {
           self$hydroid = hydroid
@@ -152,6 +158,7 @@ RomFeature <- R6Class(
     #' @param target_entity what type to relate to (default dh_feature)
     #' @param inputs criteria to search for (list key = value format)
     #' @param operator what type of spatial function,default = st_contains
+    #'   Other options are 'overlaps' or 'st_within'
     #' @param return_geoms FALSE will return a smaller dataframe
     #' @param query_remote FALSE will search on in local datasource
     #' @return dataframe of spatially related entities

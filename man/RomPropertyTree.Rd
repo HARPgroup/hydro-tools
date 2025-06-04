@@ -4,13 +4,16 @@
 \alias{RomPropertyTree}
 \title{Nested Property Object}
 \value{
-Entity class of type RomPropertyTree
+Instance of type RomPropertyTree
 }
 \description{
-Object for storing a single feature with attribute and timeseries related
+Object for storing a property and all of its sub-properties.
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data. This object
+  class will use a recursive query to navigate a graph style database (e.g.
+  VA Hydro) to get the requested property and all first-, second-, etc. order
+  proerpties below it.
 }
 \examples{
 NA
@@ -18,23 +21,27 @@ NA
 \seealso{
 NA
 }
-\section{Super classes}{
-\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{\link[hydrotools:RomDataGroup]{hydrotools::RomDataGroup}} -> \code{RomPropertyTree}
+\section{Super class}{
+\code{\link[hydrotools:RomDataGroup]{hydrotools::RomDataGroup}} -> \code{RomPropertyTree}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+\item{\code{pk_name}}{the name of this entity's pk column, always root_pid}
 
-\item{\code{prop_list}}{The raw property rows returned}
+\item{\code{prop_list}}{The raw property rows returned. This will contain all
+subproperties of the property requested upon initialization of this
+instance}
 
 \item{\code{mps}}{linked features}
 
 \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{sql_select_from}}{Enhanced form of query overrides default SQL guess.}
+\item{\code{sql_select_from}}{Enhanced form of query overrides default SQL guess
+from hydrotools:::fn_guess_sql(). This will use a recurvsive query to
+get property and all subproperties}
 }
 \if{html}{\out{</div>}}
 }
@@ -51,18 +58,11 @@ NA
 }
 }
 \if{html}{\out{
-<details><summary>Inherited methods</summary>
+<details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>hydrotools::RomEntity$set_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomDataGroup" data-id="get_vardef"><a href='../../hydrotools/html/RomDataGroup.html#method-RomDataGroup-get_vardef'><code>hydrotools::RomDataGroup$get_vardef()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomDataGroup" data-id="handle_config"><a href='../../hydrotools/html/RomDataGroup.html#method-RomDataGroup-handle_config'><code>hydrotools::RomDataGroup$handle_config()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomDataGroup" data-id="load_plugin"><a href='../../hydrotools/html/RomDataGroup.html#method-RomDataGroup-load_plugin'><code>hydrotools::RomDataGroup$load_plugin()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -79,14 +79,18 @@ NA
 \describe{
 \item{\code{datasource}}{RESTful repository object}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, see also: to_list() for format.
+These should contain identifying information about the requested
+property and will ultimatley be passed to RomDataGroup$new() and to
+RomDataSource$get()}
 
 \item{\code{load_remote}}{automatically query REST dataa source for matches?}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-object instance
+object instance of RomPropertyTree, populated with details of
+  requested property and all subproperties (in propvalues())
 }
 }
 \if{html}{\out{<hr>}}
@@ -124,7 +128,7 @@ list of object attributes suitable for input to new() and from_list() methods
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of properties to set, see also: to_list() for format}
 }
 \if{html}{\out{</div>}}
 }
@@ -162,14 +166,16 @@ NULL
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{input attributes}
+\item{\code{config}}{list of properties from RomDataGroup$new()}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-the data from the remote connection
+Nothing, but will set the properties on this instance of
+  RomPropertyTree with appropriate variable definitions in prop_list()
+  and propvalues() via self$datasource$set_prop()
 }
 }
 \if{html}{\out{<hr>}}

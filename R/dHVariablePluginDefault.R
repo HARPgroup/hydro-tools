@@ -452,6 +452,44 @@ dHOMbroadCastObject <- R6Class(
 )
 
 
+#' Tiered flowby meta-model object
+#' @title dHOMWaterSystemTieredFlowBy
+#' @description Simple class to hold tabular flow by values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMWaterSystemTieredFlowBy
+dHOMWaterSystemTieredFlowBy <- R6Class(
+  "dHOMWaterSystemTieredFlowBy",
+  inherit = dHOMDataMatrix,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'wsp_1tierflowby',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      
+      return(export)
+    },
+    list2matrix = function(l) {
+      matrix_vals = data.frame(matrix(unlist(l), nrow = length(l), byrow = TRUE)) |>
+        setNames(names(l[[1]]))
+      return(matrix_vals)
+    },
+    translateOMtoDH = function(entity, om_json) {
+      matrix_vals = self$list2matrix(om_json$processors$flowby$rule_matrix$matrix_rowcol)
+      entity$set_matrix(matrix_vals)
+    }
+  )
+)
+
 # 'This is here because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
 #' Retrieve Plugin object for a variable entity
@@ -489,6 +527,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMAlphanumericConstant$new(entity)
   } else if (plugin_name == "dHOMbroadCastObject") {
     plugin = dHOMbroadCastObject$new(entity)
+  } else if (plugin_name == "dHOMWaterSystemTieredFlowBy") {
+    plugin = dHOMWaterSystemTieredFlowBy$new(entity)
   } else {
     plugin = dHVariablePluginDefault$new(entity)
   }

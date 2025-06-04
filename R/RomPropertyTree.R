@@ -1,10 +1,14 @@
 #' Nested Property Object
-#' @description Object for storing a single feature with attribute and timeseries related
-#' @details Has standard methods for managing data and meta data
+#' @description Object for storing a property and all of its sub-properties.
+#' @details Has standard methods for managing data and meta data. This object
+#'   class will use a recursive query to navigate a graph style database (e.g.
+#'   VA Hydro) to get the requested property and all first-, second-, etc. order
+#'   proerpties below it.
 #' @importFrom R6 R6Class  
 #' @param datasource optional RomDataSource for remote and local storage
-#' @param config list of attributes to set
-#' @return Entity class of type RomPropertyTree
+#' @param config list of attributes to set. These will be passed to
+#'   RomDataGroup$new() and ultimately to RomDataSource$get()
+#' @return Instance of type RomPropertyTree
 #' @seealso NA
 #' @examples NA
 #' @export RomPropertyTree
@@ -14,15 +18,19 @@ RomPropertyTree <- R6Class(
   public = list(
     #' @field base_entity_type kind of entity
     base_entity_type = 'dh_properties',
-    #' @field pk_name the name of this entity's pk column
+    #' @field pk_name the name of this entity's pk column, always root_pid
     pk_name = 'root_pid',
-    #' @field prop_list The raw property rows returned
+    #' @field prop_list The raw property rows returned. This will contain all
+    #'   subproperties of the property requested upon initialization of this
+    #'   instance
     prop_list = NA,
     #' @field mps linked features
     mps = NA,
     #' @field geom feature geometry WKT
     geom = NA,
-    #' @field sql_select_from Enhanced form of query overrides default SQL guess.
+    #' @field sql_select_from Enhanced form of query overrides default SQL guess
+    #'   from hydrotools:::fn_guess_sql(). This will use a recurvsive query to
+    #'   get property and all subproperties
     sql_select_from = "
       WITH RECURSIVE prop_tree AS (
       SELECT [root_pid] as root_pid, p.pid, vp.varkey, p.featureid, 
@@ -48,9 +56,13 @@ RomPropertyTree <- R6Class(
     )
     SELECT * from prop_tree",
     #' @param datasource RESTful repository object
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @param config list of attributes to set, see also: to_list() for format.
+    #'   These should contain identifying information about the requested
+    #'   property and will ultimatley be passed to RomDataGroup$new() and to
+    #'   RomDataSource$get()
     #' @param load_remote automatically query REST dataa source for matches?
-    #' @return object instance
+    #' @return object instance of RomPropertyTree, populated with details of
+    #'   requested property and all subproperties (in propvalues())
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       #col.names(self$properties <-
       if (!'root_pid' %in% names(config)) {
@@ -75,7 +87,7 @@ RomPropertyTree <- R6Class(
       t_list <- list()
       return(t_list)
     },
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @param config list of properties to set, see also: to_list() for format
     #' @return NULL
     from_list = function(config) {
       # TBD
@@ -92,9 +104,11 @@ RomPropertyTree <- R6Class(
         message("save() is not yet available")
       }
     },
-    #' @param config input attributes
+    #' @param config list of properties from RomDataGroup$new()
     #' @param load_remote automatically query remote data source for matches?
-    #' @return the data from the remote connection
+    #' @return Nothing, but will set the properties on this instance of
+    #'   RomPropertyTree with appropriate variable definitions in prop_list()
+    #'   and propvalues() via self$datasource$set_prop()
     load_data = function(config, load_remote) {
       self$prop_list = config
       self$datasource$set_prop(config)

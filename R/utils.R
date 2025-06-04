@@ -874,7 +874,7 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
     list(propname=propname, featureid = as.integer(pid),
     entity_type = "dh_properties")
   )
-  if (nrow(metcheck) > 0) {
+  if (!is.logical(metcheck) && nrow(metcheck) > 0) {
     metprop <- RomProperty$new( ds, list(pid=metcheck[1,]$pid), TRUE)
   } else {
     metinfo <- list(

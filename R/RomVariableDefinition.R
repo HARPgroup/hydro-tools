@@ -60,11 +60,26 @@ RomVariableDefinition <- R6Class(
     #' @return NULL
     from_list = function(config) {
       for (i in names(config)) {
-        if (i %in% names(self)) {
-          if (typeof(self[[i]]) != 'closure') {
-            # this is not a function, so we can set it
-            self[[i]] = config[[i]]
-          }
+        if (i == "varname") {
+          self$varname = as.character(config$varname)
+        } else if (i == "hydroid") {
+          self$hydroid = as.integer(config$hydroid)
+        } else if (i == "varcode") {
+          self$varcode = as.character(config$varcode)
+        } else if (i == "datatype") {
+          self$datatype = as.character(config$datatype)
+        } else if (i == "vardesc") {
+          self$vardesc = as.character(config$vardesc)
+        } else if (i == "vocabulary") {
+          self$vocabulary = as.character(config$vocabulary)
+        } else if (i == "varunits") {
+          self$varunits = as.character(config$varunits)
+        } else if (i == "varkey") {
+          self$varkey = as.character(config$varkey)
+        } else if (i == "plugin") {
+          self$plugin = as.character(config$plugin)
+        } else if (i == "multiplicity") {
+          self$multiplicity = as.character(config$multiplicity)
         }
       }
     },

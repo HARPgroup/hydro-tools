@@ -91,7 +91,9 @@ RomProperty <- R6Class(
       # if requested, we try to load
       # only the last one returned will be sent back to user if multiple
       if (load_remote) {
-        prop <- self$datasource$get_prop(config, 'list', TRUE, self)
+        prop <- self$datasource$get_prop(
+          config = config, return_type = 'list',
+          force_refresh = TRUE, obj = self)
         if (is.data.frame(prop)) {
           if (nrow(prop) >= 1) {
             prop <- as.list(prop[1,])
@@ -106,11 +108,10 @@ RomProperty <- R6Class(
         }
       }
       self$load_data(config, load_remote)
-      if (!is.logical(self$plugin$entity_bundle)) {
-        self$bundle = self$plugin$entity_bundle
-      } else {
-        if (is.na(self$bundle)) {
-          self$bundle = 'dh_properties'
+      self$bundle = 'dh_properties'
+      if (!is.logical(self$plugin)) {
+        if (!is.logical(self$plugin$entity_bundle)) {
+          self$bundle = self$plugin$entity_bundle
         }
       }
     },
@@ -250,11 +251,11 @@ RomProperty <- R6Class(
       pid = FALSE
       if (push_remote) {
         pl <- self$to_list(self$base_only)
-        if (!is.Date(pl$startdate) & !is.integer(pl$startdate)) {
+        if (!lubridate::is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL
         }
-        if (!is.Date(pl$enddate) & !is.integer(pl$enddate)) {
+        if (!lubridate::is.Date(pl$enddate) & !is.integer(pl$enddate)) {
           # remove 
           pl[[which(names(pl) == 'enddate')]] <- NULL
         }
@@ -334,7 +335,7 @@ RomProperty <- R6Class(
           matrix_check <- self$datasource$get(
             'field_data_field_dh_matrix','revision_id',list(revision_id = self$vid)
           )
-          if (nrow(matrix_check) == 0) {
+          if (is.logical(matrix_check) || (nrow(matrix_check) == 0)) {
             pk <- NA # forces insert
           }
           self$matrix_revision_id = self$datasource$post(
@@ -385,7 +386,7 @@ RomProperty <- R6Class(
           field_check <- self$datasource$get(
             field_table,"", check_list
           )
-          if (nrow(field_check) == 0) {
+          if (is.logical(field_check) || nrow(field_check) == 0) {
             pk <- NA # forces insert
           } else {
             # must delete first because our odbc updates are not sophisticated 
@@ -413,7 +414,7 @@ RomProperty <- R6Class(
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available
       subprops <- self$propvalues()
-      if (nrow(subprops) > 0) {
+      if (!is.logical(subprops) && nrow(subprops) > 0) {
         for (pvi in 1:nrow(subprops)) {
           pv <- subprops[pvi,]
           subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)

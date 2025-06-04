@@ -15,6 +15,8 @@ RomEntity <- R6Class(
     name = NA,
     #' @field base_entity_type kind of entity
     base_entity_type = NA,
+    #' @field datasource RomDataSource
+    datasource = NA,
     #' @field pk_name the name of this entity's pk column
     pk_name = "entity_id",
     #' @field entity_id unique ID of entity
@@ -35,6 +37,10 @@ RomEntity <- R6Class(
     vardef = NULL,
     #' @field plugin (optional) instance of dHVariablePlugin class
     plugin = NA,
+    #'@field matrix_revision_id Populated by any use of this object's
+    #'  save_field() method to indicate the revision ID of this change to the
+    #'  field table. Used to match Drupal 7's now deprecated revision system.
+    matrix_revision_id = NA,
     #' @return propvalues unique properties of this entity
     #' @param propname optional name to filter
     #' @param varid option variable to filter
@@ -71,8 +77,6 @@ RomEntity <- R6Class(
       ts <- self$datasource$get_ts(config)
       return(ts)
     },
-    #' @field datasource RomDataSource
-    datasource = NA,
     #' @param datasource RESTful repository (optional)
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST data source for matches?
@@ -91,14 +95,15 @@ RomEntity <- R6Class(
         message("Configuration information faild validation. Returning.")
         return(FALSE)
       }
-      # if requested, we try to load
-      # only the last one returned will be sent back to user if multiple
+      # if requested, we try to load will return first feature if multiple are
+      # preliminaryily returned from get()
       if (load_remote) {
         feature <- self$datasource$get(self$base_entity_type, self$pk_name, config, self)
         # merge config with prop
         message("Found")
         if (!is.logical(feature)) {
-          config = feature
+            #Grab only the first feature returned
+            config = feature[1,]
         }
       }
       self$load_data(config, load_remote)
@@ -136,38 +141,72 @@ RomEntity <- R6Class(
       if (!is.null(self$vardef) & !refresh) {
         return(self$vardef)
       }
+      #message(paste("config$varkey =",config$varkey,"self$varid =", self$varid))
       if (!is.logical(config)) {
+        if ( !('varkey' %in% names(config)) && !('varid' %in% names(config)) ) {
+          return(FALSE)
+        }
         vardef = self$datasource$get_vardef(config$varkey)
       } else {
-        vardef = self$datasource$get_vardef(self$varid)
+        if (is.null(self$varid) && is.null(self$varkey)) {
+          return(FALSE)
+        }
+        if (is.null(self$varid) || is.na(self$varid)) {
+          vardef = self$datasource$get_vardef(self$varkey)
+        } else {
+          vardef = self$datasource$get_vardef(self$varid)
+        }
+      }
+      if (is.logical(vardef)) {
+        return(FALSE)
       }
       #message("vardef retrieved, creating RomVar object")
       self$vardef = RomVariableDefinition$new(self$datasource,as.list(vardef))
       return(self$vardef)
     },
-    #' @param propname list of attributes to set, see also: to_list() for format
-    #' @param varkey specify varkey? (in case of new prop creation)
-    #' @param propcode specify propcode? (in case of new prop creation)
-    #' @param remote look at remote datasource?
-    #' @returns the property object for this entity
-    get_prop = function(propname=NULL, varkey=NULL, propcode=NULL, remote=TRUE) {
+    #' @description
+        #' Get a 1st order property from this entity (assuming this entities
+        #' \code{entity_type}. This method will search for a user propname,
+        #' varkey, or propcode from dh_properties using this entity's id
+        #' (derived from \code{RomEntity$get_id()} as the featureid. If the
+        #' property is not set locally (if remote = FALSE) or in the DB (if
+        #' remote = TRUE), then it will return an instance of RomProperty with
+        #' the specified user inputs and this entity's ID.
+    #' @param propname Propname of the first order property
+    #' @param varkey varkey of the first order property (usually used in case of
+    #'   new prop creation)
+    #' @param propcode propcode of the first order property (usually used in
+    #'   case of new prop creation)
+    #' @param remote look at remote datasource for properties?
+    #' @returns A property object for this entity derived from the local or
+    #'   remote DB OR populated by user inputs if property does not exist
+    get_prop = function(propname = NULL, varkey = NULL,
+                        propcode = NULL, remote = TRUE) {
+      if (is.na(self$get_id())) {
+        # An object whose id is not set has not been saved and cannot have properties
+        return(FALSE)
+      }
+      #If user provides no data, warn them that only one property will be returned
+      if(all(is.null(propname),is.null(propcode),is.null(varkey))) {
+        message("No identifying data provided for property, will return the first 1st order property found in db")
+      }
+      #Create a config for RomProperty using self id as feature id and self
+      #entity type
       plist = list(
         featureid=self$get_id(), 
         entity_type=self$base_entity_type,
-        propname=propname
+        propname=propname,
+        # these may be a create request, populate varkey
+        propcode=propcode,
+        varkey=varkey
       )
-      if(!is.null(varkey)) {
-        # this may be a create request, populate varkey
-        plist$varkey=varkey
-      }
-      if(!is.null(propcode)) {
-        # this may be a create request, populate varkey
-        plist$propcode=propcode
-      }
+      #Remove any NULLs where user has not provided data
+      plist[!sapply(plist,is.null)]
+      #Get (and return) the user specified property
       child_prop = RomProperty$new(
-        self$datasource,
-        plist,
-        remote
+        datasource = self$datasource,
+        config = plist[!sapply(plist,is.null)],
+        load_remote = remote
       )
       return(child_prop)
     },
@@ -184,7 +223,11 @@ RomEntity <- R6Class(
     ) {
       # first, see if it exists to load and update
       # then, change/set the varid and values
-      message(paste("set_prop() called with for propname,varkey",propname,varkey))
+      if (is.na(self$get_id())) {
+        # An object whose id is not set has not been saved and cannot have properties
+        message(paste("Properties without IDs cannot have properties. Returnin FALSE from set_prop() called with for propname,varkey",propname,varkey))
+        return(FALSE)
+      }
       child_prop = self$get_prop(propname=propname,varkey=varkey,remote=remote)
       if (is.na(child_prop$pid)) {
         # this is new, so we do an update, 
@@ -228,11 +271,13 @@ RomEntity <- R6Class(
       #message(paste("Loaded vardef: "))
       self$load_plugin()
       #message(paste("Loaded plugin: "))
+      #message("self$pk_name=(below)")
+      #message(self$pk_name)
       # this should be handled better.  We need to decide if we want to 
       # still use the local datasource as a repository for remote data
       # at first the thinking was no with ODBC, but maybe that's not correct?
       # in other words, it was thought that ODBC replaced the local storage...
-      if (!is.na(self[[self$pk_name]]) & (load_remote == TRUE) ) {
+      if (!is.na(self[[self$pk_name]]) && (load_remote == TRUE) ) {
         # stash a copy in the local datasource database 
         # if this was a valid retrieval from remote
         message("Saving to local db")
@@ -327,20 +372,22 @@ RomEntity <- R6Class(
           field_check <- self$datasource$get(
             field_table,"", check_list
           )
-          if (nrow(field_check) == 0) {
+          if (is.logical(field_check) || nrow(field_check) == 0) {
             pk <- NA # forces insert
           } else {
             # must delete first because our odbc updates are not sophisticated 
             # enough to handle multiple key matches
             pk <- NA # forces insert
             #message("Deleting old")
-            fn_delete_odbc(field_table,"", check_list, self$datasource$connection, FALSE, TRUE)
+            fn_delete_odbc(entity_type = field_table, pk = "", 
+                           inputs = check_list, con = self$datasource$connection,
+                           obj = FALSE, debug = TRUE)
             #self$datasource$delete(field_table,"", check_list)
           }
           #message("Inserting new")
           self$matrix_revision_id = self$datasource$post(
-            field_table, pk, 
-            params
+            entity_type = field_table, pk = pk,
+            config = params
           )
         }
       }

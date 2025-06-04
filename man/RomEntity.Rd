@@ -12,7 +12,8 @@ loads the varid
 
 the variable definition object for this entity
 
-the property object for this entity
+A property object for this entity derived from the local or
+  remote DB OR populated by user inputs if property does not exist
 
 the property object for this entity
 
@@ -37,6 +38,8 @@ NA
 
 \item{\code{base_entity_type}}{kind of entity}
 
+\item{\code{datasource}}{RomDataSource}
+
 \item{\code{pk_name}}{the name of this entity's pk column}
 
 \item{\code{entity_id}}{unique ID of entity}
@@ -53,7 +56,9 @@ NA
 
 \item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
 
-\item{\code{datasource}}{RomDataSource}
+\item{\code{matrix_revision_id}}{Populated by any use of this object's
+save_field() method to indicate the revision ID of this change to the
+field table. Used to match Drupal 7's now deprecated revision system.}
 }
 \if{html}{\out{</div>}}
 }
@@ -214,6 +219,13 @@ object instance
 \if{html}{\out{<a id="method-RomEntity-get_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-get_prop}{}}}
 \subsection{Method \code{get_prop()}}{
+Get a 1st order property from this entity (assuming this entities
+\code{entity_type}. This method will search for a user propname,
+varkey, or propcode from dh_properties using this entity's id
+(derived from \code{RomEntity$get_id()} as the featureid. If the
+property is not set locally (if remote = FALSE) or in the DB (if
+remote = TRUE), then it will return an instance of RomProperty with
+the specified user inputs and this entity's ID.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(
   propname = NULL,
@@ -226,13 +238,15 @@ object instance
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{propname}}{list of attributes to set, see also: to_list() for format}
+\item{\code{propname}}{Propname of the first order property}
 
-\item{\code{varkey}}{specify varkey? (in case of new prop creation)}
+\item{\code{varkey}}{varkey of the first order property (usually used in case of
+new prop creation)}
 
-\item{\code{propcode}}{specify propcode? (in case of new prop creation)}
+\item{\code{propcode}}{propcode of the first order property (usually used in
+case of new prop creation)}
 
-\item{\code{remote}}{look at remote datasource?}
+\item{\code{remote}}{look at remote datasource for properties?}
 }
 \if{html}{\out{</div>}}
 }

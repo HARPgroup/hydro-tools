@@ -81,7 +81,6 @@ RomDataSource <- R6Class(
         }
       }
     },
-    #' @name get_token
     #' #'@description 
     #'Set the connection to either the database via ODBC or to a REST service
     #'(through the act of obtaining a token). OFten done in DEQ config.R files.
@@ -114,7 +113,6 @@ RomDataSource <- R6Class(
       }
     },
     # this could actually live in the RomTS object
-    #' @name get_vardef
     #' @description 
     #'Queries first local variable definitions and if necessary
     #'dh_variabledefinition for a varkey, setting the varid within RomDataSource
@@ -131,6 +129,9 @@ RomDataSource <- R6Class(
       #Set either the varkey or variable hydroid based on if the user has
       #provided character (varkey) or integer data (hydroid). Varkey is given
       #the preference
+      if (is.null(varkey)) {
+        return(FALSE)
+      }
       if (is.na(as.integer(varkey))) {
         config$varkey = varkey
       } else {
@@ -154,6 +155,9 @@ RomDataSource <- R6Class(
           #Use get to query dh_variabledefinition using the varkey or hydroid
           #with the primary key of hydroid
           vardef <- self$get('dh_variabledefinition', 'hydroid', config)
+          if (is.logical(vardef) || (length(vardef) == 0)) {
+            return(FALSE)
+          }
           vardef <- as.list(vardef[1,])
           if ('hydroid' %in% names(vardef)) {
             vardef$varid <- vardef$hydroid
@@ -171,7 +175,6 @@ RomDataSource <- R6Class(
       return(vardef)
     },
     # get properties
-    #' @name get_prop
     #'Queries first local properties and if needed or requested dh_property for
     #'the properties specified in the user config file. This method creates a
     #'WHERE clause from the config file for an SQL query of the user input for
@@ -193,14 +196,16 @@ RomDataSource <- R6Class(
     #'   hydrotools:::fn_guess_sql()
     #' @return Data frame of the first property returned from query of
     #'   properties based on data provided in config
-    get_prop = function(config, return_type = 'data.frame', force_refresh = FALSE, obj = FALSE) {
+    get_prop = function(config, return_type = 'data.frame',
+                        force_refresh = FALSE, obj = FALSE) {
       prop = FALSE
       # odbc has robust query handling so we don't need more than self$get()
       if (self$connection_type == 'odbc') {
         #Use the get() method on RomDataSource to query dh_properties using pid
         #as teh primary key, with any WHERE provided by config or optional SQL
         #in the obj provided
-        propvalues <- self$get('dh_properties', 'pid', config, obj)
+        propvalues <- self$get(entity_type = 'dh_properties',pk =  'pid', 
+                               config = config, obj = obj)
       } else {
         #NOTE: This portion is not under active development after the
         #deprecation of VAHydro REST services
@@ -307,8 +312,7 @@ RomDataSource <- R6Class(
       }
       
     },
-    #' @description Used to read vews from a REST service. Deprecated upon ODBC
-    #'   connection development
+    #' @description Used to read views from a REST service.
     #' @param uri remote address to retrieve data
     #' @param content_type http content-type
     #' @param delim delimiter
@@ -353,6 +357,7 @@ RomDataSource <- R6Class(
         prop <- self$insure_cols(prop, self$propvalues)
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
+        # as this is intended to work with RomProperty and RomPropertyTree
         dsl <- sqldf(
           "select * from prop 
            where pid not in (
@@ -499,7 +504,8 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         retvals = fn_get_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        retvals = fn_get_odbc(entity_type, pk, config, self$connection, obj, self$debug)
+        retvals = fn_get_odbc(entity_type = entity_type, pk = pk, inputs = config,
+                              con = self$connection, obj = obj, debug = self$debug)
       }
       #Return data.frame of the results
       return(retvals)
@@ -512,7 +518,9 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         return_id = fn_post_rest(entity_type, pk, config, self$site, private$token)
       } else {
-        return_id = fn_post_odbc(entity_type, pk, config, self$connection, FALSE, self$debug)
+        return_id = fn_post_odbc(entity_type = entity_type, pk = pk,
+                                 inputs = config, con = self$connection, 
+                                 obj = FALSE, debug = self$debug)
       }
       return(return_id)
     },
@@ -572,7 +580,11 @@ RomDataSource <- R6Class(
           for (i in 1:nrow(children)) {
             thischild <- children[i,]
             sub_export <- self$get_nested_export(ds, thischild$pid, props, depth)
-            export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            if (!(thischild$propname %in% names(sub_export))) {
+              message(paste("Cannot find ", thischild$propname, "in", names(sub_export)))
+            } else {
+              export[[thisobject$propname]][[thischild$propname]] <- sub_export[[thischild$propname]]
+            }
           }
         }
         return(export)

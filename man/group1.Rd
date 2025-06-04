@@ -4,7 +4,7 @@
 \alias{group1}
 \title{group1}
 \usage{
-group1(x, yearType = c("water", "calendar"), FUN = median)
+group1(x, yearType = c("water", "calendar"), FUN = stats::median)
 }
 \arguments{
 \item{x}{A zoo timeseries object containing the flow series}
@@ -28,13 +28,6 @@ group1() applies an input function FUN to a 1-D zoo x, grouping by water
 month+water year or calendar month+calendar year depending on user input
 See IHA documentation:
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
-}
-\examples{
-library(dataRetrieval)
-library(zoo)
-gageData <- dataRetrieval::readNWISdv("01634500","00060")
-gageFlow <- zoo(gageData[,4],order.by = gageData$Date)
-group1(gageFlow,'water',mean)
 }
 \references{
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
