@@ -84,6 +84,7 @@ RomFeature <- R6Class(
         ftype = self$ftype,
         fstatus = self$fstatus,
         bundle = self$bundle,
+        nextdown_id = self$nextdown_id,
         geom = self$geom
       )
       # accounts for ODBC
@@ -114,6 +115,8 @@ RomFeature <- R6Class(
           self$fstatus = as.character(config$fstatus)
         } else if (i == "dh_geofield") {
           self$geom = as.character(config$dh_geofield)
+        } else if (i == "nextdown_id") {
+          self$nextdown_id = as.integer(config$nextdown_id)
         }
       }
     },
