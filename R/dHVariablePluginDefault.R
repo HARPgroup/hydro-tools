@@ -24,7 +24,6 @@ dHVariablePluginDefault <- R6Class(
       #message("Created plugin")
     },
     #' @param entity the local object to work on 
-    #' @param load_remote automatically query REST data source for matches?
     #' @return an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
       # creates an array that can later be serialized as json, xml, or whatever
@@ -489,6 +488,78 @@ dHOMWaterSystemTieredFlowBy <- R6Class(
     }
   )
 )
+
+
+#' VA Hydro model impoundment plugin
+#' @title dHOMHydroImpoundment
+#' @description Simple class to deal with hydro impoundment class model objects
+#' @details Has standard methods for exporting impoundment properties and subproperties
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMHydroImpoundment
+dHOMHydroImpoundment <- R6Class(
+  "dHOMHydroImpoundment",
+  inherit = dHOMDataMatrix,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'hydroImpoundment',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      
+      return(export)
+    }
+  )
+)
+
+#' hydroimp
+#' @title dHOMHydroImpoundmentSmall
+#' @description Simple class to hold tabular flow by values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMHydroImpoundmentSmall
+dHOMHydroImpoundmentSmall <- R6Class(
+  "dHOMHydroImpoundmentSmall",
+  inherit = dHOMHydroImpoundment,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'hydroImpSmall',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      
+      return(export)
+    },
+    #' @param entity the local object to work on 
+    #' @param export current export object
+    #' @return Returns a modified list of property and children
+    exportOpenMIpost = function(entity, export=list()) {
+      #Copy the storage_stage_area matrix and properties over to a new list
+      #matrix that is expected in the php import to OM
+      export$matrix <- export$storage_stage_area
+      #Remove the original list
+      export$storage_stage_area <- NULL
+      return(export)
+    }
+  )
+)
+
+
 
 # 'This is here because there is no way to instantiate a dynamic class using 
 # 'a string for a class name, so we have to have logic to expose allowed classes
