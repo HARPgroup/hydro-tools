@@ -72,6 +72,12 @@ dHVariablePluginDefault <- R6Class(
       )
       return(export)
     },
+    #' @param entity the local object to work on 
+    #' @param export list of properties and subproperties to export
+    exportOpenMIpost = function(entity, export){
+      #Allows modification of exported property lists prior to JSON conversion
+      return(export)
+    },
     #' @param om_list the open MI export array/list to work on
     #' @return a Rom importable config or FALSE if it fails
     fromOpenMIBase = function(om_list) {
@@ -548,7 +554,7 @@ dHOMHydroImpoundmentSmall <- R6Class(
     #' @param entity the local object to work on 
     #' @param export current export object
     #' @return Returns a modified list of property and children
-    exportOpenMIpost = function(entity, export=list()) {
+    exportOpenMIpost = function(entity, export = list()) {
       #Copy the storage_stage_area matrix and properties over to a new list
       #matrix that is expected in the php import to OM
       export$matrix <- export$storage_stage_area

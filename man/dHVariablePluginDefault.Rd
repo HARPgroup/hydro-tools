@@ -37,6 +37,7 @@ NA
 \item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
 \item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
 \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
@@ -97,6 +98,24 @@ an updated config if necessary or FALSE if it fails
 }
 \subsection{Returns}{
 an updated config if necessary or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-exportOpenMIpost"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-exportOpenMIpost}{}}}
+\subsection{Method \code{exportOpenMIpost()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$exportOpenMIpost(entity, export)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity}}{the local object to work on}
+
+\item{\code{export}}{list of properties and subproperties to export}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
