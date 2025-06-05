@@ -583,6 +583,10 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHVariablePluginDefault$new(entity)
   } else if (plugin_name == "dHOMConstant") {
     plugin = dHOMConstant$new(entity)
+  } else if (plugin_name == "dHOMHydroImpoundmentSmall") {
+    plugin = dHOMHydroImpoundmentSmall$new(entity)
+  } else if (plugin_name == "dHOMHydroImpoundment") {
+    plugin = dHOMHydroImpoundment$new(entity)
   } else if (plugin_name == "dHOMEquation") {
     plugin = dHOMEquation$new(entity)
   } else if (plugin_name == "dHOMAlphanumericConstant") {
