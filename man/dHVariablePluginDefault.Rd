@@ -73,8 +73,6 @@ object instance
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{entity}}{the local object to work on}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
 }
 \if{html}{\out{</div>}}
 }
