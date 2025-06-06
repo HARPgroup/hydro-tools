@@ -566,7 +566,7 @@ RomDataSource <- R6Class(
     #' @return unserialized json as list, with object stored in ds$prop_json_cache
     get_nested_export = function(ds, featureid, props, depth=0) {
       propatts <- as.list(props[which(props$pid == featureid),])
-      thisobject = RomProperty$new(ds, propatts, TRUE )
+      thisobject = RomProperty$new(ds, propatts, FALSE )
       export = list()
       if (!is.null(thisobject$vardef)) {
         plugin <- thisobject$vardef$get_plugin(thisobject)

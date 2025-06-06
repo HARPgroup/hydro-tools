@@ -557,6 +557,7 @@ dHOMHydroImpoundmentSmall <- R6Class(
     exportOpenMIpost = function(entity, export = list()) {
       #Copy the storage_stage_area matrix and properties over to a new list
       #matrix that is expected in the php import to OM
+      message("Copying impoundment storage_stage_area to matrix")
       export[['storage_matrix']] <- export[['storage_stage_area']]
       #Remove the original list
       export[['storage_stage_area']] <- NULL
