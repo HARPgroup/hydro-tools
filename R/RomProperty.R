@@ -428,12 +428,30 @@ RomProperty <- R6Class(
       }
       super$delete(delete_remote)
     },
-    #' @param row_cols update the matrix
-    #' @return NULL
+    #'@description 
+    #'Takes in a data frame where each column represents a row to store in the 
+    #'data matrix of this object. This method tranposes that data frame while
+    #'trying to maintain data strcutures and types
+    #' @param row_cols A data frame of rows that will be transposed to meet final
+    #' model or property structure e.g. \code{data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))}
+    #' will be coerced to \code{data.frame(c(1,2,3), c('foo','bar','bingo'))}
+    #' @return Nothing, but will set the data_matrix field on RomProperty
+    #'   instance
     set_matrix = function(row_cols) {
       # expects a set of rows like this:
       # data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))
-      row_cols <- data.frame(t(row_cols),row.names=NULL)
+      #Transpose each row and then combine into one data frame. Previously we
+      #had used t() on the entire data frame to do this all at once, but t()
+      #required conversion to matrix which can only hold one data type and was
+      #adding white space to vectors with both charaters and numerics as it
+      #tried to keep consistent numbers of character
+      row_cols <- mapply(
+        FUN = function(df,coli){t(df[,coli])},
+        coli = 1:ncol(row_cols),
+        MoreArgs = list(df = row_cols),
+        SIMPLIFY = FALSE)
+      #Convert to data frame, but remove column names:
+      row_cols <- as.data.frame(do.call(rbind,row_cols))
       names(row_cols) <- NULL
       self$data_matrix = row_cols
     },
