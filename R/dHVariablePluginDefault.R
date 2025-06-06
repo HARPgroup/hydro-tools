@@ -558,7 +558,7 @@ dHOMHydroImpoundmentSmall <- R6Class(
       #Copy the storage_stage_area matrix and properties over to a new list
       #matrix that is expected in the php import to OM
       message("Copying impoundment storage_stage_area to matrix")
-      export[['matrix']] <- export[['storage_stage_area']]
+      export[['matrix']] <- export[['storage_stage_area']][['matrix']]
       #Remove the original list
       export[['storage_stage_area']] <- NULL
       return(export)
