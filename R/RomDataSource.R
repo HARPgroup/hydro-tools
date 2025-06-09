@@ -587,6 +587,9 @@ RomDataSource <- R6Class(
             }
           }
         }
+        # have an post process export method
+        export[[thisobject$propname]] <- plugin$exportOpenMIpost(thisobject,
+                                                                 export[[thisobject$propname]])
         return(export)
         
       } else {
