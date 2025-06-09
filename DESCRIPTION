@@ -25,5 +25,6 @@ Imports:
     lubridate,
     plyr,
     RPostgres,
+    DBI,
     R6,
     sqldf
