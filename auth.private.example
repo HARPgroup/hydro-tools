@@ -1,7 +1,10 @@
 #VAHydro-1.0 Authentication 
-username <- "TRICKY_USERNAME"
+username <- "old_USERNAME"
 hash <- "TRICKY_PASSWORD"
 
 #VAHydro-2.0 Admin REST Authentication 
-rest_uname <- 'TRICKY_USERNAME'
+rest_uname <- 'rest_USERNAME'
 rest_pw <- 'TRICKY_PASSWORD'
+
+odbc_uname <- 'odbc_USERNAME'
+odbc_pw <- 'TRICKY_PASSWORD'
