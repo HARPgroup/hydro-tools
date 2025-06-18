@@ -123,6 +123,10 @@ fn_get_runfile_info <- function(
 #' @param cached boolean - use local copy or force refresh
 #' @param outaszoo boolean return as a zoo timeseries if TRUE, or as data frame
 #' @param use_tz character pass in a custom timezone for zoo
+#' @param cleanup Logical - Should the log file be deleted (TRUE) or written to
+#'   working directory (FALSE)? Note that the cached argument requires these log
+#'   files so setting cleanup to FALSE will prevent caching regardless of cached
+#'   argument
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export fn_get_runfile
@@ -130,7 +134,8 @@ fn_get_runfile_info <- function(
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu", cached = TRUE, 
-  outaszoo=TRUE, use_tz=FALSE
+  outaszoo=TRUE, use_tz=FALSE,
+  cleanup = FALSE
   ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -222,6 +227,12 @@ fn_get_runfile <- function(
     f3 <- zoo::zoo(datv, order.by = datv$timestamp)
   }
   unlink('tempfile')
+  #If the user has provided a logical value for cleanup, check to see if user
+  #has requested the logfile be deleted. If cleanup is TRUE, delete the log file
+  if(is.logical(cleanup) && cleanup){
+    unlink(filename)
+  }
+  #Return either the data frame or the zoo
   if(outaszoo){
     return(f3)  
   }else{

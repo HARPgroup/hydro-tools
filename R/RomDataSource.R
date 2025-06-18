@@ -101,7 +101,7 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
-        self$connection <- dbConnect(
+        self$connection <- DBI::dbConnect(
           bigint = "integer",
           RPostgres::Postgres(),
           dbname = self$dbname,
@@ -587,6 +587,9 @@ RomDataSource <- R6Class(
             }
           }
         }
+        # have an post process export method
+        export[[thisobject$propname]] <- plugin$exportOpenMIpost(thisobject,
+                                                                 export[[thisobject$propname]])
         return(export)
         
       } else {
