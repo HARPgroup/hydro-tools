@@ -11,7 +11,8 @@ fn_get_runfile(
   site = "http://deq2.bse.vt.edu",
   cached = TRUE,
   outaszoo = TRUE,
-  use_tz = FALSE
+  use_tz = FALSE,
+  cleanup = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,11 @@ fn_get_runfile(
 \item{outaszoo}{boolean return as a zoo timeseries if TRUE, or as data frame}
 
 \item{use_tz}{character pass in a custom timezone for zoo}
+
+\item{cleanup}{Logical - Should the log file be deleted (TRUE) or written to
+working directory (FALSE)? Note that the cached argument requires these log
+files so setting cleanup to FALSE will prevent caching regardless of cached
+argument}
 }
 \value{
 reference class of type openmi.om.equation
