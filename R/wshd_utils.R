@@ -8,12 +8,12 @@
 #'  on which province the channel is in and the drainage area at that point.
 #'  This data is often used in OM to set local_channel properties. Returns a list 
 #'  with bank full stage "max height before floodplain", bank full width "max width before floodplain",
-#'  base width "width at lowest stage", side slope of channel
+#'  base width "width at lowest stage", side slope of channel, and mannings Roughness
 #'@param prov Integer 1 - 4. Geomorphic province 1 = appalachian plateau, 2 =
 #'  valley and ridge, 3 = Piedmont, 4 = coastal plain
 #'@param da Numeric. The drainage area of your channel.
 #'@return A list with the bank full stage (h), bank full width (bf), base width
-#'  (b), and side slope (z)
+#'  (b), side slope (z), and mannings roughness (n)
 #'@example 
 #'#usgs_bankfull_properties(prov = 1,da = 10)
 #'@export
@@ -76,7 +76,8 @@ usgs_bankfull_properties <- function(prov, da) {
       h = h,
       bf = bf,
       b = b,
-      Z = z
+      Z = z,
+      n = n
     )
   )
 }

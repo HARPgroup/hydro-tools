@@ -14,7 +14,7 @@ valley and ridge, 3 = Piedmont, 4 = coastal plain}
 }
 \value{
 A list with the bank full stage (h), bank full width (bf), base width
- (b), and side slope (z)
+ (b), side slope (z), and mannings roughness (n)
 }
 \description{
 Uses USGS bankfull regional curves for each VA geomorphic
@@ -27,5 +27,5 @@ See USGS bankfull regression reports for additional information. The
  on which province the channel is in and the drainage area at that point.
  This data is often used in OM to set local_channel properties. Returns a list 
  with bank full stage "max height before floodplain", bank full width "max width before floodplain",
- base width "width at lowest stage", side slope of channel
+ base width "width at lowest stage", side slope of channel, and mannings Roughness
 }
