@@ -147,6 +147,8 @@ RomProperty <- R6Class(
           self$enddate = as.integer(as.character(config$enddate))
         } else if (i == "propvalue") {
           self$propvalue = as.numeric(as.character(config$propvalue))
+        } else if (i == "modified") {
+          self$modified = as.integer(config$modified)
         } else if (i == "propcode") {
           self$propcode = as.character(config$propcode)
         } else if (i == "proptext") {
@@ -251,6 +253,7 @@ RomProperty <- R6Class(
       pid = FALSE
       if (push_remote) {
         pl <- self$to_list(self$base_only)
+        pl$modified = as.integer(now())
         if (!lubridate::is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL

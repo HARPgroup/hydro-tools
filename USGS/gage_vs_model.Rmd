@@ -22,13 +22,16 @@ params:
   summary_text: ''
   crit_pd_start: FALSE
   crit_pd_end: FALSE
+  crit_pd_only: FALSE
   model_output_file: FALSE
   estimated_flow_file: FALSE
   area_factor: 1.0
   intake_da: FALSE
   model_qvar: "Qout"
   model_da: FALSE
+  test_wd_pct: 0.0
   test_wd_rate: 0.0
+  cu_threshold: [-10.0, -20.0, -30.0]
   drop_cache: FALSE
   lowflow_year_zoom: [1999, 2002, 2023]
 ---
@@ -50,6 +53,7 @@ gageid <- params$gageid
 summary_text <- params$summary_text
 crit_pd_start <- params$crit_pd_start
 crit_pd_end <- params$crit_pd_end
+crit_pd_only <- params$crit_pd_only
 area_factor <- as.numeric(params$area_factor)
 model_da <- params$model_da
 model_qvar <- params$model_qvar
@@ -58,6 +62,8 @@ estimated_flow_file <- params$estimated_flow_file
 drop_cache <- params$drop_cache
 lowflow_year_zoom <- params$lowflow_year_zoom
 test_wd_rate <- params$test_wd_rate
+test_wd_pct <- params$test_wd_pct
+cu_threshold = params$cu_threshold
 intake_da <- params$intake_da
 
 safe_yield_caveats <- "**Comparison to Historical “Safe Yield” Estimates**\n
@@ -66,6 +72,22 @@ This method will yield considerably lower values than “safe yield” estimates
 ```
 
 ```{r getdata, include=FALSE}
+# get started by retrieving info on gage
+gage_info <- memo_readNWISsite(gageid)
+gage_name <- gage_info$station_nm
+if (is.logical(elid)) {
+  # try to get the USGS containing river segment from database
+  model_ftype = 'vahydro'
+  gage_feature <- RomFeature(ds, list(bundle='usgsgage', hydrocode=paste0('usgs_', gageid)), TRUE)
+  if (is.na(gage_feature$hydroid)) {
+    # 
+    wshed_df <- sqldf(
+      paste0(
+        "select * from dh_feature_fielded where st_contains(dh_geofield_geom, st_setsrid(st_MakePoint(", gage_info$dec_long_va, ", ", gage_info$dec_lat_va, "), 4326)) and bundle = 'watershed' and ftype ='", model_ftype,"'"),
+      connection = ds$connection)
+  }
+  # NOT YET COMPLETE! Get the model attached to the feature and then get the elid from there
+}
 if (!is.logical(model_output_file)) {
   model_data <- read.table(model_output_file, header = TRUE, sep = ",")
   model_flows <- zoo(as.numeric(as.character( model_data[,model_qvar] )), order.by = make_datetime(model_data$year, model_data$month, model_data$day, as.integer(model_data$hour)) )
@@ -95,8 +117,6 @@ if (drop_cache == TRUE) {
   drop_cache(memo_readNWISdv)(gageid,'00060')
 }
 historic <- memo_readNWISdv(gageid,'00060')
-gage_info <- memo_readNWISsite(gageid)
-gage_name <- gage_info$station_nm
 if (!is.logical(model_da)) {
   # auto-calc area_factor
   area_factor <- as.numeric(model_da) / gage_info$drain_area_va
@@ -133,8 +153,9 @@ model_flows <- window(model_flows, start = gstart, end = gend)
 historic$year <- year(historic$Date)
 historic$month <- month(historic$Date)
 historic$day <- day(historic$Date)
+historic$X_00060_00003 <- as.numeric(historic$X_00060_00003)
 both_data <- sqldf(
-  "select a.year, a.month, a.day, a.X_00060_00003 as flow, b.Qout as Qout
+  "select a.year, a.month, a.day, a.X_00060_00003, b.Qout as Qout
    from historic as a 
    left outer join model_data as b
    on (a.year = b.year and a.month = b.month and a.day = b.day)
@@ -171,7 +192,7 @@ names(cmp_l90) <- c("Year", "USGS", "Model")
 ymax_val <- max(c(cmp_l90$USGS,cmp_l90$Model))
 
 #Mean data ####################################################### 
-cmp_qmean <- sqldf("select year, avg(flow) as usgs_mean, avg(Qout) as model_mean from both_data group by year order by year")
+cmp_qmean <- sqldf("select year, avg(X_00060_00003) as usgs_mean, avg(Qout) as model_mean from both_data group by year order by year")
 names(cmp_qmean) <- c("Year", "USGS", "Model")
 
 #l30 data ####################################################### 
@@ -252,7 +273,7 @@ ymax_val <- max(c(cmp_l90$USGS,cmp_l90$Model))
 hymax_val <- max(c(cmp_m01$USGS,cmp_m01$Model))
 
 #Mean data ####################################################### 
-cmp_qmean <- sqldf("select year, avg(flow) as usgs_mean, avg(Qout) as model_mean from both_data group by year order by year")
+cmp_qmean <- sqldf("select year, avg(X_00060_00003) as usgs_mean, avg(Qout) as model_mean from both_data group by year order by year")
 names(cmp_qmean) <- c("Year", "USGS", "Model")
 
 
@@ -273,24 +294,24 @@ if (test_wd_rate > 0) {
 #######################
 # Estimate Water Availability if requested
 
-if (test_wd_rate > 0) {
-  
-  gage_data$gage_available_mgd <- (gage_data$X_00060_00003 * test_wd_rate / 100.0) / 1.547
-  model_data$model_available_mgd <- (model_data$Qout * test_wd_rate / 100.0) / 1.547
+if (test_wd_pct > 0) {
+  gage_data$gage_available_mgd <- (gage_data$X_00060_00003 * test_wd_pct / 100.0) / 1.547
+  model_data$model_available_mgd <- (model_data$Qout * test_wd_pct / 100.0) / 1.547
   gage_avail_table = om_flow_table(gage_data, 'gage_available_mgd')
   model_avail_table = om_flow_table(model_data, 'model_available_mgd')
   # now format but do not display yet
   model_avail <- qflextable(model_avail_table)
   gage_avail <- qflextable(gage_avail_table)
-  set_caption(gage_avail,paste("Estimated water availability based on withdrawal limited to", test_wd_rate, "% of flow from", mstart,"to",mend,"based on the flow record from USGS",  gageid, "area weighted to model intake."))
-  set_caption(model_avail,paste("Estimated water availability based on withdrawal limited to", test_wd_rate, "% of flow from", mstart,"to",mend,"based on the model simulated flow."))
+  set_caption(gage_avail,paste("Estimated water availability based on withdrawal limited to", test_wd_pct, "% of flow from", mstart,"to",mend,"based on the flow record from USGS",  gageid, "area weighted to model intake."))
+  set_caption(model_avail,paste("Estimated water availability based on withdrawal limited to", test_wd_pct, "% of flow from", mstart,"to",mend,"based on the model simulated flow."))
   
-  if (test_wd_rate > 0) {
+  if (test_wd_pct > 0) {
     cat(paste("### Gage estimated water availability during modeled time period  of", mstart, "to", mend))
     gage_avail
   }
-  
-  if (test_wd_rate > 0) {
+ 
+# disable modeled comparison 
+  if (test_wd_pct > 0) {
     cat(paste("### Model estimated water availability during modeled time period  of", mstart, "to", mend))
     model_avail
   }
@@ -298,9 +319,37 @@ if (test_wd_rate > 0) {
 
 ```
 
+```{r consumptive_use_testing, echo=FALSE, results='asis'}
+#######################
+# Estimate Water Availability if requested
+
+if (test_wd_rate > 0) {
+  gage_test_data <- historic
+  
+  gage_test_data$gage_post <- (gage_test_data$X_00060_00003 - test_wd_rate * 1.547)
+  model_data$model_post <- (model_data$Qout - test_wd_rate * 1.547)
+  # now format but do not display yet
+  gage_cu_table <- om_cu_table(NULL, gage_test_data, 'gage_post', 'X_00060_00003', cu_threshold, cu_decimals) 
+  model_cu_table <- om_cu_table(NULL, model_data, 'model_post', 'Qout', cu_threshold, cu_decimals) 
+  set_caption(gage_cu_table,paste("Estimated consumptive use based on withdrawal limited to", test_wd_rate, "MGD from", gstart,"to",gend,"based on the flow record from USGS",  gageid, "area weighted to model intake."))
+  set_caption(model_cu_table,paste("Estimated consumptive use based on withdrawal limited to", test_wd_rate, "MGD from", gstart,"to",gend,"based on the model simulated flow."))
+  
+  if (test_wd_rate > 0) {
+    cat(paste("### Gage estimated consumptive use during modeled time period  of", gstart, "to", gend))
+    gage_cu_table
+  }
+  
+#  if (test_wd_rate > 0) {
+#    cat(paste("### Model estimated water availability during modeled time period  of", gstart, "to", gend))
+#    model_cu_table
+#  }
+}
+
+```
+
 ## Flow Duration Curve Plot:
 ```{r fdc-plot, fig.width=6, fig.height=6, dev='png', echo=FALSE, message=FALSE, results='hide'}
-fdc_dat.df <- both_data[c("flow", "Qout")]
+fdc_dat.df <- both_data[c("X_00060_00003", "Qout")]
 legend_text <- c("gage","model")
 fdc_plot <- hydroTSM::fdc(cbind(fdc_dat.df),
                           yat = c(1, 5, 10, 50, 100, seq(0,round(max(fdc_dat.df),0), by = 500)),
@@ -372,7 +421,7 @@ abline(h=min(cmp_l30$USGS), col="blue", lty = "dashed")
 abline(h=min(cmp_l30$Model), col="black", lty = "dashed")
 mtext(round(min(cmp_l30$USGS),1), side=2, line=0, las=1, at=min(cmp_l30$USGS), cex=0.6, col="blue")
 mtext(round(min(cmp_l30$Model),1), side=4, line=0, las=1, at=(min(cmp_l30$Model)), cex=0.6, col="black")
-gfa <- IHA::group2(gage_flows_all)
+gfa <- hydrotools::group2(gage_flows_all, year="calendar")
 gfadf <- as.data.frame(gfa$`30 Day Min`)
 names(gfadf) <- c('usgs')
 gfadf$year <- as.numeric(gfa$year)
@@ -761,7 +810,8 @@ set_caption(usgs_fx,"USGS non-exceedence chart.")
 model_fx <- qflextable(om_flow_table(model_data, 'Qout'))
 set_caption(model_fx,"Model non-exceedence chart.")
 
-historic_fx <- qflextable(om_flow_table(historic, "X_00060_00003"))
+# try , probs=c(0,0.05,0.1,0.25, 0.3, 0.4, 0.5)
+historic_fx <- qflextable(om_flow_table(historic, q_col="X_00060_00003"))
 # note: to print this out for use in a TE,
 # enter:  kable(historic_fx$body$dataset,'markdown')
 set_caption(historic_fx,paste("Historic non-exceedence chart at USGS", gageid, "from", as.Date(min(historic$Date)),"to",as.Date(max(historic$Date)),"area weighted to model intake."))
@@ -773,6 +823,13 @@ names(both_flows) <- c('usgs', 'model')
 lt_mean_flows <- sqldf(paste("select * from both_flows where usgs <", gage_info$drain_area_va))
 lt_low_flows <- sqldf(paste("select * from both_flows where usgs <", median(gage_l90$`90 Day Min`)))
 
+# develop regression equations
+obs_med <- as.numeric(median(both_flows$usgs))
+datlow <- sqldf(paste("select * from both_flows where  usgs <=", obs_med))
+lm2 <- lm(
+    datlow$model ~ datlow$usgs
+)
+summary(lm2)
 
 ```
 
@@ -801,7 +858,9 @@ plot(lt_mean_flows$model ~ lt_mean_flows$usgs, ylim=c(0, gage_info$drain_area_va
 # lowflow_year_zoom default = c(1999, 2002, 2023)
 if (is.character(lowflow_year_zoom)) {
   if (lowflow_year_zoom == "auto") {
-    lowflow_year_zoom <- as.matrix(gage_loflows_all[which(gage_loflows_all$`30 Day Min` <= sort(gage_loflows_all$`30 Day Min`)[3]),]["year"])
+    lowflow_year_zoom <- as.matrix(
+      gage_loflows_all[which(gage_loflows_all$`30 Day Min` <= sort(gage_loflows_all$`30 Day Min`)[3]),]["year"]
+    )
   }
 }
 low_table <- round(gage_loflows_all[which(gage_loflows_all$year %in% lowflow_year_zoom),][c("year", "1 Day Min", "3 Day Min", "7 Day Min", "30 Day Min", "90 Day Min")], 1)
@@ -856,7 +915,7 @@ if (!(is.logical(crit_pd_end) & is.logical(crit_pd_start)) ) {
 }
 crit_pd_data <- sqldf(
   paste(
-    "select year, month, avg(flow) as usgs, avg(Qout) as model",
+    "select year, month, avg(X_00060_00003) as usgs, avg(Qout) as model",
     "from both_data ",
     "where ",
     "(year,month,day) BETWEEN (", paste(cp_sy, cp_sm, cp_sd,sep=","), 
@@ -889,7 +948,7 @@ if (nrow(crit_pd_data) > 0) {
   
   cp_all <- sqldf(
     paste(
-      "select year, month, day, avg(flow) as usgs, avg(Qout) as model",
+      "select year, month, day, avg(X_00060_00003) as usgs, avg(Qout) as model",
       "from both_data ",
       "where ",
       "(year,month,day) BETWEEN (", paste(cp_sy, cp_sm, cp_sd,sep=","), 
@@ -908,7 +967,7 @@ if (nrow(crit_pd_data) > 0) {
 if (!is.logical(estimated_flow_file)) {
 
   full_data <- sqldf(
-    "select a.year, a.month, a.day, a.X_00060_00003 as flow_usgs, b.Qout as flow_model
+    "select a.year, a.month, a.day, a.flow as flow_usgs, b.Qout as flow_model
      from historic as a 
      full join model_data as b
      on (a.year = b.year and a.month = b.month and a.day = b.day)
