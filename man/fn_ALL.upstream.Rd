@@ -2,22 +2,35 @@
 % Please edit documentation in R/cia_utils.R
 \name{fn_ALL.upstream}
 \alias{fn_ALL.upstream}
-\title{Find Upstream Segments: A basic function that finds the segments immediately
-upstream of a given segment(s). riv.seg may be a character vector of segments.}
+\title{fn_ALL.upstream}
 \usage{
 fn_ALL.upstream(AllSegList, riv.seg = NULL, getAllSegmentsOnly = TRUE)
 }
 \arguments{
-\item{AllSegList}{Data frame that must contain riverseg and all river}
+\item{AllSegList}{Data frame that must contain riverseg and all river
+segments in state. All columns are maintained in final This function can only
+find segments that are in this list so the user should use a comprehensive
+list of segments as demonstrated in the hydrotools package in cia_utils.R}
 
-\item{riv.seg}{If user wishes to only return certain segments, they can}
+\item{riv.seg}{If user wishes to only return certain segments, they can
+specify these in riv.seg to get a data frame showing that segment, other data
+in AllSegList, and all upstream segments. May be left as NULL to instead find
+upstream segments of all unique segments in AllSegList}
 
-\item{getAllSegmentsOnly}{If the user only wishes to get the ids of upstream}
+\item{getAllSegmentsOnly}{If the user only wishes to get the ids of upstream
+segments and the outlet i.e. this is inclusive of riv.seg. This may only be
+used if riv.seg is specified. Defaults to TRUE.}
 }
 \value{
 string next upstream segment ID
 }
 \description{
-Returns a vector of the segments immediately upstream of riv.seg
-  based on the list in AllSegList
+Returns a vector of the segments upstream of riv.seg based on
+  the list in AllSegList
+}
+\details{
+Find Upstream Segments: A basic function that finds the segments 
+upstream of a given segment(s). riv.seg may be a character vector of segments.
+and AllSegList must be a dataframe. This function returns a vector of
+upstream segments
 }

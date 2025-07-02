@@ -300,21 +300,25 @@ fn_upstream <- function(riv.seg,AllSegList,
 }
 
 
-#' Find Upstream Segments: A basic function that finds the segments immediately
+#' @name fn_ALL.upstream
+#' @title fn_ALL.upstream
+#' @description Returns a vector of the segments upstream of riv.seg based on
+#'   the list in AllSegList
+#' @details Find Upstream Segments: A basic function that finds the segments 
 #' upstream of a given segment(s). riv.seg may be a character vector of segments.
-#' @description Returns a vector of the segments immediately upstream of riv.seg
-#'   based on the list in AllSegList
+#' and AllSegList must be a dataframe. This function returns a vector of
+#' upstream segments
 #' @param AllSegList Data frame that must contain riverseg and all river
-#segments in state. All columns are maintained in final This function can only
-#find segments that are in this list so the user should use a comprehensive
-#list of segments as demonstrated in the hydrotools package in cia_utils.R
+#' segments in state. All columns are maintained in final This function can only
+#' find segments that are in this list so the user should use a comprehensive
+#' list of segments as demonstrated in the hydrotools package in cia_utils.R
 #' @param riv.seg If user wishes to only return certain segments, they can
-#specify these in riv.seg to get a data frame showing that segment, other data
-#in AllSegList, and all upstream segments. May be left as NULL to instead find
-#upstream segments of all unique segments in AllSegList
+#' specify these in riv.seg to get a data frame showing that segment, other data
+#' in AllSegList, and all upstream segments. May be left as NULL to instead find
+#' upstream segments of all unique segments in AllSegList
 #' @param getAllSegmentsOnly If the user only wishes to get the ids of upstream
-#segments and the outlet i.e. this is inclusive of riv.seg. This may only be
-#used if riv.seg is specified. Defaults to TRUE.
+#'   segments and the outlet i.e. this is inclusive of riv.seg. This may only be
+#'   used if riv.seg is specified. Defaults to TRUE.
 #' @return string next upstream segment ID
 #' @export fn_ALL.upstream
 fn_ALL.upstream <- function(
@@ -358,6 +362,12 @@ fn_ALL.upstream <- function(
   ){
     #Get only river segments specified by user
     segDataFrame <- segDataFrame[segDataFrame$riverseg %in% riv.seg,]
+    #If user has only provided a single column dataframe and a single riv.seg,
+    #this may return a vector. In these cases, convert to data.frame for
+    #fn_upstream()
+    if(is.character(segDataFrame) && length(segDataFrame) == 1){
+      segDataFrame <- data.frame(riverseg = segDataFrame)
+    }
   }
   
   #Add the next upstream segment to the data frame by calling fn_upstream() and
