@@ -72,6 +72,22 @@ This method will yield considerably lower values than “safe yield” estimates
 ```
 
 ```{r getdata, include=FALSE}
+# get started by retrieving info on gage
+gage_info <- memo_readNWISsite(gageid)
+gage_name <- gage_info$station_nm
+if (is.logical(elid)) {
+  # try to get the USGS containing river segment from database
+  model_ftype = 'vahydro'
+  gage_feature <- RomFeature(ds, list(bundle='usgsgage', hydrocode=paste0('usgs_', gageid)), TRUE)
+  if (is.na(gage_feature$hydroid)) {
+    # 
+    wshed_df <- sqldf(
+      paste0(
+        "select * from dh_feature_fielded where st_contains(dh_geofield_geom, st_setsrid(st_MakePoint(", gage_info$dec_long_va, ", ", gage_info$dec_lat_va, "), 4326)) and bundle = 'watershed' and ftype ='", model_ftype,"'"),
+      connection = ds$connection)
+  }
+  # NOT YET COMPLETE! Get the model attached to the feature and then get the elid from there
+}
 if (!is.logical(model_output_file)) {
   model_data <- read.table(model_output_file, header = TRUE, sep = ",")
   model_flows <- zoo(as.numeric(as.character( model_data[,model_qvar] )), order.by = make_datetime(model_data$year, model_data$month, model_data$day, as.integer(model_data$hour)) )
@@ -101,8 +117,6 @@ if (drop_cache == TRUE) {
   drop_cache(memo_readNWISdv)(gageid,'00060')
 }
 historic <- memo_readNWISdv(gageid,'00060')
-gage_info <- memo_readNWISsite(gageid)
-gage_name <- gage_info$station_nm
 if (!is.logical(model_da)) {
   # auto-calc area_factor
   area_factor <- as.numeric(model_da) / gage_info$drain_area_va
@@ -809,6 +823,13 @@ names(both_flows) <- c('usgs', 'model')
 lt_mean_flows <- sqldf(paste("select * from both_flows where usgs <", gage_info$drain_area_va))
 lt_low_flows <- sqldf(paste("select * from both_flows where usgs <", median(gage_l90$`90 Day Min`)))
 
+# develop regression equations
+obs_med <- as.numeric(median(both_flows$usgs))
+datlow <- sqldf(paste("select * from both_flows where  usgs <=", obs_med))
+lm2 <- lm(
+    datlow$model ~ datlow$usgs
+)
+summary(lm2)
 
 ```
 
