@@ -147,6 +147,8 @@ RomProperty <- R6Class(
           self$enddate = as.integer(as.character(config$enddate))
         } else if (i == "propvalue") {
           self$propvalue = as.numeric(as.character(config$propvalue))
+        } else if (i == "modified") {
+          self$modified = as.integer(config$modified)
         } else if (i == "propcode") {
           self$propcode = as.character(config$propcode)
         } else if (i == "proptext") {
