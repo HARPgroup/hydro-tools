@@ -1,6 +1,50 @@
 # cia_utils.R
 # Supporting functions for the CIA static and Shiny dashboards.
 
+#' Model element finder
+#' @description Finds the model, and its parent feature or prop given an OM elementid
+#' @param elid Desired elementid
+#' @param ds RomDataSource
+#' @return data frame of info about the target elementid
+#' @import sqldf
+#' @export om_find_dh_elid
+om_find_dh_elid <- function(elid, ds) {
+  
+  model_search_elid <- fn$sqldf(
+    "select a.name, a.hydrocode, 
+   CASE 
+     WHEN a.hydroid IS NULL THEN 'model' 
+     ELSE 'feature'
+   END as parent_type, 
+   CASE 
+     WHEN a.hydroid IS NULL THEN p.pid 
+     ELSE a.hydroid
+   END as parent_id,
+   b.propname, b.pid, e.propvalue as elid
+   from dh_properties as e 
+   left outer join dh_properties as b
+   on (
+     e.featureid = b.pid
+   )
+   left outer join dh_feature as a
+   on (
+     a.hydroid = b.featureid
+   )
+   left outer join dh_properties as p
+   on (
+     p.pid = b.featureid
+     and b.entity_type = 'dh_properties'
+   )
+   where e.propname = 'om_element_connection'
+   and e.propvalue = $elid
+  ",
+    connection = ds$connection
+  )
+  if (nrow(model_search_elid) == 0) {
+    model_search_elid = FALSE
+  }
+  return(model_search_elid)
+} 
 
 # CIA_data Function: Grabs data from vahydro and returns data frame 
 #data frame contains flow and percent change data for 2 runids of all upstream and downstream river segments
