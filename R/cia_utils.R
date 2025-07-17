@@ -46,6 +46,35 @@ om_find_dh_elid <- function(elid, ds) {
   return(model_search_elid)
 } 
 
+om_model_run_monitor <- function(ds_model, minspast=60, elids = FALSE, limit = 100) {
+  status_sql = "select a.elementid, a.elemname, b.status_mesg, b.runid, b.host, b.last_updated, 
+       CASE 
+         WHEN report is NULL THEN  
+           replace(remote_url,'runlog'||b.runid||'.'||c.elementid, 'report'||c.elementid||'-'||b.runid) 
+         ELSE report 
+       END as report 
+    from scen_model_element as a, system_status as b 
+    left outer join scen_model_run_elements as c 
+       on( b.element_key = c.elementid and c.runid = b.runid ) 
+    where a.elementid = b.element_key 
+    "
+  if (minspast > 0) {
+    status_sql = fn$paste(status_sql, "and b.last_updated >= (now() - interval '$minspast minutes')")
+  }
+  if (!is.logical(elids)) {
+    elist = paste0("(", paste(elids, collapse = ","), ")")
+    status_sql = fn$paste(status_sql, "and a.elementid in $elist")
+  }
+  
+  status_sql = fn$paste(status_sql, "order by last_updated DESC LIMIT $limit")
+  message(status_sql)
+  status_recs = sqldf::sqldf(
+    status_sql,
+    connection = ds_model$connection
+  )
+  return(status_recs)
+}
+
 # CIA_data Function: Grabs data from vahydro and returns data frame 
 #data frame contains flow and percent change data for 2 runids of all upstream and downstream river segments
 #' Cumulative Impact Analysis Data Function
