@@ -6,8 +6,11 @@ The R developers at DEQ's Office of Water Supply Planning and Analysis have deve
 
 ## Installation
 
-### DEQ Users (coming soon!)
-This package will soon be available for internal distribution on the DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). A config file may be provided by the package managers for database integration.
+### DEQ Users
+This package is available for internal distribution on the TEST (UAT) DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). Users will need to add the UAT package manager to their list of secondary repositories: https://positpackagemanager-uat.deq.virginia.gov/DEQmethods/latest. A config file may be provided by the package managers for database integration.  
+```
+install.packages("hydrotools")
+```
 
 ### All Other Users
 A config file may be provided by the package managers for database integration.
