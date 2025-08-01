@@ -183,3 +183,22 @@ om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_
   prop_sql <- str_replace_all(prop_sql, "\\[metric\\]", metric)
   return(prop_sql)
 }
+
+
+om_metric_matrix <- function(m_version, runids, metrics) {
+  df = FALSE
+  for (mv in m_version) {
+    for (r in runids) {
+      for (m in metrics) {
+        dr <- data.frame(mv, r, m, paste0(m,"_", r))
+        if (!is.logical(df)) {
+          df <- rbind(df,dr)
+        } else {
+          df = as.data.frame(dr)
+        }
+      }
+    }
+  }
+  colnames(df) <-  c('model_version','runid','metric','runlabel')
+  return(df)
+}
