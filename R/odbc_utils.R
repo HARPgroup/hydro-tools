@@ -78,7 +78,7 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug = FALSE)
 #' @param obj optional class with extra query info
 #' @param debug Print out debug info if true
 #' @seealso NA
-#' @export fn_post_odbc
+#' @export fn_delete_odbc
 #' @examples NA
 fn_delete_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   #Search for existing ts matching supplied varkey, featureid, entity_type 
