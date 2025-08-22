@@ -219,7 +219,7 @@ RomEntity <- R6Class(
     #' @returns the property object for this entity
     set_prop = function(
     propname, propcode=NULL,propvalue=NULL,varkey=NULL,
-    data_matrix=NULL, remote=TRUE
+    data_matrix=NULL, remote=TRUE, proptext=NULL
     ) {
       # first, see if it exists to load and update
       # then, change/set the varid and values
@@ -250,6 +250,7 @@ RomEntity <- R6Class(
       }
       if (!is.null(propvalue)) {child_prop$propvalue = propvalue}
       if (!is.null(propcode)) {child_prop$propcode = propcode}
+      if (!is.null(proptext)) {child_prop$proptext = proptext}
       if (!is.null(data_matrix)) {child_prop$set_matrix(data_matrix) }
       child_prop$save(remote)
       return(child_prop)
