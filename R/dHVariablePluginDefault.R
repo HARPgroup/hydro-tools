@@ -465,10 +465,8 @@ dHOMbroadCastObject <- R6Class(
     populate = function(entity) {
       # add all child components
       # sub classes will do things here
-      entity$set_prop(
-        'broadcast_params', 
-        varkey='om_class_DataMatrix',
-        data_matrix=data.frame(
+      entity$set_matrix(
+        data.frame(
           c('local_name1', 'local_name2'),
           c('remote_name1', 'remote_name2')
         )
