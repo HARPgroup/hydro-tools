@@ -303,10 +303,8 @@ fn_guess_insert <- function(entity_type, pk, inputs) {
       next
     }
     col_val = inputs[[col_name]]
+    col_val = fn_handle_char(col_val)
     col_sql <- paste(col_sql, in_sep, col_name)
-    if (is.character(col_val)) {
-      col_val = paste0("'",col_val,"'")
-    }
     val_sql <- paste(val_sql, in_sep, col_val)
     in_sep = ","
   }
@@ -336,9 +334,7 @@ fn_guess_update <- function(entity_type, pk, inputs) {
       next
     }
     col_val = inputs[[col_name]]
-    if (is.character(col_val)) {
-      col_val = paste0("'",col_val,"'")
-    }
+    col_val = fn_handle_char(col_val)
     if (col_name == pk) {
       #print(paste("Found pk col", pk))
       pk_val = col_val
@@ -353,6 +349,14 @@ fn_guess_update <- function(entity_type, pk, inputs) {
     "WHERE", pk, "=", pk_val
   )
   return(up_sql)
+}
+
+fn_handle_char <- function(col_val) {
+  if (is.character(col_val)) {
+    col_val = gsub("'", "''", col_val)
+    col_val = paste0("'",col_val,"'")
+  }
+  return(col_val)
 }
 
 fn_pk_clause <- function(pk, inputs) {

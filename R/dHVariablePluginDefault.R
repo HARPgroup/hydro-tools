@@ -23,6 +23,13 @@ dHVariablePluginDefault <- R6Class(
     initialize = function(config = list()) {
       #message("Created plugin")
     },
+    #' @param entity a valid RomEntity object
+    #' @return object instance
+    populate = function(entity) {
+      # add all child components
+      # sub classes will do things here
+      return(TRUE)
+    },
     #' @param entity the local object to work on 
     #' @return an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
@@ -452,6 +459,31 @@ dHOMbroadCastObject <- R6Class(
         value=I(entity$data_matrix)
       )
       return(export)
+    },
+    #' @param entity a valid RomEntity object
+    #' @return object instance
+    populate = function(entity) {
+      # add all child components
+      # sub classes will do things here
+      entity$set_matrix(
+        data.frame(
+          c('local_name1', 'local_name2'),
+          c('remote_name1', 'remote_name2')
+        )
+      )
+      entity$set_prop('broadcast_mode', varkey='om_class_AlphanumericConstant', propcode='read')
+      entity$set_prop('broadcast_class', varkey='om_class_AlphanumericConstant',propcode='global')
+      entity$set_prop('broadcast_hub', varkey='om_class_AlphanumericConstant',propcode='parent')
+      return(TRUE)
+    },
+    #' @return info regarding the needs and capabilities of this object
+    param_info = function() {
+      info = "- object_class = 'broadcastObject'; // 0 - returns entire array (normal), 1 - single column lookup (col), 2 - 2 column lookup (col & row)
+      - broadcast_params = 'array: row 1 is local names, row 2 broadcast names';
+      - broadcast_mode = 'read'; // read or cast
+      - broadcast_class = ''; // name of channel, ex: 'hydroObject' avoids name collisions 
+      - broadcast_hub = 'parent'; // 'parent' or 'child'"
+      return(info)
     }
   )
 )
