@@ -105,8 +105,11 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.1 09/05/2025
+1. Removed the need for host_site in the `fn_get_runfile` to ensure clarity with update deq1 apache settings.
+
 ### 1.0.0 08/29/2025
-- Updated *fn_get_runfile()* to no longer require an HTTP connection when determining the host site. Instead, it now determines the URL prefix based on the site passed in by the user.
+1. Updated *fn_get_runfile()* to no longer require an HTTP connection when determining the host site. Instead, it now determines the URL prefix based on the site passed in by the user.
 
 ### 0.0.0.1 Initial Release
 

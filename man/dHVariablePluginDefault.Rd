@@ -35,6 +35,7 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
+\item \href{#method-dHVariablePluginDefault-populate}{\code{dHVariablePluginDefault$populate()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
@@ -55,6 +56,25 @@ NA
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-populate"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-populate}{}}}
+\subsection{Method \code{populate()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$populate(entity)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity}}{a valid RomEntity object}
 }
 \if{html}{\out{</div>}}
 }

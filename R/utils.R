@@ -147,42 +147,16 @@ fn_get_runfile <- function(
   #setInternet2(TRUE)
   # just get the run file
   finfo = fn_get_runfile_info(elementid, runid, scenid, site)
-  # set this for comparisons and base prefix on site variable e.g. is site using
-  # http or https?
-  if(grepl("^https",site)){
-    host_site <- paste0('https://',finfo$host)
-  }else{
-    host_site <- paste0('http://',finfo$host)
-  }
-  if (finfo$compressed == 1) {
-    # If the host is not the same as site, and finfo$compressed == 1, then we need to 
-    # Repeat this request on the other host
-    if (host_site != site) {
-      finfo_save <- finfo
-      message("Compressed file requested, repeating request on model run host site")
-      finfo <- try(fn_get_runfile_info(elementid, runid, scenid, host_site))
-      if (is.logical(finfo) | class(finfo)=='try-error') { 
-        message("host site retrieval failed, trying original site.")
-        finfo <- finfo_save
-      }
-    } else {
-      # allow access to local file which will be much faster
-      cached = TRUE
-    }
-  }
+
   if (!is.list(finfo)) {
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
-  message(paste("Comparing host_site and site", host_site, "site"))
-  if (host_site == site) {
-    localname = finfo$output_file
-    cached = TRUE
-    message(paste("Using Local File Storage", localname))
-  } else {
-    localname = basename(as.character(finfo$output_file));
-  }
+  
+  localname = finfo$output_file
+  
   if (cached & file.exists(localname)) {
+    message(paste("Using Local File Storage", localname))
     linfo = file.info(localname)
     if (as.Date(finfo$run_date) > as.Date(linfo$mtime)) {
       # re-download if the remote is newer than the local

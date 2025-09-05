@@ -36,6 +36,8 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMbroadCastObject-exportOpenMIBase}{\code{dHOMbroadCastObject$exportOpenMIBase()}}
+\item \href{#method-dHOMbroadCastObject-populate}{\code{dHOMbroadCastObject$populate()}}
+\item \href{#method-dHOMbroadCastObject-param_info}{\code{dHOMbroadCastObject$param_info()}}
 \item \href{#method-dHOMbroadCastObject-clone}{\code{dHOMbroadCastObject$clone()}}
 }
 }
@@ -46,7 +48,6 @@ NA
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>hydrotools::dHVariablePluginDefault$param_info()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -67,6 +68,37 @@ NA
 }
 \subsection{Returns}{
 an updated config if necessary or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMbroadCastObject-populate"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-populate}{}}}
+\subsection{Method \code{populate()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$populate(entity)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{entity}}{a valid RomEntity object}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMbroadCastObject-param_info"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-param_info}{}}}
+\subsection{Method \code{param_info()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$param_info()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+info regarding the needs and capabilities of this object
 }
 }
 \if{html}{\out{<hr>}}
