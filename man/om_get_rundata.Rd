@@ -2,36 +2,48 @@
 % Please edit documentation in R/om_get_rundata.R
 \name{om_get_rundata}
 \alias{om_get_rundata}
-\title{The base class for executable equation based meta-model components.}
+\title{Get OM Model Data}
 \usage{
 om_get_rundata(
   elid,
   runid,
   site = "http://deq2.bse.vt.edu",
   cached = FALSE,
-  hydrowarmup = TRUE
+  hydrowarmup = TRUE,
+  cleanup = FALSE
 )
 }
 \arguments{
-\item{elid}{integer OM model element id}
+\item{elid}{integer OM element connection ID e.g. the original OM model ID}
 
-\item{runid}{integer run id}
+\item{runid}{integer run id representing the scenario. Ask the modeling team
+for scenario IDs if you are unsure otherwise see the WSPA Shiny Dashboard
+for more information}
 
-\item{site}{URL of om server}
+\item{site}{URL of OM server, typically established in WSPA config files}
 
 \item{cached}{boolean - if TRUE will use recently stored local copy}
 
-\item{hydrowarmup}{boolean - if TRUE will trim beginning of model time frame}
+\item{hydrowarmup}{boolean - if TRUE will trim beginning of model time frame
+to account for potential model warm up as water routes downstream from the
+headwaters and operational rules engage}
+
+\item{cleanup}{Logical. Should the function delete the log file create for
+the cached argument? If this is TRUE, the .log files will be deleted after
+download from OM server}
 }
 \value{
-reference class of type openmi.om.equation
+data.frame of model results
 }
 \description{
-The base class for executable equation based meta-model components.
+Retrieve model results (run data) from the VA Hydro server for a
+  particular model and run ID (scenario ID).
+}
+\details{
+A wrapper of \code{hydrotools::fn_get_runfile()}. This function
+  returns the results in a zoo (see zoo::zoo()) that has the timestamp as the
+  index. See \code{hydrotools::fn_get_runfile()} for more details.
 }
 \examples{
-NA
-}
-\seealso{
-NA
+#om_get_rundata(72446, 600, site=omsite)
 }

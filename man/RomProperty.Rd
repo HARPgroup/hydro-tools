@@ -285,6 +285,9 @@ NULL
 \if{html}{\out{<a id="method-RomProperty-set_matrix"></a>}}
 \if{latex}{\out{\hypertarget{method-RomProperty-set_matrix}{}}}
 \subsection{Method \code{set_matrix()}}{
+Takes in a data frame where each column represents a row to store in the 
+data matrix of this object. This method tranposes that data frame while
+trying to maintain data strcutures and types
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$set_matrix(row_cols)}\if{html}{\out{</div>}}
 }
@@ -292,12 +295,15 @@ NULL
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{row_cols}}{update the matrix}
+\item{\code{row_cols}}{A data frame of rows that will be transposed to meet final
+model or property structure e.g. \code{data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))}
+will be coerced to \code{data.frame(c(1,2,3), c('foo','bar','bingo'))}}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-NULL
+Nothing, but will set the data_matrix field on RomProperty
+  instance
 }
 }
 \if{html}{\out{<hr>}}

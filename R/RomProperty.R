@@ -253,7 +253,7 @@ RomProperty <- R6Class(
       pid = FALSE
       if (push_remote) {
         pl <- self$to_list(self$base_only)
-        pl$modified = as.integer(now())
+        pl$modified = as.integer(lubridate::now())
         if (!lubridate::is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL
@@ -415,7 +415,18 @@ RomProperty <- R6Class(
     set_matrix = function(row_cols) {
       # expects a set of rows like this:
       # data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))
-      row_cols <- data.frame(t(row_cols),row.names=NULL)
+      #Transpose each row and then combine into one data frame. Previously we
+      #had used t() on the entire data frame to do this all at once, but t()
+      #required conversion to matrix which can only hold one data type and was
+      #adding white space to vectors with both charaters and numerics as it
+      #tried to keep consistent numbers of character
+      row_cols <- mapply(
+        FUN = function(df,coli){t(df[,coli])},
+        coli = 1:ncol(row_cols),
+        MoreArgs = list(df = row_cols),
+        SIMPLIFY = FALSE)
+      #Convert to data frame, but remove column names:
+      row_cols <- as.data.frame(do.call(rbind,row_cols))
       names(row_cols) <- NULL
       self$data_matrix = row_cols
     },

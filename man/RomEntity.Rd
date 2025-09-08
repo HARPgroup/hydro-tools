@@ -262,7 +262,8 @@ case of new prop creation)}
   propvalue = NULL,
   varkey = NULL,
   data_matrix = NULL,
-  remote = TRUE
+  remote = TRUE,
+  proptext = NULL
 )}\if{html}{\out{</div>}}
 }
 

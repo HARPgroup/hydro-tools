@@ -1,2 +1,13 @@
-# WHERE ARE YOU LOCALLY STORING THE hydro-tools REPOSITORY
-repo_location <- "C:\\Users\\nrf46657\\Desktop\\VAHydro Development\\GitHub\\"
+# set up a caching function for NWIS
+Sys.setenv(USGS_cache_dir = "/media/model/usgs")
+export_path <- '/Workspace/tmp/'
+
+hydro_tools <- 'https://raw.githubusercontent.com/HARPgroup/hydro-tools/master'
+cbp6_location <- 'https://raw.githubusercontent.com/HARPgroup/cbp6/master'
+hydro_tools_location <- hydro_tools
+om_location <- "https://raw.githubusercontent.com/HARPgroup/om/master"
+elfgen_location <- "https://raw.githubusercontent.com/HARPgroup/elfgen/master"
+openmi_om_location <- "https://raw.githubusercontent.com/HARPgroup/openmi-om/master"
+vahydro_location <- "https://github.com/HARPgroup/vahydro/blob/master"
+github_location <- "C:/usr/local/home/git"
+HARParchive_location <- paste0(github_location, "/HARParchive")
