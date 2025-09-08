@@ -490,6 +490,41 @@ dHOMbroadCastObject <- R6Class(
 
 
 #' Tiered flowby meta-model object
+#' @title dHOMwaterSupplyModelNode
+#' @description Watershed model container
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMwaterSupplyModelNode
+dHOMwaterSupplyModelNode <- R6Class(
+  "dHOMwaterSupplyModelNode",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'waterSupplyModelNode',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      
+      return(export)
+    },
+    get_impoundment = function(entity) {
+      message("Warning: get_impoundment() not yet implemented.")
+      # check for full model impoundment, sub-comp impoundment, or link to feature model
+      return(FALSE)
+    }
+  )
+)
+
+
+#' Tiered flowby meta-model object
 #' @title dHOMWaterSystemTieredFlowBy
 #' @description Simple class to hold tabular flow by values
 #' @details Has standard methods for managing data and meta data

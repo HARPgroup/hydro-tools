@@ -330,9 +330,25 @@ RomEntity <- R6Class(
       # object class responsibilities
       # - know the required elemenprop such as varid, featureid, entity_type
       #   fail if these required elemenprop are not available 
+      self$delete_props(delete_remote)
       if (delete_remote) {
         finfo <- self$to_list()
         fid = self$datasource$delete(self$base_entity_type, self$pk_name, finfo)
+      }
+    },
+    #' @param delete_remote update locally only or push to remote database
+    #' @return NULL
+    delete_props = function(delete_remote=FALSE) {
+      # object class responsibilities
+      # - know the required elemenprop such as varid, featureid, entity_type
+      #   fail if these required elemenprop are not available
+      subprops <- self$propvalues()
+      if (!is.logical(subprops) && nrow(subprops) > 0) {
+        for (pvi in 1:nrow(subprops)) {
+          pv <- subprops[pvi,]
+          subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
+          subprop$delete(delete_remote)
+        }
       }
     },
     #' @param class_field_name what is this field called on this object (deprecated)

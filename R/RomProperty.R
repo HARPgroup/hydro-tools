@@ -410,27 +410,6 @@ RomProperty <- R6Class(
         message("Cannot save data matrix because property vid is null")
       }
     },
-    #' @param delete_remote update locally only or push to remote database
-    #' @return NULL
-    delete = function(delete_remote=FALSE) {
-      # object class responsibilities
-      # - know the required elemenprop such as varid, featureid, entity_type
-      #   fail if these required elemenprop are not available
-      subprops <- self$propvalues()
-      if (!is.logical(subprops) && nrow(subprops) > 0) {
-        for (pvi in 1:nrow(subprops)) {
-          pv <- subprops[pvi,]
-          subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
-          subprop$delete(delete_remote)
-        }
-      }
-      if (delete_remote) {
-        finfo <- self$to_list()
-        # we pass the pid, since if there are multiple revisions it will delete all
-        fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
-      }
-      super$delete(delete_remote)
-    },
     #' @param row_cols update the matrix
     #' @return NULL
     set_matrix = function(row_cols) {
