@@ -410,36 +410,8 @@ RomProperty <- R6Class(
         message("Cannot save data matrix because property vid is null")
       }
     },
-    #' @param delete_remote update locally only or push to remote database
+    #' @param row_cols update the matrix
     #' @return NULL
-    delete = function(delete_remote=FALSE) {
-      # object class responsibilities
-      # - know the required elemenprop such as varid, featureid, entity_type
-      #   fail if these required elemenprop are not available
-      subprops <- self$propvalues()
-      if (!is.logical(subprops) && nrow(subprops) > 0) {
-        for (pvi in 1:nrow(subprops)) {
-          pv <- subprops[pvi,]
-          subprop <- RomProperty$new(self$datasource, list(pid=pv$pid), TRUE)
-          subprop$delete(delete_remote)
-        }
-      }
-      if (delete_remote) {
-        finfo <- self$to_list()
-        # we pass the pid, since if there are multiple revisions it will delete all
-        fid = self$datasource$delete('dh_properties_revision', 'pid', finfo)
-      }
-      super$delete(delete_remote)
-    },
-    #'@description 
-    #'Takes in a data frame where each column represents a row to store in the 
-    #'data matrix of this object. This method tranposes that data frame while
-    #'trying to maintain data strcutures and types
-    #' @param row_cols A data frame of rows that will be transposed to meet final
-    #' model or property structure e.g. \code{data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))}
-    #' will be coerced to \code{data.frame(c(1,2,3), c('foo','bar','bingo'))}
-    #' @return Nothing, but will set the data_matrix field on RomProperty
-    #'   instance
     set_matrix = function(row_cols) {
       # expects a set of rows like this:
       # data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))
