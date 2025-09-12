@@ -105,6 +105,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.2 09/12/2025
+1. Documented and exported `om_flow_table()` from fac_utils.R.
+2. Documented and exported `om_cu_table_data()` to create a data.frame of percent or numeric differences akin to those used in the display `flextable` in `om_cu_table()`.
+
 ### 1.0.1 09/05/2025
 1. Removed the need for host_site in the `fn_get_runfile` to ensure clarity with update deq1 apache settings.
 
