@@ -169,7 +169,11 @@ Set the connection to either the database via ODBC or to a REST service
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_token}{}}}
 \subsection{Method \code{get_token()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(rest_pw = NULL, odbc_port = 5431)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(
+  rest_pw = NULL,
+  odbc_port = 5431,
+  dbConnectType = "dbi"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -180,6 +184,12 @@ for entry if not provided}
 
 \item{\code{odbc_port}}{If using odbc, which port should be used? Will prompt
 user for entry if not provided. Defaults to DEQ port approved by OIS}
+
+\item{\code{dbConnectType}}{Should DBI::dbConnect (dbConnectType = "dbi") or
+pool::dbPool (dbConnectType = "pool") be used to establish the ODBC
+connection with the database? Pool connections are recommended for
+Shiny development so that one connection pool may be shared by many
+instances. Defaults to dbi}
 }
 \if{html}{\out{</div>}}
 }

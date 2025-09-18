@@ -105,6 +105,9 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.3 09/18/2025
+1. Added an optional input to `RomDataSource$get_token()` to allow a user to use pool or dbi connections. This was added to aid in Shiny development while following DEQ R Team guidance.
+
 ### 1.0.2 09/12/2025
 1. Documented and exported `om_flow_table()` from fac_utils.R.
 2. Documented and exported `om_cu_table_data()` to create a data.frame of percent or numeric differences akin to those used in the display `flextable` in `om_cu_table()`.

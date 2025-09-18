@@ -88,10 +88,15 @@ RomDataSource <- R6Class(
     #'   for entry if not provided
     #' @param odbc_port If using odbc, which port should be used? Will prompt
     #'   user for entry if not provided. Defaults to DEQ port approved by OIS
+    #' @param dbConnectType Should DBI::dbConnect (dbConnectType = "dbi") or
+    #'   pool::dbPool (dbConnectType = "pool") be used to establish the ODBC
+    #'   connection with the database? Pool connections are recommended for
+    #'   Shiny development so that one connection pool may be shared by many
+    #'   instances. Defaults to dbi
     #' @return Nothing, but sets internal private token. Private fields are not
     #'   visible via \code{RomDataSource$token} notation and are hidden for
     #'   security
-    get_token = function(rest_pw = NULL, odbc_port = 5431) {
+    get_token = function(rest_pw = NULL, odbc_port = 5431, dbConnectType = "dbi") {
       #Check to ensure user has set site on RomDataSource - should be done
       #already via initialize but user may alter
       if (!is.character(self$site) ) {
@@ -101,15 +106,28 @@ RomDataSource <- R6Class(
       if (self$connection_type == 'rest') {
         private$token <- om_vahydro_token(self$site, self$rest_uname, rest_pw)
       } else {
-        self$connection <- DBI::dbConnect(
-          bigint = "integer",
-          RPostgres::Postgres(),
-          dbname = self$dbname,
-          host = httr::parse_url(self$site)$hostname,
-          port = odbc_port,
-          user = self$rest_uname,
-          password = rest_pw
-        )
+        if(dbConnectType == "dbi"){
+          self$connection <- DBI::dbConnect(
+            bigint = "integer",
+            RPostgres::Postgres(),
+            dbname = self$dbname,
+            host = httr::parse_url(self$site)$hostname,
+            port = odbc_port,
+            user = self$rest_uname,
+            password = rest_pw
+          )
+        }else if(dbConnectType == "pool"){
+          self$connection <- pool::dbPool(
+            bigint = "integer",
+            RPostgres::Postgres(),
+            dbname = self$dbname,
+            host = httr::parse_url(self$site)$hostname,
+            port = odbc_port,
+            user = self$rest_uname,
+            password = rest_pw
+          )
+        }
+        
       }
     },
     # this could actually live in the RomTS object
