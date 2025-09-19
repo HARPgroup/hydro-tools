@@ -80,6 +80,7 @@ field table. Used to match Drupal 7's now deprecated revision system.}
 \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
 \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
 \item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
+\item \href{#method-RomEntity-delete_props}{\code{RomEntity$delete_props()}}
 \item \href{#method-RomEntity-save_field}{\code{RomEntity$save_field()}}
 \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
 }
@@ -378,6 +379,25 @@ NULL
 \subsection{Method \code{delete()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_remote}}{update locally only or push to remote database}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+NULL
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomEntity-delete_props"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-delete_props}{}}}
+\subsection{Method \code{delete_props()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete_props(delete_remote = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

@@ -92,7 +92,6 @@ RomEntity, RomFeature, RomDatasource
 \item \href{#method-RomProperty-save}{\code{RomProperty$save()}}
 \item \href{#method-RomProperty-save_matrix}{\code{RomProperty$save_matrix()}}
 \item \href{#method-RomProperty-save_field}{\code{RomProperty$save_field()}}
-\item \href{#method-RomProperty-delete}{\code{RomProperty$delete()}}
 \item \href{#method-RomProperty-set_matrix}{\code{RomProperty$set_matrix()}}
 \item \href{#method-RomProperty-delete_fields}{\code{RomProperty$delete_fields()}}
 \item \href{#method-RomProperty-clone}{\code{RomProperty$clone()}}
@@ -101,6 +100,8 @@ RomEntity, RomFeature, RomDatasource
 \if{html}{\out{
 <details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>hydrotools::RomEntity$delete_props()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
@@ -263,31 +264,9 @@ NULL
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomProperty-delete"></a>}}
-\if{latex}{\out{\hypertarget{method-RomProperty-delete}{}}}
-\subsection{Method \code{delete()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomProperty$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{delete_remote}}{update locally only or push to remote database}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomProperty-set_matrix"></a>}}
 \if{latex}{\out{\hypertarget{method-RomProperty-set_matrix}{}}}
 \subsection{Method \code{set_matrix()}}{
-Takes in a data frame where each column represents a row to store in the 
-data matrix of this object. This method tranposes that data frame while
-trying to maintain data strcutures and types
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomProperty$set_matrix(row_cols)}\if{html}{\out{</div>}}
 }
@@ -295,15 +274,12 @@ trying to maintain data strcutures and types
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{row_cols}}{A data frame of rows that will be transposed to meet final
-model or property structure e.g. \code{data.frame(c(1,'foo'), c(2,'bar'), c(3,'bingo'))}
-will be coerced to \code{data.frame(c(1,2,3), c('foo','bar','bingo'))}}
+\item{\code{row_cols}}{update the matrix}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Nothing, but will set the data_matrix field on RomProperty
-  instance
+NULL
 }
 }
 \if{html}{\out{<hr>}}

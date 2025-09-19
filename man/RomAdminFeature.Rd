@@ -65,6 +65,7 @@ NA
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>hydrotools::RomEntity$delete_props()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
