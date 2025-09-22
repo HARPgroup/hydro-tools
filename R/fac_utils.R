@@ -18,42 +18,43 @@
 #' @export om_flow_table
 om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1) {
   # Expects a data frame, df2sum with Qout, month columns
-  if (is.zoo(df2sum)) {
+  if (zoo::is.zoo(df2sum)) {
     df2sum <- as.data.frame(df2sum)
   }
-  intake_summary_tbl = data.frame(
-    "Month" = character(), 
-    'Min' = numeric(),
-    '5%' = numeric(),
-    '10%' = numeric(),
-    '25%' = numeric(), 
-    '30%' = numeric(),
-    '50%' = numeric(),
-    'Mean' = numeric(),
-    stringsAsFactors = FALSE) ;
+  #Round the mean to one less digit, accounting for some uncertainty/sigfigs
   if (rdigits > 1) {
     mrdigits = rdigits - 1
   } else {
     mrdigits = rdigits
   }
+  #Initialize a data frame of monthly summary metrics
+  intake_summary_tbl <- data.frame(
+    "Month" = month.abb,
+    'Min' = numeric(12),
+    fivep=  numeric(12),
+    tenp = numeric(12),
+    twofivep = numeric(12),
+    thirtyp = numeric(12),
+    fiftyp = numeric(12),
+    'Mean' = numeric(12),
+    stringsAsFactors = FALSE
+  )
+  #For each month, compute the mean, median, minimum flow and various other
+  #quantile flows
   for (i in index(month.abb)) {
     moname <- month.abb[i]
-    drows <- sqldf(paste("select * from df2sum where ", mo_col, " = ", i))
+    drows <- df2sum[df2sum[,mo_col] == i,]
     q_drows <- quantile(drows[,q_col], probs=c(0,0.05,0.1,0.25, 0.3, 0.5), na.rm=TRUE)
     q_mean <- mean(drows[,q_col])
-    newline = data.frame(
-      "Month" = moname,
-      'Min' = round(as.numeric(q_drows["0%"]),rdigits),
-      '5%' = round(as.numeric(q_drows["5%"]),rdigits),
-      '10%' = round(as.numeric(q_drows["10%"]),rdigits),
-      '25%' = round(as.numeric(q_drows["25%"]),rdigits), 
-      '30%' = round(as.numeric(q_drows["30%"]),rdigits),
-      '50%' = round(as.numeric(q_drows["50%"]),rdigits),
-      'Mean' = round(q_mean,mrdigits),
-      stringsAsFactors = FALSE
-    )
-    intake_summary_tbl <- rbind(intake_summary_tbl, newline)
+    intake_summary_tbl[i,'Min'] <- round(as.numeric(q_drows["0%"]),rdigits)
+    intake_summary_tbl[i,"fivep"] <- round(as.numeric(q_drows["5%"]),rdigits)
+    intake_summary_tbl[i,"tenp"] <- round(as.numeric(q_drows["10%"]),rdigits)
+    intake_summary_tbl[i,"twofivep"] <- round(as.numeric(q_drows["25%"]),rdigits)
+    intake_summary_tbl[i,"thirtyp"] <- round(as.numeric(q_drows["30%"]),rdigits)
+    intake_summary_tbl[i,"fiftyp"] <- round(as.numeric(q_drows["50%"]),rdigits)
+    intake_summary_tbl[i,'Mean'] <- round(q_mean,mrdigits)
   }
+  #Rename entries in the tbale for display
   names(intake_summary_tbl) <- c('Month', 'Min', '5%', '10%', '25%', '30%', '50%', 'Mean')
   return(intake_summary_tbl)
 }
