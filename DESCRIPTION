@@ -28,4 +28,8 @@ Imports:
     DBI,
     R6,
     pool,
-    sqldf
+    terra,
+    nhdplusTools,
+    maptiles,
+    sqldf,
+    sf
