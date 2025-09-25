@@ -16,7 +16,6 @@ Imports:
     jsonlite,
     ggplot2,
     httr,
-    rapportools,
     graphics,
     flextable,
     bit64,

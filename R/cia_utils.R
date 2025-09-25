@@ -553,7 +553,7 @@ fn_ALL.upstream <- function(
 #' @param riv.seg string ID of segment to fine
 #' @param AllSegList AllSegList data frame of all segments
 #' @return string next upstream segment ID
-#' @import stringr rapportools
+#' @import stringr
 #' @export fn_downstream
 #fn_downstream() copy from cbp6_functions
 fn_downstream <- function(riv.seg, AllSegList) {
@@ -766,4 +766,39 @@ fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar'
     extreme_year = 0
   }
   return(c(metric_flows_Qout, extreme_year))
+}
+
+
+# is.empty 
+#'
+#' @name is.empty
+#' @title is.empty
+#' @description Checks common NULL, NA, length cases for empty values
+#' @details
+#' Imported from rapportools and should be used sparingly as explicit length,
+#' NA, and NULL checks are better for ensuring consistent data strucutre. From
+#' rapportools: "Rails-inspired helper that checks if vector values are "empty",
+#' i.e. if it's: NULL, zero-length, NA, NaN, FALSE, an empty string or 0. Note
+#' that unlike its native R is.<something> sibling functions, is.empty is
+#' vectorised (hence the "values")."
+#' @param x an object to check its emptiness. 
+#' @param ... additional arguments for sapply
+is.empty <- function (x, ...) 
+{
+  if (length(x) <= 1) {
+    if (is.null(x)) 
+      return(TRUE)
+    if (length(x) == 0) 
+      return(TRUE)
+    if (is.na(x) || is.nan(x)) 
+      return(TRUE)
+    if (is.character(x) && nchar(x) == 0) 
+      return(TRUE)
+    if (is.logical(x) && !isTRUE(x)) 
+      return(TRUE)
+    if (is.numeric(x) && x == 0) 
+      return(TRUE)
+    return(FALSE)
+  }
+  else sapply(x, is.empty, trim = trim, ...)
 }
