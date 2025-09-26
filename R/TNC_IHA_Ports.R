@@ -143,7 +143,6 @@ water.year <- function (x) {
 #'# hydrotools::group1(flows_zoo,"water",FUN = min)
 #'@importFrom zoo index coredata is.zoo
 #'@importFrom lubridate year month
-#'@importFrom rapportools median
 #'@export
 group1 <- function (
     #A zoo timeseries
