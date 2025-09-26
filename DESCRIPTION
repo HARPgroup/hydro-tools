@@ -31,4 +31,6 @@ Imports:
     nhdplusTools,
     maptiles,
     sqldf,
-    sf
+    sf,
+    lmomco,
+    e1071
