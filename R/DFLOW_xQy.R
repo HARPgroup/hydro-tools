@@ -508,14 +508,12 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
     list(
       #Critical low flows
       Flows = list(xQy = out_xQy$xQy, n1Q10 = out_1Q10$xQy, n7Q10 = out_7Q10$xQy,
-                   n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy,
-                   HM = HM),
+                   n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy, HM = HM),
       #Percentiles of critical low flows
       Pctg = list(xQy = out_xQy$pctg, n1Q10 = out_1Q10$pctg, n7Q10 = out_7Q10$pctg,
-                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg,
-                  HM = HM_pctg, SummerFlow = out_SummerFlow$AvgFlow_pctg),
+                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg, HM = HM_pctg),
       #Formatted and calculated gage data and timecheck
-      formatted_data = gageData,timecheck = timecheck, annualMinimums = annualMinimums,
+      formatted_data = gageData, timecheck = timecheck, annualMinimums = annualMinimums,
       #Dates when monthly lows occur
       nxQy_annDate = nxQy_annDate,
       n1Q10_annDate = n1Q10_annDate,
