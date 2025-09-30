@@ -105,6 +105,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.4 09/30/2025
+1. Removed rapportools dependence to ensure a clean environment for calling mean, median, max, min, etc. Updated all functions that relied on rapportools to no longer need the package and imported is.empty() from rapportools to hydrotools.
+2. Added VPDES xQy low flow functions to hydrotools to support Shydrology (Shiny dashboard for USGS and VA Hydro hydrology calculations).
+
 ### 1.0.3 09/22/2025
 1. Added an optional input to `RomDataSource$get_token()` to allow a user to use pool or dbi connections. This was added to aid in Shiny development while following DEQ R Team guidance.
 2. Added a simple GIS mapping function for us in VWP summaries, `simple_wshed_map()`. See example for details.
