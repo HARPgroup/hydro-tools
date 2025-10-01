@@ -343,7 +343,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
     loopData <- gageData[gageData$AY == i,]
     #If sufficient data exists this year, set any flows that extend to the next
     #year as NA
-    if((nrow(loopData) - (x - 2)) > 1){
+    if((nrow(loopData) - (x - 2)) > 1 && x != 1){
       loopData$rxAvg[(nrow(loopData) - (x - 2)):nrow(loopData)] <- NA
     }
     
@@ -499,9 +499,6 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   NZeros <- length(gageData_full$Flow[!is.na(gageData_full$Flow) & 
                                         gageData_full$Flow == 0 & (gageData_full$AY %in% AY_comp)])
   HM <- ((NDays - NZeros) / HM) * ((NDays - NZeros) / NDays)
-  HM_pctg <- length(gageData_full$Flow[gageData_full$Flow <= HM & 
-                                         gageData_full$AY %in% AY_comp]) / 
-    length(gageData_full$Flow[gageData_full$AY %in% AY_comp])
   
 
   return(
@@ -509,9 +506,6 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
       #Critical low flows
       Flows = list(xQy = out_xQy$xQy, n1Q10 = out_1Q10$xQy, n7Q10 = out_7Q10$xQy,
                    n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy, HM = HM),
-      #Percentiles of critical low flows
-      Pctg = list(xQy = out_xQy$pctg, n1Q10 = out_1Q10$pctg, n7Q10 = out_7Q10$pctg,
-                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg, HM = HM_pctg),
       #Formatted and calculated gage data and timecheck
       formatted_data = gageData, timecheck = timecheck, annualMinimums = annualMinimums,
       #Dates when monthly lows occur
@@ -530,3 +524,12 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   )
 }
 
+gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+low_flows <- xQy(gageDataIn = gageDat,
+                 flowColumn = "Flow", dateColumn = "Date",
+                 AYS = "07-13", AYE = "02-15",
+                 startYear = NULL, endYear = NULL,
+                 x = 1, y = 10,
+                 IncludeSummerFlow = F)
