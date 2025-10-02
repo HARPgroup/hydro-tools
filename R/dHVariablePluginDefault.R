@@ -106,6 +106,39 @@ dHVariablePluginDefault <- R6Class(
   )
 )
 
+#' Timeseries file OM object
+#' @title dHOMTimeseriesFile 
+#' @description Handler class for timeseries files in OM
+#' @details Has standard methods for managing data and meta data for timeseries
+#'   file class objects in OM, most often used in impoundment meteorology
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @export dHOMTimeseriesFile
+dHOMTimeseriesFile <- R6Class(
+  "dHOMTimeseriesFile",
+  inherit = dHVariablePluginDefault,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'Timeseries_File',
+    
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @return object instance
+    initialize = function(config = list()) {
+      #message("Created plugin")
+    },
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      export <- super$exportOpenMIBase(entity)
+      export$value <- entity$propcode
+      return(export)
+    }
+  )
+)
+
 
 #' Equation meta-model object
 #' @title dHOMEquation
@@ -678,7 +711,9 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMbroadCastObject$new(entity)
   } else if (plugin_name == "dHOMWaterSystemTieredFlowBy") {
     plugin = dHOMWaterSystemTieredFlowBy$new(entity)
-  } else {
+  } else if (plugin_name == "dHOMTimeseriesFile") {
+    plugin = dHOMTimeseriesFile$new(entity)
+  }else {
     plugin = dHVariablePluginDefault$new(entity)
   }
   return(plugin)
