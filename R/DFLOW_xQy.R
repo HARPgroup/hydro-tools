@@ -450,7 +450,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   
   #Do not keep NA minimum flows as these cannot be used in the analysis. Store
   #the now filtered vector of flows in their own numeric to pass to xQyComp
-  xQy_ann <- min_filter$xQy_ann[!is.na(min_filter$xQy_ann)]
+  xQy_ann <- min_filter$nxQy_ann[!is.na(min_filter$nxQy_ann)]
   n1Q10_ann <- min_filter$n1Q10_ann[!is.na(min_filter$n1Q10_ann)]
   n7Q10_ann <- min_filter$n7Q10_ann[!is.na(min_filter$n7Q10_ann)]
   n30Q10_ann <- min_filter$n30Q10_ann[!is.na(min_filter$n30Q10_ann)]
@@ -464,19 +464,6 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   out_7Q10 <- xQyComp(n7Q10_ann, 10)
   out_30Q10 <- xQyComp(n30Q10_ann, 10)
   out_30Q5 <- xQyComp(n30Q10_ann, 5)
-  
-  ## Flow Percentiles ####
-  #What daily percentile does the 7Q10 flow represent? For simplicity, this
-  #uses all data and is not concerned with complete analysis years. This is also
-  #easier in terms of communication with external groups just checking gages
-  #every day
-  flowCDF <- ecdf(gageData$Flow)
-  out_xQy$pctg <- flowCDF(out_xQy$xQy_out)
-  out_1Q10$pctg <- flowCDF(out_xQy$out_1Q10)
-  out_7Q10$pctg <- flowCDF(out_xQy$out_7Q10)
-  out_30Q10$pctg <- flowCDF(out_xQy$out_30Q10)
-  out_30Q5$pctg <- flowCDF(out_xQy$out_30Q5)
-  
   
   ## MDE Summer Flow ####
   #If user wants to include MDE Avg. Summer Flow:
@@ -500,12 +487,27 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
                                         gageData_full$Flow == 0 & (gageData_full$AY %in% AY_comp)])
   HM <- ((NDays - NZeros) / HM) * ((NDays - NZeros) / NDays)
   
+  ## Flow Percentiles ####
+  #What daily percentile does the 7Q10 flow represent? For simplicity, this
+  #uses all data and is not concerned with complete analysis years. This is also
+  #easier in terms of communication with external groups just checking gages
+  #every day
+  flowCDF <- ecdf(gageData$Flow)
+  out_xQy$pctg <- flowCDF(out_xQy$xQy)
+  out_1Q10$pctg <- flowCDF(out_1Q10$xQy)
+  out_7Q10$pctg <- flowCDF(out_7Q10$xQy)
+  out_30Q10$pctg <- flowCDF(out_30Q10$xQy)
+  out_30Q5$pctg <- flowCDF(out_30Q5$xQy)
+  HM_pctg <- flowCDF(HM)
 
   return(
     list(
       #Critical low flows
       Flows = list(xQy = out_xQy$xQy, n1Q10 = out_1Q10$xQy, n7Q10 = out_7Q10$xQy,
                    n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy, HM = HM),
+      #Percentiles of critical low flows
+      Percentile = list(xQy = out_xQy$pctg, n1Q10 = out_1Q10$pctg, n7Q10 = out_7Q10$pctg,
+                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg, HM = HM_pctg),
       #Formatted and calculated gage data and timecheck
       formatted_data = gageData, timecheck = timecheck, annualMinimums = annualMinimums,
       #Dates when monthly lows occur
@@ -524,12 +526,13 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   )
 }
 
-gageDat <- dataRetrieval::readNWISdv("01631000","00060")
-gageDat <- dataRetrieval::renameNWISColumns(gageDat)
-gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
-low_flows <- xQy(gageDataIn = gageDat,
-                 flowColumn = "Flow", dateColumn = "Date",
-                 AYS = "07-13", AYE = "02-15",
-                 startYear = NULL, endYear = NULL,
-                 x = 1, y = 10,
-                 IncludeSummerFlow = F)
+## Testing ####
+# gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+# gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+# gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+# low_flows <- xQy(gageDataIn = gageDat,
+#                  flowColumn = "Flow", dateColumn = "Date",
+#                  AYS = "07-13", AYE = "02-15",
+#                  startYear = NULL, endYear = NULL,
+#                  x = 8, y = 12,
+#                  IncludeSummerFlow = F)
