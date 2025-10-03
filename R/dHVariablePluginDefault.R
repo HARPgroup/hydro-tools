@@ -132,8 +132,12 @@ dHOMTimeseriesFile <- R6Class(
     #' @param entity the local object to work on 
     #' @return an updated config if necessary or FALSE if it fails
     exportOpenMIBase = function(entity) {
-      export <- super$exportOpenMIBase(entity)
-      export$value <- entity$propcode
+      export = list(
+        id = entity$pid,
+        name = entity$propname,
+        object_class = self$object_class, 
+        plugin = class(self)[1]
+      )
       return(export)
     }
   )
