@@ -144,8 +144,8 @@ xQyComp <- function(xQy_ann, y){
 #'   column specified by the user. From there, it divides the data into user
 #'   defined analysis seasons, using only complete seasons (adjusted for leap
 #'   years) in the analysis. It then used xQyComp() to calculte the probability
-#'   adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5, and
-#'   the harmonic mean.\cr
+#'   adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5,
+#'   90Q10, and the harmonic mean.\cr
 #'   Users may enter analysis years or seasons such that the low flows can be
 #'   computed across entire user defined years (like the climate or water year)
 #'   or across only certain months. The function is careful to use only
@@ -167,11 +167,11 @@ xQyComp <- function(xQy_ann, y){
 #' @param endYear Any calendar year after this year will not be included. User
 #'   can leave this as NULL (default) to include all data.
 #' @param x User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-#'   and 30Q5 are included in the results already. This input serves as the
-#'   averaging period.
+#'   90Q10, and 30Q5 are included in the results already. This input serves as
+#'   the averaging period.
 #' @param y User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-#'   and 30Q5 are included in the results already. This input serves as the
-#'   return period
+#'   90Q10, and 30Q5 are included in the results already. This input serves as
+#'   the return period
 #' @param IncludeSummerFlow Included to match inputs of VPDES function. MDE
 #'   Summer flows are particular VPDES low flows used in rare analyses. not
 #'   included in hydrotools.
@@ -337,6 +337,9 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   r30Avg <- caTools::runmean(gageData$Flow,30, alg = "exact", align = "left", endrule = "NA")
   gageData$r30Avg <- round(r30Avg,10)
   
+  r90Avg <- caTools::runmean(gageData$Flow,90, alg = "exact", align = "left", endrule = "NA")
+  gageData$r90Avg <- round(r90Avg,10)
+  
   #Need to ensure each year is independent, setting any rolling average that
   #passes into the next analysis year as NA
   for(i in unique(gageData$AY)){
@@ -354,6 +357,10 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
     if((nrow(loopData) - (30 - 2)) > 1){
       loopData$r30Avg[(nrow(loopData) - (30 - 2)):nrow(loopData)] <- NA
     }
+    
+    if((nrow(loopData) - (90 - 2)) > 1){
+      loopData$r90Avg[(nrow(loopData) - (90 - 2)):nrow(loopData)] <- NA
+    }
     gageData[gageData$AY == i,] <- loopData
   }
   
@@ -366,6 +373,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
         min(Flow) as n1Q10_ann,
         min(r7Avg) as n7Q10_ann,
         min(r30Avg) as n30Q10_ann,
+        min(r90Avg) as n90Q10_ann,
         SUM(CASE WHEN Flow IS NULL THEN 1 ELSE 0 END) AS null_count
         FROM gageData
         GROUP BY AY
@@ -376,12 +384,14 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   annualMinimums$n1Q10_ann[annualMinimums$null_count > 0] <- NA
   annualMinimums$n7Q10_ann[annualMinimums$null_count > 0] <- NA
   annualMinimums$n30Q10_ann[annualMinimums$null_count > 0] <- NA
+  annualMinimums$n90Q10_ann[annualMinimums$null_count > 0] <- NA
   
   #There must be enough data in the season to compute a minimum flow for the
   #custom each x-day flow
   annualMinimums$nxQy_ann[(annualMinimums$count - (x - 2)) <= 1] <- NA
   annualMinimums$n7Q10_ann[(annualMinimums$count - (7 - 2)) <= 1] <- NA
   annualMinimums$n30Q10_ann[(annualMinimums$count - (30 - 2)) <= 1] <- NA
+  annualMinimums$n90Q10_ann[(annualMinimums$count - (90 - 2)) <= 1] <- NA
   
   ## Find Min Dates ####
   #For each analysis year, find when the minimum x day flow occurred that year.
@@ -399,11 +409,15 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   n30Q10_annDate <- gageData$Date[
     gageData$r30Avg == annualMinimums$n30Q10_ann[match(gageData$AY,annualMinimums$AY)] &
       gageData$AY ==  annualMinimums$AY[match(gageData$AY,annualMinimums$AY)]]
+  n90Q10_annDate <- gageData$Date[
+    gageData$r90Avg == annualMinimums$n90Q10_ann[match(gageData$AY,annualMinimums$AY)] &
+      gageData$AY ==  annualMinimums$AY[match(gageData$AY,annualMinimums$AY)]]
   #Match will create NAs where there are NA flows, so we can remove these
   nxQy_annDate <- nxQy_annDate[!is.na(nxQy_annDate)]
   n1Q10_annDate <- n1Q10_annDate[!is.na(n1Q10_annDate)]
   n7Q10_annDate <- n7Q10_annDate[!is.na(n7Q10_annDate)]
   n30Q10_annDate <- n30Q10_annDate[!is.na(n30Q10_annDate)]
+  n90Q10_annDate <- n90Q10_annDate[!is.na(n90Q10_annDate)]
   #Create data frames that have the dates in which minimum flows occurred, the
   #analysis year, and the minimum flow that occurred
   nxQy_annDate <- data.frame(Date = nxQy_annDate,
@@ -418,6 +432,9 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   n30Q10_annDate <- data.frame(Date = n30Q10_annDate,
                                AY = gageData$AY[match(n30Q10_annDate,gageData$Date)],
                                minFlow = gageData$r30Avg[match(n30Q10_annDate,gageData$Date)])
+  n90Q10_annDate <- data.frame(Date = n90Q10_annDate,
+                               AY = gageData$AY[match(n90Q10_annDate,gageData$Date)],
+                               minFlow = gageData$r90Avg[match(n90Q10_annDate,gageData$Date)])
   
   
   ## Mode Min Flows ####
@@ -427,6 +444,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   n7Q10_ModeMin <- getmode(as.numeric(format(n7Q10_annDate$Date,"%m")))
   n30Q10_ModeMin<- getmode(as.numeric(format(n30Q10_annDate$Date,"%m")))
   n30Q5_ModeMin <- getmode(as.numeric(format(n30Q10_annDate$Date,"%m")))
+  n90Q10_ModeMin <- getmode(as.numeric(format(n90Q10_annDate$Date,"%m")))
   
   ##Clean Data for xQy ####
   #First, determine which analysis years are leap years and correct timecheck as
@@ -454,6 +472,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   n1Q10_ann <- min_filter$n1Q10_ann[!is.na(min_filter$n1Q10_ann)]
   n7Q10_ann <- min_filter$n7Q10_ann[!is.na(min_filter$n7Q10_ann)]
   n30Q10_ann <- min_filter$n30Q10_ann[!is.na(min_filter$n30Q10_ann)]
+  n90Q10_ann <- min_filter$n90Q10_ann[!is.na(min_filter$n90Q10_ann)]
   
   ## Compute Critical Low flows ####
   #Compute the low flows using the data from the loop. gageData is the filtered and
@@ -464,6 +483,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   out_7Q10 <- xQyComp(n7Q10_ann, 10)
   out_30Q10 <- xQyComp(n30Q10_ann, 10)
   out_30Q5 <- xQyComp(n30Q10_ann, 5)
+  out_90Q10 <- xQyComp(n90Q10_ann, 10)
   
   ## MDE Summer Flow ####
   #If user wants to include MDE Avg. Summer Flow:
@@ -498,16 +518,19 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   out_7Q10$pctg <- flowCDF(out_7Q10$xQy)
   out_30Q10$pctg <- flowCDF(out_30Q10$xQy)
   out_30Q5$pctg <- flowCDF(out_30Q5$xQy)
+  out_90Q10$pctg <- flowCDF(out_90Q10$xQy)
   HM_pctg <- flowCDF(HM)
 
   return(
     list(
       #Critical low flows
       Flows = list(xQy = out_xQy$xQy, n1Q10 = out_1Q10$xQy, n7Q10 = out_7Q10$xQy,
-                   n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy, HM = HM),
+                   n30Q10 = out_30Q10$xQy, n30Q5 = out_30Q5$xQy,
+                   n90Q10 = out_90Q10$xQy, HM = HM),
       #Percentiles of critical low flows
       Percentile = list(xQy = out_xQy$pctg, n1Q10 = out_1Q10$pctg, n7Q10 = out_7Q10$pctg,
-                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg, HM = HM_pctg),
+                  n30Q10 = out_30Q10$pctg, n30Q5 = out_30Q5$pctg,
+                  n90Q10 = out_90Q10$pctg, HM = HM_pctg),
       #Formatted and calculated gage data and timecheck
       formatted_data = gageData, timecheck = timecheck, annualMinimums = annualMinimums,
       #Dates when monthly lows occur
@@ -516,23 +539,25 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
       n7Q10_annDate = n7Q10_annDate,
       n30Q10_annDate = n30Q10_annDate,
       n30Q5_annDate = n30Q10_annDate,
+      n90Q10_annDate = n90Q10_annDate,
       #Monthly minimum flow modes
       nxQy_ModeMin = nxQy_ModeMin,
       n1Q10_ModeMin = n1Q10_ModeMin,
       n7Q10_ModeMin = n7Q10_ModeMin,
       n30Q10_ModeMin = n30Q10_ModeMin,
-      n30Q5_ModeMin = n30Q5_ModeMin
+      n30Q5_ModeMin = n30Q5_ModeMin,
+      n90Q10_ModeMin = n90Q10_ModeMin
     )
   )
 }
 
 ## Testing ####
-# gageDat <- dataRetrieval::readNWISdv("01631000","00060")
-# gageDat <- dataRetrieval::renameNWISColumns(gageDat)
-# gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
-# low_flows <- xQy(gageDataIn = gageDat,
-#                  flowColumn = "Flow", dateColumn = "Date",
-#                  AYS = "07-13", AYE = "02-15",
-#                  startYear = NULL, endYear = NULL,
-#                  x = 8, y = 12,
-#                  IncludeSummerFlow = F)
+gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+low_flows <- xQy(gageDataIn = gageDat,
+                 flowColumn = "Flow", dateColumn = "Date",
+                 AYS = "03-01", AYE = "07-31",
+                 startYear = NULL, endYear = NULL,
+                 x = 8, y = 12,
+                 IncludeSummerFlow = F)

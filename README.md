@@ -105,6 +105,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.5 10/06/2025
+1. Added 90Q10 to the default output of the `xQy()` function and did some minor debugging on function to ensure proper outputs of percentiles.
+2. Added a new plug-in for timeseries file objects to allow for their import from/to OM.
+
 ### 1.0.4 09/30/2025
 1. Removed rapportools dependence to ensure a clean environment for calling mean, median, max, min, etc. Updated all functions that relied on rapportools to no longer need the package and imported is.empty() from rapportools to hydrotools.
 2. Added VPDES xQy low flow functions to hydrotools to support Shydrology (Shiny dashboard for USGS and VA Hydro hydrology calculations).

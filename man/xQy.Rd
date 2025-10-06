@@ -39,12 +39,12 @@ User can leave this as NULL (default) to include all data.}
 can leave this as NULL (default) to include all data.}
 
 \item{x}{User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-and 30Q5 are included in the results already. This input serves as the
-averaging period.}
+90Q10, and 30Q5 are included in the results already. This input serves as
+the averaging period.}
 
 \item{y}{User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-and 30Q5 are included in the results already. This input serves as the
-return period}
+90Q10, and 30Q5 are included in the results already. This input serves as
+the return period}
 
 \item{IncludeSummerFlow}{Included to match inputs of VPDES function. MDE
 Summer flows are particular VPDES low flows used in rare analyses. not
@@ -71,8 +71,8 @@ This function calculates xQy style low flows from USGS or other flow
   column specified by the user. From there, it divides the data into user
   defined analysis seasons, using only complete seasons (adjusted for leap
   years) in the analysis. It then used xQyComp() to calculte the probability
-  adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5, and
-  the harmonic mean.\cr
+  adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5,
+  90Q10, and the harmonic mean.\cr
   Users may enter analysis years or seasons such that the low flows can be
   computed across entire user defined years (like the climate or water year)
   or across only certain months. The function is careful to use only
