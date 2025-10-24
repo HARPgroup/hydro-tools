@@ -13,7 +13,8 @@ Handler class for timeseries files in OM
 Timeseries file OM object
 
 Has standard methods for managing data and meta data for timeseries
-  file class objects in OM, most often used in impoundment meteorology
+  file class objects in OM, most often used in impoundment or land segment
+  meteorology
 }
 \section{Super class}{
 \code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{dHOMTimeseriesFile}

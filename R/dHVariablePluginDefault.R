@@ -107,11 +107,12 @@ dHVariablePluginDefault <- R6Class(
 )
 
 #' Timeseries file OM object
-#' @title dHOMTimeseriesFile 
+#' @title dHOMTimeseriesFile
 #' @description Handler class for timeseries files in OM
 #' @details Has standard methods for managing data and meta data for timeseries
-#'   file class objects in OM, most often used in impoundment meteorology
-#' @importFrom R6 R6Class  
+#'   file class objects in OM, most often used in impoundment or land segment
+#'   meteorology
+#' @importFrom R6 R6Class
 #' @param entity list or object with entity info
 #' @return reference class of type openmi.om.base.
 #' @export dHOMTimeseriesFile
@@ -122,7 +123,7 @@ dHOMTimeseriesFile <- R6Class(
     #' @field name what is it called
     name = NA,
     #' @field object_class model object type
-    object_class = 'Timeseries_File',
+    object_class = 'timeSeriesFile',
     
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance

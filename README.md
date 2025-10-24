@@ -105,6 +105,9 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.6 10/06/2025
+1. Bug fix to variable plugin for timeseries file objects by setting the correct object class to send to OM.
+
 ### 1.0.5 10/06/2025
 1. Added 90Q10 to the default output of the `xQy()` function and did some minor debugging on function to ensure proper outputs of percentiles.
 2. Added a new plug-in for timeseries file objects to allow for their import from/to OM.
