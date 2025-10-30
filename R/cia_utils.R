@@ -802,3 +802,242 @@ is.empty <- function (x, ...)
   }
   else sapply(x, is.empty, trim = trim, ...)
 }
+
+
+
+
+#'@name simple_elfgen
+#'@title Simple Hydro Elfgen Wrapper
+#'@description A wrapper that makes it easier to access VA Hydro's imported EDAS
+#'  dataset and provides simple arguments to eflgen package.
+#'@details This function provides the necessary inputs to call the
+#'  elfgen::elfgen() function. Simply, this wrapper function uses easily
+#'  accessible input to find the necessary NHD Plus watersheds and fish taxa
+#'  data to create the \code{watershed.df} input in elfgen() and returns its
+#'  output. The function will use the largest NHDPlus feature of the input code
+#'  that is contained within the user input hydro feature based on the provided
+#'  hydroid
+#'@param ds A datasource provided by the user, usally the RomDataSource instance
+#'  create in DEQ config.R files, querying drupal.dh03
+#'@param hydroid The hydroid of a feature of interest. This is used to find
+#'  intersecting NHD Plus catchments and to ultimately identify the NHD feature
+#'  of interest based on the huc_level input
+#'@param huc_level Which NHD waterhsed level should be used to generate the
+#'  \code{elfgen()} relationships? Defaults to "huc8", representing HUC8
+#'@param dataset Should \code{elfgen()} use USGS Icthys data or DEQ EDAS data
+#'  (via Hydro, which may be outdated but is state-specific data). Options are
+#'  "IchthyMaps" for USGS or "VAHydro-EDAS" for DEQ data
+#'@param ws_varkey Which NHDPlus flow for the \code{huc_level} should be used to
+#'  generate the \code{elfgen()} ecologic limit function? The options are mean
+#'  flow for any month but MUST be in the form "erom_q0001e_aug". Use
+#'  "erom_q0001e_mean" to use mean annual flow.
+#'@param quantile A specified value for the quantile of interest - 0.95 equals
+#'  the 95th percentile. This is used in the eflgen ecologic limit function
+#'  analysis
+#'@param breakpt A breakpoint - either user-supplied fixed value or may be
+#'  derived using elfgen breakpoint functions \code{bkpt_pwit()} or
+#'  \code{bkpt_ymax()} by inputting the character value "ymax" or "pwit"
+#'  respectively. If using "pwit", it is recommended the user provide a
+#'  \code{blo} and \code{bhi} value as documented in the elfgen pacakge.
+#'  \code{blo} will default to 0 and \code{bhi} to the \code{yaxis_thresh} value
+#'  input, which itself defaults to the maximum number of taxa
+#'@param yaxis_thresh The maximum value to be used in the plot. If this value is
+#'  left NULL by user, it will be set as the maximum value of the dataset. If
+#'  using "pwit" as the breakpt, this will also serve as the \code{bhi} value if
+#'  not otherwise specified by user.
+#'@param blo When using the "pwit" breakpt analysis, this is the "bound low"
+#'  value, or the lower bound of the piecewise range and defaults to 0. See
+#'  \code{elfgen::bkpt_pwit()} for additional details.
+#'@param bhi When using the "pwit" breakpt analysis, this is the "bound high"
+#'  value, or the upper bound of the piecewise range and defaults to
+#'  \code{yaxis_thresh}. See \code{elfgen::bkpt_pwit()} for additional details.
+#'@return Object containing plot image and dataframe of ELF statistics. See
+#'  \code{elfgen::elfgen()} for more details
+#'@example 
+#'#simple_elfgen(
+#'#ds = ds, hydroid = 68069,
+#'#huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
+#'#quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL,
+#'#blo = 0, bhi = yaxis_thresh)
+#'@export
+simple_elfgen <- function(
+    ds, hydroid, 
+    huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
+    quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL,
+    blo = 0, bhi = yaxis_thresh){
+  
+  #Find the riversegment feature based on user input hydroid
+  riverseg_feature <- RomFeature$new(ds, list(hydroid=as.integer(hydroid)), TRUE)
+  #Find the NHDPlus watersheds contained within this watershed featuer
+  contained_df <- riverseg_feature$find_spatial_relations(
+    target_entity = 'dh_feature', 
+    inputs = list(
+      bundle = 'watershed',
+      ftype = 'nhdplus'
+    ),
+    operator = 'st_contains',
+    return_geoms = FALSE,
+    query_remote = TRUE
+  )
+  #Use nhdplusTools to get relevant data regarding these NHDPlus segments
+  #contained in the user input river segment
+  nhdplus_df <- as.data.frame(get_nhdplus(comid= contained_df$hydrocode))
+  message(paste("length(nhdplus_df): ", length(nhdplus_df[,1])))
+  nhd_map <- list(
+    'erom_q0001e_jan' = 'qa_01',
+    'erom_q0001e_feb' = 'qa_02',
+    'erom_q0001e_mar' = 'qa_03',
+    'erom_q0001e_apr' = 'qa_04',
+    'erom_q0001e_may' = 'qa_05',
+    'erom_q0001e_june' = 'qa_06',
+    'erom_q0001e_july' = 'qa_07',
+    'erom_q0001e_aug' = 'qa_08',
+    'erom_q0001e_sept' = 'qa_09',
+    'erom_q0001e_oct' = 'qa_10',
+    'erom_q0001e_nov' = 'qa_11',
+    'erom_q0001e_dec' = 'qa_12',
+    'erom_q0001e_mean' = 'qa_ma'
+  )
+  #Get the flow of interest along with the comid, name, code, and total drainage
+  #area
+  nhd_col = as.character(nhd_map[ws_varkey])
+  nhdplus_df <- nhdplus_df[,c("comid", "gnis_name", "reachcode", "totdasqkm", nhd_col)]
+  
+  #MORE EFFICIENT SQL
+  # outlet_nhdplus_segment <- outlet_nhdplus_segment[which.max(outlet_nhdplus_segment$totdasqkm),][1] 
+  outlet_nhdplus_segment <- sqldf("select * from nhdplus_df ORDER BY totdasqkm DESC LIMIT 1")
+  #Pulls mean annual outlet flow
+  outlet_flow <- outlet_nhdplus_segment[,nhd_col] #outlet flow as erom_q0001e_mean of nhdplus segment
+  nhd_code <- substr(outlet_nhdplus_segment$reachcode, 1, as.integer(str_remove(huc_level, "huc")))
+  code_out <- outlet_nhdplus_segment$comid
+  rseg.name <- outlet_nhdplus_segment$gnis_name
+  
+  #HUC Section---------------------------------------------------------------------------
+  watershed.code <- as.character(nhd_code)
+  watershed.bundle <- 'watershed'
+  watershed.ftype <- paste("nhd_", huc_level, sep = "") #watershed.ftpe[i] when creating function
+  watershed_feature = RomFeature$new(ds, list(ftype=watershed.ftype, hydrocode=watershed.code), TRUE)
+  
+  #Based on user input, use either Icthy data from USGS or DEQ monitoring data
+  if (dataset == 'IchthyMaps'){
+    #if loop below works only for huc:6,8,10 due to naming convention in containing_watershed
+    if(huc_level == 'huc8'){
+      watershed.code <- stringr::str_sub(watershed.code, -8,-1)
+    }
+    watershed.df <- elfgen::elfdata(watershed.code)
+  }else{
+    # elfdata_vahydro() function for retrieving data from VAHydro
+    sql <- "
+  select event.tid,to_timestamp(event.tstime), pv.varkey,
+  biodat.propcode, biodat.propvalue as y_metric, dap.propvalue as x_metric,
+    CASE 
+      WHEN ws.ftype = 'nhd_huc8' THEN REPLACE(ws.hydrocode,'nhd_huc8_','') 
+      WHEN ws.ftype = 'nhd_huc12' THEN REPLACE(ws.hydrocode,'huc12_', '') 
+      WHEN ws.ftype = 'vahydro' THEN REPLACE(ws.hydrocode,'vahydrosw_wshed_','') 
+      ELSE ws.hydrocode
+    END as hydrocode,
+    st.hydroid as station_hydroid
+  from dh_feature_fielded as cov
+  left outer join dh_feature_fielded as ws
+  on (
+    st_contains(cov.dh_geofield_geom, ws.dh_geofield_geom)
+  )
+  left outer join dh_feature_fielded as st
+  on (
+    st_contains(ws.dh_geofield_geom, st.dh_geofield_geom)
+  )
+  left outer join dh_variabledefinition as tsv 
+  on (tsv.varkey = 'aqbio_sample_event')
+  left outer join dh_timeseries as event
+  on (
+    event.varid = tsv.hydroid
+    and event.featureid = st.hydroid
+  ) 
+  left outer join dh_properties as biodat
+  on (
+    biodat.featureid = event.tid
+    and biodat.entity_type = 'dh_timeseries'
+  ) 
+  left outer join dh_variabledefinition as pv 
+  on (
+    pv.varkey = '[bio_varkey]'
+    and pv.hydroid = biodat.varid
+  )
+  left outer join dh_variabledefinition as dav 
+  on (
+    dav.varkey = '[ws_varkey]'
+  )
+  left outer join dh_properties as dap 
+  on (
+    dap.featureid = ws.hydroid
+    and dap.entity_type = 'dh_feature'
+    and dav.hydroid = dap.varid
+  )
+  left outer join dh_variabledefinition as srv 
+  on (
+    srv.varkey = 'sampres'
+  )
+  left outer join dh_properties as sr 
+  on (
+    sr.featureid = event.tid
+    and sr.entity_type = 'dh_timeseries'
+    and srv.hydroid = sr.varid
+  )
+  where pv.hydroid is not null
+  and sr.propcode = '[sampres]'
+  and cov.hydroid = [covid] 
+  and ws.ftype = '[ws_ftype]'
+  and ws.bundle='watershed';
+" 
+    config <- list(
+      covid = watershed_feature$hydroid,
+      ws_ftype = 'nhdplus',
+      ws_varkey = ws_varkey,
+      bio_varkey = 'aqbio_nt_total',
+      sampres = 'species'
+    )
+    sql <- str_replace_all(sql, '\\[covid\\]', as.character(config$covid))
+    sql <- str_replace_all(sql, '\\[ws_ftype\\]', as.character(config$ws_ftype))
+    sql <- str_replace_all(sql, '\\[ws_varkey\\]', as.character(config$ws_varkey))
+    sql <- str_replace_all(sql, '\\[bio_varkey\\]', as.character(config$bio_varkey))
+    sql <- str_replace_all(sql, '\\[sampres\\]', as.character(config$sampres))
+    message(paste("querying for samples contained by", watershed_feature$ftype, watershed_feature$hydrocode))
+    watershed.df <- sqldf::sqldf(sql, conn=ds$connection)
+    watershed.df <- watershed.df[,c('x_metric', 'y_metric', 'hydrocode')]
+  }
+  #If the user has not provided the maximum y-axis value for plotting, assume
+  #the full range is applicable
+  if(is.null(yaxis_thresh)){
+    yaxis_thresh <- max(watershed.df$y_metric)
+  }
+  
+  if(!is.numeric(breakpt) && breakpt == 'ymax'){
+    #If the user chooses to set the break point using the ymax value, call
+    #elfgen to find that breakpoint
+    breakpt <- elfgen::bkpt_ymax(watershed.df)
+  }else if(!is.numeric(breakpt) && breakpt == 'pwit'){
+    #If user wants to use the piecewise function but has failed to provide the
+    #low and hi thresholds, specify these as the full data range
+    if(is.null(bhi)){
+      bhi <- yaxis_thresh
+    }
+    if(is.null(blo)){
+      blo <- 0
+    }
+    breakpt <- elfgen::bkpt_pwit(watershed.df, quantile, )
+  }
+  
+  
+  #Call elfgen, providing the ichtys or queried EDAS data and the user supplied
+  #breakpoint/maximum value
+  elf <- elfgen::elfgen(
+    "watershed.df" = watershed.df,
+    "quantile" = quantile,
+    "breakpt" = breakpt,
+    "yaxis_thresh" = yaxis_thresh,
+    "xlabel" = "Mean Annual Flow (ft3/s)",
+    "ylabel" = "Fish Species Richness"
+  )
+  
+  return(elf)
+}
