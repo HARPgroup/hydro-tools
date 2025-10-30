@@ -6,8 +6,11 @@ The R developers at DEQ's Office of Water Supply Planning and Analysis have deve
 
 ## Installation
 
-### DEQ Users (coming soon!)
-This package will soon be available for internal distribution on the DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). A config file may be provided by the package managers for database integration.
+### DEQ Users
+This package is available for internal distribution on the TEST (UAT) DEQ Posit Package manager. Additional information on this may be found in the [DEQ Methods Encyclopedia](https://positconnect.deq.virginia.gov/DEQmethods/). Users will need to add the UAT package manager to their list of secondary repositories: https://positpackagemanager-uat.deq.virginia.gov/DEQmethods/latest. A config file may be provided by the package managers for database integration.  
+```
+install.packages("hydrotools")
+```
 
 ### All Other Users
 A config file may be provided by the package managers for database integration.
@@ -102,6 +105,11 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.1 09/05/2025
+1. Removed the need for host_site in the `fn_get_runfile` to ensure clarity with update deq1 apache settings.
+
+### 1.0.0 08/29/2025
+1. Updated *fn_get_runfile()* to no longer require an HTTP connection when determining the host site. Instead, it now determines the URL prefix based on the site passed in by the user.
 
 ### 0.0.0.1 Initial Release
 

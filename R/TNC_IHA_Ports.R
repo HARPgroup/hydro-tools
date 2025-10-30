@@ -132,6 +132,15 @@ water.year <- function (x) {
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@references
 #'\url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
+#' @examples 
+#'# #Get data for NF Shenandoah Mount Jackson
+#'# flows <- dataRetrieval::readNWISdv("01633000",parameterCd = "00060")
+#'# flows <- dataRetrieval::renameNWISColumns(flows)
+#'# #Convert flows to zoo
+#'# flows_zoo <- zoo::as.zoo(x = flows$Flow)
+#'# zoo::index(flows_zoo) <- flows$Date
+#'# #Use group 1 to get the minimum monthly flows:
+#'# hydrotools::group1(flows_zoo,"water",FUN = min)
 #'@importFrom zoo index coredata is.zoo
 #'@importFrom lubridate year month
 #'@importFrom rapportools median
@@ -193,6 +202,15 @@ group1 <- function (
 #'@return a data frame with the group 2 statistics for each year
 #'@author jason.e.law@@gmail.com (imported to Hydrotools by Connor Brogan,connor.brogan@@deq.virginia.gov)
 #'@references \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}
+#'@examples 
+#'# #Get data for NF Shenandoah Mount Jackson
+#'# flows <- dataRetrieval::readNWISdv("01633000",parameterCd = "00060")
+#'# flows <- dataRetrieval::renameNWISColumns(flows)
+#'# #Convert flows to zoo
+#'# flows_zoo <- zoo::as.zoo(x = flows$Flow)
+#'# zoo::index(flows_zoo) <- flows$Date
+#'# #Use group 2 to get critical period flows and stats:
+#'# hydrotools::group2(flows_zoo,"water",mimic.tnc = TRUE)
 #'@importFrom plyr ddply '.'
 #'@importFrom zoo coredata index
 #'@importFrom lubridate year
