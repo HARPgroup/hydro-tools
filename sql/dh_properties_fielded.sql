@@ -20,7 +20,8 @@ create or replace view dh_properties_fielded as (
       WHEN c.field_dh_matrix_value IS NOT NULL THEN (php_unserialize_to_json(c.field_dh_matrix_value ) -> 'tabledata')::text
       WHEN d.field_projection_table_value IS NOT NULL THEN (php_unserialize_to_json(d.field_projection_table_value ) -> 'tabledata')::text
       ELSE NULL
-    END as data_matrix_tabledata
+    END as data_matrix_tabledata,
+    v.varkey
   from dh_properties as a
   left outer join field_data_proptext as b
   on (
@@ -36,5 +37,9 @@ create or replace view dh_properties_fielded as (
   on (
     d.entity_id = a.pid
     and d.entity_type = 'dh_properties'
+  )
+  left outer join dh_variabledefinition as v
+  on (
+    v.hydroid = a.varid
   )
 );

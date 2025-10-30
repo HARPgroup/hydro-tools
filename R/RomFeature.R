@@ -178,10 +178,15 @@ RomFeature <- R6Class(
       base_geomcol = 'dh_geofield_geom'
       if (operator == 'overlaps') {
         spatial_join = paste0(' (base.', base_geomcol, ' && target.', target_geomcol,') ')
+      } else if ( operator == 'st_overlaps' ) {
+        # same as overlaps
+        spatial_join = paste0(' (base.', base_geomcol, ' && target.', target_geomcol,') ')
       } else if ( operator == 'st_contains' ) {
         spatial_join = paste0(' (st_contains(base.', base_geomcol, ', target.', target_geomcol,')) ')
       } else if ( operator == 'st_within' ) {
         spatial_join = paste0(' (st_within(base.', target_geomcol, ', target.', base_geomcol,')) ')
+      } else if ( operator == 'st_contains_centroid' ) {
+        spatial_join = paste0(' (st_contains(base.', target_geomcol, ', st_centroid(target.', base_geomcol,'))) ')
       }
       # include this in inputs for odbc routines
       input_where = paste0(
