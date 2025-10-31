@@ -819,11 +819,10 @@ is.empty <- function (x, ...)
 #'  hydroid
 #'@param ds A datasource provided by the user, usally the RomDataSource instance
 #'  create in DEQ config.R files, querying drupal.dh03
-#'@param hydroid The hydroid of a feature of interest. This is used to find
-#'  intersecting NHD Plus catchments and to ultimately identify the NHD feature
-#'  of interest based on the huc_level input
-#'@param huc_level Which NHD waterhsed level should be used to generate the
-#'  \code{elfgen()} relationships? Defaults to "huc8", representing HUC8
+#'@param nhd_code The code of the NHDPlus HUC of interest, which may be derived
+#'  from a VA Hydro feature using \code{hydrotools::simple_nhdPlusFlows()}
+#'@param huc_level Which NHD waterhsed level is represented by nhd_code? "huc8"
+#'  is the default
 #'@param dataset Should \code{elfgen()} use USGS Icthys data or DEQ EDAS data
 #'  (via Hydro, which may be outdated but is state-specific data). Options are
 #'  "IchthyMaps" for USGS or "VAHydro-EDAS" for DEQ data
@@ -853,70 +852,20 @@ is.empty <- function (x, ...)
 #'  \code{yaxis_thresh}. See \code{elfgen::bkpt_pwit()} for additional details.
 #'@return Object containing plot image and dataframe of ELF statistics. See
 #'  \code{elfgen::elfgen()} for more details
-#'@example 
-#'#simple_elfgen(
-#'#ds = ds, hydroid = 68069,
-#'#huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
-#'#quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL,
-#'#blo = 0, bhi = yaxis_thresh)
+#'@examples \dontrun{simple_elfgen( ds = ds, hydroid = 68069, huc_level = "huc8",
+#'  dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug', quantile = 0.8,
+#'  breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
 #'@export
 simple_elfgen <- function(
-    ds, hydroid, 
-    huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
+    ds, nhd_code, huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
     quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL,
     blo = 0, bhi = yaxis_thresh){
-  
-  #Find the riversegment feature based on user input hydroid
-  riverseg_feature <- RomFeature$new(ds, list(hydroid=as.integer(hydroid)), TRUE)
-  #Find the NHDPlus watersheds contained within this watershed featuer
-  contained_df <- riverseg_feature$find_spatial_relations(
-    target_entity = 'dh_feature', 
-    inputs = list(
-      bundle = 'watershed',
-      ftype = 'nhdplus'
-    ),
-    operator = 'st_contains',
-    return_geoms = FALSE,
-    query_remote = TRUE
-  )
-  #Use nhdplusTools to get relevant data regarding these NHDPlus segments
-  #contained in the user input river segment
-  nhdplus_df <- as.data.frame(get_nhdplus(comid= contained_df$hydrocode))
-  message(paste("length(nhdplus_df): ", length(nhdplus_df[,1])))
-  nhd_map <- list(
-    'erom_q0001e_jan' = 'qa_01',
-    'erom_q0001e_feb' = 'qa_02',
-    'erom_q0001e_mar' = 'qa_03',
-    'erom_q0001e_apr' = 'qa_04',
-    'erom_q0001e_may' = 'qa_05',
-    'erom_q0001e_june' = 'qa_06',
-    'erom_q0001e_july' = 'qa_07',
-    'erom_q0001e_aug' = 'qa_08',
-    'erom_q0001e_sept' = 'qa_09',
-    'erom_q0001e_oct' = 'qa_10',
-    'erom_q0001e_nov' = 'qa_11',
-    'erom_q0001e_dec' = 'qa_12',
-    'erom_q0001e_mean' = 'qa_ma'
-  )
-  #Get the flow of interest along with the comid, name, code, and total drainage
-  #area
-  nhd_col = as.character(nhd_map[ws_varkey])
-  nhdplus_df <- nhdplus_df[,c("comid", "gnis_name", "reachcode", "totdasqkm", nhd_col)]
-  
-  #MORE EFFICIENT SQL
-  # outlet_nhdplus_segment <- outlet_nhdplus_segment[which.max(outlet_nhdplus_segment$totdasqkm),][1] 
-  outlet_nhdplus_segment <- sqldf("select * from nhdplus_df ORDER BY totdasqkm DESC LIMIT 1")
-  #Pulls mean annual outlet flow
-  outlet_flow <- outlet_nhdplus_segment[,nhd_col] #outlet flow as erom_q0001e_mean of nhdplus segment
-  nhd_code <- substr(outlet_nhdplus_segment$reachcode, 1, as.integer(str_remove(huc_level, "huc")))
-  code_out <- outlet_nhdplus_segment$comid
-  rseg.name <- outlet_nhdplus_segment$gnis_name
-  
-  #HUC Section---------------------------------------------------------------------------
+  #Find the NHD feature based on the HUC level and code
   watershed.code <- as.character(nhd_code)
   watershed.bundle <- 'watershed'
-  watershed.ftype <- paste("nhd_", huc_level, sep = "") #watershed.ftpe[i] when creating function
-  watershed_feature = RomFeature$new(ds, list(ftype=watershed.ftype, hydrocode=watershed.code), TRUE)
+  watershed.ftype <- paste("nhd_", huc_level, sep = "")
+  watershed_feature = RomFeature$new(ds, list(ftype = watershed.ftype,
+                                              hydrocode = watershed.code), TRUE)
   
   #Based on user input, use either Icthy data from USGS or DEQ monitoring data
   if (dataset == 'IchthyMaps'){
@@ -1040,4 +989,70 @@ simple_elfgen <- function(
   )
   
   return(elf)
+}
+
+#'@name simple_nhdPlusFlows
+#'@title Get NHDPlus HUC Monthly Flows
+#'@description A wrapper function that makes it easy to obtain HUC flows from a
+#'  hydro feature
+#'@details This function provides the necessary inputs to call nhdPlusTools
+#'  functions to extract the relevant HUC flows from an area of interest. The
+#'  function will use the largest NHDPlus feature of the input code that is
+#'  contained within the user input hydro feature based on the provided hydroid
+#'@param ds A datasource provided by the user, usally the RomDataSource instance
+#'  create in DEQ config.R files, querying drupal.dh03
+#'@param hydroid The hydroid of a feature of interest. This is used to find
+#'  intersecting NHD Plus catchments and to ultimately identify the NHD feature
+#'  of interest based on the huc_level input
+#'@param huc_level Which NHD waterhsed level should be used to generate the
+#'  \code{elfgen()} relationships? Defaults to "huc8", representing HUC8
+#'@return A list that contains the HUC code of interest and data on the nhdPlus
+#'  segment
+#'@examples \dontrun{simple_nhdPlusFlows(ds = ds, hydroid = 68069, huc_level = "huc8")}
+#'@export
+simple_nhdPlusFlows <- function(ds, hydroid, huc_level = "huc8"){
+  #Find the riversegment feature based on user input hydroid
+  riverseg_feature <- RomFeature$new(ds, list(hydroid=as.integer(hydroid)), TRUE)
+  #Find the NHDPlus watersheds contained within this watershed featuer
+  contained_df <- riverseg_feature$find_spatial_relations(
+    target_entity = 'dh_feature', 
+    inputs = list(
+      bundle = 'watershed',
+      ftype = 'nhdplus'
+    ),
+    operator = 'st_contains',
+    return_geoms = FALSE,
+    query_remote = TRUE
+  )
+  #Use nhdplusTools to get relevant data regarding these NHDPlus segments
+  #contained in the user input river segment
+  nhdplus_df <- as.data.frame(get_nhdplus(comid= contained_df$hydrocode))
+  message(paste("length(nhdplus_df): ", length(nhdplus_df[,1])))
+  nhd_map <- data.frame(
+    newName = c('erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
+      'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
+      'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
+      'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec', 
+      'erom_q0001e_mean', "comid", "gnis_name", "reachcode", "totdasqkm"),
+    nhdName = c('qa_01', 'qa_02', 'qa_03', 'qa_04', 'qa_05', 'qa_06',
+                'qa_07', 'qa_08', 'qa_09', 'qa_10', 'qa_11', 'qa_12',
+                'qa_ma', "comid", "gnis_name", "reachcode", "totdasqkm")
+  )
+  #Get the flow of interest along with the comid, name, code, and total drainage
+  #area
+  nhdplus_df <- nhdplus_df[,c("comid", "gnis_name", "reachcode", "totdasqkm",
+                              grep("qa_[0-9]{2}",names(nhdplus_df),value = TRUE))]
+  names(nhdplus_df) <- nhd_map$newName[match(names(nhdplus_df), nhd_map$nhdName)]
+  
+  #Find the outlet based on the maximum total drainage area
+  outlet_nhdplus_segment <- nhdplus_df[which.max(nhdplus_df$totdasqkm),][1,]
+  #Get the first X digits of the code based on the user input
+  nhd_code <- substr(outlet_nhdplus_segment$reachcode, 1, as.integer(stringr::str_remove(huc_level, "huc")))
+  
+  return(
+    list(
+      nhd_code = nhd_code,
+      nhdplus_segment = outlet_nhdplus_segment
+    )
+  )
 }

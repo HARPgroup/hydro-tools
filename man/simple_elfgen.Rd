@@ -6,7 +6,7 @@
 \usage{
 simple_elfgen(
   ds,
-  hydroid,
+  nhd_code,
   huc_level = "huc8",
   dataset = "VAHydro-EDAS",
   ws_varkey = "erom_q0001e_aug",
@@ -21,12 +21,11 @@ simple_elfgen(
 \item{ds}{A datasource provided by the user, usally the RomDataSource instance
 create in DEQ config.R files, querying drupal.dh03}
 
-\item{hydroid}{The hydroid of a feature of interest. This is used to find
-intersecting NHD Plus catchments and to ultimately identify the NHD feature
-of interest based on the huc_level input}
+\item{nhd_code}{The code of the NHDPlus HUC of interest, which may be derived
+from a VA Hydro feature using \code{hydrotools::simple_nhdPlusFlows()}}
 
-\item{huc_level}{Which NHD waterhsed level should be used to generate the
-\code{elfgen()} relationships? Defaults to "huc8", representing HUC8}
+\item{huc_level}{Which NHD waterhsed level is represented by nhd_code? "huc8"
+is the default}
 
 \item{dataset}{Should \code{elfgen()} use USGS Icthys data or DEQ EDAS data
 (via Hydro, which may be outdated but is state-specific data). Options are
@@ -78,4 +77,9 @@ This function provides the necessary inputs to call the
  output. The function will use the largest NHDPlus feature of the input code
  that is contained within the user input hydro feature based on the provided
  hydroid
+}
+\examples{
+\dontrun{simple_elfgen( ds = ds, hydroid = 68069, huc_level = "huc8",
+ dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug', quantile = 0.8,
+ breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
 }

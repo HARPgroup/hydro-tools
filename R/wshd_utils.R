@@ -14,8 +14,7 @@
 #'@param da Numeric. The drainage area of your channel.
 #'@return A list with the bank full stage (h), bank full width (bf), base width
 #'  (b), side slope (z), and mannings roughness (n)
-#'@example 
-#'#usgs_bankfull_properties(prov = 1,da = 10)
+#'@examples usgs_bankfull_properties(prov = 1,da = 10)
 #'@export
 usgs_bankfull_properties <- function(prov, da) {
   #Provincial Channel Geometry

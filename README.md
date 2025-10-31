@@ -105,6 +105,9 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.7 10/31/2025
+1. Added wrapper functions for elfgen package. `simple_nhdPlusFlows()` finds the NHDPlus segment (and flows) contained in a VA Hydro feature. The output code can be given to `simple_elfgen()` to allow for easy generation of ecologic limit functions from imported EDAS data
+
 ### 1.0.6 10/06/2025
 1. Bug fix to variable plugin for timeseries file objects by setting the correct object class to send to OM.
 
