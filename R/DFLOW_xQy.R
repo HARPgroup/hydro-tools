@@ -204,10 +204,11 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
                 IncludeSummerFlow = FALSE){
   #Create a simplified copy of the dataset to manipulate
   gageData <- gageDataIn[,c(dateColumn,flowColumn)]
+  names(gageData) <- c("Date", "Flow")
   #Treat negative flows as missing flows, per SW toolbox
   gageData$Flow[gageData$Flow < 0] <- NA
   #Ensure date column exists
-  gageData$Date <- as.Date(gageData[,dateColumn])
+  gageData$Date <- as.Date(gageData$Date)
   
   ## Analysis Year ####
   #Initialize Analysis year by making it the calendar year

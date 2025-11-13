@@ -105,6 +105,9 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.7 11/13/2025
+1. Fixed a variable name error in the `xQy()` function that was preventing the code from being able to handle non-standard flow data frames
+
 ### 1.0.6 10/06/2025
 1. Bug fix to variable plugin for timeseries file objects by setting the correct object class to send to OM.
 
