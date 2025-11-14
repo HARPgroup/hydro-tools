@@ -198,10 +198,20 @@ xQyComp <- function(xQy_ann, y){
 #' #   IncludeSummerFlow = F)
 #' #low_flows$Flows
 xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
-                AYS = "10-01", AYE = "09-30",
+                AYS = "04-01", AYE = "03-31",
                 startYear = NULL, endYear = NULL,
                 x = 7, y = 10,
                 IncludeSummerFlow = FALSE){
+  #Is user has passed in a zoo time series, convert to data frame and ensure a
+  #flow and date column exist. This was added for backwards compatibility with
+  #existing OM summary workflows
+  if(zoo::is.zoo(gageDataIn)){
+    gageData <- as.data.frame(gageDataIn)
+    names(gageData) <- flowColumn
+    gageData$Date <- as.Date(zoo::index(gageDataIn))
+  }
+  
+  
   #Create a simplified copy of the dataset to manipulate
   gageData <- gageDataIn[,c(dateColumn,flowColumn)]
   names(gageData) <- c("Date", "Flow")
