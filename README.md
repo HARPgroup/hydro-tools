@@ -1,5 +1,9 @@
 # hydrotools
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 ## Description
 
 The R developers at DEQ's Office of Water Supply Planning and Analysis have developed an R package called `hydrotools` to support data base connections to OWSPA data sources and ensure consistent handling of common data base requests. The `rom` objects offered in hydrotools serve as a quasi-REST service for the VA Hydro databases, offering DEQ staff convenient means of getting properties and features or posting such entities. Installation instructions are offered below. Development issues, pull requests, and more are tracked on the hydrotools [GitHub repository](https://github.com/HARPgroup/hydro-tools) or on the internal [GitLab](https://gitlab.deq.virginia.gov/) server. 
