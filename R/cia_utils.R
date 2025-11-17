@@ -600,7 +600,7 @@ fn_downstream <- function(riv.seg, AllSegList) {
     Upstream <- which(as.character(ModelSegments$Downstream)==as.character(ModelSegments$RiverSeg[k]))
     NumUp <- ModelSegments$RiverSeg[Upstream]
     ModelSegments[k,6]<- paste(NumUp, collapse = '+')
-    if (hydrotools::is.empty(ModelSegments[k,6])==TRUE){
+    if (hydrotools:::is.empty(ModelSegments[k,6])==TRUE){
       ModelSegments[k,6]<- 'NA'
     } 
     k<-k+1
