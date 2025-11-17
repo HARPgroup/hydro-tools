@@ -553,6 +553,8 @@ dHOMwaterSupplyModelNode <- R6Class(
       
       return(export)
     },
+    #' @param entity The object to find impoundmnet on
+    #' @return FALSE, not yet implemented
     get_impoundment = function(entity) {
       message("Warning: get_impoundment() not yet implemented.")
       # check for full model impoundment, sub-comp impoundment, or link to feature model
@@ -588,11 +590,17 @@ dHOMWaterSystemTieredFlowBy <- R6Class(
       
       return(export)
     },
+    #'@param l The list to convert to matrix
+    #'@return A matrix of values from the list, with one value per row
     list2matrix = function(l) {
       matrix_vals = data.frame(matrix(unlist(l), nrow = length(l), byrow = TRUE)) |>
         setNames(names(l[[1]]))
       return(matrix_vals)
     },
+    #'@param entity The object to store the translated JSON on via set_matrix()
+    #'@param om_json The JSON to translate to a matrix and set on entity
+    #'@return The entity, but the method is primarily designed to set useful
+    #'  values on entity not return anything useful
     translateOMtoDH = function(entity, om_json) {
       matrix_vals = self$list2matrix(om_json$processors$flowby$rule_matrix$matrix_rowcol)
       entity$set_matrix(matrix_vals)

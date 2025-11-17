@@ -19,7 +19,6 @@ Imports:
     graphics,
     flextable,
     bit64,
-    PearsonDS,
     caTools,
     lubridate,
     plyr,
@@ -34,3 +33,5 @@ Imports:
     sf,
     lmomco,
     e1071
+Suggests: 
+    dataRetrieval

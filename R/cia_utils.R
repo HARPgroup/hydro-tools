@@ -10,7 +10,8 @@
 #' @export om_find_dh_elid
 om_find_dh_elid <- function(elid, ds) {
   
-  model_search_elid <- fn$sqldf(
+  model_search_elid <- sqldf(
+    paste0(
     "select a.name, a.hydrocode, 
    CASE 
      WHEN a.hydroid IS NULL THEN 'model' 
@@ -36,8 +37,7 @@ om_find_dh_elid <- function(elid, ds) {
      and b.entity_type = 'dh_properties'
    )
    where e.propname = 'om_element_connection'
-   and e.propvalue = $elid
-  ",
+   and e.propvalue = ",elid),
     connection = ds$connection
   )
   if (nrow(model_search_elid) == 0) {
@@ -400,7 +400,7 @@ fn_ALL.upstream <- function(
     getAllSegmentsOnly = TRUE
 ){
   #AllSegList should be a data frame and must contain a river segment column:
-  if(class(AllSegList) != "data.frame" || 
+  if(!inherits(AllSegList, "data.frame") || 
      length(AllSegList$riverseg) == 0){
     stop("The input DATA.FRAME for AllSegList must contain a column
     with the name of \"riverseg\". This column MUST contain all river segments
@@ -431,7 +431,7 @@ fn_ALL.upstream <- function(
   #fn_upstream()
   if(!is.null(riv.seg) &&
      length(riv.seg) > 0 && 
-     class(riv.seg) == 'character'
+     inherits(riv.seg, 'character')
   ){
     #Get only river segments specified by user
     segDataFrame <- segDataFrame[segDataFrame$riverseg %in% riv.seg,]
@@ -609,7 +609,7 @@ fn_downstream <- function(riv.seg, AllSegList) {
   SegDownstream <- ModelSegments$Downstream[SegDownstream]
   SegDownstream <- strsplit(as.character(SegDownstream), "\\+")
   SegDownstream <- try(SegDownstream[[1]], silent = TRUE)
-  if (class(SegDownstream)=='try-error') {
+  if (inherits(SegDownstream, 'try-error')) {
     SegDownstream <- NA
   }
   return(SegDownstream)
@@ -679,38 +679,44 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
 
 
 # fn_iha_7q10 
-#'
 #' @name fn_iha_7q10
 #' @title fn_iha_7q10
-#' @description provide the 7q10 from a given flow timeseries
-#' @param zoots a timeseries flormatted in zoo (required by IHA)
-#' @return singel numeric value for 7q10
-#' @import PearsonDS
+#' @description Calculate the 7Q10 from a flow timeseries
+#' @details
+#' This function was originally inspired by the Nature Conservancy's IHA package
+#' and relied on \code{group2()}. However, now this function is just a simple
+#' wrapper of \code{xQy()} to ensure consistency with the rest of DEQ. It takes
+#' in a data frame or zoo timeseries and outputs the 7Q10 as a single value
+#' numeric.
+#' @param zoots a timeseries formatted in zoo or a data frame that contains a
+#'   date and flow column, to be specified by user
+#' @param flowColumnIn If a dataframe is provided to the function, this is the
+#'   name of the column that contains the flow data for analysis. Ignored if a
+#'   zoo timeseries was provided.
+#' @param dateColumnIn If a dataframe is provided to the function, this is the
+#'   name of the column that contains the dates. Ignored if a zoo timeseries was
+#'   provided
+#' @return single numeric value for 7Q10
 #' @export fn_iha_7q10
-#' @examples NA
-#' @seealso NA
-fn_iha_7q10 <- function(zoots) {
-  g2 <- group2(zoots) 
-  #print("Group 2, 7-day low flow results ")
-  #print(g2["7 Day Min"])
-  x <- as.vector(as.matrix(g2["7 Day Min"]))
-  # fudge 0 values
-  # correct for zeroes?? If so, use this loop:
-  # This is not an "approved" method - we need to see how the GS/other authorities handles this
-  for (k in 1:length(x)) {
-    if (x[k] <= 0) {
-      x[k] <- 0.00000001
-      print (paste("Found 0.0 average in year", g2["year"], sep = " "))
-    }
-  }
-  x <- log(x)
-  if (length(x) <= 1) {
-    return(exp(x[1]))
-  } else {
-    pars <- PearsonDS:::pearsonIIIfitML(x)
-    x7q10 <- exp(qpearsonIII(0.1, params = pars$par))
-    return(x7q10);
-  }
+#' @examples
+#' flows <- dataRetrieval::readNWISdv("01631000","00060")
+#' flows <- dataRetrieval::renameNWISColumns(flows)
+#' #Convert flows to zoo
+#' flows_zoo <- zoo::as.zoo(x = flows$Flow)
+#' zoo::index(flows_zoo) <- flows$Date
+#' fn_iha_7q10(flows_zoo)
+#' @seealso xQy
+fn_iha_7q10 <- function(zoots, flowColumnIn = "Flow", dateColumnIn = "Date") {
+  #Calculate critical low flows from the zoo time series
+  low_flows <- xQy(gageDataIn = zoots, flowColumn = flowColumnIn, 
+                   dateColumn = dateColumnIn,
+                   AYS = "04-01", AYE = "03-31",
+                   startYear = NULL, endYear = NULL,
+                   x = 7, y = 10,
+                   IncludeSummerFlow = FALSE)
+  #Return the 7Q10
+  out_7Q10 <- low_flows$Flows$n7Q10
+  return(out_7Q10)
 }
 
 
@@ -732,7 +738,7 @@ fn_iha_mlf <- function(zoots, targetmo, q=0.5) {
   # calculates the 50th percentile - this is the August Low Flow
   # August Low Flow = median flow of the annual minimum flows in August for a chosen time period
   message("Performing quantile analysis")
-  x <- quantile(g1vec, q, na.rm = TRUE);
+  x <- stats::quantile(g1vec, q, na.rm = TRUE);
   return(as.numeric(x));
 }
 
@@ -755,7 +761,7 @@ fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar'
   } else if (stat == 'max') {
     ndx = which.max(as.numeric(metric_flows[,metric]));
   } else if (stat == 'median') {
-    ndx = which(as.numeric(metric_flows[,metric]) == median(as.numeric(metric_flows[,metric])))
+    ndx = which(as.numeric(metric_flows[,metric]) == stats::median(as.numeric(metric_flows[,metric])))
   }
   
   metric_flows_Qout = round(g2flows[ndx,metric],6);

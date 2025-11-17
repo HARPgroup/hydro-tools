@@ -216,6 +216,7 @@ RomEntity <- R6Class(
     #' @param varkey which varkey? defaults to guess Constant and AlphanumericConstant
     #' @param data_matrix dataframe contained rows/cols
     #' @param remote look at remote datasource?
+    #' @param proptext text to set on the property
     #' @returns the property object for this entity
     set_prop = function(
     propname, propcode=NULL,propvalue=NULL,varkey=NULL,

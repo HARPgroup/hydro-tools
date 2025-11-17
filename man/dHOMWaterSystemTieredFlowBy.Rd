@@ -80,6 +80,16 @@ an updated config if necessary or FALSE if it fails
 \if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$list2matrix(l)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{l}}{The list to convert to matrix}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A matrix of values from the list, with one value per row
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-translateOMtoDH"></a>}}
@@ -92,9 +102,15 @@ an updated config if necessary or FALSE if it fails
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{entity}}{list or object with entity info}
+\item{\code{entity}}{The object to store the translated JSON on via set_matrix()}
+
+\item{\code{om_json}}{The JSON to translate to a matrix and set on entity}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The entity, but the method is primarily designed to set useful
+ values on entity not return anything useful
 }
 }
 \if{html}{\out{<hr>}}
