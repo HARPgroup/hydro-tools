@@ -117,6 +117,8 @@ RomFeature <- R6Class(
           self$geom = as.character(config$dh_geofield)
         } else if (i == "nextdown_id") {
           self$nextdown_id = as.integer(config$nextdown_id)
+        } else if (i == "parent_id") {
+          self$parent_id = as.integer(config$parent_id)
         }
       }
     },
