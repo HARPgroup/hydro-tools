@@ -29,3 +29,6 @@ See USGS bankfull regression reports for additional information. The
  with bank full stage "max height before floodplain", bank full width "max width before floodplain",
  base width "width at lowest stage", side slope of channel, and mannings Roughness
 }
+\examples{
+usgs_bankfull_properties(prov = 1,da = 10)
+}

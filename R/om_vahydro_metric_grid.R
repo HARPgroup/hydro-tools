@@ -64,7 +64,7 @@ om_vahydro_metric_grid <- function (
         httr::add_headers(HTTP_X_CSRF_TOKEN = token),
         encode = "xml", httr::content_type("text/csv")
       );
-      dat <- content(rawdat)
+      dat <- httr::content(rawdat)
     } else {
       if (ds$connection_type == 'odbc') {
         #message("om_vahydro_metric_grid() called using ODBC ")
@@ -73,7 +73,7 @@ om_vahydro_metric_grid <- function (
           message(prop_sql)
         }
         message(paste("retrieving via ODBC"))
-        dat <- dbGetQuery(conn = ds$connection, prop_sql)
+        dat <- DBI::dbGetQuery(conn = ds$connection, prop_sql)
         #message(paste("returned", nrow(dat),"rows"))
       } else {
         message(paste("retrieving ", url))

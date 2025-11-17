@@ -47,7 +47,7 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
   edate <- as.POSIXct(edate,tz = "EST")
   
   #Get the window of interest from the timeseries
-  dat <- window(dat, start = sdate, end = edate);
+  dat <- stats::window(dat, start = sdate, end = edate);
   #Change mode of zoo to numeric e.g. Convert all fields to numeric
   mode(dat) <- 'numeric'
 

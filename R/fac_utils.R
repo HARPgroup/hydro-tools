@@ -44,7 +44,7 @@ om_flow_table <- function(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
   for (i in index(month.abb)) {
     moname <- month.abb[i]
     drows <- df2sum[df2sum[,mo_col] == i,]
-    q_drows <- quantile(drows[,q_col], probs=c(0,0.05,0.1,0.25, 0.3, 0.5), na.rm=TRUE)
+    q_drows <- stats::quantile(drows[,q_col], probs=c(0,0.05,0.1,0.25, 0.3, 0.5), na.rm=TRUE)
     q_mean <- mean(drows[,q_col])
     intake_summary_tbl[i,'Min'] <- round(as.numeric(q_drows["0%"]),rdigits)
     intake_summary_tbl[i,"fivep"] <- round(as.numeric(q_drows["5%"]),rdigits)
