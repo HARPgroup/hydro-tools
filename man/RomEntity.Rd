@@ -282,6 +282,8 @@ case of new prop creation)}
 \item{\code{data_matrix}}{dataframe contained rows/cols}
 
 \item{\code{remote}}{look at remote datasource?}
+
+\item{\code{proptext}}{text to set on the property}
 }
 \if{html}{\out{</div>}}
 }

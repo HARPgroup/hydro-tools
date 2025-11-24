@@ -101,7 +101,7 @@ xQyComp <- function(xQy_ann, y){
     n <- length(logFlows)
     #Step 1: Find statistics of log distribution of dates and flows
     u <- mean(logFlows)
-    s <- sqrt(var(logFlows))
+    s <- sqrt(stats::var(logFlows))
     
     #Find skewness using the appropriate method. In DFLOW example, matches type
     #1 but SW toolbox uses type 2
@@ -153,8 +153,9 @@ xQyComp <- function(xQy_ann, y){
 #'   the next analysis year. This makes choosing the correct analysis season
 #'   very important.\cr
 #'   This is functionally equivalent to the VPDES' DFLOW R Shiny application.
-#' @param gageDataIn A data frame containing a date and flow column of daily
-#'   streamflows
+#' @param gageDataIn A data frame or 1-D zoo timeseries containing a date and
+#'   flow column of daily streamflows. If a zoo is passed in, the flowColumn
+#'   argument the flowColumn and dateColumn arguments are ignored
 #' @param flowColumn The column name in gageDataIn that contains the flow values
 #' @param dateColumn The column name in gageDataIn that contains the date
 #'   values. Will be converted to the date class.
@@ -187,27 +188,38 @@ xQyComp <- function(xQy_ann, y){
 #'   the number of days in each analysis year on a non-leap year
 #' @export xQy
 #' @examples
-#' #gageDat <- dataRetrieval::readNWISdv("01631000","00060")
-#' #gageDat <- dataRetrieval::renameNWISColumns(gageDat)
-#' #gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
-#' #low_flows <- xQy(gageDataIn = gageDat,
-#' #   flowColumn = "Flow", dateColumn = "Date",
-#' #   AYS = "07-13", AYE = "02-15",
-#' #   startYear = NULL, endYear = NULL,
-#' #   x = 7, y = 10,
-#' #   IncludeSummerFlow = F)
-#' #low_flows$Flows
+#' gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+#' gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+#' gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+#' low_flows <- xQy(gageDataIn = gageDat,
+#'    flowColumn = "Flow", dateColumn = "Date",
+#'    AYS = "07-13", AYE = "02-15",
+#'    startYear = NULL, endYear = NULL,
+#'    x = 7, y = 10,
+#'    IncludeSummerFlow = FALSE)
+#' low_flows$Flows
 xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
-                AYS = "10-01", AYE = "09-30",
+                AYS = "04-01", AYE = "03-31",
                 startYear = NULL, endYear = NULL,
                 x = 7, y = 10,
                 IncludeSummerFlow = FALSE){
-  #Create a simplified copy of the dataset to manipulate
-  gageData <- gageDataIn[,c(dateColumn,flowColumn)]
+  #Is user has passed in a zoo time series, convert to data frame and ensure a
+  #flow and date column exist. This was added for backwards compatibility with
+  #existing OM summary workflows
+  if(zoo::is.zoo(gageDataIn)){
+    gageData <- as.data.frame(gageDataIn)
+    names(gageData) <- "Flow"
+    gageData$Date <- as.Date(zoo::index(gageDataIn))
+  }else{
+    #Create a simplified copy of the dataset to manipulate
+    gageData <- gageDataIn[,c(dateColumn,flowColumn)]
+    names(gageData) <- c("Date", "Flow")
+  }
+  
   #Treat negative flows as missing flows, per SW toolbox
   gageData$Flow[gageData$Flow < 0] <- NA
   #Ensure date column exists
-  gageData$Date <- as.Date(gageData[,dateColumn])
+  gageData$Date <- as.Date(gageData$Date)
   
   ## Analysis Year ####
   #Initialize Analysis year by making it the calendar year
@@ -512,7 +524,7 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
   #uses all data and is not concerned with complete analysis years. This is also
   #easier in terms of communication with external groups just checking gages
   #every day
-  flowCDF <- ecdf(gageData$Flow)
+  flowCDF <- stats::ecdf(gageData$Flow)
   out_xQy$pctg <- flowCDF(out_xQy$xQy)
   out_1Q10$pctg <- flowCDF(out_1Q10$xQy)
   out_7Q10$pctg <- flowCDF(out_7Q10$xQy)
@@ -552,12 +564,12 @@ xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
 }
 
 ## Testing ####
-gageDat <- dataRetrieval::readNWISdv("01631000","00060")
-gageDat <- dataRetrieval::renameNWISColumns(gageDat)
-gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
-low_flows <- xQy(gageDataIn = gageDat,
-                 flowColumn = "Flow", dateColumn = "Date",
-                 AYS = "03-01", AYE = "07-31",
-                 startYear = NULL, endYear = NULL,
-                 x = 8, y = 12,
-                 IncludeSummerFlow = F)
+# gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+# gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+# gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+# low_flows <- xQy(gageDataIn = gageDat,
+#                  flowColumn = "Flow", dateColumn = "Date",
+#                  AYS = "03-01", AYE = "07-31",
+#                  startYear = NULL, endYear = NULL,
+#                  x = 8, y = 12,
+#                  IncludeSummerFlow = F)

@@ -1,5 +1,9 @@
 # hydrotools
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 ## Description
 
 The R developers at DEQ's Office of Water Supply Planning and Analysis have developed an R package called `hydrotools` to support data base connections to OWSPA data sources and ensure consistent handling of common data base requests. The `rom` objects offered in hydrotools serve as a quasi-REST service for the VA Hydro databases, offering DEQ staff convenient means of getting properties and features or posting such entities. Installation instructions are offered below. Development issues, pull requests, and more are tracked on the hydrotools [GitHub repository](https://github.com/HARPgroup/hydro-tools) or on the internal [GitLab](https://gitlab.deq.virginia.gov/) server. 
@@ -105,8 +109,13 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
-### 1.0.7 10/31/2025
+### 1.0.8 10/31/2025
 1. Added wrapper functions for elfgen package. `simple_nhdPlusFlows()` finds the NHDPlus segment (and flows) contained in a VA Hydro feature. The output code can be given to `simple_elfgen()` to allow for easy generation of ecologic limit functions from imported EDAS data
+
+### 1.0.7 11/13/2025
+1. Fixed a variable name error in the `xQy()` function that was preventing the code from being able to handle non-standard flow data frames
+2. Enabled examples in `xQy()`, `group1()`, `group2()`, and `fn_iha_7q10()`
+3. Updated `fn_iha_7q10()` to use `xQy()` for consistency
 
 ### 1.0.6 10/06/2025
 1. Bug fix to variable plugin for timeseries file objects by setting the correct object class to send to OM.
