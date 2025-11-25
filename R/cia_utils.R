@@ -802,3 +802,23 @@ is.empty <- function (x, ...)
   }
   else sapply(x, is.empty, trim = trim, ...)
 }
+
+fn_handletimestamp <- function(ts) {
+  # don't do date_received as this is a field and is handled there
+  if ( (ts != '') & !is.null(ts)) {
+    orig = ts;
+    # if a valid unix epoch style timestamp has been submitted 
+    # this next will try to convert a string
+    if (is.na(as.numeric(ts))) {
+      # must be a formatted date, not a timestamp integer/float
+      # not a valid unix timestamp, so try to convert from some date format
+      if (!is.na(ymd(ts))) {
+        ts=ymd(ts)
+      } else if (!is.na(mdy(ts))) {
+        ts=mdy(ts)
+      }
+      message(paste("Converted orig to Epoch:", ts))
+    }
+  }
+  return(ts)
+}

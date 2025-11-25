@@ -231,7 +231,7 @@ RomFeature <- R6Class(
     get_raster_ts = function(
         varkey = 'prism_mod_daily',
         starttime = FALSE,
-        endtime = '2025-10-13',
+        endtime = FALSE,
         band = '1',
         aggregate = FALSE,
         metric = 'mean'
@@ -244,10 +244,10 @@ RomFeature <- R6Class(
       startclause = "(1 = 1)"
       endclause = "(1 = 1)"
       if (!is.logical(starttime)) {
-        startclause = fn$paste0("met.tstime >= extract(epoch from '$starttime'::date)")
+        startclause = paste0("met.tstime >= extract(epoch from '",starttime,"'::date)")
       }
       if (!is.logical(endtime)) {
-        endclause = fn$paste0("met.tsendtime <= extract(epoch from '$endtime'::date)")
+        endclause = paste0("met.tsendtime <= extract(epoch from '",endtime,"'::date)")
       }
       if (!is.logical(aggregate)) {
         rastercalc = fn$paste0("$aggregate((ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric)")
