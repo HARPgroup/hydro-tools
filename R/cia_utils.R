@@ -827,10 +827,10 @@ fn_handletimestamp <- function(ts) {
     if (is.na(as.numeric(ts))) {
       # must be a formatted date, not a timestamp integer/float
       # not a valid unix timestamp, so try to convert from some date format
-      if (!is.na(ymd(ts))) {
-        ts <- ymd(ts)
-      } else if (!is.na(mdy(ts))) {
-        ts <- mdy(ts)
+      if (!is.na(lubridate::ymd(ts))) {
+        ts <- lubridate::ymd(ts)
+      } else if (!is.na(lubridate::mdy(ts))) {
+        ts <- lubridate::mdy(ts)
       }
       message(paste("Converted orig to Epoch:", ts))
     }

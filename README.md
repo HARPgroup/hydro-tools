@@ -109,6 +109,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.8 11/25/2025
+1. Added the ability to query and summarize data via PostGIS from the `dh_timeseries_weather` table via the method `get_raster_ts()` on `RomFeature()`
+2. New `fn_handletimestamp()` that performs basic checks on potential date/time data before converting to date using `lubridate` functions
+
 ### 1.0.7 11/13/2025
 1. Fixed a variable name error in the `xQy()` function that was preventing the code from being able to handle non-standard flow data frames
 2. Enabled examples in `xQy()`, `group1()`, `group2()`, and `fn_iha_7q10()`
