@@ -219,6 +219,94 @@ RomFeature <- R6Class(
         related_entities <- related_entities[,retcols]
       }
       return(related_entities)
+    },
+    #' @param varkey what variable to retrieve
+    #' @param starttime begin tstime (default FALSE)
+    #' @param endtime last tsendtime (default FALSE)
+    #'   Other options are 'overlaps' or 'st_within'
+    #' @param band which band to query (default = 1)
+    #' @param aggregate FALSE will return 1 record for every date
+    #' @param metric default mean, which aspect of the ST_SUMMARIZE() to return
+    #' @return dataframe of spatially related entities
+    get_raster_ts = function(
+        varkey = 'prism_mod_daily',
+        starttime = FALSE,
+        endtime = '2025-10-13',
+        band = '1',
+        aggregate = FALSE,
+        metric = 'mean'
+      ) {
+      # looks at the table dh_timeseries_weather
+      # coverage raster summary
+      ftype = self$ftype
+      bundle = self$bundle
+      hydrocode = self$hydrocode
+      startclause = "(1 = 1)"
+      endclause = "(1 = 1)"
+      if (!is.logical(starttime)) {
+        startclause = fn$paste0("met.tstime >= extract(epoch from '$starttime'::date)")
+      }
+      if (!is.logical(endtime)) {
+        endclause = fn$paste0("met.tsendtime <= extract(epoch from '$endtime'::date)")
+      }
+      if (!is.logical(aggregate)) {
+        rastercalc = fn$paste0("$aggregate((ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric)")
+        groupby = "GROUP BY met.featureid"
+        startcol = "to_timestamp(min(met.tsendtime))"
+        endcol = "to_timestamp(max(met.tsendtime))"
+      } else {
+        rastercalc = fn$paste0("(ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric")
+        groupby = ""
+        startcol = "to_timestamp(met.tsendtime)"
+        endcol = "to_timestamp(met.tsendtime)"
+      }
+      sql = fn$paste0(
+        "WITH feature_coverages AS (
+        SELECT * 
+          FROM  dh_feature
+        WHERE hydrocode = '$hydrocode'
+        AND ftype = '$ftype'
+        AND bundle = '$bundle'
+        ),
+        metUnion as (
+          Select met.featureid, met.tsendtime,
+          st_union(met.rast) as rast
+          FROM feature_coverages as f
+          left outer join field_data_dh_geofield as fgeo
+          on (
+            fgeo.entity_id = f.hydroid
+            and fgeo.entity_type = 'dh_feature' 
+          ) 
+          JOIN(
+            select *
+              from dh_timeseries_weather as met
+            left outer join dh_variabledefinition as b
+            on (met.varid = b.hydroid) 
+            WHERE $startclause
+            AND $endclause
+            and b.varkey='$varkey'
+          ) AS met
+          ON ST_Intersects(ST_ConvexHull(met.rast),fgeo.dh_geofield_geom)
+          
+          group by met.featureid, met.tsendtime
+        )
+        SELECT met.featureid, 
+          $startcol as start_date,
+          $endcol as end_date,
+          $rastercalc as value
+        FROM feature_coverages as f
+        left outer join field_data_dh_geofield as fgeo
+        on (
+          fgeo.entity_id = f.hydroid
+          and fgeo.entity_type = 'dh_feature' 
+        ) 
+        JOIN metUnion AS met
+        ON ST_Intersects(ST_ConvexHull(met.rast),fgeo.dh_geofield_geom)
+        $groupby"
+      )
+      # to debug set ds$debug = TRUE instead of message(sql)
+      raster_records <- dbGetQuery(conn = self$datasource$connection, sql)
+      return(raster_records)
     }
   )
 )
