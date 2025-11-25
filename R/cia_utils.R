@@ -803,6 +803,15 @@ is.empty <- function (x, ...)
   else sapply(x, is.empty, trim = trim, ...)
 }
 
+
+# fn_handletimestamp 
+#'
+#' @name fn_handletimestamp
+#' @title andle Any Time/Date to Timestamp
+#' @description Try to bring any date or timestamp into a common format (Unix epoch, TBD)
+#' @param ts some type of date or timestamp
+#' @return single numeric value for UNix epoch
+#' @export fn_handletimestamp
 fn_handletimestamp <- function(ts) {
   # don't do date_received as this is a field and is handled there
   if ( (ts != '') & !is.null(ts)) {
