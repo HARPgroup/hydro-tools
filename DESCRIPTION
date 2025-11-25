@@ -32,11 +32,7 @@ Imports:
     sqldf,
     sf,
     lmomco,
-<<<<<<< HEAD
     e1071,
     elfgen
-=======
-    e1071
 Suggests: 
     dataRetrieval
->>>>>>> d7c8ffd433e896cf35e709272258931d2185aabb
