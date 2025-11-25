@@ -237,6 +237,7 @@ NULL
 \if{html}{\out{<a id="method-RomFeature-find_spatial_relations"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-find_spatial_relations}{}}}
 \subsection{Method \code{find_spatial_relations()}}{
+Find target entities via spatial query of this RomFeature
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$find_spatial_relations(
   target_entity = "dh_feature",
@@ -252,14 +253,19 @@ NULL
 \describe{
 \item{\code{target_entity}}{what type to relate to (default dh_feature)}
 
-\item{\code{inputs}}{criteria to search for (list key = value format)}
+\item{\code{inputs}}{Criteria to search for entered as a list key = value
+format. For instance, the list may contain a bundle or ftype via
+\code{list(bundle = 'watershed', ftype = 'vahydro')}}
 
-\item{\code{operator}}{what type of spatial function,default = st_contains
-Other options are 'overlaps' or 'st_within'}
+\item{\code{operator}}{what type of spatial function to perform to search for
+entities, default to 'st_contains'. Other options include
+'st_contains_centroid', 'overlaps', or 'st_within'}
 
-\item{\code{return_geoms}}{FALSE will return a smaller dataframe}
+\item{\code{return_geoms}}{FALSE will return a smaller dataframe by excluding
+the geometry fields}
 
-\item{\code{query_remote}}{FALSE will search on in local datasource}
+\item{\code{query_remote}}{FALSE will search on in local datasource only, TRUE
+will search the DS connection}
 }
 \if{html}{\out{</div>}}
 }
@@ -271,11 +277,13 @@ dataframe of spatially related entities
 \if{html}{\out{<a id="method-RomFeature-get_raster_ts"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_raster_ts}{}}}
 \subsection{Method \code{get_raster_ts()}}{
+Get raw or summarized raster values for this RomFeature from
+  dh_timeseries_weather using PostGIS
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_raster_ts(
   varkey = "prism_mod_daily",
   starttime = FALSE,
-  endtime = "2025-10-13",
+  endtime = Sys.Date(),
   band = "1",
   aggregate = FALSE,
   metric = "mean"
@@ -285,23 +293,30 @@ dataframe of spatially related entities
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{varkey}}{what variable to retrieve}
+\item{\code{varkey}}{What variable to retrieve? This should be a varkey that has
+been used to create raster summaries in dh_timeseries_weather. Relevant
+meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
+'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
+'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'}
 
-\item{\code{starttime}}{begin tstime (default FALSE)}
+\item{\code{starttime}}{begin tstime to limit query (default FALSE to remove a
+tstime filter)}
 
-\item{\code{endtime}}{last tsendtime (default FALSE)
-Other options are 'overlaps' or 'st_within'}
+\item{\code{endtime}}{last tsendtime to limit query (default FALSE to remove a
+tsendtime filter)}
 
-\item{\code{band}}{which band to query (default = 1)}
+\item{\code{band}}{which raster band to query (default = 1)?}
 
-\item{\code{aggregate}}{FALSE will return 1 record for every date}
+\item{\code{aggregate}}{Should data be aggregated and if so, how? FALSE will
+return 1 record for every date. Otheriwse, can use basic aggregate
+functions like mean, min, max to summarize data}
 
-\item{\code{metric}}{default mean, which aspect of the ST_SUMMARIZE() to return}
+\item{\code{metric}}{default mean, which aspect of the ST_SummaryStats() to return}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-dataframe of spatially related entities
+dataframe of timeseries values
 }
 }
 \if{html}{\out{<hr>}}

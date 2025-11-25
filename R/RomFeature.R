@@ -262,10 +262,10 @@ RomFeature <- R6Class(
       #If a start or endtime has been provided, set a psql where clause that
       #ensures tstime or tsendtime comply with user input filter
       if (!is.logical(starttime)) {
-        startclause = fn$paste0("met.tstime >= extract(epoch from '$starttime'::date)")
+        startclause = paste0("met.tstime >= extract(epoch from '",starttime,"'::date)")
       }
       if (!is.logical(endtime)) {
-        endclause = fn$paste0("met.tsendtime <= extract(epoch from '$endtime'::date)")
+        endclause = paste0("met.tsendtime <= extract(epoch from '",endtime,"'::date)")
       }
       #If the user wishes to apply an aggregate function, group the data by the
       #featureid and apply the aggregate and metric arguments. Otherwise, just
@@ -327,7 +327,7 @@ RomFeature <- R6Class(
         $groupby"
       )
       # to debug set ds$debug = TRUE instead of message(sql)
-      raster_records <- dbGetQuery(conn = self$datasource$connection, sql)
+      raster_records <- DBI::dbGetQuery(conn = self$datasource$connection, sql)
       return(raster_records)
     }
   )
