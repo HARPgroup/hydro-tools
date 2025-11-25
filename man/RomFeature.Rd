@@ -68,6 +68,7 @@ NA
 \item \href{#method-RomFeature-add_mp}{\code{RomFeature$add_mp()}}
 \item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
 \item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
+\item \href{#method-RomFeature-get_raster_ts}{\code{RomFeature$get_raster_ts()}}
 \item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
 }
 }
@@ -259,6 +260,43 @@ Other options are 'overlaps' or 'st_within'}
 \item{\code{return_geoms}}{FALSE will return a smaller dataframe}
 
 \item{\code{query_remote}}{FALSE will search on in local datasource}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+dataframe of spatially related entities
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-get_raster_ts"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-get_raster_ts}{}}}
+\subsection{Method \code{get_raster_ts()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_raster_ts(
+  varkey = "prism_mod_daily",
+  starttime = FALSE,
+  endtime = "2025-10-13",
+  band = "1",
+  aggregate = FALSE,
+  metric = "mean"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{varkey}}{what variable to retrieve}
+
+\item{\code{starttime}}{begin tstime (default FALSE)}
+
+\item{\code{endtime}}{last tsendtime (default FALSE)
+Other options are 'overlaps' or 'st_within'}
+
+\item{\code{band}}{which band to query (default = 1)}
+
+\item{\code{aggregate}}{FALSE will return 1 record for every date}
+
+\item{\code{metric}}{default mean, which aspect of the ST_SUMMARIZE() to return}
 }
 \if{html}{\out{</div>}}
 }
