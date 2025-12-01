@@ -6,7 +6,7 @@
 \usage{
 simple_elfgen(
   ds,
-  nhd_code,
+  ws_code,
   huc_level = "huc8",
   dataset = "VAHydro-EDAS",
   ws_varkey = "erom_q0001e_aug",
@@ -21,8 +21,9 @@ simple_elfgen(
 \item{ds}{A datasource provided by the user, usally the RomDataSource instance
 create in DEQ config.R files, querying drupal.dh03}
 
-\item{nhd_code}{The code of the NHDPlus HUC of interest, which may be derived
-from a VA Hydro feature using \code{hydrotools::simple_nhdPlusFlows()}}
+\item{ws_code}{The code of the NHDPlus HUC of interest, which may be derived
+from a VA Hydro feature using \code{hydrotools::simple_nhdPlusFlows()} OR
+the hydroid of the VA Hydro feature with bundle watershed.}
 
 \item{huc_level}{Which NHD waterhsed level is represented by nhd_code? "huc8"
 is the default}
@@ -79,7 +80,7 @@ This function provides the necessary inputs to call the
  hydroid
 }
 \examples{
-\dontrun{simple_elfgen( ds = ds, hydroid = 68069, huc_level = "huc8",
- dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug', quantile = 0.8,
+\dontrun{simple_elfgen( ds = ds, ws_code = 68069, huc_level = "huc8",
+ dataset = 'VAHydro-EDAS', ws_varkey = c('erom_q0001e_aug','erom_q0001e_mar'), quantile = 0.8,
  breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
 }
