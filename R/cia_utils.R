@@ -810,8 +810,6 @@ is.empty <- function (x, ...)
 }
 
 
-
-
 #'@name simple_elfgen
 #'@title Simple Hydro Elfgen Wrapper
 #'@description A wrapper that makes it easier to access VA Hydro's imported EDAS
@@ -858,7 +856,7 @@ is.empty <- function (x, ...)
 #'  \code{yaxis_thresh}. See \code{elfgen::bkpt_pwit()} for additional details.
 #'@return Object containing plot image and dataframe of ELF statistics. See
 #'  \code{elfgen::elfgen()} for more details
-#'@examples \dontrun{simple_elfgen( ds = ds, hydroid = 68069, huc_level = "huc8",
+#'@examples \dontrun{simple_elfgen( ds = ds, nhd_code = 68069, huc_level = "huc8",
 #'  dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug', quantile = 0.8,
 #'  breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
 #'@export
@@ -920,7 +918,7 @@ simple_elfgen <- function(
   )
   left outer join dh_variabledefinition as dav 
   on (
-    dav.varkey = '[ws_varkey]'
+    dav.varkey IN ([ws_varkey])
   )
   left outer join dh_properties as dap 
   on (
@@ -951,13 +949,14 @@ simple_elfgen <- function(
       bio_varkey = 'aqbio_nt_total',
       sampres = 'species'
     )
+    browser()
     sql <- str_replace_all(sql, '\\[covid\\]', as.character(config$covid))
     sql <- str_replace_all(sql, '\\[ws_ftype\\]', as.character(config$ws_ftype))
-    sql <- str_replace_all(sql, '\\[ws_varkey\\]', as.character(config$ws_varkey))
+    sql <- str_replace_all(sql, '\\[ws_varkey\\]', paste0("'",as.character(config$ws_varkey),"'",collapse = ","))
     sql <- str_replace_all(sql, '\\[bio_varkey\\]', as.character(config$bio_varkey))
     sql <- str_replace_all(sql, '\\[sampres\\]', as.character(config$sampres))
     message(paste("querying for samples contained by", watershed_feature$ftype, watershed_feature$hydrocode))
-    watershed.df <- sqldf::sqldf(sql, conn=ds$connection)
+    watershed.df <- sqldf::sqldf(sql, connection = ds$connection)
     watershed.df <- watershed.df[,c('x_metric', 'y_metric', 'hydrocode')]
   }
   #If the user has not provided the maximum y-axis value for plotting, assume
@@ -1061,4 +1060,32 @@ simple_nhdPlusFlows <- function(ds, hydroid, huc_level = "huc8"){
       nhdplus_segment = outlet_nhdplus_segment
     )
   )
+}
+
+# fn_handletimestamp 
+#'
+#' @name fn_handletimestamp
+#' @title Handle Any Time/Date to Timestamp
+#' @description Try to bring any date or timestamp into a common format (Unix epoch, TBD)
+#' @param ts some type of date or timestamp
+#' @return single numeric value for UNix epoch
+#' @export fn_handletimestamp
+fn_handletimestamp <- function(ts) {
+  # don't do date_received as this is a field and is handled there
+  if ( !is.null(ts) && (ts != '')) {
+    orig <- ts
+    # if a valid unix epoch style timestamp has been submitted 
+    # this next will try to convert a string
+    if (is.na(as.numeric(ts))) {
+      # must be a formatted date, not a timestamp integer/float
+      # not a valid unix timestamp, so try to convert from some date format
+      if (!is.na(lubridate::ymd(ts))) {
+        ts <- lubridate::ymd(ts)
+      } else if (!is.na(lubridate::mdy(ts))) {
+        ts <- lubridate::mdy(ts)
+      }
+      message(paste("Converted orig to Epoch:", ts))
+    }
+  }
+  return(ts)
 }

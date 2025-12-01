@@ -109,8 +109,12 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
-### 1.0.8 10/31/2025
+### 1.0.9 12/01/2025
 1. Added wrapper functions for elfgen package. `simple_nhdPlusFlows()` finds the NHDPlus segment (and flows) contained in a VA Hydro feature. The output code can be given to `simple_elfgen()` to allow for easy generation of ecologic limit functions from imported EDAS data
+
+### 1.0.8 11/25/2025
+1. Added the ability to query and summarize data via PostGIS from the `dh_timeseries_weather` table via the method `get_raster_ts()` on `RomFeature()`
+2. New `fn_handletimestamp()` that performs basic checks on potential date/time data before converting to date using `lubridate` functions
 
 ### 1.0.7 11/13/2025
 1. Fixed a variable name error in the `xQy()` function that was preventing the code from being able to handle non-standard flow data frames
