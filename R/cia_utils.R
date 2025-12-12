@@ -830,11 +830,20 @@ is.empty <- function (x, ...)
 #'  is the default
 #'@param dataset Should \code{elfgen()} use USGS Icthys data or DEQ EDAS data
 #'  (via Hydro, which may be outdated but is state-specific data). Options are
-#'  "IchthyMaps" for USGS or "VAHydro-EDAS" for DEQ data
+#'  "IchthyMaps" for USGS or "VAHydro-EDAS" and "VAHydro-EDAS-ds" for DEQ data,
+#'  with the former leveraging \code{nhdPlusTools::get_nhdplus()} to derive flows
+#'  and the latter using imported flows from the provided datasource
+#'@param axisNames Either a logical boolean (default TRUE) or character vector
+#'  to be used to derive the x-axis names for the plotted parameters. If TRUE,
+#'  then axis names will be guessed based on known VA Hydro varkey conversions.
+#'  If a character vector is provided of the same length as ws_varkey, these
+#'  will be used as plot titles. Otherwise, the ws_varkey will serve as the
+#'  label
 #'@param ws_varkey Which NHDPlus flow for the \code{huc_level} should be used to
 #'  generate the \code{elfgen()} ecologic limit function? The options are mean
 #'  flow for any month but MUST be in the form "erom_q0001e_aug". Use
-#'  "erom_q0001e_mean" to use mean annual flow.
+#'  "erom_q0001e_mean" to use mean annual flow or "All" to get all flows and all
+#'  elfgen regressions
 #'@param quantile A specified value for the quantile of interest - 0.95 equals
 #'  the 95th percentile. This is used in the eflgen ecologic limit function
 #'  analysis
@@ -855,16 +864,26 @@ is.empty <- function (x, ...)
 #'@param bhi When using the "pwit" breakpt analysis, this is the "bound high"
 #'  value, or the upper bound of the piecewise range and defaults to
 #'  \code{yaxis_thresh}. See \code{elfgen::bkpt_pwit()} for additional details.
-#'@return Object containing plot image and dataframe of ELF statistics. See
-#'  \code{elfgen::elfgen()} for more details
+#'@return A list with elfgen as the list with plot image and dataframe of ELF statistics (see
+#'  \code{elfgen::elfgen()} for more details), the flow and fish data used in
+#'  the ELF derived from dataset, and the threshold/breakpoint that is set or
+#'  calculated
 #'@examples \dontrun{simple_elfgen( ds = ds, ws_code = 68069, huc_level = "huc8",
 #'  dataset = 'VAHydro-EDAS', ws_varkey = c('erom_q0001e_aug','erom_q0001e_mar'), quantile = 0.8,
-#'  breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
+#'  breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh, axisNames = TRUE)}
 #'@export
 simple_elfgen <- function(
-    ds, ws_code, huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'erom_q0001e_aug',
-    quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL,
+    ds, ws_code, huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'All',
+    quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL, axisNames = TRUE,
     blo = 0, bhi = yaxis_thresh){
+  if(tolower(ws_varkey) == "all"){
+    #All nhd flow varkeys
+    ws_varkey <- c('erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
+    'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
+    'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
+    'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec', 
+    'erom_q0001e_mean')
+  }
   #Find the NHD feature based on the HUC level and code
   watershed.code <- as.character(ws_code)
   watershed.bundle <- 'watershed'
@@ -875,7 +894,8 @@ simple_elfgen <- function(
   #If no NHD watershed was found, try searching for this watershed using hydroid
   if(is.na(watershed_feature$hydroid)){
     watershed_feature = RomFeature$new(ds, list(bundle = watershed.bundle,
-                                                hydroid = watershed.code), TRUE)
+                                                hydroid = watershed.code,
+                                                ftype = "vahydro"), TRUE)
     
     #If no feature was found, return FALSE and warn user to check inputs
     if(is.na(watershed_feature$hydroid)){
@@ -892,74 +912,81 @@ simple_elfgen <- function(
       watershed.code <- stringr::str_sub(watershed.code, -8,-1)
     }
     watershed.df <- elfgen::elfdata(watershed.code)
-  }else{
-    # elfdata_vahydro() function for retrieving data from VAHydro
-    sql <- "
-  SELECT 
-	event.tid, 
-	to_timestamp(event.tstime),
-	pv.varkey,
-	biodat.propcode,
-	biodat.propvalue AS y_metric,
-	dap.propvalue AS x_metric,
-    CASE 
-      WHEN ws.ftype = 'nhd_huc8' THEN REPLACE(ws.hydrocode,'nhd_huc8_','') 
-      WHEN ws.ftype = 'nhd_huc12' THEN REPLACE(ws.hydrocode,'huc12_', '') 
-      WHEN ws.ftype = 'vahydro' THEN REPLACE(ws.hydrocode,'vahydrosw_wshed_','') 
-      ELSE ws.hydrocode
-    END AS hydrocode,
-    st.hydroid AS station_hydroid,
-	dav.varkey as flow_type
+  }else if (dataset == "VAHydro-EDAS" | dataset == "VAHydro-EDAS-ds"){
+    x_metrix_sql <- ''
+    flow_type_sql <- ''
+    flow_join_sql <- ''
+    if(dataset == "VAHydro-EDAS-ds"){
+      #If the user wishes to get flows directly from the datasource, join these
+      #in using the requested varkeys
+      x_metrix_sql <- "dap.propvalue AS x_metric,"
+      flow_type_sql <- "dav.varkey as flow_type,"
+      flow_join_sql <- 
+        "LEFT JOIN dh_variabledefinition AS dav 
+         ON dav.varkey IN ([ws_varkey])
+         LEFT JOIN dh_properties AS dap 
+         ON (
+          dap.featureid = ws.hydroid
+          AND dap.entity_type = 'dh_feature'
+          AND dav.hydroid = dap.varid
+         )"
+    }
+     
+    sql <- paste(
+    "SELECT event.tid, 
+	    to_timestamp(event.tstime),
+	    pv.varkey,
+	    biodat.propcode,
+	    biodat.propvalue AS y_metric,",
+      x_metrix_sql, flow_type_sql,
+	    "CASE 
+        WHEN ws.ftype = 'nhd_huc8' THEN REPLACE(ws.hydrocode,'nhd_huc8_','') 
+        WHEN ws.ftype = 'nhd_huc12' THEN REPLACE(ws.hydrocode,'huc12_', '') 
+        WHEN ws.ftype = 'vahydro' THEN REPLACE(ws.hydrocode,'vahydrosw_wshed_','') 
+        ELSE ws.hydrocode
+      END AS hydrocode,
+      st.hydroid AS station_hydroid
 	
-  FROM dh_feature_fielded AS cov
+    FROM dh_feature_fielded AS cov
   
-  LEFT JOIN dh_feature_fielded AS ws
-  ON ST_Contains(cov.dh_geofield_geom, ws.dh_geofield_geom)
+    LEFT JOIN dh_feature_fielded AS ws
+    ON ST_Contains(cov.dh_geofield_geom, ws.dh_geofield_geom)
   
-  LEFT JOIN dh_feature_fielded AS st
-  ON ST_Contains(ws.dh_geofield_geom, st.dh_geofield_geom)
+    LEFT JOIN dh_feature_fielded AS st
+    ON ST_Contains(ws.dh_geofield_geom, st.dh_geofield_geom)
   
-  LEFT JOIN dh_variabledefinition AS tsv 
-  ON (tsv.varkey = 'aqbio_sample_event')
+    LEFT JOIN dh_variabledefinition AS tsv 
+    ON (tsv.varkey = 'aqbio_sample_event')
   
-  LEFT JOIN dh_timeseries AS event
-  ON (
-    event.varid = tsv.hydroid
-    AND event.featureid = st.hydroid
-  ) 
-  LEFT JOIN dh_properties AS biodat
-  ON (
-    biodat.featureid = event.tid
-    AND biodat.entity_type = 'dh_timeseries'
-  ) 
-  LEFT JOIN dh_variabledefinition AS pv 
-  ON (
-    pv.varkey = '[bio_varkey]'
-    AND pv.hydroid = biodat.varid
-  )
-  LEFT JOIN dh_variabledefinition AS dav 
-  ON dav.varkey IN ([ws_varkey])
-  
-  LEFT JOIN dh_properties AS dap 
-  ON (
-    dap.featureid = ws.hydroid
-    AND dap.entity_type = 'dh_feature'
-    AND dav.hydroid = dap.varid
-  )
-  LEFT JOIN dh_variabledefinition AS srv 
-  ON srv.varkey = 'sampres'
-  LEFT JOIN dh_properties AS sr 
-  ON (
-    sr.featureid = event.tid
-    AND sr.entity_type = 'dh_timeseries'
-    AND srv.hydroid = sr.varid
-  )
-  WHERE cov.hydroid = [covid] 
-	AND pv.hydroid IS NOT NULL
-	AND ws.ftype = '[ws_ftype]'
-	AND ws.bundle='watershed'
-	AND sr.propcode = '[sampres]'
-" 
+    LEFT JOIN dh_timeseries AS event
+    ON (
+      event.varid = tsv.hydroid
+      AND event.featureid = st.hydroid
+    ) 
+    LEFT JOIN dh_properties AS biodat
+    ON (
+      biodat.featureid = event.tid
+      AND biodat.entity_type = 'dh_timeseries'
+    ) 
+    LEFT JOIN dh_variabledefinition AS pv 
+    ON (
+      pv.varkey = '[bio_varkey]'
+      AND pv.hydroid = biodat.varid
+    )",flow_join_sql,
+    "LEFT JOIN dh_variabledefinition AS srv 
+    ON srv.varkey = 'sampres'
+    LEFT JOIN dh_properties AS sr 
+    ON (
+      sr.featureid = event.tid
+      AND sr.entity_type = 'dh_timeseries'
+      AND srv.hydroid = sr.varid
+    )
+    WHERE cov.hydroid = [covid] 
+	    AND pv.hydroid IS NOT NULL
+	    AND ws.ftype = '[ws_ftype]'
+	    AND ws.bundle='watershed'
+	    AND sr.propcode = '[sampres]'")
+    
     config <- list(
       covid = watershed_feature$hydroid,
       ws_ftype = 'nhdplus',
@@ -973,35 +1000,79 @@ simple_elfgen <- function(
     sql <- str_replace_all(sql, '\\[bio_varkey\\]', as.character(config$bio_varkey))
     sql <- str_replace_all(sql, '\\[sampres\\]', as.character(config$sampres))
     message(paste("querying for samples contained by", watershed_feature$ftype, watershed_feature$hydrocode))
-    watershed.df <- sqldf::sqldf(sql, connection = ds$connection)
+    watershed_data <- sqldf::sqldf(sql, connection = ds$connection)
+    #If the user uses flows directly from the datasource, then we can just
+    #output the returned query. Otherwise, we need to add in the data by first
+    #finding the flows from nhdPlusTools
+    if(dataset == "VAHydro-EDAS-ds"){
+      watershed.df <- watershed_data[!duplicated(watershed_data[,c("tid")]),
+                                     !(names(watershed_data) %in% c("x_metric","flow_type"))]
+      #For each monthly flow requested by the user, add as column to pivot the
+      #data frame wider:
+      for(i in config$ws_varkey){
+        flowData <- watershed_data[watershed_data$flow_type == i,]
+        watershed.df[,i] <- flowData$x_metric[match(flowData$tid,watershed.df$tid)]
+      }
+      
+    }else{
+      #Get the flows of all requested nhd watersheds
+      nhdFlows <- nhdplusTools::get_nhdplus(comid = unique(watershed_data$hydrocode))
+      #Rename the columns using VA Hydro varkeys and remove geometry column
+      nhdFlows <- renameNHD(nhdFlows, returnPlotName = FALSE)
+      nhdFlows_noSF <- nhdFlows[,names(nhdFlows) != "geometry"]
+      #Join requested flows into the watershed_data data frame
+      watershed.df <- sqldf::sqldf(
+        paste("SELECT wsdf.*,",paste0("nhddf.",ws_varkey,collapse = ","),
+              "FROM watershed_data as wsdf
+              LEFT JOIN nhdFlows_noSF as nhddf
+              ON wsdf.hydrocode = nhddf.comid")
+      )
+    }
+  }else{
+    message("dataset not yet implemented. Please use 'VAHydro-EDAS-ds',
+            'VAHydro-EDAS', or 'IchthyMaps'")
+    return(FALSE)
   }
+  
+  #If the user has not provided the maximum y-axis value for plotting, assume
+  #the full range is applicable
+  yaxis_threshi <- yaxis_thresh
+  if(is.null(yaxis_threshi)){
+    yaxis_threshi <- max(watershed.df$y_metric)
+  }
+  breakpti <- breakpt
+  if(!is.numeric(breakpti) && breakpti == 'ymax'){
+    #If the user chooses to set the break point using the ymax value, call
+    #elfgen to find that breakpoint
+    breakpti <- elfgen::bkpt_ymax(watershed.df)
+  }else if(!is.numeric(breakpti) && breakpti == 'pwit'){
+    #If user wants to use the piecewise function but has failed to provide the
+    #low and hi thresholds, specify these as the full data range
+    bhii <- bhi
+    bloi <- blo
+    if(is.null(bhii)){
+      bhii <- yaxis_threshi
+    }
+    if(is.null(bloi)){
+      bloi <- 0
+    }
+    breakpti <- elfgen::bkpt_pwit(watershed.df, quantile, blo = bloi, bhi = bhii)
+  }
+  
   out <- list()
   #For each monthly flow requested by the user, attempt to apply elfgen:
   for(i in config$ws_varkey){
-    target_wsdf <- watershed.df[watershed.df$flow_type == i,c('x_metric', 'y_metric', 'hydrocode')]
-    #If the user has not provided the maximum y-axis value for plotting, assume
-    #the full range is applicable
-    yaxis_threshi <- yaxis_thresh
-    if(is.null(yaxis_threshi)){
-      yaxis_threshi <- max(target_wsdf$y_metric)
-    }
-    breakpti <- breakpt
-    if(!is.numeric(breakpti) && breakpti == 'ymax'){
-      #If the user chooses to set the break point using the ymax value, call
-      #elfgen to find that breakpoint
-      breakpti <- elfgen::bkpt_ymax(target_wsdf)
-    }else if(!is.numeric(breakpti) && breakpti == 'pwit'){
-      #If user wants to use the piecewise function but has failed to provide the
-      #low and hi thresholds, specify these as the full data range
-      bhii <- bhi
-      bloi <- blo
-      if(is.null(bhii)){
-        bhii <- yaxis_threshi
-      }
-      if(is.null(bloi)){
-        bloi <- 0
-      }
-      breakpti <- elfgen::bkpt_pwit(target_wsdf, quantile, blo = bloi, bhi = bhii)
+    #Get the column with the flow of interest and change the name to x_metric as
+    #expected in elfgen
+    target_wsdf <- watershed.df[, c(i, 'y_metric', 'hydrocode')]
+    names(target_wsdf)[names(target_wsdf) == i] <- 'x_metric'
+    
+    if(is.logical(axisNames) & axisNames){
+      axisName <- renameNHD(i, returnPlotName = TRUE)
+    }else if(is.logical(axisNames) & !axisNames){
+      axisName <- i
+    }else if((is.character(axisNames) & length(axisNames == config$ws_varkey))){
+      axisName <- axisNames[i]
     }
     
     #Call elfgen, providing the ichtys or queried EDAS data and the user supplied
@@ -1011,7 +1082,7 @@ simple_elfgen <- function(
       "quantile" = quantile,
       "breakpt" = breakpti,
       "yaxis_thresh" = yaxis_threshi,
-      "xlabel" = "Mean Annual Flow (ft3/s)",
+      "xlabel" = axisName,
       "ylabel" = "Fish Species Richness"
     )
     #Either add results to list or return a list of length 1 depending on how
@@ -1025,7 +1096,14 @@ simple_elfgen <- function(
     }
   }
   
-  return(out)
+  return(
+    list(
+      elfgen = out,
+      watershed_data = watershed.df,
+      breakpt = breakpti,
+      yaxis_thresh = yaxis_threshi
+    )
+  )
 }
 
 #'@name simple_nhdPlusFlows
@@ -1035,7 +1113,8 @@ simple_elfgen <- function(
 #'@details This function provides the necessary inputs to call nhdPlusTools
 #'  functions to extract the relevant HUC flows from an area of interest. The
 #'  function will use the largest NHDPlus feature of the input code that is
-#'  contained within the user input hydro feature based on the provided hydroid
+#'  contained within the user input hydro feature based on the provided hydroid.
+#'  Output flow columns will be renamed using VA Hydro varkeys.
 #'@param ds A datasource provided by the user, usally the RomDataSource instance
 #'  create in DEQ config.R files, querying drupal.dh03
 #'@param hydroid The hydroid of a feature of interest. This is used to find
@@ -1065,21 +1144,11 @@ simple_nhdPlusFlows <- function(ds, hydroid, huc_level = "huc8"){
   #contained in the user input river segment
   nhdplus_df <- as.data.frame(nhdplusTools::get_nhdplus(comid= contained_df$hydrocode))
   message(paste("length(nhdplus_df): ", length(nhdplus_df[,1])))
-  nhd_map <- data.frame(
-    newName = c('erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
-      'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
-      'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
-      'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec', 
-      'erom_q0001e_mean', "comid", "gnis_name", "reachcode", "totdasqkm"),
-    nhdName = c('qa_01', 'qa_02', 'qa_03', 'qa_04', 'qa_05', 'qa_06',
-                'qa_07', 'qa_08', 'qa_09', 'qa_10', 'qa_11', 'qa_12',
-                'qa_ma', "comid", "gnis_name", "reachcode", "totdasqkm")
-  )
   #Get the flow of interest along with the comid, name, code, and total drainage
   #area
   nhdplus_df <- nhdplus_df[,c("comid", "gnis_name", "reachcode", "totdasqkm",
-                              grep("qa_[0-9]{2}",names(nhdplus_df),value = TRUE))]
-  names(nhdplus_df) <- nhd_map$newName[match(names(nhdplus_df), nhd_map$nhdName)]
+                              grep("qa_(([0-9]{2})|(ma))",names(nhdplus_df),value = TRUE))]
+  nhdplus_df <- renameNHD(nhdplus_df, returnPlotName = FALSE)
   
   #Find the outlet based on the maximum total drainage area
   outlet_nhdplus_segment <- nhdplus_df[which.max(nhdplus_df$totdasqkm),][1,]
@@ -1092,6 +1161,71 @@ simple_nhdPlusFlows <- function(ds, hydroid, huc_level = "huc8"){
       nhdplus_segment = outlet_nhdplus_segment
     )
   )
+}
+
+#'@name simple_nhdPlusFlows
+#'@title Use VA Hydro Varkeys on NHDPlus
+#'@description A function to rename the columns from NHDPlus to VAHydro varkeys
+#'@details This function takes a data.frame or tibble output from 
+#'\code{nhdPlusTools::get_nhdplus()} and renames the relevant flow columns using
+#'VA Hydro varkeys from dh_variabledefinition to allow for consistent comparison
+#'to data from VA Hydro databases
+#'@param ds A datasource provided by the user, usally the RomDataSource instance
+#'  create in DEQ config.R files, querying drupal.dh03
+#'@param hydroid The hydroid of a feature of interest. This is used to find
+#'  intersecting NHD Plus catchments and to ultimately identify the NHD feature
+#'  of interest based on the huc_level input
+#'@param get_nhdplus_df A data frame output from
+#'  \code{nhdPlusTools::get_nhdplus()} or the \code{simple_nhdplus()} wrapper
+#'@param returnPlotName Default to logical FALSE. If TRUE, returns a character vector
+#'  of names that describe the flow column
+#'@return An identical data frame with flow columns renamed using appropriate
+#'  varkeys if returnPlotName is FALSE or a character vector of readible names
+#'@examples \dontrun{
+#'out <- simple_nhdPlusFlows(ds = ds, hydroid = 68069, huc_level = "huc8")
+#'out <- renameNHD(out)
+#'names(out)
+#'}
+#'@export
+renameNHD <- function(get_nhdplus_df, returnPlotName = FALSE){
+  nhd_map <- data.frame(
+    newName = c('erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
+                'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
+                'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
+                'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec', 
+                'erom_q0001e_mean', "comid", "gnis_name", "reachcode", "totdasqkm"),
+    nhdName = c('qa_01', 'qa_02', 'qa_03', 'qa_04', 'qa_05', 'qa_06',
+                'qa_07', 'qa_08', 'qa_09', 'qa_10', 'qa_11', 'qa_12',
+                'qa_ma', "comid", "gnis_name", "reachcode", "totdasqkm"),
+    plotName = c('Mean January Flow (cfs)', 'Mean February Flow (cfs)',
+                 'Mean March Flow (cfs)','Mean April Flow (cfs)','Mean May Flow (cfs)',
+                 'Mean June Flow (cfs)','Mean July Flow (cfs)',
+                 'Mean August Flow (cfs)','Mean September Flow (cfs)',
+                 'Mean October Flow (cfs)','Mean November Flow (cfs)',
+                 'Mean December Flow (cfs)','Mean Annual Flow (cfs)',
+                 "comid", "gnis_name", "reachcode", "totdasqkm")
+  )
+  if(returnPlotName){
+    #If the user has provided a character of names and requested that the plot
+    #name be returned, find the new plot name only if all provided names have
+    #matches in the key table nhd_map
+    if(is.character(get_nhdplus_df) & all(get_nhdplus_df %in% nhd_map$newName)){
+      namesForReturn <- nhd_map$plotName[match(get_nhdplus_df, nhd_map$newName)]
+    }else{
+      message("Some names in get_nhdplus_df could not be found in mapping or a 
+              non-character vector provided. Names returned unchanged.")
+      namesForReturn <- get_nhdplus_df
+    }
+    
+    return(namesForReturn)
+  }else{
+    #Find the index of each nhdName (where it is present in the names of
+    #get_nhdplus_df) within the names of get_nhdplus_df
+    matchIndex <- match(nhd_map$nhdName[nhd_map$nhdName %in% names(get_nhdplus_df)],
+                        names(get_nhdplus_df))
+    names(get_nhdplus_df)[matchIndex] <- nhd_map$newName
+    return(as.data.frame(get_nhdplus_df))
+  }
 }
 
 # fn_handletimestamp 

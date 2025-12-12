@@ -2,9 +2,12 @@
 % Please edit documentation in R/cia_utils.R
 \name{simple_nhdPlusFlows}
 \alias{simple_nhdPlusFlows}
+\alias{renameNHD}
 \title{Get NHDPlus HUC Monthly Flows}
 \usage{
 simple_nhdPlusFlows(ds, hydroid, huc_level = "huc8")
+
+renameNHD(get_nhdplus_df, returnPlotName = FALSE)
 }
 \arguments{
 \item{ds}{A datasource provided by the user, usally the RomDataSource instance
@@ -16,21 +19,43 @@ of interest based on the huc_level input}
 
 \item{huc_level}{Which NHD waterhsed level should be used to generate the
 \code{elfgen()} relationships? Defaults to "huc8", representing HUC8}
+
+\item{get_nhdplus_df}{A data frame output from
+\code{nhdPlusTools::get_nhdplus()} or the \code{simple_nhdplus()} wrapper}
+
+\item{returnPlotName}{Default to logical FALSE. If TRUE, returns a character vector
+of names that describe the flow column}
 }
 \value{
 A list that contains the HUC code of interest and data on the nhdPlus
  segment
+
+An identical data frame with flow columns renamed using appropriate
+ varkeys if returnPlotName is FALSE or a character vector of readible names
 }
 \description{
 A wrapper function that makes it easy to obtain HUC flows from a
  hydro feature
+
+A function to rename the columns from NHDPlus to VAHydro varkeys
 }
 \details{
 This function provides the necessary inputs to call nhdPlusTools
  functions to extract the relevant HUC flows from an area of interest. The
  function will use the largest NHDPlus feature of the input code that is
- contained within the user input hydro feature based on the provided hydroid
+ contained within the user input hydro feature based on the provided hydroid.
+ Output flow columns will be renamed using VA Hydro varkeys.
+
+This function takes a data.frame or tibble output from 
+\code{nhdPlusTools::get_nhdplus()} and renames the relevant flow columns using
+VA Hydro varkeys from dh_variabledefinition to allow for consistent comparison
+to data from VA Hydro databases
 }
 \examples{
 \dontrun{simple_nhdPlusFlows(ds = ds, hydroid = 68069, huc_level = "huc8")}
+\dontrun{
+out <- simple_nhdPlusFlows(ds = ds, hydroid = 68069, huc_level = "huc8")
+out <- renameNHD(out)
+names(out)
+}
 }

@@ -9,10 +9,11 @@ simple_elfgen(
   ws_code,
   huc_level = "huc8",
   dataset = "VAHydro-EDAS",
-  ws_varkey = "erom_q0001e_aug",
+  ws_varkey = "All",
   quantile = 0.8,
   breakpt = "ymax",
   yaxis_thresh = NULL,
+  axisNames = TRUE,
   blo = 0,
   bhi = yaxis_thresh
 )
@@ -30,12 +31,15 @@ is the default}
 
 \item{dataset}{Should \code{elfgen()} use USGS Icthys data or DEQ EDAS data
 (via Hydro, which may be outdated but is state-specific data). Options are
-"IchthyMaps" for USGS or "VAHydro-EDAS" for DEQ data}
+"IchthyMaps" for USGS or "VAHydro-EDAS" and "VAHydro-EDAS-ds" for DEQ data,
+with the former leveraging \code{nhdPlusTools::get_nhdplus()} to derive flows
+and the latter using imported flows from the provided datasource}
 
 \item{ws_varkey}{Which NHDPlus flow for the \code{huc_level} should be used to
 generate the \code{elfgen()} ecologic limit function? The options are mean
 flow for any month but MUST be in the form "erom_q0001e_aug". Use
-"erom_q0001e_mean" to use mean annual flow.}
+"erom_q0001e_mean" to use mean annual flow or "All" to get all flows and all
+elfgen regressions}
 
 \item{quantile}{A specified value for the quantile of interest - 0.95 equals
 the 95th percentile. This is used in the eflgen ecologic limit function
@@ -54,6 +58,13 @@ left NULL by user, it will be set as the maximum value of the dataset. If
 using "pwit" as the breakpt, this will also serve as the \code{bhi} value if
 not otherwise specified by user.}
 
+\item{axisNames}{Either a logical boolean (default TRUE) or character vector
+to be used to derive the x-axis names for the plotted parameters. If TRUE,
+then axis names will be guessed based on known VA Hydro varkey conversions.
+If a character vector is provided of the same length as ws_varkey, these
+will be used as plot titles. Otherwise, the ws_varkey will serve as the
+label}
+
 \item{blo}{When using the "pwit" breakpt analysis, this is the "bound low"
 value, or the lower bound of the piecewise range and defaults to 0. See
 \code{elfgen::bkpt_pwit()} for additional details.}
@@ -63,8 +74,10 @@ value, or the upper bound of the piecewise range and defaults to
 \code{yaxis_thresh}. See \code{elfgen::bkpt_pwit()} for additional details.}
 }
 \value{
-Object containing plot image and dataframe of ELF statistics. See
- \code{elfgen::elfgen()} for more details
+A list with elfgen as the list with plot image and dataframe of ELF statistics (see
+ \code{elfgen::elfgen()} for more details), the flow and fish data used in
+ the ELF derived from dataset, and the threshold/breakpoint that is set or
+ calculated
 }
 \description{
 A wrapper that makes it easier to access VA Hydro's imported EDAS
@@ -82,5 +95,5 @@ This function provides the necessary inputs to call the
 \examples{
 \dontrun{simple_elfgen( ds = ds, ws_code = 68069, huc_level = "huc8",
  dataset = 'VAHydro-EDAS', ws_varkey = c('erom_q0001e_aug','erom_q0001e_mar'), quantile = 0.8,
- breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh)}
+ breakpt = "ymax", yaxis_thresh = NULL, blo = 0, bhi = yaxis_thresh, axisNames = TRUE)}
 }
