@@ -45,13 +45,15 @@ elfgen regressions}
 the 95th percentile. This is used in the eflgen ecologic limit function
 analysis}
 
-\item{breakpt}{A breakpoint - either user-supplied fixed value or may be
-derived using elfgen breakpoint functions \code{bkpt_pwit()} or
-\code{bkpt_ymax()} by inputting the character value "ymax" or "pwit"
-respectively. If using "pwit", it is recommended the user provide a
-\code{blo} and \code{bhi} value as documented in the elfgen pacakge.
-\code{blo} will default to 0 and \code{bhi} to the \code{yaxis_thresh} value
-input, which itself defaults to the maximum number of taxa}
+\item{breakpt}{A breakpoint - either user-supplied fixed value (single or a
+numeric of equal length to ws_varkey) or may be derived using elfgen
+breakpoint functions \code{bkpt_pwit()} or \code{bkpt_ymax()} by inputting
+the character value "ymax" or "pwit" respectively. If using "pwit", it is
+recommended the user provide a \code{blo} and \code{bhi} value as documented
+in the elfgen pacakge. \code{blo} will default to 0 and \code{bhi} to the
+\code{yaxis_thresh} value input, which itself defaults to the maximum number
+of taxa. "pwit" will default to ymax if none can be identified. "pwit" and
+"ymax" will be determine breakpoints separately for each ws_varkey}
 
 \item{yaxis_thresh}{The maximum value to be used in the plot. If this value is
 left NULL by user, it will be set as the maximum value of the dataset. If

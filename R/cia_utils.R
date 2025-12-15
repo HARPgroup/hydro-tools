@@ -847,13 +847,15 @@ is.empty <- function (x, ...)
 #'@param quantile A specified value for the quantile of interest - 0.95 equals
 #'  the 95th percentile. This is used in the eflgen ecologic limit function
 #'  analysis
-#'@param breakpt A breakpoint - either user-supplied fixed value or may be
-#'  derived using elfgen breakpoint functions \code{bkpt_pwit()} or
-#'  \code{bkpt_ymax()} by inputting the character value "ymax" or "pwit"
-#'  respectively. If using "pwit", it is recommended the user provide a
-#'  \code{blo} and \code{bhi} value as documented in the elfgen pacakge.
-#'  \code{blo} will default to 0 and \code{bhi} to the \code{yaxis_thresh} value
-#'  input, which itself defaults to the maximum number of taxa
+#'@param breakpt A breakpoint - either user-supplied fixed value (single or a
+#'  numeric of equal length to ws_varkey) or may be derived using elfgen
+#'  breakpoint functions \code{bkpt_pwit()} or \code{bkpt_ymax()} by inputting
+#'  the character value "ymax" or "pwit" respectively. If using "pwit", it is
+#'  recommended the user provide a \code{blo} and \code{bhi} value as documented
+#'  in the elfgen pacakge. \code{blo} will default to 0 and \code{bhi} to the
+#'  \code{yaxis_thresh} value input, which itself defaults to the maximum number
+#'  of taxa. "pwit" will default to ymax if none can be identified. "pwit" and
+#'  "ymax" will be determine breakpoints separately for each ws_varkey
 #'@param yaxis_thresh The maximum value to be used in the plot. If this value is
 #'  left NULL by user, it will be set as the maximum value of the dataset. If
 #'  using "pwit" as the breakpt, this will also serve as the \code{bhi} value if
@@ -876,13 +878,13 @@ simple_elfgen <- function(
     ds, ws_code, huc_level = "huc8", dataset = 'VAHydro-EDAS', ws_varkey = 'All',
     quantile = 0.8, breakpt = "ymax", yaxis_thresh = NULL, axisNames = TRUE,
     blo = 0, bhi = yaxis_thresh){
-  if(tolower(ws_varkey) == "all"){
+  if(any(tolower(ws_varkey) == "all")){
     #All nhd flow varkeys
-    ws_varkey <- c('erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
-    'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
-    'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
-    'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec', 
-    'erom_q0001e_mean')
+    ws_varkey <- c('erom_q0001e_mean', 
+                   'erom_q0001e_jan', 'erom_q0001e_feb', 'erom_q0001e_mar',
+                   'erom_q0001e_apr', 'erom_q0001e_may', 'erom_q0001e_june',
+                   'erom_q0001e_july', 'erom_q0001e_aug', 'erom_q0001e_sept',
+                   'erom_q0001e_oct', 'erom_q0001e_nov', 'erom_q0001e_dec')
   }
   #Find the NHD feature based on the HUC level and code
   watershed.code <- as.character(ws_code)
@@ -994,11 +996,11 @@ simple_elfgen <- function(
       bio_varkey = 'aqbio_nt_total',
       sampres = 'species'
     )
-    sql <- str_replace_all(sql, '\\[covid\\]', as.character(config$covid))
-    sql <- str_replace_all(sql, '\\[ws_ftype\\]', as.character(config$ws_ftype))
-    sql <- str_replace_all(sql, '\\[ws_varkey\\]', paste0("'",as.character(config$ws_varkey),"'",collapse = ","))
-    sql <- str_replace_all(sql, '\\[bio_varkey\\]', as.character(config$bio_varkey))
-    sql <- str_replace_all(sql, '\\[sampres\\]', as.character(config$sampres))
+    sql <- stringr::str_replace_all(sql, '\\[covid\\]', as.character(config$covid))
+    sql <- stringr::str_replace_all(sql, '\\[ws_ftype\\]', as.character(config$ws_ftype))
+    sql <- stringr::str_replace_all(sql, '\\[ws_varkey\\]', paste0("'",as.character(config$ws_varkey),"'",collapse = ","))
+    sql <- stringr::str_replace_all(sql, '\\[bio_varkey\\]', as.character(config$bio_varkey))
+    sql <- stringr::str_replace_all(sql, '\\[sampres\\]', as.character(config$sampres))
     message(paste("querying for samples contained by", watershed_feature$ftype, watershed_feature$hydrocode))
     watershed_data <- sqldf::sqldf(sql, connection = ds$connection)
     #If the user uses flows directly from the datasource, then we can just
@@ -1040,26 +1042,10 @@ simple_elfgen <- function(
   if(is.null(yaxis_threshi)){
     yaxis_threshi <- max(watershed.df$y_metric)
   }
-  breakpti <- breakpt
-  if(!is.numeric(breakpti) && breakpti == 'ymax'){
-    #If the user chooses to set the break point using the ymax value, call
-    #elfgen to find that breakpoint
-    breakpti <- elfgen::bkpt_ymax(watershed.df)
-  }else if(!is.numeric(breakpti) && breakpti == 'pwit'){
-    #If user wants to use the piecewise function but has failed to provide the
-    #low and hi thresholds, specify these as the full data range
-    bhii <- bhi
-    bloi <- blo
-    if(is.null(bhii)){
-      bhii <- yaxis_threshi
-    }
-    if(is.null(bloi)){
-      bloi <- 0
-    }
-    breakpti <- elfgen::bkpt_pwit(watershed.df, quantile, blo = bloi, bhi = bhii)
-  }
+
   
   out <- list()
+  bkpt_list <- character()
   #For each monthly flow requested by the user, attempt to apply elfgen:
   for(i in config$ws_varkey){
     #Get the column with the flow of interest and change the name to x_metric as
@@ -1067,6 +1053,47 @@ simple_elfgen <- function(
     target_wsdf <- watershed.df[, c(i, 'y_metric', 'hydrocode')]
     names(target_wsdf)[names(target_wsdf) == i] <- 'x_metric'
     
+    #Find the breakpoint for this dataset, dependent on user selection
+    if(is.numeric(breakpt) && length(breakpt) == 1){
+      breakpti <- breakpt
+    }else if(is.numeric(breakpt) && all(!is.na(breakpt)) && length(breakpt) == length(config$ws_varkey)){
+      breakpti <- breakpt[which(config$ws_varkey == i)]
+    }else if(!is.numeric(breakpt) && tolower(breakpt) == 'ymax'){
+      #If the user chooses to set the break point using the ymax value, call
+      #elfgen to find that breakpoint
+      breakpti <- elfgen::bkpt_ymax(target_wsdf)
+    }else if(!is.numeric(breakpt) && tolower(breakpt) == 'pwit'){
+    #If the user has elected to use a piecewise breakpoint, find it via elfgen
+      #If user wants to use the piecewise function but has failed to provide the
+      #low and hi thresholds, specify these as the full data range
+      bhii <- bhi
+      bloi <- blo
+      if(is.null(bhii)){
+        bhii <- yaxis_threshi
+      }
+      if(is.null(bloi)){
+        bloi <- 0
+      }
+      tryPWIT <- tryCatch({
+        elfgen::bkpt_pwit(target_wsdf, quantile, blo = bloi, bhi = bhii)
+      },error = function(e) {NULL})
+        
+      if(!is.null(tryPWIT)){
+        breakpti <- tryPWIT
+      }else{
+        message(paste("No piecewise breakpoint identified for",i,"with current
+                      blo and bhi breakpoints. Defaulted to ymax."))
+        #Default to the ymax for this ws_varkey if no PWIT could be found
+        breakpti <- elfgen::bkpt_ymax(target_wsdf)
+      }
+    }else{
+      message("Breakpoint is incorrect. Ensure that it is either set to
+      'pwit', 'ymax', a single numeric, or a numeric of equal length to
+      ws_varkey (13 for all)")
+      return(FALSE)
+    }
+    
+    #Set axis name for elfgen based on ws_varkey for more readible plot labels
     if(is.logical(axisNames) & axisNames){
       axisName <- renameNHD(i, returnPlotName = TRUE)
     }else if(is.logical(axisNames) & !axisNames){
@@ -1085,6 +1112,7 @@ simple_elfgen <- function(
       "xlabel" = axisName,
       "ylabel" = "Fish Species Richness"
     )
+    bkpt_list <- c(bkpt_list, breakpti)
     #Either add results to list or return a list of length 1 depending on how
     #many flows were requested by user
     if(length(config$ws_varkey) == 1){
@@ -1100,7 +1128,7 @@ simple_elfgen <- function(
     list(
       elfgen = out,
       watershed_data = watershed.df,
-      breakpt = breakpti,
+      breakpt = bkpt_list,
       yaxis_thresh = yaxis_threshi
     )
   )
