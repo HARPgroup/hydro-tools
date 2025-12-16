@@ -9,19 +9,20 @@
 #'   the RomDataSource object consistent.
 #' @details Provides integrated, queryable universe of features, observations
 #'   and meta data
-#' @importFrom R6 R6Class
+#' @importFrom R6 R6Class R
 #' @param baseurl URL of remote data store with REST capabilities, optional
 #' @return reference class of type openmi.om.base.
 #' @seealso NA
-#' @examples 
-#' ##Get new datasource via odbc
-#' #ds <- RomDataSource$new(site,
-#'#                         rest_uname = odbc_uname,
-#'#                         connection_type = 'odbc',
-#'#                         dbname = databaseName)
-#'# ds$get_token(rest_pw = odbc_pw)
-#' ##Pointer to external db
-#'# ds$connection
+#' @examples \dontrun{
+#'#Get new datasource via odbc
+#'ds <- RomDataSource$new(site,
+#'                       rest_uname = odbc_uname,
+#'                       connection_type = 'odbc',
+#'                       dbname = databaseName)
+#'ds$get_token(rest_pw = odbc_pw)
+#'#Pointer to external db
+#'ds$connection
+#'}
 #' @export RomDataSource
 RomDataSource <- R6Class(
   "RomDataSource",

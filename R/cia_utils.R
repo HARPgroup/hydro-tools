@@ -1191,22 +1191,20 @@ simple_nhdPlusFlows <- function(ds, hydroid, huc_level = "huc8"){
   )
 }
 
-#'@name simple_nhdPlusFlows
+#'@name renameNHD
 #'@title Use VA Hydro Varkeys on NHDPlus
-#'@description A function to rename the columns from NHDPlus to VAHydro varkeys
+#'@description A function to rename the flows from NHDPlus to VAHydro varkeys
 #'@details This function takes a data.frame or tibble output from 
 #'\code{nhdPlusTools::get_nhdplus()} and renames the relevant flow columns using
 #'VA Hydro varkeys from dh_variabledefinition to allow for consistent comparison
-#'to data from VA Hydro databases
-#'@param ds A datasource provided by the user, usally the RomDataSource instance
-#'  create in DEQ config.R files, querying drupal.dh03
-#'@param hydroid The hydroid of a feature of interest. This is used to find
-#'  intersecting NHD Plus catchments and to ultimately identify the NHD feature
-#'  of interest based on the huc_level input
+#'to data from VA Hydro databases. Alternatively, it takes in a vector of flow
+#'names from \code{nhdPlusTools::get_nhdplus()} and returns a vector of readible
+#'names (when returnPlotName is TRUE).
 #'@param get_nhdplus_df A data frame output from
-#'  \code{nhdPlusTools::get_nhdplus()} or the \code{simple_nhdplus()} wrapper
-#'@param returnPlotName Default to logical FALSE. If TRUE, returns a character vector
-#'  of names that describe the flow column
+#'  \code{nhdPlusTools::get_nhdplus()} or the \code{simple_nhdplus()} wrapper.
+#'  Alternatively, a vector of nhd flow names
+#'@param returnPlotName Logical. Defaults to FALSE. If TRUE, returns a character
+#'  vector of names that describe the flow column
 #'@return An identical data frame with flow columns renamed using appropriate
 #'  varkeys if returnPlotName is FALSE or a character vector of readible names
 #'@examples \dontrun{
