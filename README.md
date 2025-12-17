@@ -111,6 +111,7 @@ This package is in active development.
 ## Release notes
 ### 1.0.10 12/15/2025
 1. Update elfgen wrappers to allow for more dynamic generation of NHDPlus flows.
+2. Added an `na.rm = TRUE` to the mean flows call in `om_flow_table()`
 
 ### 1.0.9 12/01/2025
 1. Added wrapper functions for elfgen package. `simple_nhdPlusFlows()` finds the NHDPlus segment (and flows) contained in a VA Hydro feature. The output code can be given to `simple_elfgen()` to allow for easy generation of ecologic limit functions from imported EDAS data
