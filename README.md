@@ -109,6 +109,13 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.11 01/07/2026
+1. Updated the documentation on `RomFeature$get_raster_ts()` to be more accurate
+for the starttime and endtime arguments. Additionally, added a `touched` argument
+to leverage the new options in PostGIS `ST_Clip()`
+2. Added an `outaszoo` argument to `om_get_rundata()` to allow data frames of
+model data to be returned.
+
 ### 1.0.10 12/15/2025
 1. Update elfgen wrappers to allow for more dynamic generation of NHDPlus flows.
 2. Added an `na.rm = TRUE` to the mean flows call in `om_flow_table()`

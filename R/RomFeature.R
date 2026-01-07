@@ -233,15 +233,18 @@ RomFeature <- R6Class(
     #'   meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
     #'   'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
     #'   'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'
-    #' @param starttime begin tstime to limit query (default FALSE to remove a
+    #' @param starttime begin date-time to limit query (default FALSE to remove a
     #'   tstime filter)
-    #' @param endtime last tsendtime to limit query (default FALSE to remove a
-    #'   tsendtime filter)
+    #' @param endtime last date-time to limit query (default to Sys.Date())
     #' @param band which raster band to query (default = 1)?
     #' @param aggregate Should data be aggregated and if so, how? FALSE will
     #'   return 1 record for every date. Otheriwse, can use basic aggregate
     #'   functions like mean, min, max to summarize data
     #' @param metric default mean, which aspect of the ST_SummaryStats() to return
+    #' @param touched Defaults to FALSE. Should PostGIS ST_Clip() use the
+    #'   touched argument to return all raster cells touched by the feature? Or,
+    #'   if FALSE, should only pixels that have centroids within the feature be
+    #'   considered?
     #' @return dataframe of timeseries values
     get_raster_ts = function(
         varkey = 'prism_mod_daily',
@@ -249,7 +252,8 @@ RomFeature <- R6Class(
         endtime = Sys.Date(),
         band = '1',
         aggregate = FALSE,
-        metric = 'mean'
+        metric = 'mean',
+        touched = FALSE
       ) {
       # looks at the table dh_timeseries_weather
       # coverage raster summary
@@ -269,14 +273,21 @@ RomFeature <- R6Class(
       }
       #If the user wishes to apply an aggregate function, group the data by the
       #featureid and apply the aggregate and metric arguments. Otherwise, just
-      #get the metric from st_summarystats
+      #get the metric from st_summarystats. The data will be clipped to the
+      #feature and the user can choose to apply the touched argument from
+      #postGIS st_Clip
+      if(touched){
+        clipSQL <- paste0("st_clip(met.rast, fgeo.dh_geofield_geom,touched => true)")
+      }else{
+        clipSQL <- paste0("st_clip(met.rast, fgeo.dh_geofield_geom,touched => false)")
+      }
       if (!is.logical(aggregate)) {
-        rastercalc = fn$paste0("$aggregate((ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric)")
+        rastercalc = fn$paste0("$aggregate((ST_summarystats($clipSQL, 1, TRUE)).$metric)")
         groupby = "GROUP BY met.featureid"
         startcol = "to_timestamp(min(met.tsendtime))"
         endcol = "to_timestamp(max(met.tsendtime))"
       } else {
-        rastercalc = fn$paste0("(ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric")
+        rastercalc = fn$paste0("(ST_summarystats($clipSQL, 1, TRUE)).$metric")
         groupby = ""
         startcol = "to_timestamp(met.tsendtime)"
         endcol = "to_timestamp(met.tsendtime)"

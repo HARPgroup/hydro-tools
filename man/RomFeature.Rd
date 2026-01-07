@@ -286,7 +286,8 @@ Get raw or summarized raster values for this RomFeature from
   endtime = Sys.Date(),
   band = "1",
   aggregate = FALSE,
-  metric = "mean"
+  metric = "mean",
+  touched = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -299,11 +300,10 @@ meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
 'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
 'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'}
 
-\item{\code{starttime}}{begin tstime to limit query (default FALSE to remove a
+\item{\code{starttime}}{begin date-time to limit query (default FALSE to remove a
 tstime filter)}
 
-\item{\code{endtime}}{last tsendtime to limit query (default FALSE to remove a
-tsendtime filter)}
+\item{\code{endtime}}{last date-time to limit query (default to Sys.Date())}
 
 \item{\code{band}}{which raster band to query (default = 1)?}
 
@@ -312,6 +312,11 @@ return 1 record for every date. Otheriwse, can use basic aggregate
 functions like mean, min, max to summarize data}
 
 \item{\code{metric}}{default mean, which aspect of the ST_SummaryStats() to return}
+
+\item{\code{touched}}{Defaults to FALSE. Should PostGIS ST_Clip() use the
+touched argument to return all raster cells touched by the feature? Or,
+if FALSE, should only pixels that have centroids within the feature be
+considered?}
 }
 \if{html}{\out{</div>}}
 }
