@@ -1262,22 +1262,25 @@ renameNHD <- function(get_nhdplus_df, returnPlotName = FALSE){
 #' @param ts some type of date or timestamp
 #' @return single numeric value for UNix epoch
 #' @export fn_handletimestamp
-fn_handletimestamp <- function(ts) {
+fn_handletimestamp <- function(tslike, format="epoch") {
   # don't do date_received as this is a field and is handled there
-  if ( !is.null(ts) && (ts != '')) {
-    orig <- ts
+  if ( (tslike != '') & !is.null(tslike)) {
+    orig = tslike;
     # if a valid unix epoch style timestamp has been submitted 
     # this next will try to convert a string
-    if (is.na(as.numeric(ts))) {
+    if (is.na(as.numeric(tslike))) {
       # must be a formatted date, not a timestamp integer/float
       # not a valid unix timestamp, so try to convert from some date format
-      if (!is.na(lubridate::ymd(ts))) {
-        ts <- lubridate::ymd(ts)
-      } else if (!is.na(lubridate::mdy(ts))) {
-        ts <- lubridate::mdy(ts)
+      if (!is.na(ymd(tslike))) {
+        tslike=ymd(tslike)
+      } else if (!is.na(mdy(tslike))) {
+        tslike=mdy(tslike)
+      } else {
+        message(paste("Error: Cannot find way to interpret", tslike, "as date/time-like."))
+        return(FALSE)
       }
-      message(paste("Converted orig to Epoch:", ts))
+      message(paste("Converted orig to Epoch:", tslike))
     }
   }
-  return(ts)
+  return(tslike)
 }
