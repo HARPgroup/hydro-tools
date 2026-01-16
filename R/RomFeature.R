@@ -195,6 +195,8 @@ RomFeature <- R6Class(
         spatial_join = paste0(' (st_within(base.', target_geomcol, ', target.', base_geomcol,')) ')
       } else if ( operator == 'st_contains_centroid' ) {
         spatial_join = paste0(' (st_contains(base.', target_geomcol, ', st_centroid(target.', base_geomcol,'))) ')
+      } else if ( operator == 'st_centroid_within' ) {
+        spatial_join = paste0(' (st_contains(target.', target_geomcol,', st_centroid(base.', base_geomcol, '))) ')
       }
       # include this in inputs for odbc routines
       input_where = paste0(
