@@ -22,24 +22,24 @@ fn_plot_impoundment_flux <- function(
   ymn <- 1
   ymx <- 100
   # par(mar = c(5,5,2,5))
-  par(mar = c(8.8,5,0.5,5))
+  graphics::par(mar = c(8.8,5,0.5,5))
   plot(
     dat[,pur_col] * 100.0,
     ylim=c(ymn,ymx),
     ylab="Reservoir Usable Storage (%)",
     xlab=paste("Model Flow Period",min(index(dat)),"to",max(index(dat)))
   )
-  par(new = TRUE)
+  graphics::par(new = TRUE)
   plot(dat[,Qin_col],col='blue', axes=FALSE, xlab="", ylab="")
-  lines(dat[,Qout_col],col='green')
-  lines(dat[,wd_col] * 1.547,col='red')
+  graphics::lines(dat[,Qout_col],col='green')
+  graphics::lines(dat[,wd_col] * 1.547,col='red')
   graphics::axis(side = 4)
-  mtext(side = 4, line = 3, 'Flow/Demand (cfs)')
+  graphics::mtext(side = 4, line = 3, 'Flow/Demand (cfs)')
   if (legend_on == TRUE) {
-    legend("bottom",inset=-0.36, xpd=TRUE, c("Reservoir Usable Storage","Inflow","Outflow","Demand"),
-           col = c("black", "blue", "green","red"),
-           lty = c(1,1,1,1),
-           bg='white',cex=0.8) 
+    graphics::legend("bottom",inset=-0.36, xpd=TRUE, c("Reservoir Usable Storage","Inflow","Outflow","Demand"),
+                      col = c("black", "blue", "green","red"),
+                      lty = c(1,1,1,1),
+                      bg='white',cex=0.8) 
   }
 }
 

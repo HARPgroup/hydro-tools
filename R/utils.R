@@ -31,8 +31,8 @@ fn_get_rundata <- function(
   filename<-paste(urlbase, elementid, "&variables=", varname, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   message(paste("From ", filename));
   
-  dat = try(read.table(filename, header = TRUE, sep = ",")) 
-  if (class(dat)=='try-error') { 
+  dat = try(utils::read.table(filename, header = TRUE, sep = ",")) 
+  if (inherits(dat, 'try-error')) { 
     # what to do if file empty 
     message(paste("Error: problem reading file ", filename))
     return (FALSE);
@@ -71,7 +71,7 @@ fn_remove_model_warmup <- function(dat) {
   #ensure there are associated timezones
   sdate <- as.POSIXct(sdate,tz = "EST")
   edate <- as.POSIXct(edate,tz = "EST")
-  dat <- window(dat, start = sdate, end = edate)
+  dat <- stats::window(dat, start = sdate, end = edate)
   return(dat)
 }
 
@@ -103,8 +103,8 @@ fn_get_runfile_info <- function(
   message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
   filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
   message(paste("From ", filename))
-  finfo = try(read.csv(filename, header = TRUE, sep = "\t")) ;
-  if (class(finfo)=='try-error') { 
+  finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
+  if (inherits(finfo, 'try-error')) { 
     # what to do if file empty 
     message(paste("Error: retrieving ", filename))
     return (FALSE);
@@ -162,8 +162,8 @@ fn_get_runfile <- function(
       # re-download if the remote is newer than the local
       if (finfo$compressed == 1) {
         message(paste("Downloading Compressed Run File ", filename));
-        drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
-        if ((drez == FALSE) | class(drez)=='try-error') { 
+        drez <- try(utils::download.file(filename,'tempfile',mode="wb", method = "libcurl"))
+        if ((drez == FALSE) | inherits(drez, 'try-error')) { 
           message(paste("Download for", filename, "failed. "))
           return(FALSE)
         }
@@ -179,8 +179,8 @@ fn_get_runfile <- function(
   } else {
     # does not exist locally
     message(paste("Downloading Run File ", filename));
-    drez <- try(download.file(filename,'tempfile',mode="wb", method = "libcurl"))
-    if (is.logical(drez) | class(drez)=='try-error') { 
+    drez <- try(utils::download.file(filename,'tempfile',mode="wb", method = "libcurl"))
+    if (is.logical(drez) | inherits(drez, 'try-error')) { 
       message(paste("Download for", filename, "failed."))
       return(FALSE)
     }
@@ -189,8 +189,8 @@ fn_get_runfile <- function(
       filename <-  utils::unzip ('tempfile');
     }
   }
-  dat = try(read.table( filename, header = TRUE, sep = ",")) 
-  if (is.logical(dat) | class(dat)=='try-error') { 
+  dat = try(utils::read.table( filename, header = TRUE, sep = ",")) 
+  if (is.logical(dat) | inherits(dat, 'try-error')) { 
     # what to do if file empty 
     message(paste("Error: empty file ", filename))
     return (FALSE);

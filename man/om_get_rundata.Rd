@@ -10,7 +10,8 @@ om_get_rundata(
   site = "http://deq2.bse.vt.edu",
   cached = FALSE,
   hydrowarmup = TRUE,
-  cleanup = FALSE
+  cleanup = FALSE,
+  outaszoo = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ headwaters and operational rules engage}
 \item{cleanup}{Logical. Should the function delete the log file create for
 the cached argument? If this is TRUE, the .log files will be deleted after
 download from OM server}
+
+\item{outaszoo}{boolean return as a zoo timeseries with numeric mode if TRUE,
+or as data frame if FALSE. Default is TRUE.}
 }
 \value{
 data.frame of model results
@@ -42,7 +46,10 @@ Retrieve model results (run data) from the VA Hydro server for a
 \details{
 A wrapper of \code{hydrotools::fn_get_runfile()}. This function
   returns the results in a zoo (see zoo::zoo()) that has the timestamp as the
-  index. See \code{hydrotools::fn_get_runfile()} for more details.
+  index. See \code{hydrotools::fn_get_runfile()} for more details. If
+  outaszoo is TRUE, the output will be a zoo TS with numeric mode. Please note
+  that zoo's are matrices and cannot hold more than one data type such that
+  character and date fields will be set to NA.
 }
 \examples{
 #om_get_rundata(72446, 600, site=omsite)

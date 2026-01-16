@@ -1,6 +1,6 @@
 Package: hydrotools
 Title: Data processing and accessors for VAHydro
-Version: 1.0.6
+Version: 1.0.11
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Depends: 
@@ -19,7 +19,6 @@ Imports:
     graphics,
     flextable,
     bit64,
-    PearsonDS,
     caTools,
     lubridate,
     plyr,
@@ -33,4 +32,7 @@ Imports:
     sqldf,
     sf,
     lmomco,
-    e1071
+    e1071,
+    elfgen
+Suggests: 
+    dataRetrieval

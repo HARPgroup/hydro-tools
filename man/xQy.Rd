@@ -8,8 +8,8 @@ xQy(
   gageDataIn,
   flowColumn = "Flow",
   dateColumn = "Date",
-  AYS = "10-01",
-  AYE = "09-30",
+  AYS = "04-01",
+  AYE = "03-31",
   startYear = NULL,
   endYear = NULL,
   x = 7,
@@ -18,8 +18,9 @@ xQy(
 )
 }
 \arguments{
-\item{gageDataIn}{A data frame containing a date and flow column of daily
-streamflows}
+\item{gageDataIn}{A data frame or 1-D zoo timeseries containing a date and
+flow column of daily streamflows. If a zoo is passed in, the flowColumn
+argument the flowColumn and dateColumn arguments are ignored}
 
 \item{flowColumn}{The column name in gageDataIn that contains the flow values}
 
@@ -82,14 +83,14 @@ This function calculates xQy style low flows from USGS or other flow
   This is functionally equivalent to the VPDES' DFLOW R Shiny application.
 }
 \examples{
-#gageDat <- dataRetrieval::readNWISdv("01631000","00060")
-#gageDat <- dataRetrieval::renameNWISColumns(gageDat)
-#gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
-#low_flows <- xQy(gageDataIn = gageDat,
-#   flowColumn = "Flow", dateColumn = "Date",
-#   AYS = "07-13", AYE = "02-15",
-#   startYear = NULL, endYear = NULL,
-#   x = 7, y = 10,
-#   IncludeSummerFlow = F)
-#low_flows$Flows
+gageDat <- dataRetrieval::readNWISdv("01631000","00060")
+gageDat <- dataRetrieval::renameNWISColumns(gageDat)
+gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
+low_flows <- xQy(gageDataIn = gageDat,
+   flowColumn = "Flow", dateColumn = "Date",
+   AYS = "07-13", AYE = "02-15",
+   startYear = NULL, endYear = NULL,
+   x = 7, y = 10,
+   IncludeSummerFlow = FALSE)
+low_flows$Flows
 }

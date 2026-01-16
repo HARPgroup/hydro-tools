@@ -14,8 +14,8 @@
 #'@param da Numeric. The drainage area of your channel.
 #'@return A list with the bank full stage (h), bank full width (bf), base width
 #'  (b), side slope (z), and mannings roughness (n)
-#'@example 
-#'#usgs_bankfull_properties(prov = 1,da = 10)
+#'@examples 
+#'usgs_bankfull_properties(prov = 1,da = 10)
 #'@export
 usgs_bankfull_properties <- function(prov, da) {
   #Provincial Channel Geometry
@@ -264,7 +264,7 @@ simple_wshed_map <- function(ds,wshdHydroid, findUpstream = FALSE,
       )))
   #point buffer, which may have x,y buffers
   if(!is.null(config$pointBuffer)){
-    if(class(config$pointBuffer) == "numeric" & length(config$pointBuffer) <= 2){
+    if(inherits(config$pointBuffer, "numeric") & length(config$pointBuffer) <= 2){
       pointLabelLocations <- sweep(pointLabelLocations,2,config$pointBuffer)
     }else if(
       !is.null(config$pointBuffer) &&
@@ -275,7 +275,7 @@ simple_wshed_map <- function(ds,wshdHydroid, findUpstream = FALSE,
   }
   #watershed buffer, which may be specific to each watershed or a generic buffer
   #vector
-  if(class(config$wshdBuffer) == "numeric" & length(config$wshdBuffer) <= 2){
+  if(inherits(config$wshdBuffer, "numeric") & length(config$wshdBuffer) <= 2){
     wshdLabelLocations <- sweep(wshdLabelLocations,2,config$wshdBuffer)
   }else if(
     !is.null(config$wshdBuffer) &&
