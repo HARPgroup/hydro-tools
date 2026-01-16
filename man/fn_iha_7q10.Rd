@@ -4,20 +4,41 @@
 \alias{fn_iha_7q10}
 \title{fn_iha_7q10}
 \usage{
-fn_iha_7q10(zoots)
+fn_iha_7q10(zoots, flowColumnIn = "Flow", dateColumnIn = "Date")
 }
 \arguments{
-\item{zoots}{a timeseries flormatted in zoo (required by IHA)}
+\item{zoots}{a timeseries formatted in zoo or a data frame that contains a
+date and flow column, to be specified by user}
+
+\item{flowColumnIn}{If a dataframe is provided to the function, this is the
+name of the column that contains the flow data for analysis. Ignored if a
+zoo timeseries was provided.}
+
+\item{dateColumnIn}{If a dataframe is provided to the function, this is the
+name of the column that contains the dates. Ignored if a zoo timeseries was
+provided}
 }
 \value{
-singel numeric value for 7q10
+single numeric value for 7Q10
 }
 \description{
-provide the 7q10 from a given flow timeseries
+Calculate the 7Q10 from a flow timeseries
+}
+\details{
+This function was originally inspired by the Nature Conservancy's IHA package
+and relied on \code{group2()}. However, now this function is just a simple
+wrapper of \code{xQy()} to ensure consistency with the rest of DEQ. It takes
+in a data frame or zoo timeseries and outputs the 7Q10 as a single value
+numeric.
 }
 \examples{
-NA
+flows <- dataRetrieval::readNWISdv("01631000","00060")
+flows <- dataRetrieval::renameNWISColumns(flows)
+#Convert flows to zoo
+flows_zoo <- zoo::as.zoo(x = flows$Flow)
+zoo::index(flows_zoo) <- flows$Date
+fn_iha_7q10(flows_zoo)
 }
 \seealso{
-NA
+xQy
 }

@@ -21,14 +21,16 @@ Provides integrated, queryable universe of features, observations
   and meta data
 }
 \examples{
-##Get new datasource via odbc
-#ds <- RomDataSource$new(site,
-#                         rest_uname = odbc_uname,
-#                         connection_type = 'odbc',
-#                         dbname = databaseName)
-# ds$get_token(rest_pw = odbc_pw)
-##Pointer to external db
-# ds$connection
+\dontrun{
+#Get new datasource via odbc
+ds <- RomDataSource$new(site,
+                      rest_uname = odbc_uname,
+                      connection_type = 'odbc',
+                      dbname = databaseName)
+ds$get_token(rest_pw = odbc_pw)
+#Pointer to external db
+ds$connection
+}
 }
 \seealso{
 NA

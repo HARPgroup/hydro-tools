@@ -82,9 +82,12 @@ an updated config if necessary or FALSE if it fails
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{entity}}{list or object with entity info}
+\item{\code{entity}}{The object to find impoundmnet on}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+FALSE, not yet implemented
 }
 }
 \if{html}{\out{<hr>}}

@@ -157,12 +157,18 @@ RomFeature <- R6Class(
         }
       }
     },
+    #' @description Find target entities via spatial query of this RomFeature
     #' @param target_entity what type to relate to (default dh_feature)
-    #' @param inputs criteria to search for (list key = value format)
-    #' @param operator what type of spatial function,default = st_contains
-    #'   Other options are 'overlaps' or 'st_within'
-    #' @param return_geoms FALSE will return a smaller dataframe
-    #' @param query_remote FALSE will search on in local datasource
+    #' @param inputs Criteria to search for entered as a list key = value
+    #'   format. For instance, the list may contain a bundle or ftype via
+    #'   \code{list(bundle = 'watershed', ftype = 'vahydro')}
+    #' @param operator what type of spatial function to perform to search for
+    #'   entities, default to 'st_contains'. Other options include
+    #'   'st_contains_centroid', 'overlaps', or 'st_within'
+    #' @param return_geoms FALSE will return a smaller dataframe by excluding
+    #'   the geometry fields
+    #' @param query_remote FALSE will search on in local datasource only, TRUE
+    #'   will search the DS connection
     #' @return dataframe of spatially related entities
     find_spatial_relations = function(
         target_entity = 'dh_feature', 
@@ -220,46 +226,73 @@ RomFeature <- R6Class(
       }
       return(related_entities)
     },
-    #' @param varkey what variable to retrieve
-    #' @param starttime begin tstime (default FALSE)
-    #' @param endtime last tsendtime (default FALSE)
-    #'   Other options are 'overlaps' or 'st_within'
-    #' @param band which band to query (default = 1)
-    #' @param aggregate FALSE will return 1 record for every date
-    #' @param metric default mean, which aspect of the ST_SUMMARIZE() to return
-    #' @return dataframe of spatially related entities
+    #' @description Get raw or summarized raster values for this RomFeature from
+    #'   dh_timeseries_weather using PostGIS
+    #' @param varkey What variable to retrieve? This should be a varkey that has
+    #'   been used to create raster summaries in dh_timeseries_weather. Relevant
+    #'   meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
+    #'   'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
+    #'   'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'
+    #' @param starttime begin date-time to limit query (default FALSE to remove a
+    #'   tstime filter)
+    #' @param endtime last date-time to limit query (default to Sys.Date())
+    #' @param band which raster band to query (default = 1)?
+    #' @param aggregate Should data be aggregated and if so, how? FALSE will
+    #'   return 1 record for every date. Otheriwse, can use basic aggregate
+    #'   functions like mean, min, max to summarize data
+    #' @param metric default mean, which aspect of the ST_SummaryStats() to return
+    #' @param touched Defaults to FALSE. Should PostGIS ST_Clip() use the
+    #'   touched argument to return all raster cells touched by the feature? Or,
+    #'   if FALSE, should only pixels that have centroids within the feature be
+    #'   considered?
+    #' @return dataframe of timeseries values
     get_raster_ts = function(
         varkey = 'prism_mod_daily',
         starttime = FALSE,
-        endtime = FALSE,
+        endtime = Sys.Date(),
         band = '1',
         aggregate = FALSE,
-        metric = 'mean'
+        metric = 'mean',
+        touched = FALSE
       ) {
       # looks at the table dh_timeseries_weather
       # coverage raster summary
       ftype = self$ftype
       bundle = self$bundle
       hydrocode = self$hydrocode
+      #Default to all records unless otherwise input by user
       startclause = "(1 = 1)"
       endclause = "(1 = 1)"
+      #If a start or endtime has been provided, set a psql where clause that
+      #ensures tstime or tsendtime comply with user input filter
       if (!is.logical(starttime)) {
         startclause = paste0("met.tstime >= extract(epoch from '",starttime,"'::date)")
       }
       if (!is.logical(endtime)) {
         endclause = paste0("met.tsendtime <= extract(epoch from '",endtime,"'::date)")
       }
+      #If the user wishes to apply an aggregate function, group the data by the
+      #featureid and apply the aggregate and metric arguments. Otherwise, just
+      #get the metric from st_summarystats. The data will be clipped to the
+      #feature and the user can choose to apply the touched argument from
+      #postGIS st_Clip
+      if(touched){
+        clipSQL <- paste0("st_clip(met.rast, fgeo.dh_geofield_geom,touched => true)")
+      }else{
+        clipSQL <- paste0("st_clip(met.rast, fgeo.dh_geofield_geom,touched => false)")
+      }
       if (!is.logical(aggregate)) {
-        rastercalc = fn$paste0("$aggregate((ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric)")
+        rastercalc = fn$paste0("$aggregate((ST_summarystats($clipSQL, 1, TRUE)).$metric)")
         groupby = "GROUP BY met.featureid"
         startcol = "to_timestamp(min(met.tsendtime))"
         endcol = "to_timestamp(max(met.tsendtime))"
       } else {
-        rastercalc = fn$paste0("(ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom), 1, TRUE)).$metric")
+        rastercalc = fn$paste0("(ST_summarystats($clipSQL, 1, TRUE)).$metric")
         groupby = ""
         startcol = "to_timestamp(met.tsendtime)"
         endcol = "to_timestamp(met.tsendtime)"
       }
+      #Query the DB
       sql = fn$paste0(
         "WITH feature_coverages AS (
         SELECT * 
@@ -305,7 +338,7 @@ RomFeature <- R6Class(
         $groupby"
       )
       # to debug set ds$debug = TRUE instead of message(sql)
-      raster_records <- dbGetQuery(conn = self$datasource$connection, sql)
+      raster_records <- DBI::dbGetQuery(conn = self$datasource$connection, sql)
       return(raster_records)
     }
   )

@@ -3,8 +3,10 @@
 #'   particular model and run ID (scenario ID).
 #' @details A wrapper of \code{hydrotools::fn_get_runfile()}. This function
 #'   returns the results in a zoo (see zoo::zoo()) that has the timestamp as the
-#'   index. See \code{hydrotools::fn_get_runfile()} for more details.
-#'
+#'   index. See \code{hydrotools::fn_get_runfile()} for more details. If
+#'   outaszoo is TRUE, the output will be a zoo TS with numeric mode. Please note
+#'   that zoo's are matrices and cannot hold more than one data type such that
+#'   character and date fields will be set to NA.
 #' @param elid integer OM element connection ID e.g. the original OM model ID
 #' @param runid integer run id representing the scenario. Ask the modeling team
 #'   for scenario IDs if you are unsure otherwise see the WSPA Shiny Dashboard
@@ -17,15 +19,18 @@
 #' @param cleanup Logical. Should the function delete the log file create for
 #'   the cached argument? If this is TRUE, the .log files will be deleted after
 #'   download from OM server
+#' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
+#'   or as data frame if FALSE. Default is TRUE.
 #' @return data.frame of model results
 #' @export om_get_rundata
 #' @examples #om_get_rundata(72446, 600, site=omsite)
 om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
                            cached=FALSE, hydrowarmup=TRUE,
-                           cleanup = FALSE) {
+                           cleanup = FALSE,  outaszoo = TRUE) {
   # replace this with a single function that grabs
   # a hydro model for summarization and slims it down
-  dat <- fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup)
+  dat <- fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup,
+                        outaszoo = outaszoo)
   syear = as.integer(min(dat$year))
   eyear = as.integer(max(dat$year))
   if ((hydrowarmup == TRUE) & (syear < (eyear - 2))) {
@@ -47,9 +52,13 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
   edate <- as.POSIXct(edate,tz = "EST")
   
   #Get the window of interest from the timeseries
-  dat <- window(dat, start = sdate, end = edate);
-  #Change mode of zoo to numeric e.g. Convert all fields to numeric
-  mode(dat) <- 'numeric'
+  if(outaszoo){
+    dat <- stats::window(dat, start = sdate, end = edate)
+    #Change mode of zoo to numeric e.g. Convert all fields to numeric
+    mode(dat) <- 'numeric'
+  }else{
+    dat <- dat[dat$timestamp >= sdate & dat$timestamp <= edate,]
+  }
 
   return(dat)
 }

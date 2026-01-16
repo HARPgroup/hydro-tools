@@ -30,14 +30,14 @@ See IHA documentation:
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}
 }
 \examples{
-# #Get data for NF Shenandoah Mount Jackson
-# flows <- dataRetrieval::readNWISdv("01633000",parameterCd = "00060")
-# flows <- dataRetrieval::renameNWISColumns(flows)
-# #Convert flows to zoo
-# flows_zoo <- zoo::as.zoo(x = flows$Flow)
-# zoo::index(flows_zoo) <- flows$Date
-# #Use group 1 to get the minimum monthly flows:
-# hydrotools::group1(flows_zoo,"water",FUN = min)
+#Get data for NF Shenandoah Mount Jackson
+flows <- dataRetrieval::readNWISdv("01633000",parameterCd = "00060")
+flows <- dataRetrieval::renameNWISColumns(flows)
+#Convert flows to zoo
+flows_zoo <- zoo::as.zoo(x = flows$Flow)
+zoo::index(flows_zoo) <- flows$Date
+#Use group 1 to get the minimum monthly flows:
+group1(flows_zoo,"water",FUN = min)
 }
 \references{
 \url{http://www.nature.org/initiatives/freshwater/conservationtools/art17004.html}

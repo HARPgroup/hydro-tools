@@ -1,5 +1,9 @@
 # hydrotools
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HARPgroup/hydro-tools/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 ## Description
 
 The R developers at DEQ's Office of Water Supply Planning and Analysis have developed an R package called `hydrotools` to support data base connections to OWSPA data sources and ensure consistent handling of common data base requests. The `rom` objects offered in hydrotools serve as a quasi-REST service for the VA Hydro databases, offering DEQ staff convenient means of getting properties and features or posting such entities. Installation instructions are offered below. Development issues, pull requests, and more are tracked on the hydrotools [GitHub repository](https://github.com/HARPgroup/hydro-tools) or on the internal [GitLab](https://gitlab.deq.virginia.gov/) server. 
@@ -105,6 +109,29 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.11 01/07/2026
+1. Updated the documentation on `RomFeature$get_raster_ts()` to be more accurate
+for the starttime and endtime arguments. Additionally, added a `touched` argument
+to leverage the new options in PostGIS `ST_Clip()`
+2. Added an `outaszoo` argument to `om_get_rundata()` to allow data frames of
+model data to be returned.
+
+### 1.0.10 12/15/2025
+1. Update elfgen wrappers to allow for more dynamic generation of NHDPlus flows.
+2. Added an `na.rm = TRUE` to the mean flows call in `om_flow_table()`
+
+### 1.0.9 12/01/2025
+1. Added wrapper functions for elfgen package. `simple_nhdPlusFlows()` finds the NHDPlus segment (and flows) contained in a VA Hydro feature. The output code can be given to `simple_elfgen()` to allow for easy generation of ecologic limit functions from imported EDAS data
+
+### 1.0.8 11/25/2025
+1. Added the ability to query and summarize data via PostGIS from the `dh_timeseries_weather` table via the method `get_raster_ts()` on `RomFeature()`
+2. New `fn_handletimestamp()` that performs basic checks on potential date/time data before converting to date using `lubridate` functions
+
+### 1.0.7 11/13/2025
+1. Fixed a variable name error in the `xQy()` function that was preventing the code from being able to handle non-standard flow data frames
+2. Enabled examples in `xQy()`, `group1()`, `group2()`, and `fn_iha_7q10()`
+3. Updated `fn_iha_7q10()` to use `xQy()` for consistency
+
 ### 1.0.6 10/06/2025
 1. Bug fix to variable plugin for timeseries file objects by setting the correct object class to send to OM.
 
