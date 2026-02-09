@@ -1259,7 +1259,8 @@ renameNHD <- function(get_nhdplus_df, returnPlotName = FALSE){
 #' @name fn_handletimestamp
 #' @title Handle Any Time/Date to Timestamp
 #' @description Try to bring any date or timestamp into a common format (Unix epoch, TBD)
-#' @param ts some type of date or timestamp
+#' @param tslike some type of date or timestamp
+#' @param format TBD use this to allow alternative return formats
 #' @return single numeric value for UNix epoch
 #' @export fn_handletimestamp
 fn_handletimestamp <- function(tslike, format="epoch") {

@@ -422,7 +422,7 @@ watershed_model_da <- function(watershed_json) {
 #'@title usgs_calib_rarray
 #'@description Create a best guess calibration render script param set.
 #'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
-#'@param watershed_feature a valid RomFeature for the watershed of interest
+#'@param riverseg_json a valid RomFeature for the watershed of interest
 #'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
 #'@param model_runid a model run id/scenario
 usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
