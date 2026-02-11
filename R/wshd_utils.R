@@ -371,36 +371,36 @@ set_zoom <- function(pb){
 }
 
 
-#'@name usgs_nearest_gage
-#'@title usgs_nearest_gage
-#'@description Find the closest gage for a watershed feature and model.
-#'@details This function finds full drainage watersheds that contain a feature, and make an area match.
-#'@param watershed_feature a valid RomFeature for the watershed of interest
-#'@param watershed_json a valid json model for the watershed of interest
-usgs_nearest_gage <- function(watershed_feature, watershed_json) {
-  # get gages
-  gages <- watershed_feature$find_spatial_relations(
-    inputs=list(bundle='watershed', ftype='usgs_full_drainage'), 
-    operator='st_centroid_within', 
-    TRUE
-  )
-  # get DA
-  gages = sqldf(
-    paste0(
-      "select *, ST_Area(dh_geofield_geom::geography) / 1609.34^2 as area_sqmi
-       from dh_feature_fielded as g ",
-      "where g.hydroid in",
-      paste0("(", paste(gages$hydroid, collapse=", "),")" )
-    ),
-    connection=ds$connection
-  )
-  gages$gageid <- stringr::str_replace_all(gages$hydrocode, "usgs_ws_",'')
-  # choose gage based on DA
-  gages$distance <- gages$area_sqmi - watershed_model_da(watershed_json)
-  gage <- gages[abs(gages$distance) == min(abs(gages$distance)),]
-  return(gage)
-}
-
+#' #'@name usgs_nearest_gage
+#' #'@title usgs_nearest_gage
+#' #'@description Find the closest gage for a watershed feature and model.
+#' #'@details This function finds full drainage watersheds that contain a feature, and make an area match.
+#' #'@param watershed_feature a valid RomFeature for the watershed of interest
+#' #'@param watershed_json a valid json model for the watershed of interest
+#' usgs_nearest_gage <- function(watershed_feature, watershed_json) {
+#'   # get gages
+#'   gages <- watershed_feature$find_spatial_relations(
+#'     inputs=list(bundle='watershed', ftype='usgs_full_drainage'), 
+#'     operator='st_centroid_within', 
+#'     TRUE
+#'   )
+#'   # get DA
+#'   gages = sqldf(
+#'     paste0(
+#'       "select *, ST_Area(dh_geofield_geom::geography) / 1609.34^2 as area_sqmi
+#'        from dh_feature_fielded as g ",
+#'       "where g.hydroid in",
+#'       paste0("(", paste(gages$hydroid, collapse=", "),")" )
+#'     ),
+#'     connection=ds$connection
+#'   )
+#'   gages$gageid <- stringr::str_replace_all(gages$hydrocode, "usgs_ws_",'')
+#'   # choose gage based on DA
+#'   gages$distance <- gages$area_sqmi - watershed_model_da(watershed_json)
+#'   gage <- gages[abs(gages$distance) == min(abs(gages$distance)),]
+#'   return(gage)
+#' }
+#' 
 #' 
 #' #'@name watershed_model_da
 #' #'@title watershed_model_da
@@ -408,7 +408,7 @@ usgs_nearest_gage <- function(watershed_feature, watershed_json) {
 #' #'@details This function handles the varying area data formats that these models have historically used.
 #' #'@param watershed_json a valid json model for the watershed of interest
 #' watershed_model_da <- function(watershed_json) {
-#'   
+#' 
 #'   if ("0. River Channel" %in% names(watershed_json)) {
 #'     drainage_area <- watershed_json$`0. River Channel`$drainage_area$value
 #'   } else {
