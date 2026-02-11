@@ -87,14 +87,29 @@ dHVariablePluginDefault <- R6Class(
     },
     #' @param om_list the open MI export array/list to work on
     #' @return a Rom importable config or FALSE if it fails
-    fromOpenMIBase = function(om_list) {
+    fromOpenMIBase = function(openmi_list) {
       rom_list = list(
-        pid=om_list$id,
-        propname=om_list$name,
-        propvalue=om_list$value,
-        propcode=om_list$code
+        pid=openmi_list$id,
+        propname=openmi_list$name,
+        propvalue=openmi_list$value,
+        propcode=openmi_list$code
       )
       return(rom_list)
+    },
+    #' @param om_list the simple OM format export array/list to work on
+    #' @return properly formatted list to be used by RomProperty$from_list() FALSE if not successful
+    fromOM = function(om_list) {
+      # handles expected sub-components, and also knows whether or not the value is a str or num
+      # OM entity lists should be mostly 1 deep, that is, a sub-comp can have other components
+      # at the first level but will not have them as the 2nd level, so we do not recurse
+      from_list = list()
+      nms = names(om_list)
+      if (!("name" %in% nms)) {
+        return(FALSE)
+      }
+      from_list$propname = om_list$name
+      # base case has low expectations as it may be a container so it returns just the name
+      return(from_list)
     },
     #' @return detailed information about this object in markdown list format
     param_info = function() {
@@ -367,6 +382,39 @@ dHOMDataMatrix <- R6Class(
         value=I(entity$data_matrix)
       )
       return(export)
+    },
+    #' @param om_list the simple OM format export array/list to work on
+    #' @return properly formatted list to be used by RomProperty$from_list() FALSE if not successful
+    fromOM = function(om_list) {
+      # handles expected sub-components, and also knows whether or not the value is a str or num
+      # OM entity lists should be mostly 1 deep, that is, a sub-comp can have other components
+      # at the first level but will not have them as the 2nd level, so we do not recurse
+      from_list = super$fromOM(om_list)
+      if (is.logical(from_list)) (
+        return(FALSE)
+      )
+      nms = names(om_list)
+      if (!("matrix_rowcol" %in% nms)) {
+        return(FALSE)
+      }
+      matrix_rowcol = data.frame()
+      if (length(om_list$matrix_rowcol) > 0) {
+        h = length(om_list$matrix_rowcol)
+        w = length(om_list$matrix_rowcol[[1]])
+        for (i in 1:h) {
+          r = c()
+          for (j in 1:w) {
+            r[j] = om_list$matrix_rowcol[[i]][[j]]
+          }
+          matrix_rowcol = rbind(matrix_rowcol, r)
+        }
+      }
+      # the from_list() method of properties expects the matrix to be in JSON
+      # and by doing so, this from_list can be directly 
+      # sent to the RomProperty$new() constructor
+      from_list$data_matrix = jsonlite::toJSON(matrix_rowcol) 
+      # base case has low expectations as it may be a container so it returns just the name
+      return(from_list)
     },
     #' @return info regarding the needs and capabilities of this object
     param_info = function() {
