@@ -38,6 +38,7 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
+\item \href{#method-dHOMDataMatrix-fromOM}{\code{dHOMDataMatrix$fromOM()}}
 \item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
 \item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
 }
@@ -70,6 +71,25 @@ NA
 }
 \subsection{Returns}{
 an updated config if necessary or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMDataMatrix-fromOM"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMDataMatrix-fromOM}{}}}
+\subsection{Method \code{fromOM()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$fromOM(om_list)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{om_list}}{the simple OM format export array/list to work on}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+properly formatted list to be used by RomProperty$from_list() FALSE if not successful
 }
 }
 \if{html}{\out{<hr>}}

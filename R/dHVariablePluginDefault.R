@@ -85,7 +85,7 @@ dHVariablePluginDefault <- R6Class(
       #Allows modification of exported property lists prior to JSON conversion
       return(export)
     },
-    #' @param om_list the open MI export array/list to work on
+    #' @param openmi_list the open MI export array/list to work on
     #' @return a Rom importable config or FALSE if it fails
     fromOpenMIBase = function(openmi_list) {
       rom_list = list(
