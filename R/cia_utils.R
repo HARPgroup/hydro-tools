@@ -600,7 +600,7 @@ fn_downstream <- function(riv.seg, AllSegList) {
     Upstream <- which(as.character(ModelSegments$Downstream)==as.character(ModelSegments$RiverSeg[k]))
     NumUp <- ModelSegments$RiverSeg[Upstream]
     ModelSegments[k,6]<- paste(NumUp, collapse = '+')
-    if (hydrotools:::is.empty(ModelSegments[k,6])==TRUE){
+    if (hydrotools::is.empty(ModelSegments[k,6])==TRUE){
       ModelSegments[k,6]<- 'NA'
     } 
     k<-k+1
@@ -789,6 +789,8 @@ fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar'
 #' vectorised (hence the "values")."
 #' @param x an object to check its emptiness. 
 #' @param ... additional arguments for sapply
+#' @return TRUE/FALSE
+#' @export is.empty
 is.empty <- function (x, ...) 
 {
   if (length(x) <= 1) {
@@ -1259,7 +1261,8 @@ renameNHD <- function(get_nhdplus_df, returnPlotName = FALSE){
 #' @name fn_handletimestamp
 #' @title Handle Any Time/Date to Timestamp
 #' @description Try to bring any date or timestamp into a common format (Unix epoch, TBD)
-#' @param ts some type of date or timestamp
+#' @param tslike some type of date or timestamp
+#' @param format TBD use this to allow alternative return formats
 #' @return single numeric value for UNix epoch
 #' @export fn_handletimestamp
 fn_handletimestamp <- function(tslike, format="epoch") {

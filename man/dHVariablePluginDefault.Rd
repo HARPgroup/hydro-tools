@@ -40,6 +40,7 @@ NA
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
 \item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
+\item \href{#method-dHVariablePluginDefault-fromOM}{\code{dHVariablePluginDefault$fromOM()}}
 \item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
 \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
 }
@@ -143,18 +144,37 @@ an updated config if necessary or FALSE if it fails
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOpenMIBase}{}}}
 \subsection{Method \code{fromOpenMIBase()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOpenMIBase(om_list)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOpenMIBase(openmi_list)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{om_list}}{the open MI export array/list to work on}
+\item{\code{openmi_list}}{the open MI export array/list to work on}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 a Rom importable config or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-fromOM"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOM}{}}}
+\subsection{Method \code{fromOM()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOM(om_list)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{om_list}}{the simple OM format export array/list to work on}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+properly formatted list to be used by RomProperty$from_list() FALSE if not successful
 }
 }
 \if{html}{\out{<hr>}}

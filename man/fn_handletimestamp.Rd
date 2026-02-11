@@ -4,10 +4,12 @@
 \alias{fn_handletimestamp}
 \title{Handle Any Time/Date to Timestamp}
 \usage{
-fn_handletimestamp(ts)
+fn_handletimestamp(tslike, format = "epoch")
 }
 \arguments{
-\item{ts}{some type of date or timestamp}
+\item{tslike}{some type of date or timestamp}
+
+\item{format}{TBD use this to allow alternative return formats}
 }
 \value{
 single numeric value for UNix epoch
