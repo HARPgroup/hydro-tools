@@ -11,9 +11,6 @@ is.empty(x, ...)
 
 \item{...}{additional arguments for sapply}
 }
-\value{
-TRUE/FALSE
-}
 \description{
 Checks common NULL, NA, length cases for empty values
 }

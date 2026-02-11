@@ -371,70 +371,70 @@ set_zoom <- function(pb){
 }
 
 
-#' #'@name usgs_nearest_gage
-#' #'@title usgs_nearest_gage
-#' #'@description Find the closest gage for a watershed feature and model.
-#' #'@details This function finds full drainage watersheds that contain a feature, and make an area match.
-#' #'@param watershed_feature a valid RomFeature for the watershed of interest
-#' #'@param watershed_json a valid json model for the watershed of interest
-#' usgs_nearest_gage <- function(watershed_feature, watershed_json) {
-#'   # get gages
-#'   gages <- watershed_feature$find_spatial_relations(
-#'     inputs=list(bundle='watershed', ftype='usgs_full_drainage'), 
-#'     operator='st_centroid_within', 
-#'     TRUE
-#'   )
-#'   # get DA
-#'   gages = sqldf(
-#'     paste0(
-#'       "select *, ST_Area(dh_geofield_geom::geography) / 1609.34^2 as area_sqmi
-#'        from dh_feature_fielded as g ",
-#'       "where g.hydroid in",
-#'       paste0("(", paste(gages$hydroid, collapse=", "),")" )
-#'     ),
-#'     connection=ds$connection
-#'   )
-#'   gages$gageid <- stringr::str_replace_all(gages$hydrocode, "usgs_ws_",'')
-#'   # choose gage based on DA
-#'   gages$distance <- gages$area_sqmi - watershed_model_da(watershed_json)
-#'   gage <- gages[abs(gages$distance) == min(abs(gages$distance)),]
-#'   return(gage)
-#' }
-#' 
-#' 
-#' #'@name watershed_model_da
-#' #'@title watershed_model_da
-#' #'@description Find the drainage area from a json model collection.
-#' #'@details This function handles the varying area data formats that these models have historically used.
-#' #'@param watershed_json a valid json model for the watershed of interest
-#' watershed_model_da <- function(watershed_json) {
-#' 
-#'   if ("0. River Channel" %in% names(watershed_json)) {
-#'     drainage_area <- watershed_json$`0. River Channel`$drainage_area$value
-#'   } else {
-#'     drainage_area <- watershed_json$local_channel$drainage_area$value
-#'   }
-#'   return(drainage_area)
-#' }
-#' 
-#' 
-#' #'@name usgs_calib_rarray
-#' #'@title usgs_calib_rarray
-#' #'@description Create a best guess calibration render script param set.
-#' #'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
-#' #'@param riverseg_json a valid RomFeature for the watershed of interest
-#' #'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
-#' #'@param model_runid a model run id/scenario
-#' usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
-#'   # set up render array
-#'   da <- watershed_model_da(riverseg_json)
-#'   params = list(
-#'     doc_title = "USGS Gage vs VAHydro Model",
-#'     model_output_file=FALSE,
-#'     runid = model_runid,
-#'     gageid = gage_info$site_no,
-#'     model_da = da,
-#'     elid = riverseg_json$om_element_connection$value
-#'   )
-#'   return(params)
-#' }
+#'@name usgs_nearest_gage
+#'@title usgs_nearest_gage
+#'@description Find the closest gage for a watershed feature and model.
+#'@details This function finds full drainage watersheds that contain a feature, and make an area match.
+#'@param watershed_feature a valid RomFeature for the watershed of interest
+#'@param watershed_json a valid json model for the watershed of interest
+usgs_nearest_gage <- function(watershed_feature, watershed_json) {
+  # get gages
+  gages <- watershed_feature$find_spatial_relations(
+    inputs=list(bundle='watershed', ftype='usgs_full_drainage'), 
+    operator='st_centroid_within', 
+    TRUE
+  )
+  # get DA
+  gages = sqldf(
+    paste0(
+      "select *, ST_Area(dh_geofield_geom::geography) / 1609.34^2 as area_sqmi
+       from dh_feature_fielded as g ",
+      "where g.hydroid in",
+      paste0("(", paste(gages$hydroid, collapse=", "),")" )
+    ),
+    connection=ds$connection
+  )
+  gages$gageid <- stringr::str_replace_all(gages$hydrocode, "usgs_ws_",'')
+  # choose gage based on DA
+  gages$distance <- gages$area_sqmi - watershed_model_da(watershed_json)
+  gage <- gages[abs(gages$distance) == min(abs(gages$distance)),]
+  return(gage)
+}
+
+
+#'@name watershed_model_da
+#'@title watershed_model_da
+#'@description Find the drainage area from a json model collection.
+#'@details This function handles the varying area data formats that these models have historically used.
+#'@param watershed_json a valid json model for the watershed of interest
+watershed_model_da <- function(watershed_json) {
+
+  if ("0. River Channel" %in% names(watershed_json)) {
+    drainage_area <- watershed_json$`0. River Channel`$drainage_area$value
+  } else {
+    drainage_area <- watershed_json$local_channel$drainage_area$value
+  }
+  return(drainage_area)
+}
+
+
+#'@name usgs_calib_rarray
+#'@title usgs_calib_rarray
+#'@description Create a best guess calibration render script param set.
+#'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
+#'@param riverseg_json a valid RomFeature for the watershed of interest
+#'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
+#'@param model_runid a model run id/scenario
+usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
+  # set up render array
+  da <- watershed_model_da(riverseg_json)
+  params = list(
+    doc_title = "USGS Gage vs VAHydro Model",
+    model_output_file=FALSE,
+    runid = model_runid,
+    gageid = gage_info$site_no,
+    model_da = da,
+    elid = riverseg_json$om_element_connection$value
+  )
+  return(params)
+}
