@@ -377,6 +377,7 @@ set_zoom <- function(pb){
 #'@details This function finds full drainage watersheds that contain a feature, and make an area match.
 #'@param watershed_feature a valid RomFeature for the watershed of interest
 #'@param watershed_json a valid json model for the watershed of interest
+#'@export usgs_nearest_gage
 usgs_nearest_gage <- function(watershed_feature, watershed_json) {
   # get gages
   gages <- watershed_feature$find_spatial_relations(
@@ -407,6 +408,7 @@ usgs_nearest_gage <- function(watershed_feature, watershed_json) {
 #'@description Find the drainage area from a json model collection.
 #'@details This function handles the varying area data formats that these models have historically used.
 #'@param watershed_json a valid json model for the watershed of interest
+#'@export watershed_model_da
 watershed_model_da <- function(watershed_json) {
 
   if ("0. River Channel" %in% names(watershed_json)) {
@@ -425,6 +427,7 @@ watershed_model_da <- function(watershed_json) {
 #'@param riverseg_json a valid RomFeature for the watershed of interest
 #'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
 #'@param model_runid a model run id/scenario
+#'@export usgs_calib_rarray
 usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
   # set up render array
   da <- watershed_model_da(riverseg_json)
