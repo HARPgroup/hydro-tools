@@ -1,24 +1,34 @@
 
-
+#' Watershed Model Node data object
+#' @title WatershedModelNode
+#' @description Utility class for interacting with a watershed feature/model combo
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param ds RomDataSource for remote and local storage (required)
+#' @param config list of attributes to set/query
+#' @param ds_om RomDataSource for legacy model connection (optional)
+#' @return R6Class of type WatershedModelNode
+#' @seealso NA
+#' @examples NA
 #' @export WatershedModelNode
 WatershedModelNode <- R6Class(
   "watershed_model_node",
   public = list(
     #' @field ds RomDataSource
     ds = NA,
-    #' @field ds RomDataSource points to legacy model db
+    #' @field ds_om RomDataSource points to legacy model db
     ds_om = NA,
-    #' @field hydroid
+    #' @field hydroid unique ID from dh_feature database
     hydroid = NA,
-    #' @field hydrocode
+    #' @field hydrocode non-numeric identifier may reference ext source db
     hydrocode = NA,
-    #' @field bundle
+    #' @field bundle type of feature
     bundle = NA,
-    #' @field ftype
+    #' @field ftype sub-type of feature
     ftype = NA,
-    #' @field RomFeature
+    #' @field feature a RomFeature entity
     feature = NA,
-    #' @field pid integer
+    #' @field pid integer identifier
     pid = NA,
     #' @field version descriptive code for model
     version = NA,
@@ -120,7 +130,7 @@ WatershedModelNode <- R6Class(
     #' @param include_children recurse through children? default = 1
     #' @param max_recursion_level integer how far to search if include_children = 1
     #' @param exclude_custom1 custom1 to exclude (use cova_upstream prevent upstream recursion)
-    #' @parawm target_custom1 custom1 to find
+    #' @param target_custom1 custom1 to find
     #' @return dataframe of elementids
     om_element_tree = function(
       elementid, include_children=1, max_recursion_level=-1, 
