@@ -46,6 +46,16 @@ om_find_dh_elid <- function(elid, ds) {
   return(model_search_elid)
 } 
 
+#' @name om_model_run_monitor
+#' @title List of models that have been run or are running
+#' @description Finds the model, and its parent feature or prop given an OM elementid
+#' @param ds_model RomDataSource connectio to model runtime database
+#' @param minspast integer, number of minutes from present to limit results
+#' @param elids Desired elementid(s) FALSE retrieves all
+#' @param limit total number of records to return
+#' @return data frame of info about the target elementid
+#' @import sqldf
+#' @export om_model_run_monitor
 om_model_run_monitor <- function(ds_model, minspast=60, elids = FALSE, limit = 100) {
   status_sql = "select a.elementid, a.elemname, b.status_mesg, b.runid, b.host, b.last_updated, 
        CASE 
