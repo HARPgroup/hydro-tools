@@ -135,7 +135,12 @@ ModelElementBase <- R6Class(
     load_json_model = function() {
       self$json = self$ds$get_json_prop(self$get_model_pid())
       if (typeof(self$json) == "list") {
-        self$elementid = self$json$om_element_connection$value
+        if ("om_element_connection" %in% names(model$json)) {
+          self$elementid = self$json$om_element_connection$value
+        }
+        if ("riverseg" %in% names(model$json)) {
+          self$riverseg = self$json$riverseg$value
+        }
       }
     },
     #' @return json of model from dH
@@ -329,13 +334,18 @@ WatershedModelNode <- R6Class(
         cu_threshold, include_appendices
       )
     },
-    gage_vs_model = function() {
+    gage_vs_model = function(runid, gage='auto', export_path=export_path, github_location = github_location) {
+      if (gage == 'auto') {
+        gage = self$nearest_gage()
+      } 
+      gage_info = dataRetrieval::readNWISsite(gage)
+      render_params <- usgs_calib_rarray(self$json, gage_info, runid)
       rmarkdown::render(
         paste(github_location,'/hydro-tools/USGS/gage_vs_model.Rmd',sep="/"),
         output_file = paste0(
-          '/WorkSpace/modeling/projects/james_river/appomattox/', 
+          export_path, 
           gage_info$site_no, '_',
-          riverseg_json$riverseg$value
+          self$riverseg
         ),
         params = render_params
       )
