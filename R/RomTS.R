@@ -146,6 +146,9 @@ RomTS <- R6Class(
         # todo:
         # bundle = self$bundle
       )
+      if (!is.na(self$modified)) {
+        t_list$modified = self$modified
+      }
       return(t_list)
     },
     #' @param name attribute name
