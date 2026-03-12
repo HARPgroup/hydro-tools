@@ -103,10 +103,7 @@ ModelElementBase <- R6Class(
     },
     #' @return json of model from dH
     get_model = function() {
-      if (!is.na(self$pid)) {
-        self$prop = RomProperty$new(self$ds,list(pid=self$pid), TRUE)
-        self$pid = self$prop$pid
-      } else {
+      if (is.na(self$pid)) {
         # check for feature and version
         if (typeof(self$feature)=="environment") {
           if (!is.na(self$version)) {
@@ -114,6 +111,9 @@ ModelElementBase <- R6Class(
             self$pid = self$prop$pid
           }
         }
+      }
+      if (!is.na(self$pid)) {
+        self$prop = RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
       return(self$prop)
     },
@@ -431,6 +431,71 @@ WaterSupplyElement <- R6Class(
         cu_pre_var, cu_post_var, doc_title,
         cu_threshold, include_appendices
       )
+    }
+  )
+)
+
+
+
+#' Watershed Model Node data object
+#' @title HydroImpoundment
+#' @description Utility class for interacting with a facility feature/model combo
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param ds RomDataSource for remote and local storage (required)
+#' @param config list of attributes to set/query
+#' @param ds_om RomDataSource for legacy model connection (optional)
+#' @return R6Class of type HydroImpoundment
+#' @seealso NA
+#' @examples NA
+#' @export HydroImpoundment
+HydroImpoundment <- R6Class(
+  "HydroImpoundment",
+  inherit = ModelElementBase,
+  public = list(
+    #' @param ds RomDataSource object mandatory
+    #' @param config list of attributes to set, see also: to_list() for format
+    #' @param ds_om RomDataSource object pointing to OM (optional)
+    #' @param site URI base for the legacy model scripts assumes global var omsite exists for default
+    #' @return object instance
+    initialize = function(ds, config = list(), ds_om=NA, site=omsite) {
+      super$initialize(ds, config, ds_om, site=omsite)
+    },
+    #' @param storage lookup/interpolate by storage
+    #' @param stage lookup/interpolate by stage
+    #' @param surface_area lookup/interpolate by surface area
+    #' @return file path of rendered output
+    ssa_lookup = function(storage=FALSE, stage=FALSE, surface_area=FALSE) {
+      # Will return a lookup based on the first matching non-FALSE argument
+      svals = FALSE
+      json = self$get_json_model()
+      if ( !("storage_stage_area" %in% names(json)) ){
+        message("Cannot locate storage_stage_area property on", self$feature$name)
+        return(FALSE)
+      }
+      # TODO: migrate this into the dHDataMatrix plugin?
+      raw_table = self$json$storage_stage_area$matrix$value
+      if (as.character(raw_table[1,1]) == "storage") {
+        raw_table = raw_table[-1,]
+      }
+      rownames(raw_table) <- NULL # insure these are indexed beginning at 1
+      colnames(raw_table) <- c('storage', 'stage', 'surface_area')
+      ssa = openmi.om.matrix$new()
+      ssa$datamatrix <- as.matrix(
+        raw_table
+      )
+      ssa$datamatrix = apply(ssa$datamatrix, 2, FUN=as.numeric)
+      ssa$rowtype = as.integer(2)
+      ssa$colindex = 'val'
+      
+      if (!is.logical(storage)) {
+        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,1], storage, 1)
+      } else if (!is.logical(stage)) {
+        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,2], stage, 1)
+      } else if (!is.logical(surface_area)) {
+        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,3], surface_area, 1)
+      }
+      return(svals)
     }
   )
 )
