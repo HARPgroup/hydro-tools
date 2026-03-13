@@ -3,6 +3,7 @@
 #' @description Utility class for interacting with a watershed feature/model combo
 #' @details Has standard methods for managing data and meta data
 #' @importFrom R6 R6Class  
+#' @import openmi.om
 #' @param ds RomDataSource for remote and local storage (required)
 #' @param config list of attributes to set/query
 #' @param ds_om RomDataSource for legacy model connection (optional)
@@ -480,7 +481,7 @@ HydroImpoundment <- R6Class(
       }
       rownames(raw_table) <- NULL # insure these are indexed beginning at 1
       colnames(raw_table) <- c('storage', 'stage', 'surface_area')
-      ssa = openmi.om.matrix$new()
+      ssa = openmi.om::openmi.om.matrix$new()
       ssa$datamatrix <- as.matrix(
         raw_table
       )
