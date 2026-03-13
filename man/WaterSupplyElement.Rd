@@ -127,8 +127,8 @@ file path of rendered output
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$render_cia_brief(
   runid,
-  export_path,
-  github_location,
+  export_path = export_path,
+  github_location = github_location,
   cu_pre_var = "Qintake",
   cu_post_var = "Qintake",
   doc_title = "auto",

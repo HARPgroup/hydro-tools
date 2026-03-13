@@ -335,7 +335,12 @@ WatershedModelNode <- R6Class(
         cu_threshold, include_appendices
       )
     },
-    gage_vs_model = function(runid, gage='auto', export_path=export_path, github_location = github_location) {
+    #' @param runid runid to summarize
+    #' @param export_path where to store the file
+    #' @param gage what to compare to
+    #' @param github_location library to load rendering code
+    gage_vs_model = function(
+    runid, gage='auto', export_path=export_path, github_location = github_location) {
       if (gage == 'auto') {
         gage = self$nearest_gage()
       } 

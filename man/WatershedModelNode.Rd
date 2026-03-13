@@ -66,6 +66,7 @@ NA
 \item \href{#method-WatershedModelNode-nearest_gage}{\code{WatershedModelNode$nearest_gage()}}
 \item \href{#method-WatershedModelNode-render_cia_detailed}{\code{WatershedModelNode$render_cia_detailed()}}
 \item \href{#method-WatershedModelNode-render_cia_brief}{\code{WatershedModelNode$render_cia_brief()}}
+\item \href{#method-WatershedModelNode-gage_vs_model}{\code{WatershedModelNode$gage_vs_model()}}
 \item \href{#method-WatershedModelNode-clone}{\code{WatershedModelNode$clone()}}
 }
 }
@@ -162,8 +163,8 @@ file path of rendered output
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$render_cia_brief(
   runid,
-  export_path,
-  github_location,
+  export_path = export_path,
+  github_location = github_location,
   cu_pre_var = "Qout",
   cu_post_var = "Qout",
   doc_title = "auto",
@@ -195,6 +196,33 @@ file path of rendered output
 }
 \subsection{Returns}{
 file path of rendered output
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WatershedModelNode-gage_vs_model"></a>}}
+\if{latex}{\out{\hypertarget{method-WatershedModelNode-gage_vs_model}{}}}
+\subsection{Method \code{gage_vs_model()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$gage_vs_model(
+  runid,
+  gage = "auto",
+  export_path = export_path,
+  github_location = github_location
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{runid}}{runid to summarize}
+
+\item{\code{gage}}{what to compare to}
+
+\item{\code{export_path}}{where to store the file}
+
+\item{\code{github_location}}{library to load rendering code}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
