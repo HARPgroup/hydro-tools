@@ -250,8 +250,8 @@ dataframe of elementids
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$render_cia_brief(
   runid,
-  export_path,
-  github_location,
+  export_path = export_path,
+  github_location = github_location,
   cu_pre_var = "Qout",
   cu_post_var = "Qout",
   doc_title = "auto",

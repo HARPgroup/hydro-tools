@@ -33,6 +33,7 @@ Imports:
     sf,
     lmomco,
     e1071,
-    elfgen
+    elfgen,
+    openmi.om
 Suggests: 
     dataRetrieval
