@@ -152,15 +152,44 @@ ModelElementBase <- R6Class(
       return(self$json)
     },
     #' @param elementid target container to search
+    #' @param oborops target container to search
+    #' @return elemxml and elemoperators
+    get_elem_xml= function(elementid = FALSE, oborops='object') {
+      # NOTE: this is not yet working.
+      # the xml comes in, and it appears to parse yielding a list-like
+      # vawriable attributes, but those attributes cannot be viewed
+      if (elementid == FALSE) {
+        elementid = self$elementid
+      }
+      raw_xml <- sqldf::sqldf(
+        paste(
+          "select elem_xml, elemoperators 
+           from scen_model_element 
+           where elementid =", elementid
+        ), 
+        connection = self$ds_om$connection
+      )
+      if (oborops == 'operators') {
+        rxx = as.character(raw_xml[['elemoperators']])
+        trim_xml = substr(rxx, 3,stringr::str_length(rxx) -2)
+      } else {
+        trim_xml = raw_xml[['elem_xml']]
+      }
+      exp <- XML::xmlParseString(trim_xml)
+      
+    },
+    #' @param elementid target container to search
     #' @param include_children recurse through children? default = 1
     #' @param max_recursion_level integer how far to search if include_children = 1
     #' @param exclude_custom1 custom1 to exclude (use cova_upstream prevent upstream recursion)
     #' @param target_custom1 custom1 to find
     #' @return dataframe of elementids
     om_element_tree = function(
-    elementid, include_children=1, max_recursion_level=-1, 
+    elementid=FALSE, include_children=1, max_recursion_level=-1, 
     exclude_custom1=-1, target_custom1=-1) {
-      
+      if (elementid == FALSE) {
+        elementid = self$elementid
+      }
       sql=paste0(
         "WITH RECURSIVE element_tree AS (
               SELECT p.*, 0 AS level, e.custom1
@@ -443,7 +472,7 @@ WaterSupplyElement <- R6Class(
 
 
 
-#' Watershed Model Node data object
+#' Reservoir object
 #' @title HydroImpoundment
 #' @description Utility class for interacting with a facility feature/model combo
 #' @details Has standard methods for managing data and meta data
