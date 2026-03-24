@@ -68,6 +68,7 @@ NA
 \item \href{#method-ModelElementBase-get_run_data}{\code{ModelElementBase$get_run_data()}}
 \item \href{#method-ModelElementBase-load_json_model}{\code{ModelElementBase$load_json_model()}}
 \item \href{#method-ModelElementBase-get_json_model}{\code{ModelElementBase$get_json_model()}}
+\item \href{#method-ModelElementBase-get_elem_xml}{\code{ModelElementBase$get_elem_xml()}}
 \item \href{#method-ModelElementBase-om_element_tree}{\code{ModelElementBase$om_element_tree()}}
 \item \href{#method-ModelElementBase-render_cia_brief}{\code{ModelElementBase$render_cia_brief()}}
 \item \href{#method-ModelElementBase-clone}{\code{ModelElementBase$clone()}}
@@ -211,12 +212,33 @@ json of model from dH
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ModelElementBase-get_elem_xml"></a>}}
+\if{latex}{\out{\hypertarget{method-ModelElementBase-get_elem_xml}{}}}
+\subsection{Method \code{get_elem_xml()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_elem_xml(elementid = FALSE, oborops = "object")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{elementid}}{target container to search}
+
+\item{\code{oborops}}{target container to search}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+elemxml and elemoperators
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-om_element_tree"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-om_element_tree}{}}}
 \subsection{Method \code{om_element_tree()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$om_element_tree(
-  elementid,
+  elementid = FALSE,
   include_children = 1,
   max_recursion_level = -1,
   exclude_custom1 = -1,

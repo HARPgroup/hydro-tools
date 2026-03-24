@@ -175,8 +175,9 @@ ModelElementBase <- R6Class(
       } else {
         trim_xml = raw_xml[['elem_xml']]
       }
-      exp <- XML::xmlParseString(trim_xml)
-      
+      expdoc <- xml2::read_xml(trim_xml)
+      exp <- xml2::as_list(expdoc)
+      return(exp)
     },
     #' @param elementid target container to search
     #' @param include_children recurse through children? default = 1
