@@ -41,12 +41,13 @@ NA
 }
 }
 \if{html}{\out{
-<details open><summary>Inherited methods</summary>
+<details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>hydrotools::dHOMDataMatrix$fromOM()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>hydrotools::dHOMDataMatrix$param_info()</code></a></span></li>
 </ul>
 </details>
