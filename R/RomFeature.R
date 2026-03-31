@@ -164,7 +164,9 @@ RomFeature <- R6Class(
     #'   \code{list(bundle = 'watershed', ftype = 'vahydro')}
     #' @param operator what type of spatial function to perform to search for
     #'   entities, default to 'st_contains'. Other options include
-    #'   'st_contains_centroid', 'overlaps', or 'st_within'
+    #'   'st_contains_centroid' (is the centroid of the other feature contained
+    #'   in this feature?),'st_centroid_within' (is the centroid of this feature
+    #'   in another feature?), 'overlaps', or 'st_within'
     #' @param return_geoms FALSE will return a smaller dataframe by excluding
     #'   the geometry fields
     #' @param query_remote FALSE will search on in local datasource only, TRUE

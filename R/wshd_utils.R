@@ -374,7 +374,8 @@ set_zoom <- function(pb){
 #'@name usgs_nearest_gage
 #'@title usgs_nearest_gage
 #'@description Find the closest gage for a watershed feature and model.
-#'@details This function finds full drainage watersheds that contain a feature, and make an area match.
+#'@details This function finds full drainage watersheds that contain a feature,
+#'  and make an area match.
 #'@param watershed_feature a valid RomFeature for the watershed of interest
 #'@param watershed_json a valid json model for the watershed of interest
 usgs_nearest_gage <- function(watershed_feature, watershed_json) {
@@ -405,7 +406,8 @@ usgs_nearest_gage <- function(watershed_feature, watershed_json) {
 #'@name watershed_model_da
 #'@title watershed_model_da
 #'@description Find the drainage area from a json model collection.
-#'@details This function handles the varying area data formats that these models have historically used.
+#'@details This function handles the varying area data formats that these models
+#'  have historically used.
 #'@param watershed_json a valid json model for the watershed of interest
 watershed_model_da <- function(watershed_json) {
   
