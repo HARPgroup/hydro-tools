@@ -1,11 +1,17 @@
+# ModelElementBase ####
 #' Watershed Model Node data object
 #' @title ModelElementBase
 #' @description Utility class for interacting with a watershed feature/model combo
-#' @details Has standard methods for managing data and meta data
+#' @details . This R6 object has standard methods for managing the data and meta
+#'   data related to OWS model data. These objects may be initialized with OWS
+#'   model data. The objects will store relevant model data and has methods to
+#'   load related feautre or model data.
 #' @importFrom R6 R6Class  
 #' @import openmi.om
-#' @param ds RomDataSource for remote and local storage (required)
-#' @param config list of attributes to set/query
+#' @param ds RomDataSource for remote and local storage (required; often
+#'   provided in DEQ config files)
+#' @param config list of attributes to set/query and used to identify model
+#'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type ModelElementBase
 #' @seealso NA
@@ -14,42 +20,57 @@
 ModelElementBase <- R6Class(
   "ModelElementBase",
   public = list(
-    #' @field ds RomDataSource
+    #' @field ds RomDataSource often provided in DEQ config files and features a
+    #'   local data storage or a connection to a database/RESTful service
     ds = NA,
-    #' @field ds_om RomDataSource points to legacy model db
+    #' @field ds_om RomDataSource points to legacy model database and may also
+    #'   be provided in DEQ config file upon request to OWS modelling staff
     ds_om = NA,
-    #' @field hydroid unique ID from dh_feature database
+    #' @field hydroid unique ID from dh_feature database to identify the
+    #'   physical feature that is or has been modelled by OWS
     hydroid = NA,
-    #' @field hydrocode non-numeric identifier may reference ext source db
+    #' @field hydrocode non-numeric identifier in dh_feature that often defines
+    #'   external data source connections or identifiers
     hydrocode = NA,
-    #' @field bundle type of feature
+    #' @field bundle type of feature in dh_feature. See ReadMe for more details.
     bundle = NA,
-    #' @field ftype sub-type of feature
+    #' @field ftype sub-type of feature in dh_feature. See ReadMe for more details.
     ftype = NA,
-    #' @field feature a RomFeature entity
+    #' @field feature a \code{RomFeature} entity that has found a valid feature in dh_feature
     feature = NA,
-    #' @field pid integer identifier
+    #' @field pid integer identifier of the model as found in dh_properties
     pid = NA,
-    #' @field version descriptive code for model
+    #' @field version descriptive code for the model version. Often 'vahydro-1.0'
     version = NA,
-    #' @field prop as RomProperty
+    #' @field prop a RomProperty that is defined by the model base property
     prop = NA,
-    #' @field json as list
+    #' @field json Modelling data (inputs) JSON
     json = NA,
-    #' @field elementid as integer
+    #' @field elementid An integer identifier of the OM model element
     elementid = NA,
     #' @field rocode describes runoff type default = 'cbp6_lrseg'
     rocode = 'cbp6_lrseg',
-    #' @field name what is it called
+    #' @field name The model name
     name = NA,
-    #' @field riverseg we using code names
+    #' @field riverseg The riverseg code defined for the watershed node in VA
+    #'   Hydro OM model (often derived or related to the river segment codes
+    #'   used in the CB Watershed Model)
     riverseg = NA,
     #' @field site URI base for the legacy model scripts assumes global var omsite exists for default
     site = NA,
-    #' @param ds RomDataSource object mandatory
+    #' @description
+    #' Initialize a ModelElementBase instance, returning an R6 object that is
+    #' now populated with model data in its fields through queries of the
+    #' provided ds using the \code{handle_config()}, \code{get_feature()} and
+    #' \code{get_model()} methods. This object will also have numerous methods
+    #' that are described in \code{?ModelElementBase}.
+    #' @param ds RomDataSource object mandatory. This is most often created in
+    #'   DEQ config files and will feature connections to local or OWS data
+    #'   bases
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param ds_om RomDataSource object pointing to OM (optional)
-    #' @param site URI base for the legacy model scripts assumes global var omsite exists for default
+    #' @param site URI base for the legacy model scripts assumes global var
+    #'   omsite exists for default (as often created in DEQ config files)
     #' @return object instance
     initialize = function(ds, config = list(), ds_om=NA, site=omsite) {
       #message("Created plugin")
@@ -60,7 +81,14 @@ ModelElementBase <- R6Class(
       self$get_feature()
       self$get_model()
     },
-    #' @return json of model from dH
+    #' @description
+    #' Parse the user provided config list to define essential fields to be used
+    #' in ds queries to identify relevant model and feature
+    #' @param config list of attributes to set, see also: to_list() for format,
+    #' often provided in initialize call of the instance
+    #' @return TRUE, to indicate successful config parsing. Populates pid,
+    #'   hydroid, bundle, ftype, hydrocode, version, and rocode fields on instance
+    #'   depending on user config.
     handle_config = function(config) {
       
       if ("pid" %in% names(config)) {
@@ -86,7 +114,12 @@ ModelElementBase <- R6Class(
       }
       return(TRUE)
     },
-    #' @return json of model from dH
+    #' @description
+    #' Initialize a \code{RomFeature()} using the data source and either the hydroid
+    #' field or the hydrocode, bundle, and ftype on this object instance. Some
+    #' of these latter fields may be NULL per RomFeature.
+    #' @return The R6 RomFeature found. This will also populate the feature
+    #'   field of this object instance.
     get_feature = function() {
       if (!is.na(self$hydroid)) {
         self$feature = RomFeature$new(self$ds, list(hydroid=self$hydroid), TRUE)
@@ -95,14 +128,25 @@ ModelElementBase <- R6Class(
       }
       return(self$feature)
     },
-    #' @return json of model from dH
+    #' @description
+    #' A simple function that gets the self pid or returns FALSE if not
+    #' populated. A placeholder for future development that serves as QC to
+    #' ensure a PID has been populated.
+    #' @return Self PID field if present or FALSE if not.
     get_model_pid = function() {
       if (is.na(self$pid)) {
         return(FALSE)
       }
       return(self$pid)
     },
-    #' @return json of model from dH
+    #' @description
+    #' Populates the prop field of this object instance by either querying the
+    #' datasource field (if the PID field of this object is populated) or
+    #' otherwise using the \code{get_prop(propcode = self$version)} method on
+    #' the feature field to find the appropriate property by querying off the
+    #' feature
+    #' @return The R6 RomProperty found. This will also populate the prop field of
+    #'   this object instance.
     get_model = function() {
       if (is.na(self$pid)) {
         # check for feature and version
@@ -118,42 +162,65 @@ ModelElementBase <- R6Class(
       }
       return(self$prop)
     },
-    #' @param runid run scenario/id to retrieve
-    #' @param cached - use local cache? default FALSE
-    #' @param hydrowarmup truncate first 2-9 months?
-    #' @param cleanup Should the function delete the log file create for the cached argument?
-    #' @param outaszoo zoo is default, if FALSE returns dataframe
-    #' @return timeseries of run file
+    #' @description Gets and returns the model run data for a given model
+    #' elementID and scenario runID. Model data will be returned as a zoo or a
+    #' data frame depending on user request
+    #' @param runid integer run id representing the scenario. Ask the modeling team
+    #'   for scenario IDs if you are unsure otherwise see the WSPA Shiny Dashboard
+    #'   for more information
+    #' @param cached boolean - if TRUE will use recently stored local copy
+    #' @param hydrowarmup boolean - if TRUE will trim beginning of model time frame
+    #'   to account for potential model warm up as water routes downstream from the
+    #'   headwaters and operational rules engage
+    #' @param cleanup Logical. Should the function delete the log file create for
+    #'   the cached argument? If this is TRUE, the .log files will be deleted after
+    #'   download from OM server
+    #' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
+    #'   or as data frame if FALSE. Default is TRUE.
+    #' @return timeseries of run file as either data frame or zoo depending on
+    #'   user input
     get_run_data = function(runid, cached = FALSE, hydrowarmup = TRUE, cleanup = FALSE, outaszoo = TRUE) {
       if (!is.na(self$elementid)) {
-        self$prop = RomProperty$new(self$ds,list(pid=self$pid), TRUE)
-        self$pid = self$prop$pid
+        self$prop <- RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
-      dat = om_get_rundata(self$elementid, runid, site = self$site)
+      dat <- om_get_rundata(self$elementid, runid, site = self$site,
+                           cached = cached, hydrowarmup = hydrowarmup,
+                           cleanup = cleanup,  outaszoo = outaszoo)
       return(dat)
     },
-    #' @return TRUE or FALSE
+    
+    #' @description Uses the \code{get_json_prop()} method on this objects data
+    #'   source to get model json from this object's PID field. Stores the json
+    #'   as a field on this object. This method will then try to populate the
+    #'   elementid and riverseg fields on this object based on values in the
+    #'   JSON, if they exist
+    #' @return Nothing
     load_json_model = function() {
       self$json = self$ds$get_json_prop(self$get_model_pid())
       if (typeof(self$json) == "list") {
         if ("om_element_connection" %in% names(model$json)) {
-          self$elementid = self$json$om_element_connection$value
+          self$elementid <- self$json$om_element_connection$value
         }
         if ("riverseg" %in% names(model$json)) {
-          self$riverseg = self$json$riverseg$value
+          self$riverseg <- self$json$riverseg$value
         }
       }
     },
-    #' @return json of model from dH
+    #' @description Calls the \code{load_json_model()} method to load the model
+    #'   json and returns it. If the json field on this object is already
+    #'   populated, will return what's available
+    #' @return json of model from dh_properties as set in
     get_json_model = function() {
       if (typeof(self$json) != "list") {
         self$load_json_model()
       }
       return(self$json)
     },
-    #' @param elementid target container to search
+    #' @description Grabs the original model XML file and converts it to a
+    #'   readible list to return to the use
+    #' @param elementid target model container to search (OM model ID)
     #' @param oborops target container to search
-    #' @return elemxml and elemoperators
+    #' @return elemxml converted to list
     get_elem_xml= function(elementid = FALSE, oborops='object') {
       # NOTE: this is not yet working.
       # the xml comes in, and it appears to parse yielding a list-like
@@ -179,7 +246,11 @@ ModelElementBase <- R6Class(
       exp <- xml2::as_list(expdoc)
       return(exp)
     },
-    #' @param elementid target container to search
+    #' @description Returns all model elementids that are upstream and
+    #'   optionally downstream of the target model. These VAHydro OM elementids
+    #'   can be used to identify related models within a modelElementBase()
+    #'   object
+    #' @param elementid target OM elementid to build the tree off of (e.g. the container to search)
     #' @param include_children recurse through children? default = 1
     #' @param max_recursion_level integer how far to search if include_children = 1
     #' @param exclude_custom1 custom1 to exclude (use cova_upstream prevent upstream recursion)
@@ -223,14 +294,21 @@ ModelElementBase <- R6Class(
       elids = sqldf(sql, connection=self$ds_om$connection)
       return(elids)
     },
+    #' @description Render the CIA brief with basic parameters set by user for
+    #'   this model
     #' @param runid runid to summarize
-    #' @param export_path where to store the file
-    #' @param github_location library to load rendering code
-    #' @param cu_pre_var variable for "BEFORE" flow values
-    #' @param cu_post_var variable for "AFTER"
-    #' @param doc_title document title page text, default generated from feature
-    #' @param cu_threshold thresholds of change to code yellow, orange, red
-    #' @param include_appendices options 'hydropower', ...
+    #' @param export_path path to render the word document
+    #' @param github_location Path to github folder that should contain the
+    #'   vahydro OWS repository
+    #' @param cu_pre_var variable for "BEFORE" flow values e.g. before permit
+    #'   implementation
+    #' @param cu_post_var variable for "AFTER" flow values e.g. after permit
+    #'   implementation
+    #' @param doc_title document title page text. The default value, auto, will
+    #'   create a title based on the feature name
+    #' @param cu_threshold thresholds of change to code yellow, orange, red in
+    #'   display CIA tables drawn from \code{om_cu_table()}
+    #' @param include_appendices options for appendices like 'hydropower', ...
     #' @return file path of rendered output
     render_cia_brief = function(
     runid, export_path=export_path, github_location=github_location, 
@@ -257,7 +335,7 @@ ModelElementBase <- R6Class(
 )
 
 
-
+# WatershedModelNode ####
 #' Watershed Model Node data object
 #' @title WatershedModelNode
 #' @description Utility class for interacting with a watershed feature/model combo
@@ -390,7 +468,7 @@ WatershedModelNode <- R6Class(
 )
 
 
-
+# WaterSupplyElement ####
 #' Watershed Model Node data object
 #' @title WaterSupplyElement
 #' @description Utility class for interacting with a facility feature/model combo
@@ -472,7 +550,7 @@ WaterSupplyElement <- R6Class(
 )
 
 
-
+# HydroImpoundment ####
 #' Reservoir object
 #' @title HydroImpoundment
 #' @description Utility class for interacting with a facility feature/model combo

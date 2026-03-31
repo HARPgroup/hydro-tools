@@ -7,7 +7,7 @@
 usgs_calib_rarray(riverseg_json, gage_info, model_runid)
 }
 \arguments{
-\item{riverseg_json}{a valid RomFeature for the watershed of interest}
+\item{riverseg_json}{a valid json model for the watershed of interest}
 
 \item{gage_info}{a dataframe returned from dataRetrieval::readNWISsite(gageid)}
 
