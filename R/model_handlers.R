@@ -67,7 +67,10 @@ ModelElementBase <- R6Class(
     #' @param ds RomDataSource object mandatory. This is most often created in
     #'   DEQ config files and will feature connections to local or OWS data
     #'   bases
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @param config list of attributes to set, may include pid, hydroid,
+    #'   hydrocode, feature, bundle, etc. These will be used in the
+    #'   \code{get_model()} and \code{get_feature()} methods to identify the
+    #'   users model and feature
     #' @param ds_om RomDataSource object pointing to OM (optional)
     #' @param site URI base for the legacy model scripts assumes global var
     #'   omsite exists for default (as often created in DEQ config files)
@@ -298,8 +301,8 @@ ModelElementBase <- R6Class(
     #'   this model
     #' @param runid runid to summarize
     #' @param export_path path to render the word document
-    #' @param github_location Path to github folder that should contain the
-    #'   vahydro OWS repository
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
     #' @param cu_pre_var variable for "BEFORE" flow values e.g. before permit
     #'   implementation
     #' @param cu_post_var variable for "AFTER" flow values e.g. after permit
@@ -339,10 +342,17 @@ ModelElementBase <- R6Class(
 #' Watershed Model Node data object
 #' @title WatershedModelNode
 #' @description Utility class for interacting with a watershed feature/model combo
-#' @details Has standard methods for managing data and meta data
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to OWS model data for watershed model nodes (e.g. river
+#'   segment models). These objects may be initialized with OWS model data. The
+#'   objects will store relevant model data and has methods to load related
+#'   feautre or model data. Inherits additional methods from
+#'   \code{ModelElementBase()}.
 #' @importFrom R6 R6Class  
-#' @param ds RomDataSource for remote and local storage (required)
-#' @param config list of attributes to set/query
+#' @param ds RomDataSource for remote and local storage (required; often
+#'   provided in DEQ config files)
+#' @param config list of attributes to set/query and used to identify model
+#'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type WatershedModelNode
 #' @seealso NA
@@ -352,44 +362,66 @@ WatershedModelNode <- R6Class(
   "WatershedModelNode",
   inherit = ModelElementBase,
   public = list(
-    #' @field ds RomDataSource
+    #' @field ds RomDataSource often provided in DEQ config files and features a
+    #'   local data storage or a connection to a database/RESTful service
     ds = NA,
-    #' @field ds_om RomDataSource points to legacy model db
+    #' @field ds_om RomDataSource points to legacy model database and may also
+    #'   be provided in DEQ config file upon request to OWS modelling staff
     ds_om = NA,
-    #' @field hydroid unique ID from dh_feature database
+    #' @field hydroid unique ID from dh_feature database to identify the
+    #'   physical feature that is or has been modelled by OWS
     hydroid = NA,
-    #' @field hydrocode non-numeric identifier may reference ext source db
+    #' @field hydrocode non-numeric identifier in dh_feature that often defines
+    #'   external data source connections or identifiers
     hydrocode = NA,
-    #' @field bundle type of feature
+    #' @field bundle type of feature in dh_feature. See ReadMe for more details.
     bundle = NA,
-    #' @field ftype sub-type of feature
+    #' @field ftype sub-type of feature in dh_feature. See ReadMe for more details.
     ftype = NA,
-    #' @field feature a RomFeature entity
+    #' @field feature a \code{RomFeature} entity that has found a valid feature in dh_feature
     feature = NA,
-    #' @field pid integer identifier
+    #' @field pid integer identifier of the model as found in dh_properties
     pid = NA,
-    #' @field version descriptive code for model
+    #' @field version descriptive code for the model version. Often 'vahydro-1.0'
     version = NA,
-    #' @field prop as RomProperty
+    #' @field prop a RomProperty that is defined by the model base property
     prop = NA,
-    #' @field json as list
+    #' @field json Modelling data (inputs) JSON
     json = NA,
-    #' @field elementid as integer
+    #' @field elementid An integer identifier of the OM model element
     elementid = NA,
     #' @field rocode describes runoff type default = 'cbp6_lrseg'
     rocode = 'cbp6_lrseg',
-    #' @field name what is it called
+    #' @field name The model name
     name = NA,
-    #' @field riverseg we using code names
+    #' @field riverseg The riverseg code defined for the watershed node in VA
+    #'   Hydro OM model (often derived or related to the river segment codes
+    #'   used in the CB Watershed Model)
     riverseg = NA,
-    #' @param ds RomDataSource object mandatory
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @description
+    #' Initialize a WatershedModelNode() instance, returning an R6 object that is
+    #' now populated with model data in its fields through queries of the
+    #' provided ds using the \code{ModelElementBase$initialize()} inherited method.
+    #' This object will also have numerous methods that are described in 
+    #' \code{?WatershedModelNode()}.
+    #' @param ds RomDataSource object mandatory. This is most often created in
+    #'   DEQ config files and will feature connections to local or OWS data
+    #'   bases
+    #' @param config list of attributes to set, may include pid, hydroid,
+    #'   hydrocode, feature, bundle, etc. These will be used in the
+    #'   \code{get_model()} and \code{get_feature()} methods to identify the
+    #'   users model and feature
     #' @param ds_om RomDataSource object pointing to OM (optional)
-    #' @param site URI base for the legacy model scripts assumes global var omsite exists for default
+    #' @param site URI base for the legacy model scripts assumes global var
+    #'   omsite exists for default (as often created in DEQ config files)
     #' @return object instance
     initialize = function(ds, config = list(), ds_om=NA, site=omsite) {
       super$initialize(ds, config, ds_om, site=omsite)
     },
+    #' @description
+    #' Based on the rocode field (default is cbp6_lrseg), return a list of model
+    #' OM elementids that correspond to the runoff models upstream by leveraging
+    #' the inherited \code{om_element_tree()} method
     #' @return list of elementids corresponding to runoff props uses rocode prop to filter
     get_runoff_elids = function() {
       # TBD
@@ -409,26 +441,45 @@ WatershedModelNode <- R6Class(
       }
       return(elids)
     },
+    #' @description
+    #' Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
+    #' watersheds and returns that with a drainage area closest to the target
+    #' watershed feature (i.e. the feature in the feature field on this object)
+    #' drainage area
     #' @return data frame with the closest gage
     nearest_gage = function() {
       usgs_nearest_gage(self$feature, self$get_json_model())
     },
+    #' @description Coming Soon!!!
+    #'   Render the detailed CIA R markdown with basic parameters set
+    #'   by user for this model
     #' @param runids runids to summarize
-    #' @param export_path where to store the file
-    #' @param github_location library to load rendering code
+    #' @param export_path path to render the word document
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
     #' @return file path of rendered output
     render_cia_detailed = function(runids, export_path, github_location) {
       # TBD
       return(FALSE)
     },
+    #' @description Render the CIA brief R markdownd with basic parameters set
+    #'   by user for this model. This method calls the inherited
+    #'   \code{ModelElementBase$render_cia_brief()} method and is largely
+    #'   identical to that method, but was included here for future
+    #'   customization
     #' @param runid runid to summarize
-    #' @param export_path where to store the file
-    #' @param github_location library to load rendering code
-    #' @param cu_pre_var variable for "BEFORE" flow values
-    #' @param cu_post_var variable for "AFTER"
-    #' @param doc_title document title page text, default generated from feature
-    #' @param cu_threshold thresholds of change to code yellow, orange, red
-    #' @param include_appendices options 'hydropower', ...
+    #' @param export_path ath to render the word document
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
+    #' @param cu_pre_var variable for "BEFORE" flow values e.g. before permit
+    #'   implementation
+    #' @param cu_post_var variable for "AFTER" flow values e.g. after permit
+    #'   implementation
+    #' @param doc_title document title page text. The default value, auto, will
+    #'   create a title based on the feature name
+    #' @param cu_threshold thresholds of change to code yellow, orange, red in
+    #'   display CIA tables drawn from \code{om_cu_table()}
+    #' @param include_appendices options for appendices like 'hydropower', ...
     #' @return file path of rendered output
     render_cia_brief = function(
       runid, export_path=export_path, github_location=github_location, 
@@ -443,10 +494,19 @@ WatershedModelNode <- R6Class(
         cu_threshold, include_appendices
       )
     },
+    #' @description Render gage vs model calibration description markdown. This
+    #'   markdown will provide information about how gage and model flows
+    #'   compare.
+    #'   \code{ModelElementBase$render_cia_brief()} method and is largely
+    #'   identical to that method, but was included here for future
+    #'   customization
     #' @param runid runid to summarize
-    #' @param export_path where to store the file
-    #' @param gage what to compare to
-    #' @param github_location library to load rendering code
+    #' @param export_path where to render the word document to
+    #' @param gage A USGS gage to compare model flows to. If gage is set to
+    #'   auto, the \code{nearest_gage()} method will be called and the selected
+    #'   gage used automatically
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
     gage_vs_model = function(
     runid, gage='auto', export_path=export_path, github_location = github_location) {
       if (gage == 'auto') {
@@ -472,10 +532,17 @@ WatershedModelNode <- R6Class(
 #' Watershed Model Node data object
 #' @title WaterSupplyElement
 #' @description Utility class for interacting with a facility feature/model combo
-#' @details Has standard methods for managing data and meta data
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to OWS model data for water supply element models (e.g.
+#'   facility models). These objects may be initialized with OWS model data. The
+#'   objects will store relevant model data and has methods to load related
+#'   feautre or model data. Inherits additional methods and fields from
+#'   \code{ModelElementBase()}.
 #' @importFrom R6 R6Class  
-#' @param ds RomDataSource for remote and local storage (required)
-#' @param config list of attributes to set/query
+#' @param ds RomDataSource for remote and local storage (required; often
+#'   provided in DEQ config files)
+#' @param config list of attributes to set/query and used to identify model
+#'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type WaterSupplyElement
 #' @seealso NA
@@ -485,14 +552,30 @@ WaterSupplyElement <- R6Class(
   "WaterSupplyElement",
   inherit = ModelElementBase,
   public = list(
-    #' @param ds RomDataSource object mandatory
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @description
+    #' Initialize a WaterSupplyElement() instance, returning an R6 object that
+    #' is now populated with model data in its fields through queries of the
+    #' provided ds using the \code{ModelElementBase$initialize()} inherited
+    #' method. This object will also have numerous methods that are described in
+    #' \code{?WaterSupplyElement()}.
+    #' @param ds RomDataSource object mandatory. This is most often created in
+    #'   DEQ config files and will feature connections to local or OWS data
+    #'   bases
+    #' @param config list of attributes to set, may include pid, hydroid,
+    #'   hydrocode, feature, bundle, etc. These will be used in the
+    #'   \code{get_model()} and \code{get_feature()} methods to identify the
+    #'   users model and feature
     #' @param ds_om RomDataSource object pointing to OM (optional)
-    #' @param site URI base for the legacy model scripts assumes global var omsite exists for default
+    #' @param site URI base for the legacy model scripts assumes global var
+    #'   omsite exists for default (as often created in DEQ config files)
     #' @return object instance
     initialize = function(ds, config = list(), ds_om=NA, site=omsite) {
       super$initialize(ds, config, ds_om, site=omsite)
     },
+    #' @description
+    #' Based on the rocode field (default is cbp6_lrseg), return a list of model
+    #' OM elementids that correspond to the runoff models upstream by leveraging
+    #' the inherited \code{om_element_tree()} method
     #' @return list of elementids corresponding to runoff props uses rocode prop to filter
     get_runoff_elids = function() {
       # TBD
@@ -512,26 +595,45 @@ WaterSupplyElement <- R6Class(
       }
       return(elids)
     },
+    #' @description
+    #' Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
+    #' watersheds and returns that with a drainage area closest to the target
+    #' feature (i.e. the feature in the feature field on this object) drainage
+    #' area
     #' @return data frame with the closest gage
     nearest_gage = function() {
       usgs_nearest_gage(self$feature, self$get_json_model())
     },
+    #' @description Coming Soon!!!
+    #'   Render the detailed CIA R markdown with basic parameters set
+    #'   by user for this model
     #' @param runids runids to summarize
-    #' @param export_path where to store the file
-    #' @param github_location library to load rendering code
+    #' @param export_path path to render the word document
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
     #' @return file path of rendered output
     render_cia_detailed = function(runids, export_path, github_location) {
       # TBD
       return(FALSE)
     },
-    #' @param runid n to summarize
-    #' @param export_path where to store the file
-    #' @param github_location library to load rendering code
-    #' @param cu_pre_var variable for "BEFORE" flow values
-    #' @param cu_post_var variable for "AFTER"
-    #' @param doc_title document title page text, default generated from feature
-    #' @param cu_threshold thresholds of change to code yellow, orange, red
-    #' @param include_appendices options 'hydropower', ...
+    #' @description Render the CIA brief R markdownd with basic parameters set
+    #'   by user for this model. This method calls the inherited
+    #'   \code{ModelElementBase$render_cia_brief()} method and is largely
+    #'   identical to that method, but was included here for future
+    #'   customization
+    #' @param runid runid to summarize
+    #' @param export_path path to render the word document
+    #' @param github_location library to load rendering code (R markdown), may
+    #'   be set in DEQ config file
+    #' @param cu_pre_var variable for "BEFORE" flow values e.g. before permit
+    #'   implementation
+    #' @param cu_post_var variable for "AFTER" flow values e.g. after permit
+    #'   implementation
+    #' @param doc_title document title page text. The default value, auto, will
+    #'   create a title based on the feature name
+    #' @param cu_threshold thresholds of change to code yellow, orange, red in
+    #'   display CIA tables drawn from \code{om_cu_table()}
+    #' @param include_appendices options for appendices like 'hydropower', ...
     #' @return file path of rendered output
     render_cia_brief = function(
     runid, export_path=export_path, github_location=github_location, 
@@ -553,11 +655,18 @@ WaterSupplyElement <- R6Class(
 # HydroImpoundment ####
 #' Reservoir object
 #' @title HydroImpoundment
-#' @description Utility class for interacting with a facility feature/model combo
-#' @details Has standard methods for managing data and meta data
+#' @description Utility class for interacting with an impoundment feature/model combo
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to OWS model data for impoundments (often contained in river
+#'   segment or feature models). These objects may be initialized with OWS model
+#'   data. The objects will store relevant model data and has methods to load
+#'   related feautre or model data. Inherits additional methods from
+#'   \code{ModelElementBase()}.
 #' @importFrom R6 R6Class  
-#' @param ds RomDataSource for remote and local storage (required)
-#' @param config list of attributes to set/query
+#' @param ds RomDataSource for remote and local storage (required; often
+#'   provided in DEQ config files)
+#' @param config list of attributes to set/query and used to identify model
+#'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type HydroImpoundment
 #' @seealso NA
@@ -567,10 +676,22 @@ HydroImpoundment <- R6Class(
   "HydroImpoundment",
   inherit = ModelElementBase,
   public = list(
-    #' @param ds RomDataSource object mandatory
-    #' @param config list of attributes to set, see also: to_list() for format
+    #' @description
+    #' Initialize a HydroImpoundment() instance, returning an R6 object that is
+    #' now populated with model data in its fields through queries of the
+    #' provided ds using the \code{ModelElementBase$initialize()} inherited method.
+    #' This object will also have numerous methods that are described in 
+    #' \code{?HydroImpoundment()}.
+    #' @param ds RomDataSource object mandatory. This is most often created in
+    #'   DEQ config files and will feature connections to local or OWS data
+    #'   bases
+    #' @param config list of attributes to set, may include pid, hydroid,
+    #'   hydrocode, feature, bundle, etc. These will be used in the
+    #'   \code{get_model()} and \code{get_feature()} methods to identify the
+    #'   users model and feature
     #' @param ds_om RomDataSource object pointing to OM (optional)
-    #' @param site URI base for the legacy model scripts assumes global var omsite exists for default
+    #' @param site URI base for the legacy model scripts assumes global var
+    #'   omsite exists for default (
     #' @return object instance
     initialize = function(ds, config = list(), ds_om=NA, site=omsite) {
       super$initialize(ds, config, ds_om, site=omsite)

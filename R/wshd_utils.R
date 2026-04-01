@@ -375,7 +375,8 @@ set_zoom <- function(pb){
 #'@title usgs_nearest_gage
 #'@description Find the closest gage for a watershed feature and model.
 #'@details This function finds full drainage watersheds that contain a feature,
-#'  and make an area match.
+#'  and make an area match to choose a gage with the closest drainage area to
+#'  the watershed feature
 #'@param watershed_feature a valid RomFeature for the watershed of interest
 #'@param watershed_json a valid json model for the watershed of interest
 usgs_nearest_gage <- function(watershed_feature, watershed_json) {
@@ -423,10 +424,12 @@ watershed_model_da <- function(watershed_json) {
 #'@name usgs_calib_rarray
 #'@title usgs_calib_rarray
 #'@description Create a best guess calibration render script param set.
-#'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
+#'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS
+#'  to include a title, runid, gageid, model_da, and model element id (elid)
 #'@param riverseg_json a valid json model for the watershed of interest
 #'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
 #'@param model_runid a model run id/scenario
+#'@return A list with parameters for the gage_vs_model.Rmd markdown
 usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
   # set up render array
   da <- watershed_model_da(riverseg_json)
