@@ -103,7 +103,10 @@ that are described in \code{?ModelElementBase}.
 DEQ config files and will feature connections to local or OWS data
 bases}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+hydrocode, feature, bundle, etc. These will be used in the
+\code{get_model()} and \code{get_feature()} methods to identify the
+users model and feature}
 
 \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
 
@@ -351,8 +354,8 @@ Render the CIA brief with basic parameters set by user for
 
 \item{\code{export_path}}{path to render the word document}
 
-\item{\code{github_location}}{Path to github folder that should contain the
-vahydro OWS repository}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 
 \item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
 implementation}

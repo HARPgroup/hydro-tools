@@ -355,8 +355,18 @@ ModelElementBase <- R6Class(
 #'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type WatershedModelNode
-#' @seealso NA
-#' @examples NA
+#' @examples \dontrun{
+#' riverseg ="JA4_7280_7340"
+#' hydrocode=paste0('vahydrosw_wshed_',riverseg)
+#' model = WatershedModelNode$new(
+#' ds,list(
+#'  hydrocode=hydrocode, 
+#'  bundle='watershed', 
+#'  ftype='vahydro', 
+#'  version="vahydro-1.0"),
+#'  ds_om=ds_model
+#'  )
+#'  }
 #' @export WatershedModelNode
 WatershedModelNode <- R6Class(
   "WatershedModelNode",
@@ -545,7 +555,7 @@ WatershedModelNode <- R6Class(
 #'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type WaterSupplyElement
-#' @seealso NA
+#' @seealso WatershedModelNode
 #' @examples NA
 #' @export WaterSupplyElement
 WaterSupplyElement <- R6Class(
@@ -669,7 +679,7 @@ WaterSupplyElement <- R6Class(
 #'   elements in datasource
 #' @param ds_om RomDataSource for legacy model connection (optional)
 #' @return R6Class of type HydroImpoundment
-#' @seealso NA
+#' @seealso WatershedModelNode
 #' @examples NA
 #' @export HydroImpoundment
 HydroImpoundment <- R6Class(

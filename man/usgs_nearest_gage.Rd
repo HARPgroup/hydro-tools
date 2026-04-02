@@ -16,5 +16,6 @@ Find the closest gage for a watershed feature and model.
 }
 \details{
 This function finds full drainage watersheds that contain a feature,
- and make an area match.
+ and make an area match to choose a gage with the closest drainage area to
+ the watershed feature
 }

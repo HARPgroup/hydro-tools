@@ -12,13 +12,26 @@ Utility class for interacting with a watershed feature/model combo
 \details{
 Watershed Model Node data object
 
-Has standard methods for managing data and meta data
+This R6 object has standard methods for managing the data and meta
+  data related to OWS model data for watershed model nodes (e.g. river
+  segment models). These objects may be initialized with OWS model data. The
+  objects will store relevant model data and has methods to load related
+  feautre or model data. Inherits additional methods from
+  \code{ModelElementBase()}.
 }
 \examples{
-NA
-}
-\seealso{
-NA
+\dontrun{
+riverseg ="JA4_7280_7340"
+hydrocode=paste0('vahydrosw_wshed_',riverseg)
+model = WatershedModelNode$new(
+ds,list(
+ hydrocode=hydrocode, 
+ bundle='watershed', 
+ ftype='vahydro', 
+ version="vahydro-1.0"),
+ ds_om=ds_model
+ )
+ }
 }
 \section{Super class}{
 \code{\link[hydrotools:ModelElementBase]{hydrotools::ModelElementBase}} -> \code{WatershedModelNode}
@@ -26,35 +39,41 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{ds}}{RomDataSource}
+\item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
+local data storage or a connection to a database/RESTful service}
 
-\item{\code{ds_om}}{RomDataSource points to legacy model db}
+\item{\code{ds_om}}{RomDataSource points to legacy model database and may also
+be provided in DEQ config file upon request to OWS modelling staff}
 
-\item{\code{hydroid}}{unique ID from dh_feature database}
+\item{\code{hydroid}}{unique ID from dh_feature database to identify the
+physical feature that is or has been modelled by OWS}
 
-\item{\code{hydrocode}}{non-numeric identifier may reference ext source db}
+\item{\code{hydrocode}}{non-numeric identifier in dh_feature that often defines
+external data source connections or identifiers}
 
-\item{\code{bundle}}{type of feature}
+\item{\code{bundle}}{type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{ftype}}{sub-type of feature}
+\item{\code{ftype}}{sub-type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{feature}}{a RomFeature entity}
+\item{\code{feature}}{a \code{RomFeature} entity that has found a valid feature in dh_feature}
 
-\item{\code{pid}}{integer identifier}
+\item{\code{pid}}{integer identifier of the model as found in dh_properties}
 
-\item{\code{version}}{descriptive code for model}
+\item{\code{version}}{descriptive code for the model version. Often 'vahydro-1.0'}
 
-\item{\code{prop}}{as RomProperty}
+\item{\code{prop}}{a RomProperty that is defined by the model base property}
 
-\item{\code{json}}{as list}
+\item{\code{json}}{Modelling data (inputs) JSON}
 
-\item{\code{elementid}}{as integer}
+\item{\code{elementid}}{An integer identifier of the OM model element}
 
 \item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
 
-\item{\code{name}}{what is it called}
+\item{\code{name}}{The model name}
 
-\item{\code{riverseg}}{we using code names}
+\item{\code{riverseg}}{The riverseg code defined for the watershed node in VA
+Hydro OM model (often derived or related to the river segment codes
+used in the CB Watershed Model)}
 }
 \if{html}{\out{</div>}}
 }
@@ -89,6 +108,11 @@ NA
 \if{html}{\out{<a id="method-WatershedModelNode-new"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize a WatershedModelNode() instance, returning an R6 object that is
+now populated with model data in its fields through queries of the
+provided ds using the \code{ModelElementBase$initialize()} inherited method.
+This object will also have numerous methods that are described in 
+\code{?WatershedModelNode()}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
 }
@@ -96,13 +120,19 @@ NA
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ds}}{RomDataSource object mandatory}
+\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+DEQ config files and will feature connections to local or OWS data
+bases}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+hydrocode, feature, bundle, etc. These will be used in the
+\code{get_model()} and \code{get_feature()} methods to identify the
+users model and feature}
 
 \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
 
-\item{\code{site}}{URI base for the legacy model scripts assumes global var omsite exists for default}
+\item{\code{site}}{URI base for the legacy model scripts assumes global var
+omsite exists for default (as often created in DEQ config files)}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,6 +144,9 @@ object instance
 \if{html}{\out{<a id="method-WatershedModelNode-get_runoff_elids"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-get_runoff_elids}{}}}
 \subsection{Method \code{get_runoff_elids()}}{
+Based on the rocode field (default is cbp6_lrseg), return a list of model
+OM elementids that correspond to the runoff models upstream by leveraging
+the inherited \code{om_element_tree()} method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$get_runoff_elids()}\if{html}{\out{</div>}}
 }
@@ -126,6 +159,10 @@ list of elementids corresponding to runoff props uses rocode prop to filter
 \if{html}{\out{<a id="method-WatershedModelNode-nearest_gage"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-nearest_gage}{}}}
 \subsection{Method \code{nearest_gage()}}{
+Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
+watersheds and returns that with a drainage area closest to the target
+watershed feature (i.e. the feature in the feature field on this object)
+drainage area
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$nearest_gage()}\if{html}{\out{</div>}}
 }
@@ -138,6 +175,9 @@ data frame with the closest gage
 \if{html}{\out{<a id="method-WatershedModelNode-render_cia_detailed"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-render_cia_detailed}{}}}
 \subsection{Method \code{render_cia_detailed()}}{
+Coming Soon!!!
+  Render the detailed CIA R markdown with basic parameters set
+  by user for this model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$render_cia_detailed(runids, export_path, github_location)}\if{html}{\out{</div>}}
 }
@@ -147,9 +187,10 @@ data frame with the closest gage
 \describe{
 \item{\code{runids}}{runids to summarize}
 
-\item{\code{export_path}}{where to store the file}
+\item{\code{export_path}}{path to render the word document}
 
-\item{\code{github_location}}{library to load rendering code}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 }
 \if{html}{\out{</div>}}
 }
@@ -161,6 +202,11 @@ file path of rendered output
 \if{html}{\out{<a id="method-WatershedModelNode-render_cia_brief"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-render_cia_brief}{}}}
 \subsection{Method \code{render_cia_brief()}}{
+Render the CIA brief R markdownd with basic parameters set
+  by user for this model. This method calls the inherited
+  \code{ModelElementBase$render_cia_brief()} method and is largely
+  identical to that method, but was included here for future
+  customization
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$render_cia_brief(
   runid,
@@ -179,19 +225,24 @@ file path of rendered output
 \describe{
 \item{\code{runid}}{runid to summarize}
 
-\item{\code{export_path}}{where to store the file}
+\item{\code{export_path}}{ath to render the word document}
 
-\item{\code{github_location}}{library to load rendering code}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 
-\item{\code{cu_pre_var}}{variable for "BEFORE" flow values}
+\item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
+implementation}
 
-\item{\code{cu_post_var}}{variable for "AFTER"}
+\item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
+implementation}
 
-\item{\code{doc_title}}{document title page text, default generated from feature}
+\item{\code{doc_title}}{document title page text. The default value, auto, will
+create a title based on the feature name}
 
-\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red}
+\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
+display CIA tables drawn from \code{om_cu_table()}}
 
-\item{\code{include_appendices}}{options 'hydropower', ...}
+\item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
 }
 \if{html}{\out{</div>}}
 }
@@ -203,6 +254,12 @@ file path of rendered output
 \if{html}{\out{<a id="method-WatershedModelNode-gage_vs_model"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-gage_vs_model}{}}}
 \subsection{Method \code{gage_vs_model()}}{
+Render gage vs model calibration description markdown. This
+  markdown will provide information about how gage and model flows
+  compare.
+  \code{ModelElementBase$render_cia_brief()} method and is largely
+  identical to that method, but was included here for future
+  customization
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$gage_vs_model(
   runid,
@@ -217,11 +274,14 @@ file path of rendered output
 \describe{
 \item{\code{runid}}{runid to summarize}
 
-\item{\code{gage}}{what to compare to}
+\item{\code{gage}}{A USGS gage to compare model flows to. If gage is set to
+auto, the \code{nearest_gage()} method will be called and the selected
+gage used automatically}
 
-\item{\code{export_path}}{where to store the file}
+\item{\code{export_path}}{where to render the word document to}
 
-\item{\code{github_location}}{library to load rendering code}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 }
 \if{html}{\out{</div>}}
 }

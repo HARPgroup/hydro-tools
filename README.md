@@ -109,6 +109,12 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.12 04/02/2026
+1. Added a new class of R6 objects, `modelElementBase`, `WatershedModelNode,
+`WaterSupplyElement`, and `HydroImpoundment` to assist with uniform model data
+querying and assembly. These objects will be used routinely in model data
+processing.
+
 ### 1.0.11 01/07/2026
 1. Updated the documentation on `RomFeature$get_raster_ts()` to be more accurate
 for the starttime and endtime arguments. Additionally, added a `touched` argument

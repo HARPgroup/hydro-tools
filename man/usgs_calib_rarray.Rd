@@ -13,9 +13,13 @@ usgs_calib_rarray(riverseg_json, gage_info, model_runid)
 
 \item{model_runid}{a model run id/scenario}
 }
+\value{
+A list with parameters for the gage_vs_model.Rmd markdown
+}
 \description{
 Create a best guess calibration render script param set.
 }
 \details{
-Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
+Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS
+ to include a title, runid, gageid, model_da, and model element id (elid)
 }
