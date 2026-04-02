@@ -4,19 +4,28 @@
 \alias{RomFeature}
 \title{Feature entity data object}
 \value{
-feature class of type RomFeature
+Instance of RomFeature populated by returned query attributes or by
+  config inputs
+
+Nothing, but will try to set the feat_sf field. Will message
+  errors if encountered.
 }
 \description{
-Object for storing a single feature with attribute and timeseries related
+Object for storing a single feature with attribute and
+  timeseries related
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data for features in
+  the dh_feature table within the OWS database. \code{RomFeature} provides
+  users an easy way to query for a feature and then get additional data like
+  measuring points, properties, and spatial information. Inherits additional
+  methods from \code{RomEntity}
 }
 \examples{
 NA
 }
 \seealso{
-NA
+RomProperty
 }
 \section{Super class}{
 \code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomFeature}
@@ -24,31 +33,41 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{base_entity_type}}{kind of entity}
+\item{\code{base_entity_type}}{kind of entity (general OWS database structure)}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+\item{\code{pk_name}}{The name of this entity's primary key column that can be
+used as a unique identifier for this entity}
 
-\item{\code{name}}{of this entity}
+\item{\code{name}}{The name of the feature}
 
-\item{\code{hydrocode}}{alpha code for this entity from original dataset}
+\item{\code{hydrocode}}{Code for this entity from original dataset (sometimes
+alpha code)}
 
-\item{\code{ftype}}{feature type}
+\item{\code{ftype}}{Feature type. Depends on the bundle. See hydrotools ReadMe
+for additional infomraiton but these may include use types and much
+more}
 
-\item{\code{hydroid}}{unique ID (integer)}
+\item{\code{hydroid}}{unique ID (integer) to identify features (primary key)}
 
 \item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
 
-\item{\code{fstatus}}{entity status}
+\item{\code{fstatus}}{entity status e.g. active, inactive, abandonded, etc.}
 
 \item{\code{description}}{notes field}
 
-\item{\code{mps}}{linked features}
+\item{\code{mps}}{linked features that may represent measuring points like
+intakes, wells, etc.}
 
 \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{nextdown_id}}{feature geometry WKT}
+\item{\code{geom_CRS}}{What is the coordinate system to use to convert geom
+field to SF?}
 
-\item{\code{parent_id}}{feature geometry WKT}
+\item{\code{feat_sf}}{An SF data frame to represent the feature}
+
+\item{\code{nextdown_id}}{"Downstream" entity where applicable}
+
+\item{\code{parent_id}}{"Upstream" entity where applicable}
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
@@ -69,6 +88,8 @@ NA
 \item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
 \item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
 \item \href{#method-RomFeature-get_raster_ts}{\code{RomFeature$get_raster_ts()}}
+\item \href{#method-RomFeature-wkt_to_sf}{\code{RomFeature$wkt_to_sf()}}
+\item \href{#method-RomFeature-plot_feat}{\code{RomFeature$plot_feat()}}
 \item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
 }
 }
@@ -324,6 +345,36 @@ considered?}
 }
 \subsection{Returns}{
 dataframe of timeseries values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-wkt_to_sf"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-wkt_to_sf}{}}}
+\subsection{Method \code{wkt_to_sf()}}{
+Convert the WKT field geom of this entity to an SF data
+  frame for easy R GIS analysis.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$wkt_to_sf()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-plot_feat"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-plot_feat}{}}}
+\subsection{Method \code{plot_feat()}}{
+Plot this feature on a basic GIS map for QC purposes. If the
+  package ggspatial is loaded, plot may be returned as a ggplot
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$plot_feat(useggplot = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{useggplot}}{Defaults to FALSE. If TRUE, a ggplot is returned but
+this requires ggspatial}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
