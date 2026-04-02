@@ -7,18 +7,23 @@
 R6Class of type HydroImpoundment
 }
 \description{
-Utility class for interacting with a facility feature/model combo
+Utility class for interacting with an impoundment feature/model combo
 }
 \details{
 Reservoir object
 
-Has standard methods for managing data and meta data
+This R6 object has standard methods for managing the data and meta
+  data related to OWS model data for impoundments (often contained in river
+  segment or feature models). These objects may be initialized with OWS model
+  data. The objects will store relevant model data and has methods to load
+  related feautre or model data. Inherits additional methods from
+  \code{ModelElementBase()}.
 }
 \examples{
 NA
 }
 \seealso{
-NA
+WatershedModelNode
 }
 \section{Super class}{
 \code{\link[hydrotools:ModelElementBase]{hydrotools::ModelElementBase}} -> \code{HydroImpoundment}
@@ -51,6 +56,11 @@ NA
 \if{html}{\out{<a id="method-HydroImpoundment-new"></a>}}
 \if{latex}{\out{\hypertarget{method-HydroImpoundment-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize a HydroImpoundment() instance, returning an R6 object that is
+now populated with model data in its fields through queries of the
+provided ds using the \code{ModelElementBase$initialize()} inherited method.
+This object will also have numerous methods that are described in 
+\code{?HydroImpoundment()}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{HydroImpoundment$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
 }
@@ -58,13 +68,19 @@ NA
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ds}}{RomDataSource object mandatory}
+\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+DEQ config files and will feature connections to local or OWS data
+bases}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+hydrocode, feature, bundle, etc. These will be used in the
+\code{get_model()} and \code{get_feature()} methods to identify the
+users model and feature}
 
 \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
 
-\item{\code{site}}{URI base for the legacy model scripts assumes global var omsite exists for default}
+\item{\code{site}}{URI base for the legacy model scripts assumes global var
+omsite exists for default (}
 }
 \if{html}{\out{</div>}}
 }

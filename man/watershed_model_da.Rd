@@ -13,5 +13,6 @@ watershed_model_da(watershed_json)
 Find the drainage area from a json model collection.
 }
 \details{
-This function handles the varying area data formats that these models have historically used.
+This function handles the varying area data formats that these models
+ have historically used.
 }

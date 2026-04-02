@@ -12,13 +12,18 @@ Utility class for interacting with a facility feature/model combo
 \details{
 Watershed Model Node data object
 
-Has standard methods for managing data and meta data
+This R6 object has standard methods for managing the data and meta
+  data related to OWS model data for water supply element models (e.g.
+  facility models). These objects may be initialized with OWS model data. The
+  objects will store relevant model data and has methods to load related
+  feautre or model data. Inherits additional methods and fields from
+  \code{ModelElementBase()}.
 }
 \examples{
 NA
 }
 \seealso{
-NA
+WatershedModelNode
 }
 \section{Super class}{
 \code{\link[hydrotools:ModelElementBase]{hydrotools::ModelElementBase}} -> \code{WaterSupplyElement}
@@ -53,6 +58,11 @@ NA
 \if{html}{\out{<a id="method-WaterSupplyElement-new"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterSupplyElement-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize a WaterSupplyElement() instance, returning an R6 object that
+is now populated with model data in its fields through queries of the
+provided ds using the \code{ModelElementBase$initialize()} inherited
+method. This object will also have numerous methods that are described in
+\code{?WaterSupplyElement()}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
 }
@@ -60,13 +70,19 @@ NA
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ds}}{RomDataSource object mandatory}
+\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+DEQ config files and will feature connections to local or OWS data
+bases}
 
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
+\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+hydrocode, feature, bundle, etc. These will be used in the
+\code{get_model()} and \code{get_feature()} methods to identify the
+users model and feature}
 
 \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
 
-\item{\code{site}}{URI base for the legacy model scripts assumes global var omsite exists for default}
+\item{\code{site}}{URI base for the legacy model scripts assumes global var
+omsite exists for default (as often created in DEQ config files)}
 }
 \if{html}{\out{</div>}}
 }
@@ -78,6 +94,9 @@ object instance
 \if{html}{\out{<a id="method-WaterSupplyElement-get_runoff_elids"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterSupplyElement-get_runoff_elids}{}}}
 \subsection{Method \code{get_runoff_elids()}}{
+Based on the rocode field (default is cbp6_lrseg), return a list of model
+OM elementids that correspond to the runoff models upstream by leveraging
+the inherited \code{om_element_tree()} method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$get_runoff_elids()}\if{html}{\out{</div>}}
 }
@@ -90,6 +109,10 @@ list of elementids corresponding to runoff props uses rocode prop to filter
 \if{html}{\out{<a id="method-WaterSupplyElement-nearest_gage"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterSupplyElement-nearest_gage}{}}}
 \subsection{Method \code{nearest_gage()}}{
+Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
+watersheds and returns that with a drainage area closest to the target
+feature (i.e. the feature in the feature field on this object) drainage
+area
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$nearest_gage()}\if{html}{\out{</div>}}
 }
@@ -102,6 +125,9 @@ data frame with the closest gage
 \if{html}{\out{<a id="method-WaterSupplyElement-render_cia_detailed"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterSupplyElement-render_cia_detailed}{}}}
 \subsection{Method \code{render_cia_detailed()}}{
+Coming Soon!!!
+  Render the detailed CIA R markdown with basic parameters set
+  by user for this model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$render_cia_detailed(runids, export_path, github_location)}\if{html}{\out{</div>}}
 }
@@ -111,9 +137,10 @@ data frame with the closest gage
 \describe{
 \item{\code{runids}}{runids to summarize}
 
-\item{\code{export_path}}{where to store the file}
+\item{\code{export_path}}{path to render the word document}
 
-\item{\code{github_location}}{library to load rendering code}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 }
 \if{html}{\out{</div>}}
 }
@@ -125,6 +152,11 @@ file path of rendered output
 \if{html}{\out{<a id="method-WaterSupplyElement-render_cia_brief"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterSupplyElement-render_cia_brief}{}}}
 \subsection{Method \code{render_cia_brief()}}{
+Render the CIA brief R markdownd with basic parameters set
+  by user for this model. This method calls the inherited
+  \code{ModelElementBase$render_cia_brief()} method and is largely
+  identical to that method, but was included here for future
+  customization
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterSupplyElement$render_cia_brief(
   runid,
@@ -141,21 +173,26 @@ file path of rendered output
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{runid}}{n to summarize}
+\item{\code{runid}}{runid to summarize}
 
-\item{\code{export_path}}{where to store the file}
+\item{\code{export_path}}{path to render the word document}
 
-\item{\code{github_location}}{library to load rendering code}
+\item{\code{github_location}}{library to load rendering code (R markdown), may
+be set in DEQ config file}
 
-\item{\code{cu_pre_var}}{variable for "BEFORE" flow values}
+\item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
+implementation}
 
-\item{\code{cu_post_var}}{variable for "AFTER"}
+\item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
+implementation}
 
-\item{\code{doc_title}}{document title page text, default generated from feature}
+\item{\code{doc_title}}{document title page text. The default value, auto, will
+create a title based on the feature name}
 
-\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red}
+\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
+display CIA tables drawn from \code{om_cu_table()}}
 
-\item{\code{include_appendices}}{options 'hydropower', ...}
+\item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
 }
 \if{html}{\out{</div>}}
 }
