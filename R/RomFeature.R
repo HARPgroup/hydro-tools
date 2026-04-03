@@ -450,26 +450,29 @@ RomFeature <- R6Class(
       return(raster_records)
     },
     #' @description Convert the WKT field geom of this entity to an SF data
-    #'   frame for easy R GIS analysis.
+    #'   frame for easy R GIS analysis. Will not work if geom field is not
+    #'   populated
     #' @return Nothing, but will try to set the feat_sf field. Will message
     #'   errors if encountered.
     wkt_to_sf = function() {
-      #Grab all feature fields including geometry
-      feat_data <- self$to_list()
-      #Convert to an SF object within a try-catch. If an error is thrown, warn
-      #user that SF was not created
-      tryCatch(
-        {
-          self$feat_sf <- sf::st_as_sf(
-            wkt = "geom", crs = self$geom_CRS,
-            as.data.frame(feat_data)
-          )
-        }, error = function(e) {
-          message("Could not create SF object from WKT due to:")
-          message(e)
-          return(NA)
-        }
-      )
+      if(!is.na(self$geom)){
+        #Grab all feature fields including geometry
+        feat_data <- self$to_list()
+        #Convert to an SF object within a try-catch. If an error is thrown, warn
+        #user that SF was not created
+        tryCatch(
+          {
+            self$feat_sf <- sf::st_as_sf(
+              wkt = "geom", crs = self$geom_CRS,
+              as.data.frame(feat_data)
+            )
+          }, error = function(e) {
+            message("Could not create SF object from WKT due to:")
+            message(e)
+            return(NA)
+          }
+        )
+      }
     },
     #' @description Plot this feature on a basic GIS map for QC purposes. If the
     #'   package ggspatial is loaded, plot may be returned as a ggplot
