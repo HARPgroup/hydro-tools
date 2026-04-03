@@ -231,10 +231,18 @@ RomFeature <- R6Class(
     #'   in this feature?),'st_centroid_within' (is the centroid of this feature
     #'   in another feature?), 'overlaps', or 'st_within'
     #' @param return_geoms FALSE will return a smaller dataframe by excluding
-    #'   the geometry fields
+    #'   the geometry fields. "SF" will return an SF and TRUE will return a data
+    #'   frame
     #' @param query_remote FALSE will search on in local datasource only, TRUE
     #'   will search the DS connection
-    #' @return dataframe of spatially related entities
+    #' @param plot_results If TRUE, a plot will be included in the return that
+    #'   shows the base feature and the related entities returned from the query
+    #' @return If plot_results is FALSE, a dataframe or SF dataframe of
+    #'   spatially related entities is returned bsaed on returns_geom. If
+    #'   plot_results is TRUE, then a list is returned with an entry plot that
+    #'   is the ggplot of the feature and queried entities and the other entry,
+    #'   spatial_relations, is a data.frame or SF data.frame of the related
+    #'   entities
     find_spatial_relations = function(
         target_entity = 'dh_feature', 
         inputs = list(
@@ -243,7 +251,8 @@ RomFeature <- R6Class(
         ),
         operator = 'st_contains',
         return_geoms = FALSE,
-        query_remote = TRUE
+        query_remote = TRUE,
+        plot_results = FALSE
       ) {
       # todo: should we move this to the ODBC functions?  Needs more generic handling.
       # currently only supports dh_feature, but could later support others
@@ -284,14 +293,46 @@ RomFeature <- R6Class(
         message("Warning: query_remote = FALSE is not yet supported for spatial relations")
       }
       message(sql)
-      related_entities <- dbGetQuery(conn = self$datasource$connection, sql)
+      query_results <- dbGetQuery(conn = self$datasource$connection, sql)
+      #If returns_geom is FALSE, remove the geometry fields
       if (return_geoms == FALSE) {
-        retcols = unlist(names(related_entities))
+        retcols = unlist(names(query_results))
         retcols <- retcols[-which(retcols == "dh_geofield")]
         retcols <- retcols[-which(retcols == "dh_geofield_geom")]
-        related_entities <- related_entities[,retcols]
+        related_entities <- query_results[,retcols]
+      }else if(return_geoms == "SF"){
+        #If returns_geom is SF, try to convert to an SF object to return
+        tryCatch(
+          {
+            related_entities <- sf::st_as_sf(
+              wkt = "dh_geofield", crs = self$geom_CRS,
+              x = query_results)
+            sf::st_geometry(related_entities) <- "geom"
+          }, error = function(e) {
+            message("Could not create SF object from WKT due to:")
+            message(e)
+          }
+        )
       }
-      return(related_entities)
+      #If the user wishes to plot the results, plot the feature and the returned
+      #data frame. then, return a list with the plot and the results of the
+      #query. Otherwise, just return spatial_relations
+      if(plot_results){
+        #Create an sf object plot_entities, if not already created
+        if(!inherits(related_entities, "sf")){
+          plot_entities <- sf::st_as_sf(
+            wkt = "dh_geofield", crs = self$geom_CRS,
+            x = query_results)
+          sf::st_geometry(plot_entities) <- "geom"
+        }else{
+          plot_entities <- related_entities
+        }
+        p <- self$plot_feat(useggplot = TRUE, 
+                       other_geom = list("Spatial_Relations" = plot_entities))
+        return(list(spatial_relations = related_entities, plot = p))
+      }else{
+        return(related_entities) 
+      }
     },
     #' @description Get raw or summarized raster values for this RomFeature from
     #'   dh_timeseries_weather using PostGIS
@@ -419,7 +460,7 @@ RomFeature <- R6Class(
       #user that SF was not created
       tryCatch(
         {
-          self$feat_sf <- st_as_sf(
+          self$feat_sf <- sf::st_as_sf(
             wkt = "geom", crs = self$geom_CRS,
             as.data.frame(feat_data)
           )
@@ -432,31 +473,91 @@ RomFeature <- R6Class(
     },
     #' @description Plot this feature on a basic GIS map for QC purposes. If the
     #'   package ggspatial is loaded, plot may be returned as a ggplot
-    #' @param useggplot Defaults to FALSE. If TRUE, a ggplot is returned but
-    #'   this requires ggspatial
+    #' @param useggplot Defaults to TRUE. If TRUE, a ggplot is returned using
+    #'   ggspatial; if FALSE, a plot is sent to the viewer
+    #' @param other_geom Named list of other SF data frames to include on plot
+    #'   (only used in ggplot)
     #' @returns If useggplot is FALSE, nothing is returned but a plot is
     #'   printed to the viewer. If useggplot is TRUE, a ggplot object is
     #'   returned
-    plot_feat = function(useggplot = FALSE) {
+    plot_feat = function(useggplot = TRUE, other_geom = list()) {
       if(any(!is.na(self$feat_sf))){
-        #Bounding box of feature
-        bbox <- sf::st_bbox(self$feat_sf)
-        #Get background map tiles from Esri at an appropriate zoom
+        #Use Esri base map
         tileProvider <- "Esri.NatGeoWorldMap"
-        tiles <- maptiles::get_tiles(self$feat_sf,
+        #A base object to use to get map tiles. May be replaced by bounding box
+        #for a polygon if multiple geometries are given
+        maptiles_obj <- self$feat_sf
+        #Bounding box of feature or of the largest other geometry
+        bbox <- sf::st_bbox(self$feat_sf)
+        if(is.list(other_geom) &
+            length(other_geom) > 0 &
+            !is.null(names(other_geom))){
+          #Get the bboxes of each object in other_geom and add to a matrix with
+          #the bbox from self$feat_sf
+          bboxs <- do.call(rbind,
+                          c(list(bbox),
+                            lapply(
+                              lapply(other_geom,st_geometry),
+                              st_bbox))
+          )
+          #Get the bbox with the maximum extent
+          maptiles_obj <- st_bbox(
+            c(xmin = min(bboxs[,1]), ymin = min(bboxs[,2]),
+              xmax = max(bboxs[,3]), ymax = max(bboxs[,4])),
+            crs = self$geom_CRS
+          )
+        }
+        
+        #Get background map tiles from Esri at an appropriate zoom
+        tiles <- maptiles::get_tiles(maptiles_obj,
                                      zoom = set_zoom(bbox), 
                                      crop = FALSE, verbose = FALSE, 
                                      provider = tileProvider)
-        if(require("ggspatial") & useggplot){
+        if(useggplot){
           #Alternate, but requires ggspatial:
-          p <- ggplot() +
+          p <- ggplot2::ggplot() +
             ggspatial::layer_spatial(tiles) +
-            geom_sf(data = self$feat_sf$geom, fill = NA)
+            ggplot2::geom_sf(data = self$feat_sf, fill = NA, lwd = 1) + 
+            ggplot2::theme_minimal()
+          #If other geometries are provided in a named list, plot them with
+          #unique colors
+          if(is.list(other_geom) &
+             length(other_geom) > 0 &
+             !is.null(names(other_geom))){
+            #For each SF in other_geom, add a ggplot geom_sf layer with a new
+            #color controlled by that list entry name
+            new_layers <- lapply(
+              X = 1:length(other_geom),
+              other_geom = other_geom,
+              FUN = function(X, other_geom){
+                geom_sf(data = other_geom[[X]], fill = NA, lwd = 1,
+                        mapping = aes(color = names(other_geom)[X])
+                )
+              })
+            #Create unique colors based on the length of other_geom
+            plot_colors <- grDevices::heat.colors(length(other_geom))
+            #Add a legend and apply colors to the new_layers
+            p <- p + new_layers + 
+              ggplot2::scale_color_manual(values = plot_colors) + 
+              ggplot2::labs(color = "Key")
+          }
           return(p)
         }else{
           #Plot feature and tiles
           terra::plotRGB(tiles, axes = TRUE,mar = c(2,1,1,1))
           plot(add = TRUE,self$feat_sf$geom)
+          if(is.list(other_geom) & length(other_geom) > 0){
+            #Create unique colors based on the length of other_geom
+            plot_colors <- grDevices::heat.colors(length(other_geom))
+            lapply(
+              X = 1:length(other_geom),
+              other_geom = other_geom,
+              plot_colors = plot_colors,
+                   FUN = function(X,other_geom, plot_colors){
+                     plot(add = TRUE, other_geom[[X]]$geom,
+                          border = plot_colors[X])
+              })
+          }
         }
       }else{
         warning("feat_sf object must be a valid SF object to plot")

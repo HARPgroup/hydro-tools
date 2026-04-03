@@ -307,7 +307,8 @@ Find target entities via spatial query of this RomFeature
   inputs = list(bundle = NA, ftype = NA),
   operator = "st_contains",
   return_geoms = FALSE,
-  query_remote = TRUE
+  query_remote = TRUE,
+  plot_results = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -327,15 +328,24 @@ in this feature?),'st_centroid_within' (is the centroid of this feature
 in another feature?), 'overlaps', or 'st_within'}
 
 \item{\code{return_geoms}}{FALSE will return a smaller dataframe by excluding
-the geometry fields}
+the geometry fields. "SF" will return an SF and TRUE will return a data
+frame}
 
 \item{\code{query_remote}}{FALSE will search on in local datasource only, TRUE
 will search the DS connection}
+
+\item{\code{plot_results}}{If TRUE, a plot will be included in the return that
+shows the base feature and the related entities returned from the query}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-dataframe of spatially related entities
+If plot_results is FALSE, a dataframe or SF dataframe of
+  spatially related entities is returned bsaed on returns_geom. If
+  plot_results is TRUE, then a list is returned with an entry plot that
+  is the ggplot of the feature and queried entities and the other entry,
+  spatial_relations, is a data.frame or SF data.frame of the related
+  entities
 }
 }
 \if{html}{\out{<hr>}}
@@ -407,14 +417,17 @@ Convert the WKT field geom of this entity to an SF data
 Plot this feature on a basic GIS map for QC purposes. If the
   package ggspatial is loaded, plot may be returned as a ggplot
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$plot_feat(useggplot = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$plot_feat(useggplot = TRUE, other_geom = list())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{useggplot}}{Defaults to FALSE. If TRUE, a ggplot is returned but
-this requires ggspatial}
+\item{\code{useggplot}}{Defaults to TRUE. If TRUE, a ggplot is returned using
+ggspatial; if FALSE, a plot is sent to the viewer}
+
+\item{\code{other_geom}}{Named list of other SF data frames to include on plot
+(only used in ggplot)}
 }
 \if{html}{\out{</div>}}
 }
