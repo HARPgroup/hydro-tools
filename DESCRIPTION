@@ -34,7 +34,7 @@ Imports:
     lmomco,
     e1071,
     elfgen,
+    ggspatial,
     openmi.om
 Suggests: 
-    dataRetrieval,
-    ggspatial
+    dataRetrieval
