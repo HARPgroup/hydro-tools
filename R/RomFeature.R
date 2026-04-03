@@ -451,7 +451,7 @@ RomFeature <- R6Class(
     },
     #' @description Convert the WKT field geom of this entity to an SF data
     #'   frame for easy R GIS analysis.
-    #' @returns Nothing, but will try to set the feat_sf field. Will message
+    #' @return Nothing, but will try to set the feat_sf field. Will message
     #'   errors if encountered.
     wkt_to_sf = function() {
       #Grab all feature fields including geometry
@@ -477,7 +477,7 @@ RomFeature <- R6Class(
     #'   ggspatial; if FALSE, a plot is sent to the viewer
     #' @param other_geom Named list of other SF data frames to include on plot
     #'   (only used in ggplot)
-    #' @returns If useggplot is FALSE, nothing is returned but a plot is
+    #' @return If useggplot is FALSE, nothing is returned but a plot is
     #'   printed to the viewer. If useggplot is TRUE, a ggplot object is
     #'   returned
     plot_feat = function(useggplot = TRUE, other_geom = list()) {

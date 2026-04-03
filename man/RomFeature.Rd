@@ -6,13 +6,6 @@
 \value{
 Instance of RomFeature populated by returned query attributes or by
   config inputs
-
-Nothing, but will try to set the feat_sf field. Will message
-  errors if encountered.
-
-If useggplot is FALSE, nothing is returned but a plot is
-  printed to the viewer. If useggplot is TRUE, a ggplot object is
-  returned
 }
 \description{
 Object for storing a single feature with attribute and
@@ -409,6 +402,10 @@ Convert the WKT field geom of this entity to an SF data
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$wkt_to_sf()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+Nothing, but will try to set the feat_sf field. Will message
+  errors if encountered.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-plot_feat"></a>}}
@@ -430,6 +427,11 @@ ggspatial; if FALSE, a plot is sent to the viewer}
 (only used in ggplot)}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+If useggplot is FALSE, nothing is returned but a plot is
+  printed to the viewer. If useggplot is TRUE, a ggplot object is
+  returned
 }
 }
 \if{html}{\out{<hr>}}

@@ -119,6 +119,7 @@ processing.
 `RomFeature$plot_feat()` will provide a quick plot of the feature. Finally,
 `RomFeature$find_spatial_relations(returns_geom = "SF")` will now ensure queried
 related features are returned to the user in an SF data frame
+3. Expanded `RomFeature` documentation
 
 ### 1.0.11 01/07/2026
 1. Updated the documentation on `RomFeature$get_raster_ts()` to be more accurate
