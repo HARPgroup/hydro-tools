@@ -114,6 +114,11 @@ This package is in active development.
 `WaterSupplyElement`, and `HydroImpoundment` to assist with uniform model data
 querying and assembly. These objects will be used routinely in model data
 processing.
+2. Added SF integrations to `RomFeature`. Now, on initialize,
+`RomFeature$feat_sf` will contain an sf data frame of the feature.
+`RomFeature$plot_feat()` will provide a quick plot of the feature. Finally,
+`RomFeature$find_spatial_relations(returns_geom = "SF")` will now ensure queried
+related features are returned to the user in an SF data frame
 
 ### 1.0.11 01/07/2026
 1. Updated the documentation on `RomFeature$get_raster_ts()` to be more accurate
