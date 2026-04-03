@@ -36,4 +36,5 @@ Imports:
     elfgen,
     openmi.om
 Suggests: 
-    dataRetrieval
+    dataRetrieval,
+    ggspatial
