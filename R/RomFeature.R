@@ -547,7 +547,16 @@ RomFeature <- R6Class(
           terra::plotRGB(tiles, axes = TRUE,mar = c(2,1,1,1))
           plot(add = TRUE,self$feat_sf$geom)
           if(is.list(other_geom) & length(other_geom) > 0){
-            lapply(other_geom,FUN = plot, add = TRUE)
+            #Create unique colors based on the length of other_geom
+            plot_colors <- grDevices::heat.colors(length(other_geom))
+            lapply(
+              X = 1:length(other_geom),
+              other_geom = other_geom,
+              plot_colors = plot_colors,
+                   FUN = function(X,other_geom, plot_colors){
+                     plot(add = TRUE, other_geom[[X]]$geom,
+                          border = plot_colors[X])
+              })
           }
         }
       }else{
