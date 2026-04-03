@@ -9,6 +9,10 @@ Instance of RomFeature populated by returned query attributes or by
 
 Nothing, but will try to set the feat_sf field. Will message
   errors if encountered.
+
+If useggplot is FALSE, nothing is returned but a plot is
+  printed to the viewer. If useggplot is TRUE, a ggplot object is
+  returned
 }
 \description{
 Object for storing a single feature with attribute and
@@ -22,7 +26,12 @@ Has standard methods for managing data and meta data for features in
   methods from \code{RomEntity}
 }
 \examples{
-NA
+\dontrun{
+#Get new datasource via odbc
+feat <- RomFeature$new(ds, config = list(hydroid = 68048), TRUE)
+#Pointer to external db
+feat$plot_feat(TRUE)
+}
 }
 \seealso{
 RomProperty
@@ -114,6 +123,12 @@ field to SF?}
 \if{html}{\out{<a id="method-RomFeature-new"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize an instance of RomFeature. This method will create an
+instance of RomFeature populated with fields based on the user query
+inputs passed via config. This method first calls the RomEntity inherited
+\code{RomEntity$initialize()} to populate fields then posts the feature
+in the internal feature database in the datasource (via
+\code{self$datasource$set_feature()}).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$new(datasource = NULL, config, load_remote = FALSE)}\if{html}{\out{</div>}}
 }
@@ -130,25 +145,36 @@ field to SF?}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-object instance
+object instance with populated fields based on user config and
+  methods to manipulate the feature
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_id}{}}}
 \subsection{Method \code{get_id()}}{
+A simple function that returns the primary key associated
+  with this feature. There should be a \code{get_id} on all children of
+  \code{RomEntity} objects to allow easy query
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_id()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid, subclassed as function
+get_id the unique id of this entity alias to remote pkid,
+  subclassed as function.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-load_data}{}}}
 \subsection{Method \code{load_data()}}{
+Populates fields on the object based on the queried results from the
+user config. It will save a copy of the feature to the local
+repository. The feature plugin and variable definitions will be
+loaded automatically as the inherited \code{RomEntity$load_data()} is
+called. The SF field will then be populated by any geometry on the
+feature
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$load_data(config, load_remote)}\if{html}{\out{</div>}}
 }
@@ -156,7 +182,7 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{}
+\item{\code{config}}{Populated by the config field (provided by user)}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }
@@ -170,6 +196,8 @@ the data from the remote connection
 \if{html}{\out{<a id="method-RomFeature-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-to_list}{}}}
 \subsection{Method \code{to_list()}}{
+Create a list of all the fields on this feature object instance to allow
+easy data sharing with R
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
@@ -177,18 +205,23 @@ the data from the remote connection
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
+\item{\code{base_only}}{include only base table columns (TRUE) or add fields
+(FALSE)}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-list of object attributes suitable for input to new() and from_list() methods
+list of object attributes suitable for input to \code{new()} and
+  \code{from_list()} methods
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-from_list}{}}}
 \subsection{Method \code{from_list()}}{
+Populate fields of this object based on the named entries in
+  list config. Searches specifically for hydroid, name, hydrocode, ftype,
+  bundle, fstatus, dh_geofield, nextdown_id, parent_id
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$from_list(config)}\if{html}{\out{</div>}}
 }
@@ -201,13 +234,16 @@ list of object attributes suitable for input to new() and from_list() methods
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-NULL
+Object instance now with fields populated by config
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_mps"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_mps}{}}}
 \subsection{Method \code{get_mps()}}{
+Queries dh_feature_fielded for any entities that have a
+  parent_id equal to this objects ID. These will include a facility's
+  measuring points (wells, intakes, etc.)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_mps()}\if{html}{\out{</div>}}
 }
@@ -220,6 +256,8 @@ a dataframe of connected MPs
 \if{html}{\out{<a id="method-RomFeature-add_mp"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-add_mp}{}}}
 \subsection{Method \code{add_mp()}}{
+Add a connected MP to local mp storage (mps field). This
+  will hopefully be expanded to include remote saving.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$add_mp(thismp)}\if{html}{\out{</div>}}
 }
@@ -232,13 +270,17 @@ a dataframe of connected MPs
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-add a connected MP. TBD
+add a connected MP to local mp storage.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-save}{}}}
 \subsection{Method \code{save()}}{
+Save changes to this feature to remote or local database based on
+push_remote by first getting all fields via \code{self$to_list()} and
+then subsequently using the \code{self$datasource$post()} as described in
+\code{RomDataSource()}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$save(push_remote = FALSE)}\if{html}{\out{</div>}}
 }

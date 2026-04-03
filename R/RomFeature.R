@@ -16,7 +16,12 @@
 #' @return Instance of RomFeature populated by returned query attributes or by
 #'   config inputs
 #' @seealso RomProperty
-#' @examples NA
+#' @examples \dontrun{
+#'#Get new datasource via odbc
+#'feat <- RomFeature$new(ds, config = list(hydroid = 68048), TRUE)
+#'#Pointer to external db
+#'feat$plot_feat(TRUE)
+#'}
 #' @export RomFeature
 RomFeature <- R6Class(
   "RomFeature",
@@ -65,10 +70,18 @@ RomFeature <- R6Class(
     ",
     #' @field base_only - how to export to list in case of complex multi table entity and ODBC
     base_only = FALSE,
+    #' @description
+    #' Initialize an instance of RomFeature. This method will create an
+    #' instance of RomFeature populated with fields based on the user query
+    #' inputs passed via config. This method first calls the RomEntity inherited
+    #' \code{RomEntity$initialize()} to populate fields then posts the feature
+    #' in the internal feature database in the datasource (via
+    #' \code{self$datasource$set_feature()}). 
     #' @param datasource RESTful repository object
     #' @param config list of attributes to set, see also: to_list() for format
     #' @param load_remote automatically query REST dataa source for matches?
-    #' @return object instance
+    #' @return object instance with populated fields based on user config and
+    #'   methods to manipulate the feature
     initialize = function(datasource = NULL, config, load_remote = FALSE) {
       #col.names(self$properties <-
       super$initialize(datasource, config, load_remote)
@@ -76,11 +89,22 @@ RomFeature <- R6Class(
       self$datasource$set_feature(self$to_list())
       self$mps = list()
     },
-    #' @return get_id the unique id of this entity alias to remote pkid, subclassed as function
+    #' @description A simple function that returns the primary key associated
+    #'   with this feature. There should be a \code{get_id} on all children of
+    #'   \code{RomEntity} objects to allow easy query
+    #' @return get_id the unique id of this entity alias to remote pkid,
+    #'   subclassed as function.
     get_id = function() {
       return(self$hydroid)
     },
-    #' @param config 
+    #' @description
+        #' Populates fields on the object based on the queried results from the
+        #' user config. It will save a copy of the feature to the local
+        #' repository. The feature plugin and variable definitions will be
+        #' loaded automatically as the inherited \code{RomEntity$load_data()} is
+        #' called. The SF field will then be populated by any geometry on the
+        #' feature
+    #' @param config Populated by the config field (provided by user)
     #' @param load_remote automatically query remote data source for matches?
     #' @return the data from the remote connection
     load_data = function(config, load_remote) {
@@ -93,8 +117,13 @@ RomFeature <- R6Class(
       super$load_data(config, load_remote)
       self$wkt_to_sf()
     },
-    #' @param base_only include only base table columns (TRUE) or add fields (FALSE)
-    #' @return list of object attributes suitable for input to new() and from_list() methods
+    #' @description
+    #' Create a list of all the fields on this feature object instance to allow
+    #' easy data sharing with R
+    #' @param base_only include only base table columns (TRUE) or add fields
+    #'   (FALSE)
+    #' @return list of object attributes suitable for input to \code{new()} and
+    #'   \code{from_list()} methods
     to_list = function(base_only=FALSE) {
       # returns as a list, which can be set and fed back to 
       # from_list() or new(config)
@@ -114,8 +143,11 @@ RomFeature <- R6Class(
       }
       return(t_list)
     },
+    #' @description Populate fields of this object based on the named entries in
+    #'   list config. Searches specifically for hydroid, name, hydrocode, ftype,
+    #'   bundle, fstatus, dh_geofield, nextdown_id, parent_id
     #' @param config list of attributes to set, see also: to_list() for format
-    #' @return NULL
+    #' @return Object instance now with fields populated by config
     from_list = function(config) {
       for (i in names(config)) {
         if (i == "hydroid") {
@@ -143,6 +175,9 @@ RomFeature <- R6Class(
         }
       }
     },
+    #' @description Queries dh_feature_fielded for any entities that have a
+    #'   parent_id equal to this objects ID. These will include a facility's
+    #'   measuring points (wells, intakes, etc.)
     #' @return a dataframe of connected MPs
     get_mps = function () {
       if (self$datasource$connection_type == 'odbc') {
@@ -154,13 +189,20 @@ RomFeature <- R6Class(
         return(FALSE)
       }
     },
+    #' @description Add a connected MP to local mp storage (mps field). This
+    #'   will hopefully be expanded to include remote saving.
     #' @param thismp mp entity
-    #' @return add a connected MP. TBD
+    #' @return add a connected MP to local mp storage.
     add_mp = function (thismp) {
       j = length(self$mps) + 1
       #self$mps[j] <- thismp
       self$mps[j] <- list('obj' = thismp)
     },
+    #' @description
+    #' Save changes to this feature to remote or local database based on
+    #' push_remote by first getting all fields via \code{self$to_list()} and
+    #' then subsequently using the \code{self$datasource$post()} as described in
+    #' \code{RomDataSource()}
     #' @param push_remote update locally only or push to remote database
     #' @return NULL
     save = function(push_remote=FALSE) {
@@ -392,6 +434,9 @@ RomFeature <- R6Class(
     #'   package ggspatial is loaded, plot may be returned as a ggplot
     #' @param useggplot Defaults to FALSE. If TRUE, a ggplot is returned but
     #'   this requires ggspatial
+    #' @returns If useggplot is FALSE, nothing is returned but a plot is
+    #'   printed to the viewer. If useggplot is TRUE, a ggplot object is
+    #'   returned
     plot_feat = function(useggplot = FALSE) {
       if(any(!is.na(self$feat_sf))){
         #Bounding box of feature
