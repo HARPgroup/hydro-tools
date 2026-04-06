@@ -201,10 +201,10 @@ ModelElementBase <- R6Class(
     load_json_model = function() {
       self$json = self$ds$get_json_prop(self$get_model_pid())
       if (typeof(self$json) == "list") {
-        if ("om_element_connection" %in% names(model$json)) {
+        if ("om_element_connection" %in% names(self$json)) {
           self$elementid <- self$json$om_element_connection$value
         }
-        if ("riverseg" %in% names(model$json)) {
+        if ("riverseg" %in% names(self$json)) {
           self$riverseg <- self$json$riverseg$value
         }
       }
