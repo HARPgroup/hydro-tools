@@ -15,5 +15,7 @@ usgs_nearest_gage(watershed_feature, watershed_json)
 Find the closest gage for a watershed feature and model.
 }
 \details{
-This function finds full drainage watersheds that contain a feature, and make an area match.
+This function finds full drainage watersheds that contain a feature,
+ and make an area match to choose a gage with the closest drainage area to
+ the watershed feature
 }

@@ -374,10 +374,11 @@ set_zoom <- function(pb){
 #'@name usgs_nearest_gage
 #'@title usgs_nearest_gage
 #'@description Find the closest gage for a watershed feature and model.
-#'@details This function finds full drainage watersheds that contain a feature, and make an area match.
+#'@details This function finds full drainage watersheds that contain a feature,
+#'  and make an area match to choose a gage with the closest drainage area to
+#'  the watershed feature
 #'@param watershed_feature a valid RomFeature for the watershed of interest
 #'@param watershed_json a valid json model for the watershed of interest
-#'@export usgs_nearest_gage
 usgs_nearest_gage <- function(watershed_feature, watershed_json) {
   # get gages
   gages <- watershed_feature$find_spatial_relations(
@@ -406,11 +407,11 @@ usgs_nearest_gage <- function(watershed_feature, watershed_json) {
 #'@name watershed_model_da
 #'@title watershed_model_da
 #'@description Find the drainage area from a json model collection.
-#'@details This function handles the varying area data formats that these models have historically used.
+#'@details This function handles the varying area data formats that these models
+#'  have historically used.
 #'@param watershed_json a valid json model for the watershed of interest
-#'@export watershed_model_da
 watershed_model_da <- function(watershed_json) {
-
+  
   if ("0. River Channel" %in% names(watershed_json)) {
     drainage_area <- watershed_json$`0. River Channel`$drainage_area$value
   } else {
@@ -423,11 +424,12 @@ watershed_model_da <- function(watershed_json) {
 #'@name usgs_calib_rarray
 #'@title usgs_calib_rarray
 #'@description Create a best guess calibration render script param set.
-#'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS.
-#'@param riverseg_json a valid RomFeature for the watershed of interest
+#'@details Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS
+#'  to include a title, runid, gageid, model_da, and model element id (elid)
+#'@param riverseg_json a valid json model for the watershed of interest
 #'@param gage_info a dataframe returned from dataRetrieval::readNWISsite(gageid)
 #'@param model_runid a model run id/scenario
-#'@export usgs_calib_rarray
+#'@return A list with parameters for the gage_vs_model.Rmd markdown
 usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
   # set up render array
   da <- watershed_model_da(riverseg_json)

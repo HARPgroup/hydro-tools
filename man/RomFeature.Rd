@@ -4,19 +4,30 @@
 \alias{RomFeature}
 \title{Feature entity data object}
 \value{
-feature class of type RomFeature
+Instance of RomFeature populated by returned query attributes or by
+  config inputs
 }
 \description{
-Object for storing a single feature with attribute and timeseries related
+Object for storing a single feature with attribute and
+  timeseries related
 }
 \details{
-Has standard methods for managing data and meta data
+Has standard methods for managing data and meta data for features in
+  the dh_feature table within the OWS database. \code{RomFeature} provides
+  users an easy way to query for a feature and then get additional data like
+  measuring points, properties, and spatial information. Inherits additional
+  methods from \code{RomEntity}
 }
 \examples{
-NA
+\dontrun{
+#Get new datasource via odbc
+feat <- RomFeature$new(ds, config = list(hydroid = 68048), TRUE)
+#Pointer to external db
+feat$plot_feat(TRUE)
+}
 }
 \seealso{
-NA
+RomProperty
 }
 \section{Super class}{
 \code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomFeature}
@@ -24,31 +35,41 @@ NA
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{base_entity_type}}{kind of entity}
+\item{\code{base_entity_type}}{kind of entity (general OWS database structure)}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+\item{\code{pk_name}}{The name of this entity's primary key column that can be
+used as a unique identifier for this entity}
 
-\item{\code{name}}{of this entity}
+\item{\code{name}}{The name of the feature}
 
-\item{\code{hydrocode}}{alpha code for this entity from original dataset}
+\item{\code{hydrocode}}{Code for this entity from original dataset (sometimes
+alpha code)}
 
-\item{\code{ftype}}{feature type}
+\item{\code{ftype}}{Feature type. Depends on the bundle. See hydrotools ReadMe
+for additional infomraiton but these may include use types and much
+more}
 
-\item{\code{hydroid}}{unique ID (integer)}
+\item{\code{hydroid}}{unique ID (integer) to identify features (primary key)}
 
 \item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
 
-\item{\code{fstatus}}{entity status}
+\item{\code{fstatus}}{entity status e.g. active, inactive, abandonded, etc.}
 
 \item{\code{description}}{notes field}
 
-\item{\code{mps}}{linked features}
+\item{\code{mps}}{linked features that may represent measuring points like
+intakes, wells, etc.}
 
 \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{nextdown_id}}{feature geometry WKT}
+\item{\code{geom_CRS}}{What is the coordinate system to use to convert geom
+field to SF?}
 
-\item{\code{parent_id}}{feature geometry WKT}
+\item{\code{feat_sf}}{An SF data frame to represent the feature}
+
+\item{\code{nextdown_id}}{"Downstream" entity where applicable}
+
+\item{\code{parent_id}}{"Upstream" entity where applicable}
 
 \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
@@ -69,6 +90,8 @@ NA
 \item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
 \item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
 \item \href{#method-RomFeature-get_raster_ts}{\code{RomFeature$get_raster_ts()}}
+\item \href{#method-RomFeature-wkt_to_sf}{\code{RomFeature$wkt_to_sf()}}
+\item \href{#method-RomFeature-plot_feat}{\code{RomFeature$plot_feat()}}
 \item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
 }
 }
@@ -93,6 +116,12 @@ NA
 \if{html}{\out{<a id="method-RomFeature-new"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize an instance of RomFeature. This method will create an
+instance of RomFeature populated with fields based on the user query
+inputs passed via config. This method first calls the RomEntity inherited
+\code{RomEntity$initialize()} to populate fields then posts the feature
+in the internal feature database in the datasource (via
+\code{self$datasource$set_feature()}).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$new(datasource = NULL, config, load_remote = FALSE)}\if{html}{\out{</div>}}
 }
@@ -109,25 +138,36 @@ NA
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-object instance
+object instance with populated fields based on user config and
+  methods to manipulate the feature
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_id}{}}}
 \subsection{Method \code{get_id()}}{
+A simple function that returns the primary key associated
+  with this feature. There should be a \code{get_id} on all children of
+  \code{RomEntity} objects to allow easy query
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_id()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid, subclassed as function
+get_id the unique id of this entity alias to remote pkid,
+  subclassed as function.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-load_data}{}}}
 \subsection{Method \code{load_data()}}{
+Populates fields on the object based on the queried results from the
+user config. It will save a copy of the feature to the local
+repository. The feature plugin and variable definitions will be
+loaded automatically as the inherited \code{RomEntity$load_data()} is
+called. The SF field will then be populated by any geometry on the
+feature
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$load_data(config, load_remote)}\if{html}{\out{</div>}}
 }
@@ -135,7 +175,7 @@ get_id the unique id of this entity alias to remote pkid, subclassed as function
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{config}}{}
+\item{\code{config}}{Populated by the config field (provided by user)}
 
 \item{\code{load_remote}}{automatically query remote data source for matches?}
 }
@@ -149,6 +189,8 @@ the data from the remote connection
 \if{html}{\out{<a id="method-RomFeature-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-to_list}{}}}
 \subsection{Method \code{to_list()}}{
+Create a list of all the fields on this feature object instance to allow
+easy data sharing with R
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
 }
@@ -156,18 +198,23 @@ the data from the remote connection
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
+\item{\code{base_only}}{include only base table columns (TRUE) or add fields
+(FALSE)}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-list of object attributes suitable for input to new() and from_list() methods
+list of object attributes suitable for input to \code{new()} and
+  \code{from_list()} methods
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-from_list}{}}}
 \subsection{Method \code{from_list()}}{
+Populate fields of this object based on the named entries in
+  list config. Searches specifically for hydroid, name, hydrocode, ftype,
+  bundle, fstatus, dh_geofield, nextdown_id, parent_id
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$from_list(config)}\if{html}{\out{</div>}}
 }
@@ -180,13 +227,16 @@ list of object attributes suitable for input to new() and from_list() methods
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-NULL
+Object instance now with fields populated by config
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_mps"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_mps}{}}}
 \subsection{Method \code{get_mps()}}{
+Queries dh_feature_fielded for any entities that have a
+  parent_id equal to this objects ID. These will include a facility's
+  measuring points (wells, intakes, etc.)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_mps()}\if{html}{\out{</div>}}
 }
@@ -199,6 +249,8 @@ a dataframe of connected MPs
 \if{html}{\out{<a id="method-RomFeature-add_mp"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-add_mp}{}}}
 \subsection{Method \code{add_mp()}}{
+Add a connected MP to local mp storage (mps field). This
+  will hopefully be expanded to include remote saving.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$add_mp(thismp)}\if{html}{\out{</div>}}
 }
@@ -211,13 +263,17 @@ a dataframe of connected MPs
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-add a connected MP. TBD
+add a connected MP to local mp storage.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-save}{}}}
 \subsection{Method \code{save()}}{
+Save changes to this feature to remote or local database based on
+push_remote by first getting all fields via \code{self$to_list()} and
+then subsequently using the \code{self$datasource$post()} as described in
+\code{RomDataSource()}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$save(push_remote = FALSE)}\if{html}{\out{</div>}}
 }
@@ -244,7 +300,8 @@ Find target entities via spatial query of this RomFeature
   inputs = list(bundle = NA, ftype = NA),
   operator = "st_contains",
   return_geoms = FALSE,
-  query_remote = TRUE
+  query_remote = TRUE,
+  plot_results = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -259,18 +316,29 @@ format. For instance, the list may contain a bundle or ftype via
 
 \item{\code{operator}}{what type of spatial function to perform to search for
 entities, default to 'st_contains'. Other options include
-'st_contains_centroid', 'overlaps', or 'st_within'}
+'st_contains_centroid' (is the centroid of the other feature contained
+in this feature?),'st_centroid_within' (is the centroid of this feature
+in another feature?), 'overlaps', or 'st_within'}
 
 \item{\code{return_geoms}}{FALSE will return a smaller dataframe by excluding
-the geometry fields}
+the geometry fields. "SF" will return an SF and TRUE will return a data
+frame}
 
 \item{\code{query_remote}}{FALSE will search on in local datasource only, TRUE
 will search the DS connection}
+
+\item{\code{plot_results}}{If TRUE, a plot will be included in the return that
+shows the base feature and the related entities returned from the query}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-dataframe of spatially related entities
+If plot_results is FALSE, a dataframe or SF dataframe of
+  spatially related entities is returned bsaed on returns_geom. If
+  plot_results is TRUE, then a list is returned with an entry plot that
+  is the ggplot of the feature and queried entities and the other entry,
+  spatial_relations, is a data.frame or SF data.frame of the related
+  entities
 }
 }
 \if{html}{\out{<hr>}}
@@ -322,6 +390,48 @@ considered?}
 }
 \subsection{Returns}{
 dataframe of timeseries values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-wkt_to_sf"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-wkt_to_sf}{}}}
+\subsection{Method \code{wkt_to_sf()}}{
+Convert the WKT field geom of this entity to an SF data
+  frame for easy R GIS analysis.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$wkt_to_sf()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Nothing, but will try to set the feat_sf field. Will message
+  errors if encountered.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomFeature-plot_feat"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-plot_feat}{}}}
+\subsection{Method \code{plot_feat()}}{
+Plot this feature on a basic GIS map for QC purposes. If the
+  package ggspatial is loaded, plot may be returned as a ggplot
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RomFeature$plot_feat(useggplot = TRUE, other_geom = list())}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{useggplot}}{Defaults to TRUE. If TRUE, a ggplot is returned using
+ggspatial; if FALSE, a plot is sent to the viewer}
+
+\item{\code{other_geom}}{Named list of other SF data frames to include on plot
+(only used in ggplot)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+If useggplot is FALSE, nothing is returned but a plot is
+  printed to the viewer. If useggplot is TRUE, a ggplot object is
+  returned
 }
 }
 \if{html}{\out{<hr>}}
