@@ -46,6 +46,8 @@ ModelElementBase <- R6Class(
     prop = NA,
     #' @field json Modelling data (inputs) JSON
     json = NA,
+    #' @field xml as list
+    xml = NA,
     #' @field elementid An integer identifier of the OM model element
     elementid = NA,
     #' @field rocode describes runoff type default = 'cbp6_lrseg'
@@ -83,6 +85,7 @@ ModelElementBase <- R6Class(
       self$handle_config(config)
       self$get_feature()
       self$get_model()
+      self$get_om_model()
     },
     #' @description
     #' Parse the user provided config list to define essential fields to be used
@@ -115,6 +118,9 @@ ModelElementBase <- R6Class(
       if ("rocode" %in% names(config)) {
         self$rocode = config[['rocode']]
       }
+      if ("elementid" %in% names(config)) {
+        self$elementid = config[['elementid']]
+      }
       return(TRUE)
     },
     #' @description
@@ -127,7 +133,9 @@ ModelElementBase <- R6Class(
       if (!is.na(self$hydroid)) {
         self$feature = RomFeature$new(self$ds, list(hydroid=self$hydroid), TRUE)
       } else {
-        self$feature = RomFeature$new(ds, list(hydrocode=self$hydrocode, bundle=self$bundle, ftype=self$ftype), TRUE)
+        if ( !is.na(self$hydrocode) & !is.na(self$bundle) ) {
+          self$feature = RomFeature$new(ds, list(hydrocode=self$hydrocode, bundle=self$bundle, ftype=self$ftype), TRUE)
+        }
       }
       return(self$feature)
     },
@@ -164,6 +172,16 @@ ModelElementBase <- R6Class(
         self$prop = RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
       return(self$prop)
+    },
+    #' @param refresh TRUE/FALSE use XML if already retrieved
+    #' @return xml of model from om
+    get_om_model = function(refresh=FALSE) {
+      if (!is.na(self$elementid)) {
+        if (is.na(self$xml) || (refresh == TRUE)) {
+          self$xml = self$get_elem_xml()
+        }
+      }
+      return(self$xml)
     },
     #' @description Gets and returns the model run data for a given model
     #' elementID and scenario runID. Model data will be returned as a zoo or a
