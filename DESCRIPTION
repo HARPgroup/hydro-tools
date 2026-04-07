@@ -34,7 +34,45 @@ Imports:
     lmomco,
     e1071,
     elfgen,
-    ggspatial,
-    openmi.om
+    ggspatial
 Suggests: 
     dataRetrieval
+Collate: 
+    'DFLOW_xQy.R'
+    'RomAdminFeature.R'
+    'RomDataGroup.R'
+    'RomDataSource.R'
+    'RomEntity.R'
+    'RomFeature.R'
+    'RomProperty.R'
+    'RomPropertyTree.R'
+    'RomTS.R'
+    'RomVariableDefinition.R'
+    'TNC_IHA_Ports.R'
+    'TNC_IHA_Ports_Utils.R'
+    'cia_utils.R'
+    'dHVariablePluginDefault.R'
+    'fac_utils.R'
+    'fn_plot_cia_dend.R'
+    'imp_utils.R'
+    'lm_analysis_test_args.R'
+    'model_handlers.R'
+    'odbc_utils.R'
+    'om_auth_read.R'
+    'om_cia_table.R'
+    'om_cu_table.R'
+    'om_demand_table.R'
+    'om_get_model_scenario.R'
+    'om_get_rundata.R'
+    'om_model_object.R'
+    'om_model_table.R'
+    'om_vahydro_metric_grid.R'
+    'om_vahydro_token.R'
+    'openmi.om.timer.R'
+    'openmi.om.base.R'
+    'openmi.om.linkableComponent.R'
+    'openmi.om.matrix.R'
+    'rmd_utils.R'
+    'utils.R'
+    'utils.working.R'
+    'wshd_utils.R'

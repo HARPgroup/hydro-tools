@@ -7,7 +7,6 @@
 #'   model data. The objects will store relevant model data and has methods to
 #'   load related feautre or model data.
 #' @importFrom R6 R6Class  
-#' @import openmi.om
 #' @param ds RomDataSource for remote and local storage (required; often
 #'   provided in DEQ config files)
 #' @param config list of attributes to set/query and used to identify model
@@ -743,7 +742,10 @@ HydroImpoundment <- R6Class(
       }
       rownames(raw_table) <- NULL # insure these are indexed beginning at 1
       colnames(raw_table) <- c('storage', 'stage', 'surface_area')
-      ssa = openmi.om::openmi.om.matrix$new()
+      
+      #interpolate the input stage storage area using the standard methods
+      #provided by the openmi.om.matrix
+      ssa = openmi.om.matrix$new()
       ssa$datamatrix <- as.matrix(
         raw_table
       )
@@ -751,12 +753,12 @@ HydroImpoundment <- R6Class(
       ssa$rowtype = as.integer(2)
       ssa$colindex = 'val'
       
-      if (!is.logical(storage)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,1], storage, 1)
-      } else if (!is.logical(stage)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,2], stage, 1)
-      } else if (!is.logical(surface_area)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,3], surface_area, 1)
+      if (is.numeric(storage)) {
+        svals = ssa$findMatch(ssa$datamatrix, storage, "storage", 1)
+      } else if (is.numeric(stage)) {
+        svals = ssa$findMatch(ssa$datamatrix, stage, "stage", 1)
+      } else if (is.numeric(surface_area)) {
+        svals = ssa$findMatch(ssa$datamatrix, surface_area, "surface_area", 1)
       }
       return(svals)
     }
