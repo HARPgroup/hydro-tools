@@ -129,10 +129,20 @@ om_cu_table_data <- function(pr_data,
 }
 
 
-
-
-
-om_quantile_table <- function(rundata_df, metrics = c("Qintake","Runit"), quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), rdigits = 2) {
+#' Difference in monthly percentiles
+#' @description Using a data frame and column list provided by user, calculate quantiles 
+#' for desired variables.
+#' @param rundata_df Model run timeseries dataframe.
+#' @quantiles Which quantiles to calculate?
+#' @param rdigits Number of Digits to round column values.
+#' @return A data frame that if has one row per variable with quantiles in columns
+#' @export om_quantile_table
+om_quantile_table <- function(
+    rundata_df, 
+    metrics = c("Qintake","Runit"), 
+    quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), 
+    rdigits = 2
+  ) {
   quantile_df <- data.frame(matrix(ncol = length(quantiles), nrow = 0))
   colnames(quantile_df) <- paste0(quantiles*100, "%")
   for (i in 1:length(metrics)){
