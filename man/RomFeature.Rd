@@ -397,7 +397,8 @@ dataframe of timeseries values
 \if{latex}{\out{\hypertarget{method-RomFeature-wkt_to_sf}{}}}
 \subsection{Method \code{wkt_to_sf()}}{
 Convert the WKT field geom of this entity to an SF data
-  frame for easy R GIS analysis.
+  frame for easy R GIS analysis. Will not work if geom field is not
+  populated
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RomFeature$wkt_to_sf()}\if{html}{\out{</div>}}
 }
