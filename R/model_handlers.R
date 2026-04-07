@@ -132,6 +132,10 @@ ModelElementBase <- R6Class(
     get_feature = function() {
       if (!is.na(self$hydroid)) {
         self$feature = RomFeature$new(self$ds, list(hydroid=self$hydroid), TRUE)
+      } else if (!is.na(self$pid)) {
+        # get model, then get feature
+        self$get_model()
+        self$feature = RomFeature$new(self$ds, list(hydroid=self$prop$featureid), TRUE)
       } else {
         if ( !is.na(self$hydrocode) & !is.na(self$bundle) ) {
           self$feature = RomFeature$new(ds, list(hydrocode=self$hydrocode, bundle=self$bundle, ftype=self$ftype), TRUE)
