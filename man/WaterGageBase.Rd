@@ -85,6 +85,7 @@ for discharge}
 \item \href{#method-waterGageBase-nep_table}{\code{WaterGageBase$nep_table()}}
 \item \href{#method-waterGageBase-baseflow_analysis}{\code{WaterGageBase$baseflow_analysis()}}
 \item \href{#method-waterGageBase-baseflow_forecast}{\code{WaterGageBase$baseflow_forecast()}}
+\item \href{#method-waterGageBase-join_precip_data}{\code{WaterGageBase$join_precip_data()}}
 \item \href{#method-waterGageBase-clone}{\code{WaterGageBase$clone()}}
 }
 }
@@ -275,6 +276,50 @@ Using the regression derived from baseflow_analysis method,
 \if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$baseflow_forecast()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-waterGageBase-join_precip_data"></a>}}
+\if{latex}{\out{\hypertarget{method-waterGageBase-join_precip_data}{}}}
+\subsection{Method \code{join_precip_data()}}{
+Use the watershed feature to find precipitation from 1980
+  onward using \code{RomFeature$get_raster_ts()}. Join this data to the
+  stream data and return to the user. Inputs are further described in
+  \code{RomFeature}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$join_precip_data(
+  metric = "mean",
+  aggregateData = FALSE,
+  varkey = "prism_mod_daily",
+  touched = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{metric}}{default mean, which aspect of the ST_SummaryStats() to return}
+
+\item{\code{aggregateData}}{Should data be aggregated and if so, how? FALSE will
+return 1 record for every date. Otheriwse, can use basic aggregate
+functions like mean, min, max to summarize data}
+
+\item{\code{varkey}}{What variable to retrieve? This should be a varkey that has
+been used to create raster summaries in dh_timeseries_weather. Relevant
+meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
+'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
+'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'}
+
+\item{\code{touched}}{Defaults to FALSE. Should PostGIS ST_Clip() use the
+touched argument to return all raster cells touched by the feature? Or,
+if FALSE, should only pixels that have centroids within the feature be
+considered?}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+The gage_data data frame now with a column of precip_mm joined
+    on
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-waterGageBase-clone"></a>}}

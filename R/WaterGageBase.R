@@ -149,10 +149,10 @@ WaterGageBase <- R6::R6Class(
     #'   \code{gage_data} fields on object
     get_gage_data_old = function(){
       gage_data <- dataRetrieval::readNWISdv(
-        siteNumbers = self$gage_id, parameter_code = self$parameter_code,
+        siteNumbers = self$gage_id, parameterCd = self$parameter_code,
         statCd = self$statistic_id
       )
-      self$gage_date <- dataRetrieval::renameNWISColumns(gage_data)
+      self$gage_data <- dataRetrieval::renameNWISColumns(gage_data)
       self$flow_col <- "Flow"
       self$date_col <- "Date"
     },
@@ -198,7 +198,7 @@ WaterGageBase <- R6::R6Class(
                             bundle = "watershed",
                             ftype = "usgs_full_drainage"),
           TRUE)
-        if(is.na(self$gage_feature$hydroid)){
+        if(is.na(found_feature$hydroid)){
           found_feature <- NA
           message("No feature for this watershed found")
         }
@@ -262,6 +262,60 @@ WaterGageBase <- R6::R6Class(
     #' @description Using the regression derived from baseflow_analysis method,
     #'   what may flows look like if no rain occurs for the next ndays?
     baseflow_forecast = function(){
+    },
+    #' @description Use the watershed feature to find precipitation from 1980
+    #'   onward using \code{RomFeature$get_raster_ts()}. Join this data to the
+    #'   stream data and return to the user. Inputs are further described in
+    #'   \code{RomFeature}.
+    #' @param varkey What variable to retrieve? This should be a varkey that has
+    #'   been used to create raster summaries in dh_timeseries_weather. Relevant
+    #'   meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
+    #'   'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
+    #'   'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'
+    #' @param aggregateData Should data be aggregated and if so, how? FALSE will
+    #'   return 1 record for every date. Otheriwse, can use basic aggregate
+    #'   functions like mean, min, max to summarize data
+    #' @param metric default mean, which aspect of the ST_SummaryStats() to return
+    #' @param touched Defaults to FALSE. Should PostGIS ST_Clip() use the
+    #'   touched argument to return all raster cells touched by the feature? Or,
+    #'   if FALSE, should only pixels that have centroids within the feature be
+    #'   considered?
+    #' @return The gage_data data frame now with a column of precip_mm joined
+    #'     on
+    join_precip_data = function(metric = "mean", aggregateData = FALSE,
+                                varkey = 'prism_mod_daily', touched = FALSE){
+      #We will use RomFeature$get_raster_ts() so we need to make sure the
+      #feature is loaded
+      if(is.na(self$gage_feature)){
+        self$load_wshd_feat()
+      }
+      if(inherits(self$gage_feature,"RomFeature")){
+        message("A RomFeature is required to join precip data. Contact OWS for assistance.")
+        return(NULL)
+      }
+      #Store a copy of the data for sqldf below
+      gage_data <- self$gage_data
+      #Get the precip data based on user input
+      precip_data <- self$gage_feature$get_raster_ts(
+        varkey = varkey,
+        starttime = min(gage_data[,self$date_col]),
+        endtime = max(gage_data[,self$date_col]),
+        band = '1',
+        aggregate = aggregateData,
+        metric = metric,
+        touched = touched)
+      #Convert the end date from posixct to date for joining
+      precip_data$end_date <- as.Date(precip_data$end_date)
+      #Join precip in mm to the streamflow and return to user
+      join_data <- sqldf::sqldf(
+        paste0(
+          "SELECT a.*, b.value as precip_mm
+        FROM gage_data as a
+        LEFT JOIN precip_data as b
+        ON b.end_date = a.",self$date_col)
+      )
+      
+      return(join_data)
     }
     
   )# End Public
