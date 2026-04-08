@@ -1,0 +1,269 @@
+# WaterGageBase ####
+#' Water Gage Data Object
+#' @title WaterGageBase
+#' @description Utility class for interacting with water gage data from USGS or
+#'   other source
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to stream gage data. On initialize, the object can load in USGS
+#'   gage data, a csv, or data provided by user and then offers methods to bring
+#'   in USGS geometries, OWS watersheds, calculate VPDES critical low flows, and
+#'   to provide basic drought forecasting capabilities.
+#' @importFrom R6 R6Class  
+#' @param data_source "USGS", a file path, or a data frame of stream gage data that
+#'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
+#'   \code{flow_col} and \code{date_col} are not used as data will be pulled
+#'   directly from USGS.
+#' @param gage_id The gage ID. This should be a USGS site number if \code{data_source}
+#'   is "USGS" such as 01671020
+#' @param flow_col The column identifying the data of interest in the gage data.
+#'   Only required if \code{data_source} is a file path or a data frame
+#' @param date_col The column identifying the dates in the gage data. Only
+#'   required if \code{data_source} is a file path or a data frame
+#' @param ds_in An optional RomDataSource to allow for querying of additional
+#'   information. May be provided by OWS config files.
+#' @return R6 Object of class WaterGageBase
+#' @export WaterGageBase
+#' @examples \dontrun{
+#' NA_HartCorner <- WaterGageBase$new(data_source = "USGS", gage_id = "01671020",
+#'                                     ds_in = NA, get_sf = FALSE)
+#'NA_HartCorner$load_sf_da()
+#'NA_HartCorner$comp_xQy()
+#'NA_HartCorner$drainage_area
+#'NA_HartCorner$low_flows
+#'#If data source provided:
+#'#NA_HartCorner$load_wshd_feat()
+#' }
+WaterGageBase <- R6::R6Class(
+  "waterGageBase",
+  public = list(
+    #' @field ds RomDataSource often provided in DEQ config files and features a
+    #'   local data storage or a connection to a database/RESTful service
+    ds = NA,
+    #' @field data_source May be either USGS or the path to gage data. If a file
+    #'   path is used, both the flow_col and date_col fields should be populated
+    data_source = "USGS",
+    #' @field gage_id The USGS ID of the gage
+    gage_id = NA,
+    #' @field date_col The column containing "date" R class date times for the
+    #'   date_source
+    date_col = "time",
+    #'@field flow_col The column containing the flow values from the data_source
+    flow_col = "value",
+    #' @field drainage_area The drainage area of the gage, populated on
+    #'   initialize if possible
+    drainage_area = NA,
+    #' @field gage_data The gage data from data_source
+    gage_data = NA,
+    #' @field gage_data_sf A simple feature of the gage data
+    gage_data_sf = NA,
+    #'@field gage_feature a VA Hydro feature of the gage if available from ds
+    gage_feature = NA,
+    #' @field statistic_id The kind of stream data to pull
+    statistic_id = "00003",
+    #'@field parameter_code Which USGS paramter to analyze? Defaults to 00060
+    #'  for discharge
+    parameter_code = "00060",
+    #' @field usgs_properties The fields to pull from USGS
+    usgs_properties = c("monitoring_location_id", "parameter_code",
+                        "time", "value", "unit_of_measure"),
+    #'@field low_flows Critical low flows calculated by hydrotools::xQy() via
+    #'  \code{self$comp_xQy()}
+    low_flows = NA,
+    
+    #' @description
+    #' Initialize a WaterGageBase() instance, returning an R6 object that is
+    #' now populated with gage data in its fields either by querying USGS or
+    #' through user upload of data. This object offers various standard methods
+    #' to analyze USGS gage data
+    #' @param data_source "USGS", a file path, or a data frame of stream gage data that
+    #'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
+    #'   \code{flow_col} and \code{date_col} are not used as data will be pulled
+    #'   directly from USGS.
+    #' @param gage_id The gage ID. This should be a USGS site number if \code{data_source}
+    #'   is "USGS" such as 01671020
+    #' @param flow_col The column identifying the data of interest in the gage data.
+    #'   Only required if \code{data_source} is a file path or a data frame
+    #' @param date_col The column identifying the dates in the gage data. Only
+    #'   required if \code{data_source} is a file path or a data frame
+    #' @param ds_in An optional RomDataSource to allow for querying of additional
+    #'   information. May be provided by OWS config files.
+    #' @return object instance
+    initialize = function(data_source, gage_id = NA,
+                          flow_col, date_col,
+                          ds_in = NA){
+      #Set the data source and gage fields
+      self$data_source <- data_source
+      self$gage_id <- gage_id
+      #If user is using USGS, use dataRetrieval
+      if(self$data_source == "USGS"){
+        #Use either the new dataRetrieval functions or those slated for
+        #deprecation based on version number
+        if(packageVersion("dataRetrieval") >= "2.7.23") {
+          self$get_gage_data()
+        }else{
+          #Deprecated with new dataRetrieval
+          self$get_gage_data_old()
+        }
+      }else if (is.character(data_source)){
+        #if the user has set data_source to a single character vector, assume a
+        #file path to a csv and attempt to read in the data, setting flow and
+        #date col fields based on user input
+        self$gage_data <- read.csv(data_source)
+        self$flow_col <- flow_col
+        self$date_col <- date_col
+      }else if(inherits(data_source,"data.frame")){
+        #If user simply provides the data as a data frame, simply set the fields
+        self$gage_data <- data_source
+        self$flow_col <- flow_col
+        self$date_col <- date_col
+      }
+      #If the user has provided a RomDataSource ds, set the appropriate field
+      if(inherits(ds_in, "RomDataSource")){
+        self$ds <- ds_in
+      }
+    },
+    #' @description
+    #' Using the new \code{dataRetrieval::read_waterdata_daily()}, query USGS
+    #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
+    #' and \code{self$statistic_id}. Fields returned can be controlled by
+    #' \code{usgs_properties} field
+    #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
+    #'   \code{gage_data} fields on object
+    get_gage_data = function(){
+      self$gage_data <- dataRetrieval::read_waterdata_daily(
+        monitoring_location_id = paste0("USGS-",self$gage_id),
+        parameter_code = self$parameter_code,
+        statistic_id = self$statistic_id, skipGeometry = TRUE,
+        properties = self$usgs_properties
+      )
+      self$gage_data <- as.data.frame(self$gage_data)
+      self$flow_col <- "value"
+      self$date_col <- "time"
+    },
+    #' @description
+    #' Using the deprecated \code{dataRetrieval::readNWISdv()}, query USGS
+    #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
+    #' and \code{self$statistic_id}. Fields are renamed via
+    #' \code{dataRetrieval::renameNWISColumns()}
+    #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
+    #'   \code{gage_data} fields on object
+    get_gage_data_old = function(){
+      gage_data <- dataRetrieval::readNWISdv(
+        siteNumbers = self$gage_id, parameter_code = self$parameter_code,
+        statCd = self$statistic_id
+      )
+      self$gage_date <- dataRetrieval::renameNWISColumns(gage_data)
+      self$flow_col <- "Flow"
+      self$date_col <- "Date"
+    },
+    #' @description
+    #' If a valid USGS gage_id is set on object, use
+    #' \code{dataRetrieval::read_waterdata_monitoring_location()} or
+    #' \code{dataRetrieval::readNWISsite()} to get an sf data frame with
+    #' additional details about the gage and use it to set the
+    #' \code{gage_data_sf} and \code{drainage_area} fields
+    #' @return Nothing, but sets \code{gage_data_sf} and \code{drainage_area}
+    #'   fields on object
+    load_sf_da = function(){
+      #If user is using USGS or has provided a gage id, try to use dataRetrieval
+      #to get additional info about gage/site
+      if(self$data_source == "USGS" || !is.na(self$gage_id)){
+        #Based on dataRetrieval pacakge version, use either new or deprecated
+        #NWIS functions
+        if(packageVersion("dataRetrieval") >= "2.7.23") {
+          #New functions return an sf already. so just parse out drainage area
+          #for separate field
+          self$gage_data_sf <- dataRetrieval::read_waterdata_monitoring_location(self$gage_id)
+          self$drainage_area <- self$gage_data_sf$drainage_area
+        }else{
+          #NWIS functions return a data frame, so convert to SF using
+          #appropriate coordinate fields
+          site_info <- dataRetrieval::readNWISsite(self$gage_id)
+          self$gage_data_sf <-  sf::st_as_sf(site_info, crs = 4326, 
+                                             coords = c("dec_long_va", "dec_lat_va"))
+          self$drainage_area <- site_info$drain_area_va
+        }
+      }else{
+        message("Please set the gage_id field with a valid USGS site number to use automatic geometries.")
+      }
+    },
+    #' @description
+    #' If a valid RomDataSource has been provided and the gage_id field has been
+    #' set, query the ds field for the corresponding USGS watershed feature
+    #' @return The RomFeature if found or NA. Also sets \code{gage_feature} field on the object
+    load_wshd_feat = function(){
+      if(inherits(self$ds, "RomDataSource") && !is.na(self$gage_id)){
+        found_feature <- RomFeature$new(
+          ds, config = list(hydrocode = paste0("usgs_ws_",self$gage_id),
+                            bundle = "watershed",
+                            ftype = "usgs_full_drainage"),
+          TRUE)
+        if(is.na(self$gage_feature$hydroid)){
+          found_feature <- NA
+          message("No feature for this watershed found")
+        }
+        self$gage_feature <- found_feature
+        return(found_feature)
+      }
+    },
+    #' @description Calculate critical low flows like the 1Q10, 7Q10, 30Q10,
+    #' 30Q5, and harmonic mean using the VPDES standard
+    #' \code{hydrotools::xQy()}. Custom parameters may be entered to customize
+    #' the low flow calculation
+    #' @param AYS The start of the analysis season in the format MM-DD. For
+    #'   instance, to calculate low flows across the water year, AYS = '10-01'
+    #' @param AYE The end of the analysis season in the format MM-DD. For instance,
+    #'   to calculate low flows across the water year, AYE = '09-31'
+    #' @param startYear Any calendar year prior to this year will not be included.
+    #'   User can leave this as NULL (default) to include all data.
+    #' @param endYear Any calendar year after this year will not be included. User
+    #'   can leave this as NULL (default) to include all data.
+    #' @param x User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
+    #'   90Q10, and 30Q5 are included in the results already. This input serves as
+    #'   the averaging period.
+    #' @param y User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
+    #'   90Q10, and 30Q5 are included in the results already. This input serves as
+    #'   the return period
+    #' @seealso [xQy()]
+    #' @return Sets the low_flow field on the object but also returns the list
+    #'   from \code{hydrotools::xQy()}
+    comp_xQy = function(AYS = "04-01", AYE = "03-31",
+                        startYear = NULL, endYear = NULL,
+                        x = 7, y = 10){
+      critical_flows <- xQy(
+        gageDataIn = self$gage_data, flowColumn = self$flow_col, 
+        dateColumn = self$date_col,
+        AYS = AYS, AYE = AYE, startYear = startYear,
+        endYear = endYear, x = 7, y = 10)
+      self$low_flows <- critical_flows
+      return(critical_flows)
+      
+    },
+    #' @description
+    #' Calculate non-exceedance flows for standard OWS percentiles in each month
+    #' of the year using \code{hydrotools::om_flow_table()}
+    #' @seealso [om_flow_table()]
+    #' @return A non-exceedance from table from \code{hydrotools::om_flow_table()}
+    nep_table = function(){
+      table_data <- self$gage_data
+      #Create a field for the month
+      table_data$month <- as.numeric(format(table_data[,self$date_col],"%m"))
+      #Use hydrotools om_flow_table() to calculate the non-exceedance
+      #probabilities for each month
+      nep_data <- om_flow_table(table_data, q_col = self$flow_col,
+                                            mo_col = "month", rdigits = 2)
+      
+      return(nep_data)
+    },
+    #' @description Derive relevant baseflow recession parameters
+    baseflow_analysis = function(){
+      #HARP 2026 workflow here, maybe set and AGWRC to use in a forecast method
+    },
+    #' @description Using the regression derived from baseflow_analysis method,
+    #'   what may flows look like if no rain occurs for the next ndays?
+    baseflow_forecast = function(){
+    }
+    
+  )# End Public
+) # End R6
+    

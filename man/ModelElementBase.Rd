@@ -52,6 +52,8 @@ external data source connections or identifiers}
 
 \item{\code{json}}{Modelling data (inputs) JSON}
 
+\item{\code{xml}}{as list}
+
 \item{\code{elementid}}{An integer identifier of the OM model element}
 
 \item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
@@ -74,6 +76,7 @@ used in the CB Watershed Model)}
 \item \href{#method-ModelElementBase-get_feature}{\code{ModelElementBase$get_feature()}}
 \item \href{#method-ModelElementBase-get_model_pid}{\code{ModelElementBase$get_model_pid()}}
 \item \href{#method-ModelElementBase-get_model}{\code{ModelElementBase$get_model()}}
+\item \href{#method-ModelElementBase-get_om_model}{\code{ModelElementBase$get_om_model()}}
 \item \href{#method-ModelElementBase-get_run_data}{\code{ModelElementBase$get_run_data()}}
 \item \href{#method-ModelElementBase-load_json_model}{\code{ModelElementBase$load_json_model()}}
 \item \href{#method-ModelElementBase-get_json_model}{\code{ModelElementBase$get_json_model()}}
@@ -190,6 +193,25 @@ feature
 \subsection{Returns}{
 The R6 RomProperty found. This will also populate the prop field of
   this object instance.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ModelElementBase-get_om_model"></a>}}
+\if{latex}{\out{\hypertarget{method-ModelElementBase-get_om_model}{}}}
+\subsection{Method \code{get_om_model()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_om_model(refresh = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{refresh}}{TRUE/FALSE use XML if already retrieved}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+xml of model from om
 }
 }
 \if{html}{\out{<hr>}}
