@@ -133,7 +133,9 @@ om_cu_table_data <- function(pr_data,
 #' @description Using a data frame and column list provided by user, calculate quantiles 
 #' for desired variables.
 #' @param rundata_df Model run timeseries dataframe.
-#' @quantiles Which quantiles to calculate?
+#' @param metrics Which metrics to calculate quantiles for? These should be
+#'   column names of rundata_df
+#' @param quantiles Which quantiles to calculate?
 #' @param rdigits Number of Digits to round column values.
 #' @return A data frame that if has one row per variable with quantiles in columns
 #' @export om_quantile_table
