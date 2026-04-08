@@ -140,6 +140,15 @@ ModelElementBase <- R6Class(
         if ( !is.na(self$hydrocode) & !is.na(self$bundle) ) {
           self$feature = RomFeature$new(ds, list(hydrocode=self$hydrocode, bundle=self$bundle, ftype=self$ftype), TRUE)
         }
+        else if (!is.na(self$elementid)) {
+          # try to find the pid associated with thihs model, then find the feature
+          pid = om_find_dh_elid(self$elementid, self$ds)[1,]$pid
+          if (!is.na(pid)) {
+            self$pid = pid
+            self$get_model()
+            self$feature = RomFeature$new(self$ds, list(hydroid=self$prop$featureid), TRUE)
+          }
+        }
       }
       return(self$feature)
     },
