@@ -755,20 +755,22 @@ HydroImpoundment <- R6Class(
       }
       rownames(raw_table) <- NULL # insure these are indexed beginning at 1
       colnames(raw_table) <- c('storage', 'stage', 'surface_area')
+      #interpolate the input stage storage area using the standard methods
+      #provided by the openmi.om.matrix
       ssa = openmi.om.matrix$new()
-      ssa$datamatrix <- as.matrix(-
+      ssa$datamatrix <- as.matrix(
         raw_table
       )
       ssa$datamatrix = apply(ssa$datamatrix, 2, FUN=as.numeric)
       ssa$rowtype = as.integer(2)
       ssa$colindex = 'val'
       
-      if (!is.logical(storage)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,1], storage, 1)
-      } else if (!is.logical(stage)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,2], stage, 1)
-      } else if (!is.logical(surface_area)) {
-        svals = ssa$findMatch(ssa$datamatrix, ssa$datamatrix[,3], surface_area, 1)
+      if (is.numeric(storage)) {
+        svals = ssa$findMatch(ssa$datamatrix, storage, "storage", 1)
+      } else if (is.numeric(stage)) {
+        svals = ssa$findMatch(ssa$datamatrix, stage, "stage", 1)
+      } else if (is.numeric(surface_area)) {
+        svals = ssa$findMatch(ssa$datamatrix, surface_area, "surface_area", 1)
       }
       return(svals)
     }

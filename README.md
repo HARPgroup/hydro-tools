@@ -103,12 +103,18 @@ Begin by cloning the [hydrotools package](https://github.com/HARPgroup/hydro-too
 Connor Brogan ([connor.brogan\@deq.virginia.gov](mailto:connor.brogan@deq.virginia.gov){.email}) <br/>
 Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@deq.virginia.gov){.email})<br/> 
 
-
 ## Project status
 
 This package is in active development.
 
 ## Release notes
+### 1.0.13 04/07/2026
+1. Brought in `openmi.om.base` and `openmi.om.matrix` objects from `openmi.om`
+to allow for the creation of a stage-storage interpolation function on
+`HydroImpoundment`
+2. Removed `openmi.om` as dependency as HARPGroup has decided to migrate all
+these objects internal in hydrotools.
+
 ### 1.0.12 04/02/2026
 1. Added a new class of R6 objects, `modelElementBase`, `WatershedModelNode,
 `WaterSupplyElement`, and `HydroImpoundment` to assist with uniform model data
