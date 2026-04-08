@@ -7,7 +7,6 @@
 #'   model data. The objects will store relevant model data and has methods to
 #'   load related feautre or model data.
 #' @importFrom R6 R6Class  
-#' @import openmi.om
 #' @param ds RomDataSource for remote and local storage (required; often
 #'   provided in DEQ config files)
 #' @param config list of attributes to set/query and used to identify model
@@ -756,7 +755,7 @@ HydroImpoundment <- R6Class(
       }
       rownames(raw_table) <- NULL # insure these are indexed beginning at 1
       colnames(raw_table) <- c('storage', 'stage', 'surface_area')
-      ssa = openmi.om::openmi.om.matrix$new()
+      ssa = openmi.om.matrix$new()
       ssa$datamatrix <- as.matrix(-
         raw_table
       )
