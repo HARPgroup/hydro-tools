@@ -757,7 +757,7 @@ HydroImpoundment <- R6Class(
       rownames(raw_table) <- NULL # insure these are indexed beginning at 1
       colnames(raw_table) <- c('storage', 'stage', 'surface_area')
       ssa = openmi.om::openmi.om.matrix$new()
-      ssa$datamatrix <- as.matrix(
+      ssa$datamatrix <- as.matrix(-
         raw_table
       )
       ssa$datamatrix = apply(ssa$datamatrix, 2, FUN=as.numeric)
