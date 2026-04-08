@@ -884,9 +884,9 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
 
 #' Find a name in a nested list. TODO: move to utils.R or in OM (where its used)
 #' 
-#' @param haystack 
-#' @param needle
-#' @return ret 
+#' @param haystack list
+#' @param needle object name to search for
+#' @return Object found in list 
 #' @export find_name
 #' @examples NA
 find_name <- function(haystack, needle) {

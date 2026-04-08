@@ -108,6 +108,12 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.14 04/08/2026
+1. Added an R6 `WaterGageBase` class to allow for standard methods and
+processing of gage data including getting gage data from USGS, deriving sf from
+data frame, getting RomFeature of watershed, calculating low flows, and deriving
+non-exceednace flows
+
 ### 1.0.13 04/07/2026
 1. Brought in `openmi.om.base` and `openmi.om.matrix` objects from `openmi.om`
 to allow for the creation of a stage-storage interpolation function on
