@@ -117,7 +117,7 @@ dHVariablePluginDefault <- R6Class(
       }
       from_list$propname = om_list$name
       for (n in self$om_codenames()) {
-        if (!is.na(om_list[[n]])) {
+        if (!is.null(om_list[[n]])) {
           from_list[[n]] = list(
             propname = n,
             propvalue = NULL,
@@ -126,7 +126,7 @@ dHVariablePluginDefault <- R6Class(
         }
       }
       for (n in self$om_valnames()) {
-        if (!is.na(om_list[[n]])) {
+        if (!is.null(om_list[[n]])) {
           from_list[[n]] = list(
             propname = n,
             propvalue = as.character(om_list[[n]]),
@@ -727,7 +727,7 @@ dHOMWaterSystemTieredFlowBy <- R6Class(
 
 
 
-#' Tiered flowby meta-model object
+#' Simple flowby meta-model object
 #' @title dHOMWaterSystemFlowBy
 #' @description Simple class to hold equation-based flow by values
 #' @details Has standard methods for managing data and meta data
@@ -763,7 +763,7 @@ dHOMWaterSystemFlowBy <- R6Class(
     #' @return names that come from json as numeric values
     om_codenames = function() {
       nms = unique(
-        c( c('equation', 'cfb_condition', 'cfb_var', 'value_dbcolumntype'), super$om_valnames() )
+        c( c('flowby_eqn', 'cfb_condition', 'cfb_var', 'value_dbcolumntype'), super$om_valnames() )
       )
       return(nms)
     }
@@ -885,6 +885,8 @@ get_plugin_class <- function(plugin_name, entity) {
     plugin = dHOMbroadCastObject$new(entity)
   } else if (plugin_name == "dHOMWaterSystemTieredFlowBy") {
     plugin = dHOMWaterSystemTieredFlowBy$new(entity)
+  } else if (plugin_name == "dHOMWaterSystemFlowBy") {
+    plugin = dHOMWaterSystemFlowBy$new(entity)
   } else if (plugin_name == "dHOMTimeseriesFile") {
     plugin = dHOMTimeseriesFile$new(entity)
   }else {
