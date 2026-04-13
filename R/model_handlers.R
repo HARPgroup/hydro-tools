@@ -297,7 +297,7 @@ ModelElementBase <- R6Class(
       }
       sql=paste0(
         "WITH RECURSIVE element_tree AS (
-              SELECT p.*, 0 AS level, e.custom1
+              SELECT p.*, 0 AS level, e.custom1, e.elemname
               FROM map_model_linkages as p
               left outer join scen_model_element as e
               on (
@@ -306,7 +306,7 @@ ModelElementBase <- R6Class(
               WHERE p.dest_id = ", elementid, "
                 AND linktype = 1
               UNION
-              SELECT c.*, p.level + 1 as level, e.custom1
+              SELECT c.*, p.level + 1 as level, e.custom1, e.elemname
               FROM map_model_linkages as c
               left outer join scen_model_element as e
               on (
@@ -318,7 +318,7 @@ ModelElementBase <- R6Class(
               WHERE ( (e.custom1 <> '", exclude_custom1, "') 
                 OR ('", exclude_custom1, "' = '-1') )
             )
-          SELECT src_id from element_tree
+          SELECT src_id, elemname from element_tree
           WHERE ((level <= ", max_recursion_level, ") OR (", max_recursion_level, " = -1))
               AND ( (custom1 = '", target_custom1, "') 
                 OR ('", target_custom1, "' = '-1') );"
