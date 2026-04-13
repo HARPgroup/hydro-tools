@@ -141,7 +141,12 @@ ModelElementBase <- R6Class(
         }
         else if (!is.na(self$elementid)) {
           # try to find the pid associated with thihs model, then find the feature
-          pid = om_find_dh_elid(self$elementid, self$ds)[1,]$pid
+          matches = om_find_dh_elid(self$elementid, self$ds)
+          if (!is.logical(matches)) {
+            pid = om_find_dh_elid(self$elementid, self$ds)[1,]$pid
+          } else {
+            pid = NA
+          }
           if (!is.na(pid)) {
             self$pid = pid
             self$get_model()
