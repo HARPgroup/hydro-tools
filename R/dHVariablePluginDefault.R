@@ -30,6 +30,14 @@ dHVariablePluginDefault <- R6Class(
       # sub classes will do things here
       return(TRUE)
     },
+    #' @return names that come from json as string values
+    om_codenames = function() {
+      return(c('description'))
+    },
+    #' @return names that come from json as numeric values
+    om_valnames = function() {
+      return(c('debug', 'cacheable'))
+    },
     #' @param entity the local object to work on 
     #' @return an updated config if necessary or FALSE if it fails
     exportOpenMI = function(entity) {
@@ -108,6 +116,24 @@ dHVariablePluginDefault <- R6Class(
         return(FALSE)
       }
       from_list$propname = om_list$name
+      for (n in self$om_codenames()) {
+        if (!is.na(om_list[[n]])) {
+          from_list[[n]] = list(
+            propname = n,
+            propvalue = NULL,
+            propcode = as.character(om_list[[n]])
+          )
+        }
+      }
+      for (n in self$om_valnames()) {
+        if (!is.na(om_list[[n]])) {
+          from_list[[n]] = list(
+            propname = n,
+            propvalue = as.character(om_list[[n]]),
+            propcode = NULL
+          )
+        }
+      }
       # base case has low expectations as it may be a container so it returns just the name
       return(from_list)
     },
@@ -178,11 +204,24 @@ dHOMEquation <- R6Class(
     name = NA,
     #' @field object_class model object type
     object_class = 'Equation',
-    
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
     initialize = function(config = list()) {
       #message("Created plugin")
+    },
+    #' @return names that come from json as string values
+    om_valnames = function() {
+      nms = unique(
+        c( c('defaultval', 'nanvalue', 'strictnull', 'nonnegative', 'minvalue'), super$om_valnames() )
+      )
+      return(nms)
+    },
+    #' @return names that come from json as numeric values
+    om_codenames = function() {
+      nms = unique(
+        c( c('equation', 'engine'), super$om_valnames() )
+      )
+      return(nms)
     },
     #' @param entity the local object to work on 
     #' @return an updated config if necessary or FALSE if it fails
@@ -258,7 +297,6 @@ dHOMAlphanumericConstant <- R6Class(
     name = NA,
     #' @field object_class model object type
     object_class = FALSE,
-    
     #' @param config list of attributes to set, see also: to_list() for format
     #' @return object instance
     initialize = function(config = list()) {
@@ -383,12 +421,27 @@ dHOMDataMatrix <- R6Class(
       )
       return(export)
     },
+    #' @return names that come from json as string values
+    om_valnames = function() {
+      nms = unique(
+        c( c('valuetype', 'lutype1', 'lutype2', 'numrows', 'numcols'), super$om_valnames() )
+      )
+      return(nms)
+    },
+    #' @return names that come from json as numeric values
+    om_codenames = function() {
+      nms = unique(
+        c( c('value_dbcolumntype', 'keycol1','keycol2'), super$om_valnames() )
+      )
+      return(nms)
+    },
     #' @param om_list the simple OM format export array/list to work on
     #' @return properly formatted list to be used by RomProperty$from_list() FALSE if not successful
     fromOM = function(om_list) {
       # handles expected sub-components, and also knows whether or not the value is a str or num
       # OM entity lists should be mostly 1 deep, that is, a sub-comp can have other components
       # at the first level but will not have them as the 2nd level, so we do not recurse
+      # base case has low expectations as it may be a container so it returns just the name
       from_list = super$fromOM(om_list)
       if (is.logical(from_list)) (
         return(FALSE)
@@ -413,7 +466,7 @@ dHOMDataMatrix <- R6Class(
       # and by doing so, this from_list can be directly 
       # sent to the RomProperty$new() constructor
       from_list$data_matrix = jsonlite::toJSON(matrix_rowcol) 
-      # base case has low expectations as it may be a container so it returns just the name
+      # read matrix behavior details
       return(from_list)
     },
     #' @return info regarding the needs and capabilities of this object
@@ -575,7 +628,7 @@ dHOMbroadCastObject <- R6Class(
 )
 
 
-#' Tiered flowby meta-model object
+#' Container dHOMwaterSupplyModelNode meta-model object
 #' @title dHOMwaterSupplyModelNode
 #' @description Watershed model container
 #' @details Has standard methods for managing data and meta data
@@ -638,6 +691,20 @@ dHOMWaterSystemTieredFlowBy <- R6Class(
       
       return(export)
     },
+    #' @return names that come from json as string values
+    om_valnames = function() {
+      nms = unique(
+        c( c('enable_cfb', 'enable_conservation'), super$om_valnames() )
+      )
+      return(nms)
+    },
+    #' @return names that come from json as numeric values
+    om_codenames = function() {
+      nms = unique(
+        c( c('equation', 'cfb_condition', 'cfb_var', 'value_dbcolumntype'), super$om_valnames() )
+      )
+      return(nms)
+    },
     #'@param l The list to convert to matrix
     #'@return A matrix of values from the list, with one value per row
     list2matrix = function(l) {
@@ -650,12 +717,58 @@ dHOMWaterSystemTieredFlowBy <- R6Class(
     #'@return The entity, but the method is primarily designed to set useful
     #'  values on entity not return anything useful
     translateOMtoDH = function(entity, om_json) {
+      message("Warning: translateOMtoDH is Deprecated.  See method fromOM()")
+      return
       matrix_vals = self$list2matrix(om_json$processors$flowby$rule_matrix$matrix_rowcol)
       entity$set_matrix(matrix_vals)
     }
   )
 )
 
+
+
+#' Tiered flowby meta-model object
+#' @title dHOMWaterSystemFlowBy
+#' @description Simple class to hold equation-based flow by values
+#' @details Has standard methods for managing data and meta data
+#' @importFrom R6 R6Class  
+#' @param entity list or object with entity info
+#' @return reference class of type openmi.om.base.
+#' @seealso NA
+#' @examples NA
+#' @export dHOMWaterSystemFlowBy
+dHOMWaterSystemFlowBy <- R6Class(
+  "dHOMWaterSystemFlowBy",
+  inherit = dHOMEquation,
+  public = list(
+    #' @field name what is it called
+    name = NA,
+    #' @field object_class model object type
+    object_class = 'wsp_flowby',
+    #' @param entity the local object to work on 
+    #' @return an updated config if necessary or FALSE if it fails
+    exportOpenMIBase = function(entity) {
+      #print(paste("Entity matrix:", entity$propname))
+      export = super$exportOpenMIBase(entity)
+      
+      return(export)
+    },
+    #' @return names that come from json as string values
+    om_valnames = function() {
+      nms = unique(
+        c( c('enable_cfb', 'enable_conservation'), super$om_valnames() )
+      )
+      return(nms)
+    },
+    #' @return names that come from json as numeric values
+    om_codenames = function() {
+      nms = unique(
+        c( c('equation', 'cfb_condition', 'cfb_var', 'value_dbcolumntype'), super$om_valnames() )
+      )
+      return(nms)
+    }
+  )
+)
 
 #' VA Hydro model impoundment plugin
 #' @title dHOMHydroImpoundment
