@@ -23,6 +23,7 @@ Imports:
     lubridate,
     plyr,
     dplyr,
+    tidyr,
     RPostgres,
     DBI,
     R6,
