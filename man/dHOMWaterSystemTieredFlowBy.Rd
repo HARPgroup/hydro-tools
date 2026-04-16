@@ -36,6 +36,8 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMWaterSystemTieredFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemTieredFlowBy$exportOpenMIBase()}}
+\item \href{#method-dHOMWaterSystemTieredFlowBy-om_valnames}{\code{dHOMWaterSystemTieredFlowBy$om_valnames()}}
+\item \href{#method-dHOMWaterSystemTieredFlowBy-om_codenames}{\code{dHOMWaterSystemTieredFlowBy$om_codenames()}}
 \item \href{#method-dHOMWaterSystemTieredFlowBy-list2matrix}{\code{dHOMWaterSystemTieredFlowBy$list2matrix()}}
 \item \href{#method-dHOMWaterSystemTieredFlowBy-translateOMtoDH}{\code{dHOMWaterSystemTieredFlowBy$translateOMtoDH()}}
 \item \href{#method-dHOMWaterSystemTieredFlowBy-clone}{\code{dHOMWaterSystemTieredFlowBy$clone()}}
@@ -71,6 +73,30 @@ NA
 }
 \subsection{Returns}{
 an updated config if necessary or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-om_valnames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-om_valnames}{}}}
+\subsection{Method \code{om_valnames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$om_valnames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as string values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-om_codenames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-om_codenames}{}}}
+\subsection{Method \code{om_codenames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$om_codenames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as numeric values
 }
 }
 \if{html}{\out{<hr>}}

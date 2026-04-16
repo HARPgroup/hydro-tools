@@ -36,6 +36,8 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMEquation-new}{\code{dHOMEquation$new()}}
+\item \href{#method-dHOMEquation-om_valnames}{\code{dHOMEquation$om_valnames()}}
+\item \href{#method-dHOMEquation-om_codenames}{\code{dHOMEquation$om_codenames()}}
 \item \href{#method-dHOMEquation-exportOpenMIBase}{\code{dHOMEquation$exportOpenMIBase()}}
 \item \href{#method-dHOMEquation-clone}{\code{dHOMEquation$clone()}}
 }
@@ -69,6 +71,30 @@ NA
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMEquation-om_valnames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMEquation-om_valnames}{}}}
+\subsection{Method \code{om_valnames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMEquation$om_valnames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as string values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMEquation-om_codenames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMEquation-om_codenames}{}}}
+\subsection{Method \code{om_codenames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMEquation$om_codenames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as numeric values
 }
 }
 \if{html}{\out{<hr>}}

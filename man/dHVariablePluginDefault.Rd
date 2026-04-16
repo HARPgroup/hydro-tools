@@ -36,6 +36,8 @@ NA
 \itemize{
 \item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
 \item \href{#method-dHVariablePluginDefault-populate}{\code{dHVariablePluginDefault$populate()}}
+\item \href{#method-dHVariablePluginDefault-om_codenames}{\code{dHVariablePluginDefault$om_codenames()}}
+\item \href{#method-dHVariablePluginDefault-om_valnames}{\code{dHVariablePluginDefault$om_valnames()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
 \item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
@@ -81,6 +83,30 @@ object instance
 }
 \subsection{Returns}{
 object instance
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-om_codenames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-om_codenames}{}}}
+\subsection{Method \code{om_codenames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$om_codenames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as string values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-om_valnames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-om_valnames}{}}}
+\subsection{Method \code{om_valnames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$om_valnames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as numeric values
 }
 }
 \if{html}{\out{<hr>}}

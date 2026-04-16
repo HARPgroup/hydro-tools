@@ -48,6 +48,8 @@ NA
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>hydrotools::dHOMDataMatrix$fromOM()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_codenames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_codenames'><code>hydrotools::dHOMDataMatrix$om_codenames()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_valnames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_valnames'><code>hydrotools::dHOMDataMatrix$om_valnames()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>hydrotools::dHOMDataMatrix$param_info()</code></a></span></li>
 </ul>
 </details>

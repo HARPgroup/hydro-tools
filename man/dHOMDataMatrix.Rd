@@ -38,6 +38,8 @@ NA
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
+\item \href{#method-dHOMDataMatrix-om_valnames}{\code{dHOMDataMatrix$om_valnames()}}
+\item \href{#method-dHOMDataMatrix-om_codenames}{\code{dHOMDataMatrix$om_codenames()}}
 \item \href{#method-dHOMDataMatrix-fromOM}{\code{dHOMDataMatrix$fromOM()}}
 \item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
 \item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
@@ -71,6 +73,30 @@ NA
 }
 \subsection{Returns}{
 an updated config if necessary or FALSE if it fails
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMDataMatrix-om_valnames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMDataMatrix-om_valnames}{}}}
+\subsection{Method \code{om_valnames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$om_valnames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as string values
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMDataMatrix-om_codenames"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMDataMatrix-om_codenames}{}}}
+\subsection{Method \code{om_codenames()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$om_codenames()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+names that come from json as numeric values
 }
 }
 \if{html}{\out{<hr>}}

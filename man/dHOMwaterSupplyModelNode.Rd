@@ -10,7 +10,7 @@ reference class of type openmi.om.base.
 Watershed model container
 }
 \details{
-Tiered flowby meta-model object
+Container dHOMwaterSupplyModelNode meta-model object
 
 Has standard methods for managing data and meta data
 }
@@ -48,6 +48,8 @@ NA
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>hydrotools::dHVariablePluginDefault$fromOM()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>hydrotools::dHVariablePluginDefault$om_codenames()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>hydrotools::dHVariablePluginDefault$om_valnames()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>hydrotools::dHVariablePluginDefault$param_info()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
 </ul>
