@@ -260,12 +260,10 @@ ModelElementBase <- R6Class(
     #' @param oborops target container to search
     #' @return elemxml converted to list
     get_elem_xml= function(elementid = FALSE, oborops='object') {
-      # NOTE: this is not yet working.
-      # the xml comes in, and it appears to parse yielding a list-like
-      # vawriable attributes, but those attributes cannot be viewed
       if (elementid == FALSE) {
         elementid = self$elementid
       }
+      #Get the xml from model db
       raw_xml <- sqldf::sqldf(
         paste(
           "select elem_xml, elemoperators 
@@ -274,13 +272,16 @@ ModelElementBase <- R6Class(
         ), 
         connection = self$ds_om$connection
       )
+      #If user only wants operators, get those only
       if (oborops == 'operators') {
         rxx = as.character(raw_xml[['elemoperators']])
         trim_xml = substr(rxx, 3,stringr::str_length(rxx) -2)
+        #Add an arbitrary wrapper element to ensure proper reading
+        expdoc <- xml2::read_xml(paste0("<container>",trim_xml,"</container>"))
       } else {
         trim_xml = raw_xml[['elem_xml']]
+        expdoc <- xml2::read_xml(trim_xml)
       }
-      expdoc <- xml2::read_xml(trim_xml)
       exp <- xml2::as_list(expdoc)
       return(exp)
     },
