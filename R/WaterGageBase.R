@@ -374,7 +374,7 @@ WaterGageBase <- R6::R6Class(
       }
       
       #Store in the list of plots on this object
-      self$plots <- c(plotName = list(p), self$plots)
+      self$plots[[plotName]] <- p
       #Return the plot
       return(p)
     }
