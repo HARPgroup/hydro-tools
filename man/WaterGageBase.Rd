@@ -100,8 +100,8 @@ for discharge}
 \item \href{#method-waterGageBase-days_below}{\code{WaterGageBase$days_below()}}
 \item \href{#method-waterGageBase-join_precip_data}{\code{WaterGageBase$join_precip_data()}}
 \item \href{#method-waterGageBase-plot_rechare_context}{\code{WaterGageBase$plot_rechare_context()}}
-\item \href{#method-waterGageBase-plot_low_flows}{\code{WaterGageBase$plot_low_flows()}}
 \item \href{#method-waterGageBase-plot_precip_data}{\code{WaterGageBase$plot_precip_data()}}
+\item \href{#method-waterGageBase-plot_low_flows}{\code{WaterGageBase$plot_low_flows()}}
 \item \href{#method-waterGageBase-plot_all}{\code{WaterGageBase$plot_all()}}
 \item \href{#method-waterGageBase-clone}{\code{WaterGageBase$clone()}}
 }
@@ -368,16 +368,12 @@ Create a boxplot of the monthly metric requested by user at
   this gage (or of a user input data frame) and then plot the target year
   as highlighted points on the plot. Often used in OWS to assess
   potential winter baseflow recharge when using gage data and evaluting
-  between October - March (include_months = c(10,11,12,1,2,3)). All
-  defaults will work if using gage flow data from the initialize of this
-  object
+  between October - March (include_months = c(10,11,12,1,2,3)).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$plot_rechare_context(
   targetYear = as.numeric(format(Sys.Date(), "\%Y")),
   include_months = 1:12,
   AYS = 10,
-  dataframe_in = self$gage_data,
-  value_col = self$flow_col,
   metric = mean,
   use_y_log = TRUE,
   ylab = "Monthly Mean Flow (cfs)"
@@ -396,12 +392,6 @@ to this year. If left as NULL, no additional point data will be included}
 this month and then proceed through the next 12 months or those
 included by user in include_months}
 
-\item{\code{dataframe_in}}{An optional data frame to use in the plot, but will
-default to the gage_data on this object}
-
-\item{\code{value_col}}{An optional field to use to control which column is
-plotted from dataframe_in}
-
 \item{\code{metric}}{A function to pass to \code{dplyr::summarize()} to control
 how data monthly data is aggregated}
 
@@ -414,6 +404,53 @@ to TRUE}
 }
 \subsection{Returns}{
 A boxplot of monthly mean flows with highlighted points
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-waterGageBase-plot_precip_data"></a>}}
+\if{latex}{\out{\hypertarget{method-waterGageBase-plot_precip_data}{}}}
+\subsection{Method \code{plot_precip_data()}}{
+Create a boxplot of monthly sums of precipitation using the
+ data provided in either the precip_data field or by join_precip_data(). 
+ The boxplot is created by plot_recharge_context()
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$plot_precip_data(
+  targetYear = as.numeric(format(Sys.Date(), "\%Y")),
+  include_months = 1:12,
+  AYS = 10,
+  metric = mean,
+  precip_col = "precip_mm",
+  use_y_log = FALSE,
+  ylab = "Monthly Precip (mm)"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{targetYear}}{What year should be highlighted on the plot? Defaults
+to this year. If left as NULL, no additional point data will be included}
+
+\item{\code{include_months}}{What months should be included in plot/analysis?}
+
+\item{\code{AYS}}{Which month begins the analysis year? The plot will start in
+this month and then proceed through the next 12 months or those
+included by user in include_months}
+
+\item{\code{metric}}{A function to pass to \code{dplyr::summarize()} to control
+how data monthly data is aggregated}
+
+\item{\code{precip_col}}{The column to plot in the precip data frame}
+
+\item{\code{use_y_log}}{Boolean. Should the y axis be on a log10 scale? Defaults
+to FALSE}
+
+\item{\code{ylab}}{Character. The text to display on the y-axis of the plot.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A boxplot of precipitation data, also set in the plots field
 }
 }
 \if{html}{\out{<hr>}}
@@ -440,42 +477,6 @@ average low flow metric}
 \subsection{Returns}{
 A line plot of the x-day average low flow recorded each analysis
   year. Will set in the plots list as well.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-waterGageBase-plot_precip_data"></a>}}
-\if{latex}{\out{\hypertarget{method-waterGageBase-plot_precip_data}{}}}
-\subsection{Method \code{plot_precip_data()}}{
-Create a boxplot of monthly sums of precipitation using the
- data provided in either the precip_data field or by join_precip_data(). 
- The boxplot is created by plot_recharge_context()
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$plot_precip_data(
-  targetYear = as.numeric(format(Sys.Date(), "\%Y")),
-  include_months = 1:12,
-  AYS = 10,
-  precip_col = "precip_mm"
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{targetYear}}{What year should be highlighted on the plot? Defaults
-to this year. If left as NULL, no additional point data will be included}
-
-\item{\code{include_months}}{What months should be included in plot/analysis?}
-
-\item{\code{AYS}}{Which month begins the analysis year? The plot will start in
-this month and then proceed through the next 12 months or those
-included by user in include_months}
-
-\item{\code{precip_col}}{The column to plot in the precip data frame}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A boxplot of precipitation data, also set in the plots field
 }
 }
 \if{html}{\out{<hr>}}
