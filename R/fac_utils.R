@@ -163,3 +163,104 @@ om_quantile_table <- function(
   quantile_df <- round(quantile_df,rdigits)
   return(quantile_df)
 }
+
+#' Monthly boxplot with single year highlight
+#' @description Create a boxplot of the monthly metric requested by user at
+#'   this gage (or of a user input data frame) and then plot the target year
+#'   as highlighted points on the plot. Often used in OWS to assess
+#'   potential winter baseflow recharge when using gage data and evaluting
+#'   between October - March (include_months = c(10,11,12,1,2,3)). 
+#' @param targetYear What year should be highlighted on the plot? Defaults
+#'   to this year. If left as NULL, no additional point data will be included
+#' @param include_months What months should be included in plot/analysis?
+#' @param AYS Which month begins the analysis year? The plot will start in
+#'   this month and then proceed through the next 12 months or those
+#'   included by user in include_months
+#' @param dataframe_in A data frame to summarize and use for the plot. Must
+#'   contain the fields input in value_col and date_col
+#' @param value_col A field name in dataframe_in used to control which column is
+#'   plotted from dataframe_in
+#' @param date_col A field name in dataframe_in that must contain R Dates, to be
+#'   used in developing the monthly metrics
+#' @param gage_id A name to display in the plot title
+#' @param metric A function to pass to \code{dplyr::summarize()} to control
+#'   how data monthly data is aggregated
+#' @param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
+#'   to TRUE
+#' @param ylab Character. The text to display on the y-axis of the plot.
+#' @return A boxplot of monthly mean flows with highlighted points
+#' @export plot_boxplot_context
+plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
+                                include_months = 1:12,
+                                AYS = 10,
+                                dataframe_in = NULL,
+                                value_col = "flow",
+                                date_col = "time",
+                                gage_id = NA,
+                                metric = mean,
+                                use_y_log = TRUE,
+                                ylab = "Monthly Mean Flow (cfs)"){
+  #metric name for plotting labels
+  metric_name <- as.character(substitute(metric))
+  metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
+  
+  #Create columns for the month and year in the gage data
+  plotData <- dataframe_in
+  plotData$month <- as.numeric(format(plotData[,date_col], "%m"))
+  plotData$year <- as.numeric(format(plotData[,date_col], "%Y"))
+  #Increment year per user start month to reflect the order data should be
+  #included in plot
+  plotData$analysis_year <- plotData$year
+  plotData$analysis_year[plotData$month >= AYS] <- plotData$analysis_year[plotData$month >= AYS] + 1
+  #Group by month and year and find the metric of the value_col requested by
+  #user in every month-year. Then filter out month-years with incomplete
+  #data
+  plotData <- plotData |> 
+    dplyr::group_by(month,analysis_year) |> 
+    dplyr::summarise(aggregateValue = metric(!!dplyr::sym(value_col), na.rm = TRUE),
+                     ndays = dplyr::n()) |> 
+    dplyr::mutate(daysInMonth = lubridate::days_in_month(paste0(analysis_year,"-",month,"-01"))) |> 
+    dplyr::filter(daysInMonth == ndays) |> 
+    #Only include the months requested by the user and relabel all months
+    #using their abbreviations
+    dplyr::filter(month %in% include_months) |> 
+    dplyr::mutate(month = month.abb[month])
+  #Store the months as a factor, with ordered levels based on user input
+  plotData$month <- factor(plotData$month,levels = month.abb[include_months])
+  
+  #Create a boxplot of the month-year mean flows and include the targetData
+  #as point data to highlight this year's trends
+  p <- ggplot() + 
+    geom_boxplot(data = plotData, aes(group = month, x = month, y = aggregateValue)) +
+    ggplot2::labs(color = element_blank()) + 
+    ggplot2::xlab(element_blank()) + 
+    ggplot2::ylab(ylab) + 
+    theme_minimal()
+  #If the user wishes to use a log scale on the y-axis
+  if(use_y_log){
+    #Use a semi-log (y) plot
+    p <- p + scale_y_log10()
+  }
+  
+  if(!is.null(targetYear)){
+    #Select only data from the user selected target year to additionally
+    #include on the plot
+    targetData <- plotData[plotData$analysis_year == targetYear,]
+    
+    p <- p + 
+      geom_point(data = targetData, aes(x = month, y = aggregateValue,
+                                        col = as.character(targetYear)),
+                 pch = 12) +
+      #Color and label the point values
+      ggplot2::scale_color_manual(values = "blue") + 
+      ggplot2::ggtitle(paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",gage_id)) + 
+      theme(plot.title = element_text(hjust = 0.5)) 
+    #Add the year to the plot object name
+  }else{
+    p <- p + 
+      ggplot2::ggtitle(paste("Hist. Monthly",metric_name,"\nUSGS",gage_id)) +
+      theme(plot.title = element_text(hjust = 0.5))
+  }
+  
+  return(p)
+}

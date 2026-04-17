@@ -363,19 +363,13 @@ WaterGageBase <- R6::R6Class(
     #'   this gage (or of a user input data frame) and then plot the target year
     #'   as highlighted points on the plot. Often used in OWS to assess
     #'   potential winter baseflow recharge when using gage data and evaluting
-    #'   between October - March (include_months = c(10,11,12,1,2,3)). All
-    #'   defaults will work if using gage flow data from the initialize of this
-    #'   object
+    #'   between October - March (include_months = c(10,11,12,1,2,3)). 
     #' @param targetYear What year should be highlighted on the plot? Defaults
     #'   to this year. If left as NULL, no additional point data will be included
     #' @param include_months What months should be included in plot/analysis?
     #' @param AYS Which month begins the analysis year? The plot will start in
     #'   this month and then proceed through the next 12 months or those
     #'   included by user in include_months
-    #' @param dataframe_in An optional data frame to use in the plot, but will
-    #'   default to the gage_data on this object
-    #' @param value_col An optional field to use to control which column is
-    #'   plotted from dataframe_in
     #' @param metric A function to pass to \code{dplyr::summarize()} to control
     #'   how data monthly data is aggregated
     #' @param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
@@ -385,80 +379,93 @@ WaterGageBase <- R6::R6Class(
     plot_rechare_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
                                     include_months = 1:12,
                                     AYS = 10,
-                                    dataframe_in = self$gage_data,
-                                    value_col = self$flow_col,
                                     metric = mean,
                                     use_y_log = TRUE,
                                     ylab = "Monthly Mean Flow (cfs)"){
-      #metric name for plotting labels
+      #Create a recharge context plot using user inputs and the data stored on
+      #this object
+      p <- plot_boxplot_context(targetYear = targetYear,
+                           include_months = include_months,
+                           AYS = AYS,
+                           dataframe_in = self$gage_data,
+                           value_col = self$flow_col,
+                           date_col = self$date_col,
+                           gage_id = self$gage_id,
+                           metric = metric,
+                           use_y_log = use_y_log,
+                           ylab = ylab)
+      
+      #metric name for plot name
       metric_name <- as.character(substitute(metric))
       metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
-      
-      #Create columns for the month and year in the gage data
-      plotData <- dataframe_in
-      plotData$month <- as.numeric(format(plotData[,self$date_col], "%m"))
-      plotData$year <- as.numeric(format(plotData[,self$date_col], "%Y"))
-      #Increment year per user start month to reflect the order data should be
-      #included in plot
-      plotData$analysis_year <- plotData$year
-      plotData$analysis_year[plotData$month >= AYS] <- plotData$analysis_year[plotData$month >= AYS] + 1
-      #Group by month and year and find the metric of the value_col requested by
-      #user in every month-year. Then filter out month-years with incomplete
-      #data
-      
-      plotData <- plotData |> 
-        dplyr::group_by(month,analysis_year) |> 
-        dplyr::summarise(meanFlow = metric(!!dplyr::sym(value_col), na.rm = TRUE),
-                         ndays = dplyr::n()) |> 
-        dplyr::mutate(daysInMonth = lubridate::days_in_month(paste0(analysis_year,"-",month,"-01"))) |> 
-        dplyr::filter(daysInMonth == ndays) |> 
-        #Only include the months requested by the user and relabel all months
-        #using their abbreviations
-        dplyr::filter(month %in% include_months) |> 
-        dplyr::mutate(month = month.abb[month])
-      #Store the months as a factor, with ordered levels based on user input
-      plotData$month <- factor(plotData$month,levels = month.abb[include_months])
-      
-      #Create a boxplot of the month-year mean flows and include the targetData
-      #as point data to highlight this year's trends
-      p <- ggplot() + 
-        geom_boxplot(data = plotData, aes(group = month, x = month, y = meanFlow)) +
-        ggplot2::labs(color = element_blank()) + 
-        ggplot2::xlab(element_blank()) + 
-        ggplot2::ylab(ylab) + 
-        theme_minimal()
-      #If the user wishes to use a log scale on the y-axis
-      if(use_y_log){
-        #Use a semi-log (y) plot
-        p <- p + scale_y_log10()
-      }
-      
-      plotName <- paste0("recharge_context_",metric_name,"_",value_col)
-      
+  
+      #Create a name for the plot to store in the plots field that is tied to
+      #metric, value_col, and targetYear
+      plotName <- paste0("recharge_context_",metric_name,"_",self$value_col)
       if(!is.null(targetYear)){
-        #Select only data from the user selected target year to additionally
-        #include on the plot
-        targetData <- plotData[plotData$analysis_year == targetYear,]
-        
-        p <- p + 
-          geom_point(data = targetData, aes(x = month, y = meanFlow,
-                                            col = as.character(targetYear)),
-                     pch = 12) +
-          #Color and label the point values
-          ggplot2::scale_color_manual(values = "blue") + 
-          ggplot2::ggtitle(paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",self$gage_id)) + 
-          theme(plot.title = element_text(hjust = 0.5)) 
-        #Add the year to the plot object name
         plotName <- paste0(plotName,"_",targetYear)
-      }else{
-        p <- p + 
-          ggplot2::ggtitle(paste("Hist. Monthly",metric_name,"\nUSGS",self$gage_id)) +
-          theme(plot.title = element_text(hjust = 0.5))
       }
       
       #Store in the list of plots on this object
       self$plots[[plotName]] <- p
       #Return the plot
+      return(p)
+    },
+    #'@description Create a boxplot of monthly sums of precipitation using the
+    #'  data provided in either the precip_data field or by join_precip_data(). 
+    #'  The boxplot is created by plot_recharge_context()
+    #'@param targetYear What year should be highlighted on the plot? Defaults
+    #'   to this year. If left as NULL, no additional point data will be included
+    #'@param include_months What months should be included in plot/analysis?
+    #'@param AYS Which month begins the analysis year? The plot will start in
+    #'   this month and then proceed through the next 12 months or those
+    #'   included by user in include_months
+    #'@param precip_col The column to plot in the precip data frame
+    #' @param metric A function to pass to \code{dplyr::summarize()} to control
+    #'   how data monthly data is aggregated
+    #'@param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
+    #'   to FALSE
+    #'@param ylab Character. The text to display on the y-axis of the plot.
+    #'@return A boxplot of precipitation data, also set in the plots field
+    plot_precip_data = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
+                                include_months = 1:12,
+                                AYS = 10, metric = mean, precip_col = "precip_mm",
+                                use_y_log = FALSE, ylab = "Monthly Precip (mm)"){
+      #If precip data has already been loaded in on the object, use it for plot.
+      #Otherwise, reload the data using default arguments
+      if(!inherits(self$precip_data,"data.frame")){
+        message("No precip data found, loading via join_precip_data()")
+        all_data <- self$join_precip_data()
+      }else{
+        all_data <- self$precip_data
+      }
+      #Plot the data with plot_recharge_context
+      p <- plot_boxplot_context(targetYear = targetYear,
+                                include_months = include_months,
+                                AYS = AYS,
+                                dataframe_in = self$precip_data,
+                                value_col = precip_col,
+                                date_col = self$date_col,
+                                gage_id = self$gage_id,
+                                metric = metric,
+                                use_y_log = FALSE,
+                                ylab = "Monthly Precip (mm)")
+      
+      #metric name for plot name
+      metric_name <- as.character(substitute(metric))
+      metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
+      
+      #Create a name for the plot to store in the plots field that is tied to
+      #metric, value_col, and targetYear
+      plotName <- paste0("precip_context_",metric_name,"_",precip_col)
+      if(!is.null(targetYear)){
+        plotName <- paste0(plotName,"_",targetYear)
+      }
+      
+      #Store in the list of plots on this object
+      self$plots[[plotName]] <- p
+      #Return the plot
+      
       return(p)
     },
     #' @description Create a line plot of the lowest x-day average flow recorded
@@ -526,37 +533,6 @@ WaterGageBase <- R6::R6Class(
       #Store in the list of plots on this object
       self$plots[[plotName]] <- p
       
-      return(p)
-    },
-    #'@description Create a boxplot of monthly sums of precipitation using the
-    #'  data provided in either the precip_data field or by join_precip_data(). 
-    #'  The boxplot is created by plot_recharge_context()
-    #'@param targetYear What year should be highlighted on the plot? Defaults
-    #'   to this year. If left as NULL, no additional point data will be included
-    #'@param include_months What months should be included in plot/analysis?
-    #'@param AYS Which month begins the analysis year? The plot will start in
-    #'   this month and then proceed through the next 12 months or those
-    #'   included by user in include_months
-    #'@param precip_col The column to plot in the precip data frame
-    #'@return A boxplot of precipitation data, also set in the plots field
-    plot_precip_data = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
-                                include_months = 1:12,
-                                AYS = 10, precip_col = "precip_mm"){
-      #If precip data has already been loaded in on the object, use it for plot.
-      #Otherwise, reload the data using default arguments
-      if(!inherits(self$precip_data,"data.frame")){
-        message("No precip data found, loading via join_precip_data()")
-        all_data <- self$join_precip_data()
-      }else{
-        all_data <- self$precip_data
-      }
-      #Plot the data with plot_recharge_context
-      p <- self$plot_rechare_context(targetYear = targetYear, 
-                                     include_months = include_months, AYS = AYS,
-                                     dataframe_in = self$precip_data,
-                                     value_col = precip_col,
-                                     use_y_log = FALSE,
-                                     metric = sum, ylab = "Monthly Precip (mm)")
       return(p)
     },
     #' @description Run all plotting methods and populate the plots field accordingly
