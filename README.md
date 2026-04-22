@@ -108,6 +108,16 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.15 04/21/2026
+1. Added several methods to WaterGageBase, including methods for plotting
+baseflow recharge, precipitation, and annual low flows. Also added a
+`days_below()` method to identify the average number of days below a given
+threshold.
+2. Updated `get_elem_xml()` method on `ModelElementBase` to allow for debugging on model inputs directly from `model` database
+3. Added `get_broadcast_summary()` method on `ModelElementBase` to create quick
+summaries of model variables that are communicated upstream or downstream within
+the VA Hydro Operational Water Supply model
+
 ### 1.0.14 04/08/2026
 1. Added an R6 `WaterGageBase` class to allow for standard methods and
 processing of gage data including getting gage data from USGS, deriving sf from

@@ -42,6 +42,7 @@ WatershedModelNode
 \if{html}{\out{
 <details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_broadcast_summary"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_broadcast_summary'><code>hydrotools::ModelElementBase$get_broadcast_summary()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_elem_xml"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_elem_xml'><code>hydrotools::ModelElementBase$get_elem_xml()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_feature"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_feature'><code>hydrotools::ModelElementBase$get_feature()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_json_model'><code>hydrotools::ModelElementBase$get_json_model()</code></a></span></li>

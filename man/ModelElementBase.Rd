@@ -80,6 +80,7 @@ used in the CB Watershed Model)}
 \item \href{#method-ModelElementBase-get_run_data}{\code{ModelElementBase$get_run_data()}}
 \item \href{#method-ModelElementBase-load_json_model}{\code{ModelElementBase$load_json_model()}}
 \item \href{#method-ModelElementBase-get_json_model}{\code{ModelElementBase$get_json_model()}}
+\item \href{#method-ModelElementBase-get_broadcast_summary}{\code{ModelElementBase$get_broadcast_summary()}}
 \item \href{#method-ModelElementBase-get_elem_xml}{\code{ModelElementBase$get_elem_xml()}}
 \item \href{#method-ModelElementBase-om_element_tree}{\code{ModelElementBase$om_element_tree()}}
 \item \href{#method-ModelElementBase-render_cia_brief}{\code{ModelElementBase$render_cia_brief()}}
@@ -288,6 +289,22 @@ Calls the \code{load_json_model()} method to load the model
 
 \subsection{Returns}{
 json of model from dh_properties as set in
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ModelElementBase-get_broadcast_summary"></a>}}
+\if{latex}{\out{\hypertarget{method-ModelElementBase-get_broadcast_summary}{}}}
+\subsection{Method \code{get_broadcast_summary()}}{
+Summarizes all variables that are cast or listened for in
+  model broadcast objects (dHOMbroadCastObject) by parsing model json. If
+  model JSON is not loaded, will first call \code{load_json_model()}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_broadcast_summary()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A data.frame of all the variables cast and listened for in this
+  model from dHOMbroadCastObject
 }
 }
 \if{html}{\out{<hr>}}
