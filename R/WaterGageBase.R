@@ -100,7 +100,7 @@ WaterGageBase <- R6::R6Class(
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
-    initialize = function(data_source, gage_id = NA,
+    initialize = function(data_source = "USGS", gage_id = NA,
                           flow_col, date_col,
                           ds_in = NA){
       #Set the data source and gage fields
