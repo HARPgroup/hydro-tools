@@ -87,7 +87,7 @@ WaterGageBase <- R6::R6Class(
     #' now populated with gage data in its fields either by querying USGS or
     #' through user upload of data. This object offers various standard methods
     #' to analyze USGS gage data
-    #' @param data_source "USGS", a file path, or a data frame of stream gage data that
+    #' @param data_source "USGS" (default), a file path, or a data frame of stream gage data that
     #'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
     #'   \code{flow_col} and \code{date_col} are not used as data will be pulled
     #'   directly from USGS.
@@ -107,7 +107,7 @@ WaterGageBase <- R6::R6Class(
       self$data_source <- data_source
       self$gage_id <- gage_id
       #If user is using USGS, use dataRetrieval
-      if(self$data_source == "USGS"){
+      if(inherits(data_source, "character") && data_source == "USGS"){
         #Use either the new dataRetrieval functions or those slated for
         #deprecation based on version number
         if(packageVersion("dataRetrieval") >= "2.7.23") {
@@ -116,7 +116,7 @@ WaterGageBase <- R6::R6Class(
           #Deprecated with new dataRetrieval
           self$get_gage_data_old()
         }
-      }else if (is.character(data_source)){
+      }else if (inherits(data_source, "character")){
         #if the user has set data_source to a single character vector, assume a
         #file path to a csv and attempt to read in the data, setting flow and
         #date col fields based on user input
@@ -392,6 +392,7 @@ WaterGageBase <- R6::R6Class(
                            date_col = self$date_col,
                            gage_id = self$gage_id,
                            metric = metric,
+                           metric_name = as.character(substitute(metric)),
                            use_y_log = use_y_log,
                            ylab = ylab)
       
@@ -413,7 +414,8 @@ WaterGageBase <- R6::R6Class(
     },
     #'@description Create a boxplot of monthly sums of precipitation using the
     #'  data provided in either the precip_data field or by join_precip_data(). 
-    #'  The boxplot is created by plot_recharge_context()
+    #'  The boxplot is created by plot_recharge_context(). This will ONLY use
+    #'  days where the data in the input precip column is not NA
     #'@param targetYear What year should be highlighted on the plot? Defaults
     #'   to this year. If left as NULL, no additional point data will be included
     #'@param include_months What months should be included in plot/analysis?
@@ -429,7 +431,7 @@ WaterGageBase <- R6::R6Class(
     #'@return A boxplot of precipitation data, also set in the plots field
     plot_precip_data = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
                                 include_months = 1:12,
-                                AYS = 10, metric = mean, precip_col = "precip_mm",
+                                AYS = 10, metric = sum, precip_col = "precip_mm",
                                 use_y_log = FALSE, ylab = "Monthly Precip (mm)"){
       #If precip data has already been loaded in on the object, use it for plot.
       #Otherwise, reload the data using default arguments
@@ -443,11 +445,12 @@ WaterGageBase <- R6::R6Class(
       p <- plot_boxplot_context(targetYear = targetYear,
                                 include_months = include_months,
                                 AYS = AYS,
-                                dataframe_in = self$precip_data,
+                                dataframe_in = self$precip_data[!is.na(self$precip_data[,precip_col]),],
                                 value_col = precip_col,
                                 date_col = self$date_col,
                                 gage_id = self$gage_id,
                                 metric = metric,
+                                metric_name = as.character(substitute(metric)),
                                 use_y_log = FALSE,
                                 ylab = "Monthly Precip (mm)")
       

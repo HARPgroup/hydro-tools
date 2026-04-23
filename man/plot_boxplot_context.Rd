@@ -13,6 +13,7 @@ plot_boxplot_context(
   date_col = "time",
   gage_id = NA,
   metric = mean,
+  metric_name = "mean",
   use_y_log = TRUE,
   ylab = "Monthly Mean Flow (cfs)"
 )
@@ -40,6 +41,9 @@ used in developing the monthly metrics}
 
 \item{metric}{A function to pass to \code{dplyr::summarize()} to control
 how data monthly data is aggregated}
+
+\item{metric_name}{A name to use in plot title to represent the passed metric
+function}
 
 \item{use_y_log}{Boolean. Should the y axis be on a log10 scale? Defaults
 to TRUE}

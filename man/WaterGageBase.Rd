@@ -115,13 +115,19 @@ now populated with gage data in its fields either by querying USGS or
 through user upload of data. This object offers various standard methods
 to analyze USGS gage data
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$new(data_source, gage_id = NA, flow_col, date_col, ds_in = NA)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$new(
+  data_source = "USGS",
+  gage_id = NA,
+  flow_col,
+  date_col,
+  ds_in = NA
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data_source}}{"USGS", a file path, or a data frame of stream gage data that
+\item{\code{data_source}}{"USGS" (default), a file path, or a data frame of stream gage data that
 has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
 \code{flow_col} and \code{date_col} are not used as data will be pulled
 directly from USGS.}
@@ -412,13 +418,14 @@ A boxplot of monthly mean flows with highlighted points
 \subsection{Method \code{plot_precip_data()}}{
 Create a boxplot of monthly sums of precipitation using the
  data provided in either the precip_data field or by join_precip_data(). 
- The boxplot is created by plot_recharge_context()
+ The boxplot is created by plot_recharge_context(). This will ONLY use
+ days where the data in the input precip column is not NA
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$plot_precip_data(
   targetYear = as.numeric(format(Sys.Date(), "\%Y")),
   include_months = 1:12,
   AYS = 10,
-  metric = mean,
+  metric = sum,
   precip_col = "precip_mm",
   use_y_log = FALSE,
   ylab = "Monthly Precip (mm)"
