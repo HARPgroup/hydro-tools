@@ -108,6 +108,12 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.16 04/23/2026
+1. Updated `plot_boxplot_context()` to take in a metric name to be used in the
+plot title. Correspondingly, updated the `plot_rechare_context()` and
+`plot_precip_data()` to pass in a metric name based on user input metric using
+`substitute(metric)`
+
 ### 1.0.15 04/21/2026
 1. Added several methods to WaterGageBase, including methods for plotting
 baseflow recharge, precipitation, and annual low flows. Also added a

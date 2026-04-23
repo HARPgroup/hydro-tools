@@ -185,6 +185,8 @@ om_quantile_table <- function(
 #' @param gage_id A name to display in the plot title
 #' @param metric A function to pass to \code{dplyr::summarize()} to control
 #'   how data monthly data is aggregated
+#' @param metric_name A name to use in plot title to represent the passed metric
+#'   function
 #' @param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
 #'   to TRUE
 #' @param ylab Character. The text to display on the y-axis of the plot.
@@ -198,10 +200,10 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
                                 date_col = "time",
                                 gage_id = NA,
                                 metric = mean,
+                                metric_name = "mean",
                                 use_y_log = TRUE,
                                 ylab = "Monthly Mean Flow (cfs)"){
   #metric name for plotting labels
-  metric_name <- as.character(substitute(metric))
   metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
   
   #Create columns for the month and year in the gage data
