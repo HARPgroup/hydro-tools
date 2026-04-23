@@ -254,6 +254,39 @@ ModelElementBase <- R6Class(
       }
       return(self$json)
     },
+    #' @description Summarizes all variables that are cast or listened for in
+    #'   model broadcast objects (dHOMbroadCastObject) by parsing model json. If
+    #'   model JSON is not loaded, will first call \code{load_json_model()}
+    #' @return A data.frame of all the variables cast and listened for in this
+    #'   model from dHOMbroadCastObject
+    get_broadcast_summary = function() {
+      if (typeof(self$json) != "list") {
+        self$load_json_model()
+      }
+      #Find each broadcast in the model JSON list, searching by plugin
+      broadcastIndex <- lapply(self$json,
+                               FUN = function(x){
+                                 (length(x) > 1 && !is.null(x$plugin) && x$plugin == 'dHOMbroadCastObject')
+                               })
+      broadcasts <- self$json[unlist(broadcastIndex)]
+      #Summarize the broadcasts into a neat data frame
+      castSummary <- lapply(broadcasts, 
+                            FUN = function(casti){
+                              broadcastParameters <- casti$broadcast_params$value
+                              broadParams <- data.frame("BroadcastName"= casti$name,
+                                                        "LocalVariable"= broadcastParameters[,1],
+                                                        "RemoteVariable"= broadcastParameters[,2],
+                                                        "Hub"= casti$broadcast_hub$value,
+                                                        "Mode"= casti$broadcast_mode$value,
+                                                        "Class"= casti$broadcast_class$value)
+                              return(broadParams)
+                            })
+      castSummary <- do.call(rbind,castSummary)
+      #Organize data to be more legible
+      castSummary <- castSummary[order(castSummary$Mode,castSummary$LocalVariable),]
+      
+      return(castSummary)
+    },
     #' @description Grabs the original model XML file and converts it to a
     #'   readible list to return to the use
     #' @param elementid target model container to search (OM model ID)
@@ -558,14 +591,14 @@ WatershedModelNode <- R6Class(
       if (gage == 'auto') {
         gage = self$nearest_gage()
       } 
-      gage_info = dataRetrieval::readNWISsite(gage)
+      gage_info = dataRetrieval::readNWISsite(gage$gageid)
       render_params <- usgs_calib_rarray(self$json, gage_info, runid)
       rmarkdown::render(
-        paste(github_location,'/hydro-tools/USGS/gage_vs_model.Rmd',sep="/"),
+        paste0(github_location,'/hydro-tools/USGS/gage_vs_model.Rmd'),
         output_file = paste0(
           export_path, 
           gage_info$site_no, '_',
-          self$riverseg
+          self$riverseg,".docx"
         ),
         params = render_params
       )

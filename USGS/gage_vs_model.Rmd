@@ -166,9 +166,9 @@ both_data <- sqldf(
 # mean(gage_flows)
 
 # do IHA
-model_loflows <- IHA::group2(model_flows, year="calendar")
-gage_loflows <- IHA::group2(gage_flows, year="calendar")
-gage_loflows_all <- IHA::group2(gage_flows_all, year="calendar")
+model_loflows <- group2(model_flows, yearType = "calendar")
+gage_loflows <- group2(gage_flows, yearType = "calendar")
+gage_loflows_all <- group2(gage_flows_all, yearType = "calendar")
 #gage_moflows <- IHA::group1(gage_flows, FUN="mean")
 #g1gage8 <- quantile(gage_moflows[,"August"])
 
@@ -421,7 +421,7 @@ abline(h=min(cmp_l30$USGS), col="blue", lty = "dashed")
 abline(h=min(cmp_l30$Model), col="black", lty = "dashed")
 mtext(round(min(cmp_l30$USGS),1), side=2, line=0, las=1, at=min(cmp_l30$USGS), cex=0.6, col="blue")
 mtext(round(min(cmp_l30$Model),1), side=4, line=0, las=1, at=(min(cmp_l30$Model)), cex=0.6, col="black")
-gfa <- hydrotools::group2(gage_flows_all, year="calendar")
+gfa <- hydrotools::group2(gage_flows_all, yearType = "calendar")
 gfadf <- as.data.frame(gfa$`30 Day Min`)
 names(gfadf) <- c('usgs')
 gfadf$year <- as.numeric(gfa$year)
@@ -495,10 +495,7 @@ mtext(round(min(cmp_l1$Model),1), side=4, line=0, las=1, at=(min(cmp_l1$Model)),
 
 ```
 ## L1 Range Comparison Plot:
-```{r l1-barplot)
-rmarkdown::render(
-'/usr/local/home/git/vahydro/R/examples/gage_vs_model.Rmd',
-, fig.width=7, fig.height=4.8, dev='png', echo=FALSE}
+```{r l1-barplot, fig.width=7, fig.height=4.8, dev='png', echo=FALSE}
 boxplot(cmp_l1$USGS, cmp_l1$Model, ylim=c(0,ymax_val), names = c("USGS", "Model"), main = "Comparison of range of modeled vs observed 1-day low flows")
 ```
 ## m01 Model Performance Bar Plot:
@@ -550,7 +547,7 @@ mtext(round(min(cmp_m03$Model),1), side=4, line=0, las=1, at=(min(cmp_m03$Model)
 ## m03 Range Comparison Plot:
 ```{r m03-barplot, fig.width=7, fig.height=4.8, dev='png', echo=FALSE}
 boxplot(cmp_m03$USGS, cmp_m03$Model, ylim=c(0,ymax_val), names = c("USGS", "Model"), main = "Comparison of range of modeled vs observed 3-day high flows")
-
+```
 
 ## Qmean Model Performance Bar Plot:
 ```{r qmean-plot, fig.width=7, fig.height=4.8, dev='png', echo=FALSE}
