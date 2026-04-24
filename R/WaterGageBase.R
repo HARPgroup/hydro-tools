@@ -264,7 +264,7 @@ WaterGageBase <- R6::R6Class(
         if(packageVersion("dataRetrieval") >= "2.7.23") {
           #New functions return an sf already. so just parse out drainage area
           #for separate field
-          self$gage_data_sf <- dataRetrieval::read_waterdata_monitoring_location(self$gage_id)
+          self$gage_data_sf <- dataRetrieval::read_waterdata_monitoring_location(paste0("USGS-",self$gage_id))
           self$drainage_area <- self$gage_data_sf$drainage_area
         }else{
           #NWIS functions return a data frame, so convert to SF using
