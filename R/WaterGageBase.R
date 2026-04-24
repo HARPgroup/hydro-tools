@@ -19,6 +19,11 @@
 #'   Only required if \code{data_source} is a file path or a data frame
 #' @param date_col The column identifying the dates in the gage data. Only
 #'   required if \code{data_source} is a file path or a data frame
+#' @param start_date Optional. The first date to include in data get
+#' @param end_date Optional. The last date to include in data get
+#' @param approval_status 'all', 'approved', or 'provisional'. What kind of
+#'   data should be used from USGS? Defaults to that set in the field on
+#'   this object, which itself defaults to 'all'   
 #' @param ds_in An optional RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageBase
@@ -73,7 +78,15 @@ WaterGageBase <- R6::R6Class(
     parameter_code = "00060",
     #' @field usgs_properties The fields to pull from USGS
     usgs_properties = c("monitoring_location_id", "parameter_code",
-                        "time", "value", "unit_of_measure"),
+                        "time", "value", "unit_of_measure", "approval_status"),
+    #'@field approval_status Either 'approved', 'provisional', or 'all'.
+    #'  Determines what kind of data should be retrieved from USGS: all data or
+    #'  only those marked approved or provisional?
+    approval_status = "all",
+    #'@field start_date The first date to include in the data
+    start_date = "",
+    #'@field end_date The last date to include in the data
+    end_date = "",
     #'@field low_flows Critical low flows calculated by hydrotools::xQy() via
     #'  \code{self$comp_xQy()}
     low_flows = NA,
@@ -97,24 +110,36 @@ WaterGageBase <- R6::R6Class(
     #'   Only required if \code{data_source} is a file path or a data frame
     #' @param date_col The column identifying the dates in the gage data. Only
     #'   required if \code{data_source} is a file path or a data frame
+    #' @param start_date The first date to include in data get
+    #' @param end_date The last date to include in data get
+    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
+    #'   data should be used from USGS? Defaults to that set in the field on
+    #'   this object, which itself defaults to 'all'
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
     initialize = function(data_source = "USGS", gage_id = NA,
                           flow_col, date_col,
+                          start_date = self$start_date, end_date = self$end_date,
+                          approval_status = self$approval_status,
                           ds_in = NA){
       #Set the data source and gage fields
       self$data_source <- data_source
       self$gage_id <- gage_id
+      self$start_date <- start_date
+      self$end_date <- end_date
+      self$approval_status <- approval_status
       #If user is using USGS, use dataRetrieval
       if(inherits(data_source, "character") && data_source == "USGS"){
         #Use either the new dataRetrieval functions or those slated for
         #deprecation based on version number
         if(packageVersion("dataRetrieval") >= "2.7.23") {
-          self$get_gage_data()
+          self$get_gage_data(start_date = start_date, end_date = end_date,
+                             approval_status = approval_status)
         }else{
           #Deprecated with new dataRetrieval
-          self$get_gage_data_old()
+          self$get_gage_data_old(start_date = start_date, end_date = end_date,
+                                 approval_status = approval_status)
         }
       }else if (inherits(data_source, "character")){
         #if the user has set data_source to a single character vector, assume a
@@ -123,11 +148,25 @@ WaterGageBase <- R6::R6Class(
         self$gage_data <- read.csv(data_source)
         self$flow_col <- flow_col
         self$date_col <- date_col
+        #Limit based on user input dates, if any
+        if(start_date != ""){
+          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] >= as.Date(start_date),]
+        }
+        if(end_date != ""){
+          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] <= as.Date(end_date),]
+        }
       }else if(inherits(data_source,"data.frame")){
         #If user simply provides the data as a data frame, simply set the fields
-        self$gage_data <- data_source
         self$flow_col <- flow_col
         self$date_col <- date_col
+        self$gage_data <- data_source
+        #Limit based on user input dates, if any
+        if(start_date != ""){
+          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] >= as.Date(start_date),]
+        }
+        if(end_date != ""){
+          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] <= as.Date(end_date),]
+        }
       }
       #If the user has provided a RomDataSource ds, set the appropriate field
       if(inherits(ds_in, "RomDataSource")){
@@ -139,14 +178,40 @@ WaterGageBase <- R6::R6Class(
     #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
     #' and \code{self$statistic_id}. Fields returned can be controlled by
     #' \code{usgs_properties} field
+    #' @param start_date The first date to include in data get
+    #' @param end_date The last date to include in data get
+    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
+    #'   data should be used from USGS? Defaults to that set in the field on
+    #'   this object, which itself defaults to 'all'
     #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
     #'   \code{gage_data} fields on object
-    get_gage_data = function(){
+    get_gage_data = function(start_date, end_date, approval_status){
+      #Get start and end date in vector
+      time_limit <- c(start_date, end_date)
+      #Replace empty character with datetime due to USGS dataretrieval bug
+      time_limit[time_limit != ""] <- paste0(time_limit[time_limit != ""],"T00:00:00Z")
+      #Half bounded intervals use .. to indicate all data
+      time_limit[time_limit == ""] <- ".."
+      #If no bounds, set to NA
+      if(all(time_limit == "..")){
+        time_limit <- NA_character_
+      }else{
+        time_limit <- paste0(time_limit,collapse = "/")
+      }
+      
+      #If approval_status is all, set to NA for query
+      if(tolower(approval_status) == "all"){
+        approval_status <- NA_character_
+      }
+      
+      #Retrieve data
       self$gage_data <- dataRetrieval::read_waterdata_daily(
         monitoring_location_id = paste0("USGS-",self$gage_id),
         parameter_code = self$parameter_code,
         statistic_id = self$statistic_id, skipGeometry = TRUE,
-        properties = self$usgs_properties
+        properties = self$usgs_properties,
+        time = time_limit,
+        approval_status = approval_status
       )
       self$gage_data <- as.data.frame(self$gage_data)
       self$flow_col <- "value"
@@ -157,14 +222,28 @@ WaterGageBase <- R6::R6Class(
     #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
     #' and \code{self$statistic_id}. Fields are renamed via
     #' \code{dataRetrieval::renameNWISColumns()}
+    #' @param start_date The first date to include in data get
+    #' @param end_date The last date to include in data get
+    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
+    #'   data should be used from USGS? Defaults to that set in the field on
+    #'   this object, which itself defaults to 'all'
     #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
     #'   \code{gage_data} fields on object
-    get_gage_data_old = function(){
+    get_gage_data_old = function(start_date, end_date, approval_status){
       gage_data <- dataRetrieval::readNWISdv(
         siteNumbers = self$gage_id, parameterCd = self$parameter_code,
-        statCd = self$statistic_id
+        statCd = self$statistic_id,startDate = start_date,endDate = end_date
       )
-      self$gage_data <- dataRetrieval::renameNWISColumns(gage_data)
+      gage_data <- dataRetrieval::renameNWISColumns(gage_data)
+      #Retrieve only the data that is requested by user
+      if(tolower(approval_status) != "all"){
+        if(tolower(approval_status) == "approved"){
+          gage_data <- gage_data[grepl("A",gage_data$Flow_cd),]
+        }else if(tolower(approval_status) == "provisional"){
+          gage_data <- gage_data[grepl("P",gage_data$Flow_cd),]
+        }
+      }
+      self$gage_data <- gage_data
       self$flow_col <- "Flow"
       self$date_col <- "Date"
     },
