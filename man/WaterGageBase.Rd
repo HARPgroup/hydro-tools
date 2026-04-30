@@ -76,6 +76,14 @@ for discharge}
 
 \item{\code{usgs_properties}}{The fields to pull from USGS}
 
+\item{\code{approval_status}}{Either 'approved', 'provisional', or 'all'.
+Determines what kind of data should be retrieved from USGS: all data or
+only those marked approved or provisional?}
+
+\item{\code{start_date}}{The first date to include in the data}
+
+\item{\code{end_date}}{The last date to include in the data}
+
 \item{\code{low_flows}}{Critical low flows calculated by hydrotools::xQy() via
 \code{self$comp_xQy()}}
 
@@ -120,6 +128,9 @@ to analyze USGS gage data
   gage_id = NA,
   flow_col,
   date_col,
+  start_date = self$start_date,
+  end_date = self$end_date,
+  approval_status = self$approval_status,
   ds_in = NA
 )}\if{html}{\out{</div>}}
 }
@@ -141,6 +152,14 @@ Only required if \code{data_source} is a file path or a data frame}
 \item{\code{date_col}}{The column identifying the dates in the gage data. Only
 required if \code{data_source} is a file path or a data frame}
 
+\item{\code{start_date}}{The first date to include in data get}
+
+\item{\code{end_date}}{The last date to include in data get}
+
+\item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
+data should be used from USGS? Defaults to that set in the field on
+this object, which itself defaults to 'all'}
+
 \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
 }
@@ -159,9 +178,22 @@ for the \code{self$gage_id} based on the set \code{self$paramter_code}
 and \code{self$statistic_id}. Fields returned can be controlled by
 \code{usgs_properties} field
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$get_gage_data()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$get_gage_data(start_date, end_date, approval_status)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{start_date}}{The first date to include in data get}
+
+\item{\code{end_date}}{The last date to include in data get}
+
+\item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
+data should be used from USGS? Defaults to that set in the field on
+this object, which itself defaults to 'all'}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 Nothing, but sets \code{flow_col}, \code{date_col}, and
   \code{gage_data} fields on object
@@ -176,9 +208,22 @@ for the \code{self$gage_id} based on the set \code{self$paramter_code}
 and \code{self$statistic_id}. Fields are renamed via
 \code{dataRetrieval::renameNWISColumns()}
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$get_gage_data_old()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$get_gage_data_old(start_date, end_date, approval_status)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{start_date}}{The first date to include in data get}
+
+\item{\code{end_date}}{The last date to include in data get}
+
+\item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
+data should be used from USGS? Defaults to that set in the field on
+this object, which itself defaults to 'all'}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 Nothing, but sets \code{flow_col}, \code{date_col}, and
   \code{gage_data} fields on object

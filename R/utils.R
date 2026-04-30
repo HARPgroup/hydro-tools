@@ -152,7 +152,6 @@ fn_get_runfile <- function(
     return(FALSE);
   }
   filename = as.character(finfo$remote_url);
-  
   localname = finfo$output_file
   
   if (cached & file.exists(localname)) {
@@ -177,12 +176,30 @@ fn_get_runfile <- function(
       filename = localname
     }
   } else {
+    url_parse <- httr::parse_url(filename)
+    site_parse <- httr::parse_url(site)
     # does not exist locally
     message(paste("Downloading Run File ", filename));
     drez <- try(utils::download.file(filename,'tempfile',mode="wb", method = "libcurl"))
+    
+   
+    
     if (is.logical(drez) | inherits(drez, 'try-error')) { 
-      message(paste("Download for", filename, "failed."))
-      return(FALSE)
+    #Check to see if site and filename have the same host. If not, use site to
+    #assist with server directs when running locally on server
+      if(url_parse$hostname != site_parse$hostname){
+        filename <- paste0(site,"/",url_parse$path)
+        drez <- tryCatch(
+          {utils::download.file(filename,'tempfile',mode="wb", method = "libcurl")},
+          error = function(e){
+            message(e)
+            message(paste("Download for", filename, "failed."))
+            return(FALSE)}
+          )
+      }else{
+        message(paste("Download for", filename, "failed."))
+        return(FALSE)
+      }
     }
     if (finfo$compressed == 1) {
       message(paste("Unpacking Compressed Run File ", filename)) 
