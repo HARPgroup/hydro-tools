@@ -443,3 +443,124 @@ usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
   )
   return(params)
 }
+
+#'@name get_weather_raster_data
+#'@title get_weather_raster_data
+#'@description Summary dh_timeseries_weather raster for one or many entities in
+#'  dh_feature
+#'@details Summarize raster data over one or many features as identified by the
+#'  user. Users may identify this feature through a vector of hydroids or
+#'  through a general bundle and ftype. By default, this will get the mean value
+#'  of the raster each day.
+#'@param start_epoch A start time (seconds after epoch) to begin the raster analysis
+#'@param end_epoch A end time (seconds after epoch) to begin the raster analysis
+#'@param hydroid A vector of hydroids that may be used to identify features.
+#'  Alternatively, users may use bundle AND ftype instead
+#'@param bundle If no hydroid is input, the user can identify features using a
+#'  bundle (the general type of entity) and ftype (entity sub-type) to query
+#'  dh_feature. Both bundle and ftype are mandatory for this method.
+#'@param ftype If no hydroid is input, the user can identify features using a
+#'  bundle (the general type of entity) and ftype (entity sub-type) to query
+#'  dh_feature. Both bundle and ftype are mandatory for this method.
+#'@param varkey The raster data set of interest. These varkeys are stored in
+#'  dh_variabledefinition. defaults to 'prism_mod_daily'
+#'@param band The raster band to summarize, defaults to 1
+#'@param metric Character. What kind of raster aggregate summary should be
+#'  applied? Defaults to mean. These are taken from PostGIS
+#'  \code{ST_SummaryStats()}
+#'@param touched Defaults to FALSE. Should PostGIS ST_Clip() use the touched
+#'  argument to return all raster cells touched by the feature? Or, if FALSE,
+#'  should only pixels that have centroids within the feature be considered?
+#'@return A list with parameters for the gage_vs_model.Rmd markdown
+#'@export get_weather_raster_data
+get_weather_raster_data <- function(
+    start_epoch = -1,
+    end_epoch = as.numeric(Sys.time()),
+    hydroid = NULL,
+    bundle = 'watershed',
+    ftype = "usgs_full_drainage",
+    varkey = "prism_mod_daily",
+    band = 1,
+    metric = "mean",
+    touched = FALSE
+){
+  #User may identify features through hydroid(s) or a bundle and ftype
+  if(!is.null(hydroid)){
+    feat_where <- paste0("WHERE hydroid IN (", paste0(hydroid,collapse = ","),")")
+  }else{
+    feat_where <- paste0("WHERE bundle = '", bundle,"' AND ftype = '",ftype,"'")
+  }
+  
+  #The data will be clipped to the feature and the user can choose to apply the
+  #touched argument from postGIS st_Clip
+  if(touched){
+    clipSQL <- paste0("touched => true")
+  }else{
+    clipSQL <- paste0("touched => false")
+  }
+  
+  #This query is based on the calc_raster_ts workflow file in the geo meta model
+  #-> download step. It allows for tiled rasters through the metunion below.
+  sql <- paste0("
+WITH
+ covid AS (
+  select hydroid as covid from dh_feature where hydrocode = 'cbp6_met_coverage'
+ ),
+ features AS (
+    SELECT * 
+      FROM  dh_feature
+    ", feat_where, "
+  ),
+  metUnion as (
+    Select met.featureid, met.tstime,met.tsendtime,
+    st_union(met.rast) as rast
+    FROM features as f
+    left outer join field_data_dh_geofield as fgeo
+    on (
+      fgeo.entity_id = f.hydroid
+      and fgeo.entity_type = 'dh_feature' 
+    ) 
+    JOIN(
+      select *
+        from dh_timeseries_weather as met
+      left outer join dh_variabledefinition as b
+      on (met.varid = b.hydroid) 
+      left join covid as covid on 1 = 1
+      where b.varkey='",varkey,"'
+      and ( (met.tstime >= ",start_epoch,") or (",start_epoch," = -1) )
+      and ( (met.tsendtime <= ",end_epoch,") or (",end_epoch," = -1) )
+      and met.featureid = covid.covid
+    ) AS met
+    ON fgeo.dh_geofield_geom && met.bbox
+    
+    group by met.featureid, met.tsendtime, met.tstime
+  ),
+  met as (
+    Select f.hydroid, f.name, to_timestamp(met.tsendtime) as obs_date,
+    extract(year from to_timestamp(met.tsendtime)) as yr,
+    extract(month from to_timestamp(met.tsendtime)) as mo,
+    extract(day from to_timestamp(met.tsendtime)) as da,
+    extract(hour from to_timestamp(met.tsendtime)) as hr,
+    met.tstime,met.tsendtime,
+    (ST_summarystats(st_clip(met.rast, fgeo.dh_geofield_geom, ",clipSQL,"), '",band,"', TRUE)).",metric," as stats
+    FROM features as f
+    left outer join field_data_dh_geofield as fgeo
+    on (
+      fgeo.entity_id = f.hydroid
+      and fgeo.entity_type = 'dh_feature' 
+    ) 
+    JOIN metUnion AS met
+    ON ST_Intersects(ST_ConvexHull(met.rast),fgeo.dh_geofield_geom)
+  )
+  select hydroid, name, obs_date, 
+  tstime,tsendtime,
+  yr, mo, da, hr, 
+  stats as percentNormal
+  from met
+  order by met.tsendtime")
+  
+  rasterData <- sqldf::sqldf(connection = ds$connection, sql)
+  
+  return(rasterData)
+}
+
