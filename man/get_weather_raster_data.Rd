@@ -17,9 +17,11 @@ get_weather_raster_data(
 )
 }
 \arguments{
-\item{start_epoch}{A start time (seconds after epoch) to begin the raster analysis}
+\item{start_epoch}{A start time (seconds after epoch) to begin the raster
+analysis. A value of -1 indicates all data before start_epoch}
 
-\item{end_epoch}{A end time (seconds after epoch) to begin the raster analysis}
+\item{end_epoch}{A end time (seconds after epoch) to begin the raster
+analysis. A value of -1 indicates all data after end_epoch}
 
 \item{hydroid}{A vector of hydroids that may be used to identify features.
 Alternatively, users may use bundle AND ftype instead}

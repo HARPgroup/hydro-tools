@@ -452,8 +452,10 @@ usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
 #'  user. Users may identify this feature through a vector of hydroids or
 #'  through a general bundle and ftype. By default, this will get the mean value
 #'  of the raster each day.
-#'@param start_epoch A start time (seconds after epoch) to begin the raster analysis
-#'@param end_epoch A end time (seconds after epoch) to begin the raster analysis
+#'@param start_epoch A start time (seconds after epoch) to begin the raster
+#'  analysis. A value of -1 indicates all data before start_epoch
+#'@param end_epoch A end time (seconds after epoch) to begin the raster
+#'  analysis. A value of -1 indicates all data after end_epoch
 #'@param hydroid A vector of hydroids that may be used to identify features.
 #'  Alternatively, users may use bundle AND ftype instead
 #'@param bundle If no hydroid is input, the user can identify features using a
