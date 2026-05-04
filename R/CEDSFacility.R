@@ -15,6 +15,8 @@
 #' find this facility. If pkid is provided, config is ignored
 #' @param config A list of column name value pairs to search for the facility by. These must be
 #' column names from the facility table, else it will return an error
+#' @param fully_populate Should all fields that can be populated in for CEDSFacility be ran.
+#' This means it will pull the permits, MPs, and withdrawals, and load them ahead of time
 #' @return Instance of CEDSFacility with populated facility information
 #' @examples \dontrun{
 #'#Create a CEDSFacility using pkid

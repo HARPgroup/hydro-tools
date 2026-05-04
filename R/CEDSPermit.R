@@ -15,6 +15,8 @@
 #' find this permit If pkid is provided, config is ignored
 #' @param config A list of column name value pairs to search for the permit by. These must be
 #' column names from the permit table of interest, else it will return an error
+#' @param fully_populate Should all fields that can be populated in for CEDSPermit be ran.
+#' This means it will pull the contacts, MPs, and withdrawals, and load them ahead of time
 #' @return Instance of CEDSPermit with populated permit information
 #' @examples \dontrun{
 #'#Create a CEDSFacility using pkid
@@ -48,9 +50,11 @@ CEDSPermit <- R6Class(
     #' find this permit If pkid is provided, config is ignored
     #' @param config A list of column name value pairs to search for the permit by. These must be
     #' column names from the permit table, else it will return an error
+    #' @param fully_populate Should all fields that can be populated in for CEDSPermit be ran.
+    #' This means it will pull the contacts, MPs, and withdrawals, and load them ahead of time
     #' @return Instance of CEDSPermit with populated permit information
     initialize = function(datasource, permit_type = c("WWR","VWP","GWP","VPDES"),
-                          pkid = NA, permit_number = NA, config = list()) {
+                          pkid = NA, permit_number = NA, config = list(), fully_populate=FALSE) {
       ## If a permit number is supplied, put it into config with the correct column name
       tbl_info <- fn_get_table_names(permit_type)
       
@@ -74,6 +78,13 @@ CEDSPermit <- R6Class(
                    Longitude = gisdata$Longitude, Latitude = gisdata$Latitude),
         coords = c("Longitude","Latitude"))
       self$sf <- sfobj
+      
+      ## If it is to be populated ahead of time
+      if (fully_populate) {
+        self$get_mps()
+        self$get_withdrawals()
+        self$get_contacts()
+      }
       
     },
     
