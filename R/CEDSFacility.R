@@ -38,7 +38,8 @@ CEDSFacility <- R6Class(
     facility_hydroid = NULL,
     #' @field name THe name of the facility
     name = NULL,
-    
+    feat_sf = NULL,
+    geom_CRS=4326,
     #' @description
     #' Initialize the CEDSFacility object. Requires either a pkid or a list of other column names.
     #' When supplying a config list, it will only select the first facility, even if multiple exist.
@@ -65,8 +66,8 @@ CEDSFacility <- R6Class(
       sfobj <- st_as_sf(
         data.frame(ID = self$pkid, entity_type = self$entity_type,
                    Longitude = gisdata$Longitude, Latitude = gisdata$Latitude),
-        coords = c("Longitude","Latitude"))
-      self$sf <- sfobj
+        coords = c("Longitude","Latitude"), crs = 4326)
+      self$feat_sf <- sfobj
       
       ## Setting other self fields
       self$name <- self$tbl_df$`Facility Name`
@@ -81,18 +82,46 @@ CEDSFacility <- R6Class(
       
     },
     #' @description
-    #' Queries for permits attached to this facility, and sets the permit field of this object.
-    #' Will only look for VWP (withdrwal), GWP, WWR, and VPDES permits, searching for them based
-    #' on the CEDS facility Id. No arguments are required, as it will search based on the ID
-    #' of this object. Most of the code of this method is in the parent \code{CEDSEntity$get_permits} method
-    #' @return A paired down data.frame of the permits. Also sets the \code{permits} field with
-    #' that same data.frame
+    #' Pulls all permits for a given facility ID. This searches the VWP, WWR, GWP, and VPDES tables.
+    #' These tables all have different structures and column names, so this pulls select columns and
+    #' standardizes the names.
+    #' @param facility_id The CEDS Facility ID to check for associated permits
+    #' @return Data.frame of permits assoicated with the facility. Contains only select identifying 
+    #' fields. Permit limits are withdrawals in gallons per month/year. These are not applicable to
+    #' WWRs or VPDES (VPDES limits not included)
     get_permits = function() {
-      ## Calls get_permits form CEDSEntity, passing through the facility ID
-      super$get_permits(self$pkid)
+      facility_id <- self$pkid
       
-      return(self$permits)
+      ## Look through VWP, GWP and VPDES 
+      gwp_sql <- paste("SELECT 'GWP' AS Permit_Type, GWP_Permit_Number AS Permit_Number, Permit_Id, 
+                       Permit_Status AS Classification, Use_Type, Annual_Limit, Monthly_Limit
+                       FROM water.GWP_Permits_Vw
+                       WHERE CEDS_Facility_ID = ", facility_id)
+      gwps <- dbGetQuery(self$ds$connection, gwp_sql)
       
+      vwp_sql <- paste("SELECT 'VWP' AS Permit_Type, [Permit Number] AS Permit_Number, [Permit ID] AS Permit_Id, 
+                      Classification, cond.Water_Use_Type AS Use_Type, cond.Annual_Limit, cond.Monthly_Limit
+                      FROM water.[VWP Permits] v
+                      LEFT JOIN water.Water_Withdrawal_Permits_Vw cond
+                        ON v.[Permit ID] = cond.Permit_Id
+                      WHERE v.[CEDS Facility Id] = ", facility_id)
+      vwps <- dbGetQuery(self$ds$connection, vwp_sql)
+      
+      wwr_sql <- paste("SELECT 'WWR' AS Permit_Type,Registration_number AS Permit_Number, Permit_Id,
+                   'Facility_Status' AS Classification, Use_Type, NULL AS Annual_Limit, NULL AS Monthly_Limit
+                   FROM water.Water_Withdrawal_Reg_Vw
+                   WHERE CEDS_Facility_Id = ", facility_id)
+      wwrs <- dbGetQuery(self$ds$connection, wwr_sql)
+      
+      vpdes_sql <- paste("SELECT 'VPDES' AS Permit_Type,[Permit Number] AS Permit_Number, [Permit ID] AS Permit_Id, 
+                         Classification, [Permit Type] AS Use_Type, NULL AS Annual_Limit, NULL AS Monthly_Limit
+                         FROM water.[Water Permits] 
+                         WHERE [CEDS Facility Id] = ", facility_id)
+      vpdes <- dbGetQuery(self$ds$connection, vpdes_sql)
+      
+      permits <- rbind(gwps,vwps,wwrs,vpdes)
+      
+      self$permits <- permits
     },
     #' @description
     #' Pulls the measuring points associated with all permits of this facility (that have measuring
@@ -101,10 +130,11 @@ CEDSFacility <- R6Class(
     #' MPs found. No arguments are needed, as it searches based on the facility ID of this object
     #' @param .source What type of measuring points to search for. Options are \code{"SW/GW",
     #' "GW","SW","All"}. "All" is the only option that will include transfers
+    #' @return_df Should a data.frame be returned. Defaults to TRUE
     #' @return A dataframe of the measuring points found. This data.frame is a snip form the
     #' measuring points view, and contains no withdrawal information. Also sets the mps field
     #' of the \code{CEDSFacility} object. If no MPs are found, it returns a message.
-    get_mps = function(.source = "SW/GW") {
+    get_mps = function(.source = "SW/GW", return_df = TRUE) {
       ## First check if there are already permits on the object
       if (is.null(self$permits)) {
         ## If not, find all permits
@@ -127,7 +157,7 @@ CEDSFacility <- R6Class(
           
           ## For versioned permits, MPs can be attached to each of them
           ## So remove any repeated MPs
-          loop_mps <- loop_mps[!(loop_mps$GMP_ID %in% do.call(rbind, p_mps)$GMP_ID),]
+          loop_mps <- loop_mps[!(loop_mps$Measuring_Point_ID %in% do.call(rbind, p_mps)$Measuring_Point_ID),]
           
           
           p_mps[[length(p_mps) + 1]] <- loop_mps
@@ -139,35 +169,14 @@ CEDSFacility <- R6Class(
         
         self$mps <- all_mps
         
-        return(all_mps)
+        ## Should the data frame be returned?
+        if (return_df) {
+          return(all_mps)
+        }
         
       } else {
         message("No withdrawal permits/registrations for this facility")
       }
-      
-    },
-    
-    #' @description
-    #' Pulls the withdrawals from the water.Water_Use_By_Month_Vw for the measuring points on
-    #' this facility (as pulled by \code{get_mps}). These withdrawals show either monthly or yearly
-    #' use of the all mps in the facility in millions of gallons. This is pulled by the
-    #' same method the foundation dataset is pulled, just paired down to only MP/withdrawal fields.
-    #' Since this is pulled via a live connection to ODS (still 24 hours behind CEDS), it may be
-    #' different from the foundation dataset. All arguments are optional and it can run without them,
-    #' they just change the format of the returned data.
-    #' @param years Lets you specify years of interest. By default set as FALSE, which will show the
-    #' entire period of record. Specifying years (as a numeric vector, i.e. 2015:2025) will only pull
-    #' data for those specified years. For entities with many MPs, this can speed up performance.
-    #' @param period This will control how the data is aggregated. The data is reported monthly, so by
-    #' default there will be no aggregation applied. However, if \code{period} is set to "yearly", then
-    #' it will be aggregated by year, showing the total withdrawal of that MP for the given year
-    #' @return Data.frame of the withdrawals (in millions of gallons) for the MPs of the facility
-    get_withdrawals = function(years = FALSE, period = "monthly") {
-      
-      ## Call the CEDSEntity get_withdrawals
-      withdrawals <- super$get_withdrawals(self$mps, years, period)
-      
-      return(withdrawals)
       
     },
     
@@ -185,6 +194,7 @@ CEDSFacility <- R6Class(
     ## Not saved to the object, as a facility can have multiple permits
     pull_permit = function(type = FALSE,status = "Active") {
       out <- NULL
+      
       ## Are the permits already loaded on the facility
       if (is.null(self$permits)) {
         ## If not, find all permits
@@ -213,12 +223,18 @@ CEDSFacility <- R6Class(
         type <- unique(permit_df$Permit_Type)
       }
       
-      permit_out <- permit_df[permit_df$Permit_Type == type & permit_df$Classification == status,]
+      ## If there is only one permit of the selected type, take it regardless of status
+      if (sum(permit_df$Permit_Type == type) == 1) {
+        permit_out <- permit_df[permit_df$Permit_Type == type,]
+      } else{
+        permit_out <- permit_df[permit_df$Permit_Type == type & permit_df$Classification == status,]
+      }
+      
       
       if (nrow(permit_out) > 1) {
         ## Still have multiple permits, select one created most recently
         permit_out <- permit_out[permit_out$Permit_Id == max(permit_out$Permit_Id),]
-      } else if (permit_out == 0) {
+      } else if (nrow(permit_out) == 0) {
         message(paste("No",status, type, "permit found for this facility"))
         return(out)
       }
@@ -229,23 +245,10 @@ CEDSFacility <- R6Class(
       
       return(permit)
     },
-    #' @description
-    #' Find contacts associated with the facility. By default it will only pull "Withdrawal Reporting
-    #' Contacts". It will set the \code{contacts} field on this object. This mainly calls the 
-    #' \code{CEDSEntity$get_contacts} method, feeding it information for this entity
-    #' @param .limit A logical for whether to limit to only "Withdrawal Reporting Contacts", or to 
-    #' include all. By default, the result is limited.
-    #' @return Returns a data.frame of pulled fields for the contacts. Also sets the 
-    #' \code{contacts} field on this object with the same result.
-    get_contacts = function(.limit = TRUE) {
-      
-      self$contacts <- super$get_contacts(pkid = self$pkid, entity_type = 'facility', .limit)
-      
-      return(self$contacts)
-    }
     
-    
+    ## Stealing RomFeatures plot method. A little janky
+    plot_method = RomFeature$public_methods$plot_feat
   )
 )
 
-# fac <- CEDSFacility$new(dsCEDS, pkid = 200000203181)
+ fac <- CEDSFacility$new(dsCEDS, pkid = 200000203181)

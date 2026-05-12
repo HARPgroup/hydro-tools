@@ -110,30 +110,6 @@ CEDSPermit <- R6Class(
     },
     
     #' @description
-    #' Pulls the withdrawals from the water.Water_Use_By_Month_Vw for the measuring points on
-    #' this facility (as pulled by \code{get_mps}). These withdrawals show either monthly or yearly
-    #' use of the all mps in the facility in millions of gallons. This is pulled by the
-    #' same method the foundation dataset is pulled, just paired down to only MP/withdrawal fields.
-    #' Since this is pulled via a live connection to ODS (still 24 hours behind CEDS), it may be
-    #' different from the foundation dataset. All arguments are optional and it can run without them,
-    #' they just change the format of the returned data.
-    #' @param years Lets you specify years of interest. By default set as FALSE, which will show the
-    #' entire period of record. Specifying years (as a numeric vector, i.e. 2015:2025) will only pull
-    #' data for those specified years. For entities with many MPs, this can speed up performance.
-    #' @param period This will control how the data is aggregated. The data is reported monthly, so by
-    #' default there will be no aggregation applied. However, if \code{period} is set to "yearly", then
-    #' it will be aggregated by year, showing the total withdrawal of that MP for the given year
-    #' @return Data.frame of the withdrawals (in millions of gallons) for the MPs of the facility
-    get_withdrawals = function(years = FALSE, period = "monthly") {
-      
-      ## Call the CEDSEntity get_withdrawals
-      withdrawals <- super$get_withdrawals(self$mps, years, period)
-      
-      return(withdrawals)
-      
-    },
-    
-    #' @description
     #' Pulls the facility this permit is associated with and creates a \code{CEDSFacility} object
     #' of it.
     #' @param return_fac A logical where if TRUE this method will return the object, in addition
@@ -147,26 +123,10 @@ CEDSPermit <- R6Class(
       
       if (return_fac) {
         
-        return(CEDSFacility$new(self$ds, pkid = self$facility))
+        return(self$facility$clone())
       }
-    },
-    
-    #' @description
-    #' Find contacts associated with the permit. It will set the \code{contacts} field on 
-    #' this object. This mainly calls the #' \code{CEDSEntity$get_contacts} method, feeding it
-    #' information for this entity. Pulls the contacts associated directly with the permit, 
-    #' except for WWRs, in which it will pull the contacts on the facility. For WWR, by default
-    #' it will also limit it down to just the Withdrawal Reporting Contacts
-    #' @param .limit A logical for whether to limit to only "Withdrawal Reporting Contacts", or to 
-    #' include all. By default, the result is limited. This parameter only affects WWR permits
-    #' @return Returns a data.frame of pulled fields for the contacts. Also sets the 
-    #' \code{contacts} field on this object with the same result.
-    get_contacts = function(.limit = TRUE) {
-      
-      self$contacts <- super$get_contacts(pkid = self$pkid, entity_type = self$entity_type, .limit)
-      
-      return(self$contacts)
     }
+    
   )
 )
 

@@ -117,7 +117,6 @@ CEDSEntity <- R6Class(
     get_mps = function(permit_id, source = c("SW/GW","SW","GW","All")) {
       ## Setting WHERE if the desire is to limit
       sql_where <- ""
-      
       ## Chooses the first one, so it defaults to "SW/GW"
       tryCatch(
         {source <- match.arg(source)},
@@ -137,51 +136,21 @@ CEDSEntity <- R6Class(
       ## Pull from MP table
       sql <- paste("SELECT * FROM water.Measuring_Point_Vw WHERE Permit_ID = ",permit_id, sql_where)
       
-      mps <- dbGetQuery(dconn = self$ds$connection, sql)
+      mps <- dbGetQuery(conn = self$ds$connection, sql)
+      
+      ## Renaming some of the MP columns since their terrible
+      names(mps) <- gsub("GMP_W_|GMP_I_|GMP_","",names(mps))
+      
+      namekey <- c("ID" = "Measuring_Point_ID", "GMPS_DESCRIPTION" = "MP_Status",
+                   "MPT_DESCRIPTION" = "MP_Type","FACILITY_ID" = "CEDS_Facility_ID",
+                   "MPWT_DESCRIPTION" = "Well_Subtype","MPTT_DESCRIPTION" = "Transfer_Type")
+      
+      names(mps)[names(mps) %in% names(namekey)] <- namekey[names(mps)[names(mps) %in% names(namekey)] ]
+      
       
       return(mps)
     },
-    #' @description
-    #' Pulls all permits for a given facility ID. This searches the VWP, WWR, GWP, and VPDES tables.
-    #' These tables all have different structures and column names, so this pulls select columns and
-    #' standardizes the names.
-    #' @param facility_id The CEDS Facility ID to check for associated permits
-    #' @return Data.frame of permits assoicated with the facility. Contains only select identifying 
-    #' fields. Permit limits are withdrawals in gallons per month/year. These are not applicable to
-    #' WWRs or VPDES (VPDES limits not included)
-    get_permits = function(facility_id) {
-      
-      ## Look through VWP, GWP and VPDES 
-      gwp_sql <- paste("SELECT 'GWP' AS Permit_Type, GWP_Permit_Number AS Permit_Number, Permit_Id, 
-                       Permit_Status AS Classification, Use_Type, Annual_Limit, Monthly_Limit
-                       FROM water.GWP_Permits_Vw
-                       WHERE CEDS_Facility_ID = ", facility_id)
-      gwps <- dbGetQuery(self$ds$connection, gwp_sql)
-      
-      vwp_sql <- paste("SELECT 'VWP' AS Permit_Type, [Permit Number] AS Permit_Number, [Permit ID] AS Permit_Id, 
-                      Classification, cond.Water_Use_Type AS Use_Type, cond.Annual_Limit, cond.Monthly_Limit
-                      FROM water.[VWP Permits] v
-                      LEFT JOIN water.Water_Withdrawal_Permits_Vw cond
-                        ON v.[Permit ID] = cond.Permit_Id
-                      WHERE v.[CEDS Facility Id] = ", facility_id)
-      vwps <- dbGetQuery(self$ds$connection, vwp_sql)
-      
-      wwr_sql <- paste("SELECT 'WWR' AS Permit_Type,Registration_number AS Permit_Number, Permit_Id,
-                   'Facility_Status' AS Classification, Use_Type, NULL AS Annual_Limit, NULL AS Monthly_Limit
-                   FROM water.Water_Withdrawal_Reg_Vw
-                   WHERE CEDS_Facility_Id = ", facility_id)
-      wwrs <- dbGetQuery(self$ds$connection, wwr_sql)
-      
-      vpdes_sql <- paste("SELECT 'VPDES' AS Permit_Type,[Permit Number] AS Permit_Number, [Permit ID] AS Permit_Id, 
-                         Classification, [Permit Type] AS Use_Type, NULL AS Annual_Limit, NULL AS Monthly_Limit
-                         FROM water.[Water Permits] 
-                         WHERE [CEDS Facility Id] = ", facility_id)
-      vpdes <- dbGetQuery(self$ds$connection, vpdes_sql)
-      
-      permits <- rbind(gwps,vwps,wwrs,vpdes)
-      
-      self$permits <- permits
-    },
+    
     #' @description
     #' Pulls contacts associated with the entity. For everything but WWR, this is the contacts associated
     #' directly with that entity. For WWR, it is the contacts of the associated facility (since they cannot
@@ -191,14 +160,24 @@ CEDSEntity <- R6Class(
     #' so the facility ID for a facility the permit ID of the permit.  
     #' @param entity_type A character string specifying what the feature of interest is. Could
     #' be "facility" or the type of permit ("WWR","VWP","GWP","VPDES")
-    #' @param limit Should the result be limited to "Water WIthdrawl Contacts"? This only applies to
+    #' @param limit Should the result be limited to "Water WIthdrawal Contacts"? This only applies to
     #' facilities and WWRs, since permit contacts often have other 'Contact Purposes'. Can be set to
     #' FALSE to include all facility contacts
+    #' @return_df Should a data.frame be returned. Defaults to TRUE
     #' @return Data.frame of contacts for the entity and their contact information
-    get_contacts = function(pkid, entity_type, limit = TRUE) {
+    get_contacts = function(limit = TRUE, return_df =TRUE) {
       ## Not pulled from self since anything could be passed in here
-      tbl_info <- fn_get_table_names(entity_type)
+      # tbl_info <- fn_get_table_names(entity_type)
 
+      entity_type <- self$entity_type
+      
+      ## For WWRs, use the facility field for pkid
+      if (entity_type == 'WWR') {
+        pkid <- self$tbl_df[[self$tbl_info$facility_field]]
+      } else {
+        pkid <- self$pkid
+      }
+      
       ## Pull all contacts for entity  
       sql_contacts <- paste("SELECT * 
                            FROM ", self$tbl_info$contact_tbl,
@@ -224,7 +203,11 @@ CEDSEntity <- R6Class(
         
       }
       
-      return(contacts_out)
+      self$contacts <- contacts_out
+      
+      if (return_df){
+        return(self$contacts)
+      }
       
     },
     
@@ -243,63 +226,77 @@ CEDSEntity <- R6Class(
     #' default there will be no aggregation applied. However, if \code{period} is set to "yearly", then
     #' it will be aggregated by year, showing the total withdrawal of that MP for the given year
     #' @return Data.frame of the withdrawals (in millions of gallons) for the MPs of the entity
-    get_withdrawals = function(years = FALSE, period = "monthly") {
+    get_withdrawals = function(years = FALSE, period = "yearly") {
+      
+      ## If no mps are loaded, throw an error
+      if (is.null(self$mps)) {
+        stop("No MPs found on object. Must first run get_mps()")
+      }
+      
       ## Pull withdrawals for those MPs 
+      mps <- self$mps
+      
+      ## Pull the withdrawals for all MPs. Filter by years if specified
+      withdr_sql <- paste0("SELECT * FROM water.Water_Use_By_Month_Vw
+                            WHERE Measuring_Point_Id IN (",
+                           paste0(as.character(mps$Measuring_Point_ID), collapse = ","), 
+                           yrs_clause,")")
+      
+      monthly_withdrw <- dbGetQuery(self$ds$connection, withdr_sql)
+      
+      ## Adding a year column
+      monthly_withdrw$year <- substr(monthly_withdrw$Withdrawal_Date,1,4)
       
       ## If years is set, specify those years as part of the WHERE
       if (!is.logical(years)) {
         ## Years should be a vector of numeric years. Stich them together in a WHERE
-        yrs_clause <- paste0("AND years(Withdrawal_Date) IN (", paste(years, collapse = ","),")")
+        where_clause <- paste0("AND years(Withdrawal_Date) IN (", paste(years, collapse = ","),")")
       } else {
-        yrs_clause <- ""
+        where_clause <- ""
       }
       
-      ## Take the mps already on this object (generated in the child object before sent here)
-      mps <- self$mps
+      if (period == "yearly") {
+        ## Selecting year and aggregating withdrawal volumne
+        aggregate_caluse <- "w.Year AS Year,
+           ROUND(SUM(w.Withdraw_Volume) / 1000000, 3) AS Water_Use_MGY"
+        
+        ## Grouping by MP and year
+        group_clause <- "GROUP BY mp_permits.Measuring_Point_Id, Source_Type,
+          mp_permits.Name, mp_permits.CEDS_Facility_Id,
+          mp_permits.Facility_Name, mp_permits.Permit_No, w.Year"
+      } else {
+        ## Select withdrawal date instead, do not aggregate withdrawal
+        aggregate_caluse <- "w.Withdrawal_Date AS Date,
+           ROUND(w.Withdraw_Volume / 1000000, 3) AS Water_Use_MGM"
+        
+        ## For monthly, no need to group
+        group_clause <- ""
+      }
       
-      ## Add in mpids (a vector of the measuring point ids attached to the feature)
-      withdr_sql <- paste0("SELECT * FROM water.Water_Use_By_Month_Vw
-                            WHERE Measuring_Point_Id IN (", paste0(as.character(mps$GMP_ID), collapse = ","), 
-                           , yrs_clause,")")
-      
-      monthly_withdrw <- dbGetQuery(conn_DBI, withdr_sql)
-      
-      
-      
-      withdrawals <- sqldf(paste0("
-        SELECT 
+      ## Format the result (group by year if specified)
+      withdrawals <-sqldf(paste(
+        "SELECT 
         mp_permits.Measuring_Point_Id AS MP_CEDSid,
-        mp_permits.MP_Hydroid AS MP_Hydroid,
         CASE 
           WHEN mp_permits.MP_Type = 'Well'   THEN 'Groundwater'
           WHEN mp_permits.MP_Type = 'Intake' THEN 'Surface Water'
         END AS Source_Type,
-        mp_permits.MP_Name AS MP_Name,
-        --hydroawrr.facility_hydroid,
+        mp_permits.Name AS MP_Name,
         mp_permits.CEDS_Facility_Id AS CEDS_Facility_Id,
         mp_permits.Facility_Name AS Facility,
+        mp_permits.Permit_No AS Permit_Number,
         CASE 
-          WHEN substr(mp_permits.Permit_Number,1,3) = 'WWR' THEN NULL
-          ELSE mp_permits.Permit_Number
-        END AS Permit_Number,
-        CASE 
-          WHEN substr(mp_permits.Permit_Number,1,3) = 'WWR' THEN NULL
-          ELSE mp_permits.Permit_Classification
-        END AS Permit_Classification,
-        w.Year AS Year,
-        ROUND(SUM(w.Withdraw_Volume) / 1000000, 3) AS Water_Use_MGY
+          WHEN substr(mp_permits.Permit_No,1,3) = 'WWR' THEN NULL
+          ELSE mp_permits.PERMIT_CLASSIFICATION_STRING
+        END AS Permit_Classification,",
+        aggregate_caluse,
         
-        FROM mps mp_permits
+        "FROM mps mp_permits
         LEFT JOIN monthly_withdrw w
           ON  mp_permits.Measuring_Point_Id = w.Measuring_Point_Id
           
-        WHERE mp_permits.MP_Type != 'Transfer'
-          AND (mp_permits.Water_Use_Type != 'Other' OR mp_permits.Water_Use_Type IS NULL)
-          AND mp_permits.CEDS_Facility_ID IS NOT NULL --This is needed to remove unassociated MPs
-        
-        GROUP BY 
-         
-        "))
+        ",where_clause,  group_clause
+        ))
       
       self$withdrawals <- withdrawals
       

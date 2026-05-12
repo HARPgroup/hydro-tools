@@ -166,7 +166,7 @@ fn_get_table_names <- function(entity_type) {
     
     out$tbl_name <- "water.Water_Withdrawal_Reg_Vw"
     
-    out$permit_num_col <- "Registration_number"
+    out$permit_num_col <- "Registration_Number"
     
     out$facility_field <- "CEDS_Facility_Id"
     
@@ -174,6 +174,10 @@ fn_get_table_names <- function(entity_type) {
                       ON gis.Permit_Number = wwr.Registration_Number"
     
     out$gis_col_names <- "Latitude, Longitude, County"
+    
+    out$contact_tbl <- "ceds.[CEDS Contacts]"
+    
+    out$contact_pkcol <- "[CEDS Facility ID]"
     
   } else if (entity_type == "GWP") {
     
