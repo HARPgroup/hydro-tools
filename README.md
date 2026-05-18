@@ -108,6 +108,13 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.17 04/30/2026
+1. Added the function `get_weather_raster_data()` to allow for
+dh_timeseries_weather raster summaries over multiple time periods and features.
+This can be used, for instance, to summarize daily precipitation over the
+drought regions. This function uses PSQL and PostGIS on the VT server to run
+these operations, allowing for integration directly on the R server
+
 ### 1.0.16 04/23/2026
 1. Updated `plot_boxplot_context()` to take in a metric name to be used in the
 plot title. Correspondingly, updated the `plot_rechare_context()` and
