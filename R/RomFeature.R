@@ -300,6 +300,8 @@ RomFeature <- R6Class(
         retcols <- retcols[-which(retcols == "dh_geofield")]
         retcols <- retcols[-which(retcols == "dh_geofield_geom")]
         related_entities <- query_results[,retcols]
+      }else if (returns_geoms == "TRUE"){
+        related_entities <- query_results
       }else if(return_geoms == "SF"){
         #If returns_geom is SF, try to convert to an SF object to return
         tryCatch(
