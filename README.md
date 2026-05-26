@@ -108,6 +108,11 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.18 05/20/2026
+1. Corrected example code in `WaterGageBase`
+2. Fixed a bug introduced in version 1.0.12 that caused
+`RomFeature$find_spatial_relations()` to fail if `returns_geoms = TRUE`
+
 ### 1.0.17 04/30/2026
 1. Added the function `get_weather_raster_data()` to allow for
 dh_timeseries_weather raster summaries over multiple time periods and features.

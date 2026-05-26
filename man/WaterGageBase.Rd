@@ -22,6 +22,9 @@ This R6 object has standard methods for managing the data and meta
 \examples{
 \dontrun{
  #Spatial Info:
+SA_Ashland <- WaterGageBase$new(gage_id = "01672500", ds_in = ds,
+                                end_date = "2021-11-11",
+                                approval_status = "Approved")
  SA_Ashland$load_sf_da()
  SA_Ashland$drainage_area
  #Flow metrics:
