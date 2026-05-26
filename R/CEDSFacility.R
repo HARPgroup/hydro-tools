@@ -74,10 +74,10 @@ CEDSFacility <- R6Class(
       
       ## If it is to be populated ahead of time
       if (fully_populate) {
-        self$get_permits()
-        self$get_mps()
-        self$get_withdrawals()
-        self$get_contacts()
+        self$get_permits(return_df = FALSE)
+        self$get_mps(return_df = FALSE)
+        self$get_withdrawals(return_df = FALSE)
+        self$get_contacts(return_df = FALSE)
       }
       
     },
@@ -89,7 +89,7 @@ CEDSFacility <- R6Class(
     #' @return Data.frame of permits assoicated with the facility. Contains only select identifying 
     #' fields. Permit limits are withdrawals in gallons per month/year. These are not applicable to
     #' WWRs or VPDES (VPDES limits not included)
-    get_permits = function() {
+    get_permits = function(return_df = TRUE) {
       facility_id <- self$pkid
       
       ## Look through VWP, GWP and VPDES 
@@ -122,6 +122,10 @@ CEDSFacility <- R6Class(
       permits <- rbind(gwps,vwps,wwrs,vpdes)
       
       self$permits <- permits
+      
+      if (return_df) {
+        return(permits)
+      }
     },
     #' @description
     #' Pulls the measuring points associated with all permits of this facility (that have measuring
@@ -246,9 +250,51 @@ CEDSFacility <- R6Class(
       return(permit)
     },
     
+    #' @description
+    #' Create a \code{RomFeature} object for the facility, connecting this CEDS feature to Hydro
+    #' @param ds A \code{RomDataSource} object. This is different from a \code{CEDSDataSource} 
+    #' object, as it is connected to the Hydro server instead of the CEDS server
+    #' @return Instance of \code{RomFeature} for the corresponding facility in the Hydro database.
+    #' Searches based on the CEDS ID property (varid 1474, CEDS_ID). It is possible for a facility
+    #' in CEDS to have multiple corresponding Hydro facilities. In those cases, a list of features
+    #' will be returned
+    pull_feature = function(ds) {
+
+      id_keys <- dbGetQuery(ds$connection, paste0(
+        "SELECT featureid, propcode
+        FROM dh_properties
+        WHERE varid = 1474
+          AND propcode = '", as.character(self$pkid),"'"
+      ))
+      
+      ft <- list()
+      
+      if (nrow(id_keys) > 1) {
+        
+        for(i in 1:nrow(id_keys)) {
+          
+          ftid <- id_keys$featureid[i]
+          
+          ft[[paste0("feature-",ftid)]] <-
+            RomFeature$new(ds, config = list(hydroid = ftid), T)
+          
+        }
+        
+      } else if (nrow(id_keys) == 0) {
+        message("There is no corresponding facility in Hydro.")
+      } else {
+        
+        ft <- RomFeature$new(ds, config = list(hydroid = id_keys$featureid), T)
+        
+      }
+      
+      return(ft)
+      
+    },
+    
     ## Stealing RomFeatures plot method. A little janky
     plot_method = RomFeature$public_methods$plot_feat
   )
 )
 
- fac <- CEDSFacility$new(dsCEDS, pkid = 200000203181)
+ fac <- CEDSFacility$new(dsCEDS, pkid = 200000203181, fully_populate = TRUE)

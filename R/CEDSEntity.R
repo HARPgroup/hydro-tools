@@ -147,7 +147,6 @@ CEDSEntity <- R6Class(
       
       names(mps)[names(mps) %in% names(namekey)] <- namekey[names(mps)[names(mps) %in% names(namekey)] ]
       
-      
       return(mps)
     },
     
@@ -226,7 +225,7 @@ CEDSEntity <- R6Class(
     #' default there will be no aggregation applied. However, if \code{period} is set to "yearly", then
     #' it will be aggregated by year, showing the total withdrawal of that MP for the given year
     #' @return Data.frame of the withdrawals (in millions of gallons) for the MPs of the entity
-    get_withdrawals = function(years = FALSE, period = "yearly") {
+    get_withdrawals = function(years = FALSE, period = "yearly", return_df =TRUE) {
       
       ## If no mps are loaded, throw an error
       if (is.null(self$mps)) {
@@ -237,10 +236,10 @@ CEDSEntity <- R6Class(
       mps <- self$mps
       
       ## Pull the withdrawals for all MPs. Filter by years if specified
-      withdr_sql <- paste0("SELECT * FROM water.Water_Use_By_Month_Vw
+      withdr_sql <- paste0("SELECT Measuring_Point_Id, Withdrawal_Date, Withdraw_Volume 
+                            FROM water.Water_Use_By_Month_Vw
                             WHERE Measuring_Point_Id IN (",
-                           paste0(as.character(mps$Measuring_Point_ID), collapse = ","), 
-                           yrs_clause,")")
+                            paste0(as.character(mps$Measuring_Point_ID), collapse = ","),")")
       
       monthly_withdrw <- dbGetQuery(self$ds$connection, withdr_sql)
       
@@ -296,11 +295,19 @@ CEDSEntity <- R6Class(
           ON  mp_permits.Measuring_Point_Id = w.Measuring_Point_Id
           
         ",where_clause,  group_clause
-        ))
+      ))
+      
+      if ("Date" %in% names(withdrawals)) {
+        withdrawals$Date <- as.Date(as.POSIXct(withdrawals$Date))
+      }
       
       self$withdrawals <- withdrawals
       
-      return(withdrawals)
+      if (return_df) {
+        return(withdrawals)
+      } else {
+        return(NULL)
+      }
     }
   )
   

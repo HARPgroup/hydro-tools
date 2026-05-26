@@ -98,14 +98,16 @@ CEDSPermit <- R6Class(
     #' measuring points view, and contains no withdrawal information. Also sets the mps field
     #' of the \code{CEDSPermit} object. If no MPs are found, it returns a message.
     ## Fills in mps field
-    get_mps = function(.source = "SW/GW") {
+    get_mps = function(.source = "SW/GW", return_df = TRUE) {
       
       pmps <- super$get_mps(self$pkid, .source)
       
       ## Setting mps
       self$mps <- pmps
       
-      return(pmps)
+      if (return_df) {
+        return(pmps)
+      }
       
     },
     
@@ -130,5 +132,5 @@ CEDSPermit <- R6Class(
   )
 )
 
-# p1 <- CEDSPermit$new(dsCEDS, permit_type = "WWR", pkid = 870000002706)
+ p1 <- CEDSPermit$new(dsCEDS, permit_type = "WWR", pkid = 870000002706)
 # p2 <- CEDSPermit$new(dsCEDS, permit_type = "GWP", permit_number = "GWI000344")
