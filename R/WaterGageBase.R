@@ -1,5 +1,33 @@
-waterGageBase <- R6::R6Class(
-  "waterGageBase",
+# WaterGageBase ####
+#' Water Gage Data Information Object
+#' @title WaterGageBase
+#' @description Utility class for compiling query info for stream gage analysis
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to stream gage data. On initialize, this object sets fields
+#'   relevant for stream flow data querying and analysis. This object can retrieve
+#'   spatial data about a gage, but is not used to query streamflow itself as it
+#'   is instead inherited by subclasses like WaterGageDaily that can query data
+#'   instead
+#' @importFrom R6 R6Class  
+#' @param config A named list containing the names of fields to set on the
+#'   object. This may contain any of the named public fields on WaterGageBase or
+#'   on the inherited object i.e. on WaterGageDaily
+#' @param ds_in An optional RomDataSource to allow for querying of additional
+#'   information. May be provided by OWS config files.
+#' @return R6 Object of class WaterGageBase
+#' @export WaterGageBase
+#' @examples \dontrun{
+#'  #Spatial Info:
+#' SA_Ashland <- WaterGageBase$new(config = list(gage_id = "01672500", ds_in = ds,
+#'                                 end_date = "2021-11-11",
+#'                                 approval_status = "Approved"))
+#'  SA_Ashland$load_sf_da()
+#'  SA_Ashland$drainage_area
+#'  #If data source provided:
+#'  SA_Ashland$load_wshd_feat()
+#' }
+WaterGageBase <- R6::R6Class(
+  "WaterGageBase",
   public = list(
     #' @field ds RomDataSource often provided in DEQ config files and features a
     #'   local data storage or a connection to a database/RESTful service
@@ -41,7 +69,6 @@ waterGageBase <- R6::R6Class(
     #' @return object instance, with fields populated by values in config
     initialize = function(config = list()){
       self$handle_config(config)
-      
     },
     #' @description
     #' Handles the config passed in initialize to set all fields on the object
@@ -56,10 +83,17 @@ waterGageBase <- R6::R6Class(
     #' the config_item
     #' @return NULL
     handle_config_item = function(config_item, config_item_name){
+      #Try to extract only fields from self by eliminating functions and
+      #environments
+      all_self_fields_methods <- names(self)
+      all_self_fields <- unlist(lapply(all_self_fields_methods, function(x) (!is.function(self[[x]]) && !is.environment(self[[x]]))))
+      all_self_fields <- all_self_fields_methods[all_self_fields]
+      
       #If the name of the config item is a field on this object, set it
-      if(config_item_name %in% names(get(class(self)[1])$public_fields)){
+      if(config_item_name %in% names(self)){
         self[[config_item_name]] <- config_item
       }
+      return(self[[config_item_name]])
     },
     #' @description
     #' If a valid USGS gage_id is set on object, use
@@ -72,7 +106,7 @@ waterGageBase <- R6::R6Class(
     load_sf_da = function(){
       #If user is using USGS or has provided a gage id, try to use dataRetrieval
       #to get additional info about gage/site
-      if(self$data_source == "USGS" || !is.na(self$gage_id)){
+      if(!is.na(self$gage_id)){
         #Based on dataRetrieval pacakge version, use either new or deprecated
         #NWIS functions
         if(packageVersion("dataRetrieval") >= "2.7.23") {
