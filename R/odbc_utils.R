@@ -188,13 +188,9 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
 
 #Return a very basic SELECT * FROM entity_type, ignoring pk and inputs
 #Here, inputs is irrelevant but it is checked for a limit
-fn_guess_sql <- function(entity_type, pk, inputs) {
+fn_guess_sql <- function(entity_type, pk = NULL, inputs = NULL) {
   sql_stuff <- list()
-  if (is.null(inputs$limit)) {
-    inputs$limit = 0
-  }
-  # remove special things that are not part of the columns
-  inputs$limit <- NULL
+
   get_sql = paste("select * from ", entity_type) 
   
   sql_stuff$get_sql <- get_sql
