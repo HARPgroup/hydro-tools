@@ -33,7 +33,7 @@ CEDSEntity <- R6Class(
     #' @field pkid Primary ID value of the entity
     pkid = NULL,
     
-    #' @field ds Datasource for this entity, created by \code {CEDSDataSource}
+    #' @field ds Datasource for this entity, created by \code{CEDSDataSource}
     ds = NULL,
     
     #' @field entity_type What type of record is this object representing
@@ -51,7 +51,8 @@ CEDSEntity <- R6Class(
     #' @field sf Coordinates of the entity in an sf data.frame
     sf = NULL,
     
-    #' @field contacts Contacts associated with the entity, created by \code{CEDSEntity$get_contacts()}
+    #' @field contacts Contacts associated with the entity, created by
+    #'   \code{CEDSEntity$get_contacts()}
     contacts = NULL,
     
     #' @field mps list/df of measuring points on Withdrawal permits/registraitons, created by \code{CEDSEntity$get_mps()}
@@ -107,8 +108,6 @@ CEDSEntity <- R6Class(
     #' (specified). This method only returns MP information, notwithdrawals.
     #' @param permit_id The permit CEDS ID. This can be either a VWP, GWP, or WWR. But it does not
     #' matter which type, since the measuring point table has a permit ID column agnostic of type
-    #' @param entity_type A character string specifying what the feature of interest is. Could
-    #' be "facility" or the type of permit ("WWR","VWP","GWP","VPDES")
     #' @param source The desired measuring points to pull. By default it is SW/GW (surface water +
     #' groundwater). This can be limited to one or the other, or "All", which includes transfers
     #' @return A data.frame of the rows from the measuring point view for MPs of the selected
@@ -157,12 +156,10 @@ CEDSEntity <- R6Class(
     #' in this method.
     #' @param pkid The CEDS ID of the entity of interest. Must be the ID of the entity itself,
     #' so the facility ID for a facility the permit ID of the permit.  
-    #' @param entity_type A character string specifying what the feature of interest is. Could
-    #' be "facility" or the type of permit ("WWR","VWP","GWP","VPDES")
     #' @param limit Should the result be limited to "Water WIthdrawal Contacts"? This only applies to
     #' facilities and WWRs, since permit contacts often have other 'Contact Purposes'. Can be set to
     #' FALSE to include all facility contacts
-    #' @return_df Should a data.frame be returned. Defaults to TRUE
+    #' @param return_df Should a data.frame be returned. Defaults to TRUE
     #' @return Data.frame of contacts for the entity and their contact information
     get_contacts = function(limit = TRUE, return_df =TRUE) {
       ## Not pulled from self since anything could be passed in here
@@ -224,6 +221,7 @@ CEDSEntity <- R6Class(
     #' @param period This will control how the data is aggregated. The data is reported monthly, so by
     #' default there will be no aggregation applied. However, if \code{period} is set to "yearly", then
     #' it will be aggregated by year, showing the total withdrawal of that MP for the given year
+    #' @param return_df Should a data.frame be returned. Defaults to TRUE
     #' @return Data.frame of the withdrawals (in millions of gallons) for the MPs of the entity
     get_withdrawals = function(years = FALSE, period = "yearly", return_df =TRUE) {
       

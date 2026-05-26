@@ -40,8 +40,12 @@ Imports:
 Suggests: 
     dataRetrieval
 Collate: 
+    'CEDSEntity.R'
+    'CEDSFacility.R'
+    'CEDSPermit.R'
     'DFLOW_xQy.R'
     'RomAdminFeature.R'
+    'RomCEDS.R'
     'RomDataGroup.R'
     'RomDataSource.R'
     'RomEntity.R'
@@ -53,6 +57,7 @@ Collate:
     'TNC_IHA_Ports.R'
     'TNC_IHA_Ports_Utils.R'
     'WaterGageBase.R'
+    'ceds_utils.R'
     'cia_utils.R'
     'dHVariablePluginDefault.R'
     'fac_utils.R'

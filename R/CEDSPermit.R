@@ -30,7 +30,7 @@ CEDSPermit <- R6Class(
   inherit = CEDSEntity,
   
   public = list(
-    #' @field permit_numer The permit number of this permit
+    #' @field permit_number The permit number of this permit
     permit_number = NULL,
     
     #' @field facility The facility ID that the permit is connected to. \code{CEDSPermit$pull_facility}
@@ -48,6 +48,9 @@ CEDSPermit <- R6Class(
     #' to ODS
     #' @param pkid The CEDS ID of the permit of interest. This or config are required to
     #' find this permit If pkid is provided, config is ignored
+    #' @param permit_type A character string specifying what the permit of interest is. Could
+    #' be one of "WWR","VWP","GWP", or "VPDES". This field is required
+    #' @param permit_number The permit number to search for. The pkid is prioritized over this
     #' @param config A list of column name value pairs to search for the permit by. These must be
     #' column names from the permit table, else it will return an error
     #' @param fully_populate Should all fields that can be populated in for CEDSPermit be ran.
@@ -94,6 +97,7 @@ CEDSPermit <- R6Class(
     #' MPs found. No arguments are needed, as it searches based on the permit ID of this object
     #' @param .source What type of measuring points to search for. Options are \code{"SW/GW",
     #' "GW","SW","All"}. "All" is the only option that will include transfers
+    #' @param return_df Should a data.frame be returned. Defaults to TRUE
     #' @return A dataframe of the measuring points found. This data.frame is a snip form the
     #' measuring points view, and contains no withdrawal information. Also sets the mps field
     #' of the \code{CEDSPermit} object. If no MPs are found, it returns a message.
@@ -132,5 +136,3 @@ CEDSPermit <- R6Class(
   )
 )
 
- p1 <- CEDSPermit$new(dsCEDS, permit_type = "WWR", pkid = 870000002706)
-# p2 <- CEDSPermit$new(dsCEDS, permit_type = "GWP", permit_number = "GWI000344")

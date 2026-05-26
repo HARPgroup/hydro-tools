@@ -38,7 +38,9 @@ CEDSFacility <- R6Class(
     facility_hydroid = NULL,
     #' @field name THe name of the facility
     name = NULL,
+    #' @field feat_sf This is an sf data.frame of the coordinates for the facility
     feat_sf = NULL,
+    #' @field geom_CRS The CRS for the feat_sf
     geom_CRS=4326,
     #' @description
     #' Initialize the CEDSFacility object. Requires either a pkid or a list of other column names.
@@ -85,7 +87,7 @@ CEDSFacility <- R6Class(
     #' Pulls all permits for a given facility ID. This searches the VWP, WWR, GWP, and VPDES tables.
     #' These tables all have different structures and column names, so this pulls select columns and
     #' standardizes the names.
-    #' @param facility_id The CEDS Facility ID to check for associated permits
+    #' @param return_df Should a data.frame be returned. Defaults to TRUE
     #' @return Data.frame of permits assoicated with the facility. Contains only select identifying 
     #' fields. Permit limits are withdrawals in gallons per month/year. These are not applicable to
     #' WWRs or VPDES (VPDES limits not included)
@@ -134,7 +136,7 @@ CEDSFacility <- R6Class(
     #' MPs found. No arguments are needed, as it searches based on the facility ID of this object
     #' @param .source What type of measuring points to search for. Options are \code{"SW/GW",
     #' "GW","SW","All"}. "All" is the only option that will include transfers
-    #' @return_df Should a data.frame be returned. Defaults to TRUE
+    #' @param return_df Should a data.frame be returned. Defaults to TRUE
     #' @return A dataframe of the measuring points found. This data.frame is a snip form the
     #' measuring points view, and contains no withdrawal information. Also sets the mps field
     #' of the \code{CEDSFacility} object. If no MPs are found, it returns a message.
@@ -290,11 +292,9 @@ CEDSFacility <- R6Class(
       
       return(ft)
       
-    },
+    }
     
-    ## Stealing RomFeatures plot method. A little janky
-    plot_method = RomFeature$public_methods$plot_feat
+    # ## Stealing RomFeatures plot method. A little janky
+    # plot_method = RomFeature$public_methods$plot_feat
   )
 )
-
- fac <- CEDSFacility$new(dsCEDS, pkid = 200000203181, fully_populate = TRUE)
