@@ -12,8 +12,6 @@
 #' @param config A named list containing the names of fields to set on the
 #'   object. This may contain any of the named public fields on WaterGageBase or
 #'   on the inherited object i.e. on WaterGageDaily
-#' @param ds_in An optional RomDataSource to allow for querying of additional
-#'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageBase
 #' @export WaterGageBase
 #' @examples \dontrun{
@@ -64,8 +62,7 @@ WaterGageBase <- R6::R6Class(
     #' Initialize a WaterGageBase() instance populating all fields passed to
     #' object by the named list config. Only valid public fields are populated.
     #' The object will iterate over config to set fields.
-    #' @param config A named list of public fields on waterGageBase with values
-    #'   to set
+    #' @param config A named list of public fields with values to set
     #' @return object instance, with fields populated by values in config
     initialize = function(config = list()){
       self$handle_config(config)
@@ -73,6 +70,7 @@ WaterGageBase <- R6::R6Class(
     #' @description
     #' Handles the config passed in initialize to set all fields on the object
     #' by calling \code{self$handle_config_item()}
+    #' @param config A named list of public fields with values to set
     #' @return NULL
     handle_config = function(config = list()){
       mapply(config, names(config), FUN = self$handle_config_item)
@@ -81,7 +79,11 @@ WaterGageBase <- R6::R6Class(
     #' For a given item in the user config, check to see if the name of the
     #' config list item is a field on this object. If so, set it to the value of
     #' the config_item
-    #' @return NULL
+    #' @param config_item A value to set on the field in config_item_name, if it
+    #'   exists on this object
+    #' @param config_item_name A field to set with the value config_item, if the
+    #'   field exists on this object
+    #' @return The target field, may be NULL if it does not exist
     handle_config_item = function(config_item, config_item_name){
       #Try to extract only fields from self by eliminating functions and
       #environments
