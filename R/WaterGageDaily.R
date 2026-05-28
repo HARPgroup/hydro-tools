@@ -601,8 +601,8 @@ WaterGageDaily <- R6::R6Class(
                            values_from = value)
       
       ## Pull gage data in the date range
-      daily <- self$gage_data[self$gage_data$time > start_date &
-                                self$gage_data$time < end_date,]
+      daily <- self$gage_data[self$gage_data[,self$date_col] > start_date &
+                                self$gage_data[,self$date_col] < end_date,]
       
       ## Attach stats to a date df that limits it to the date range,
       ## but repeats if the range covers multiple years
@@ -636,7 +636,10 @@ WaterGageDaily <- R6::R6Class(
         ggplot2::geom_ribbon(ggplot2::aes(ymin = `0`,  ymax = `5`,   fill = bins[7]), na.rm = TRUE) +
         ggplot2::geom_line(ggplot2::aes(y = `50`, linetype = "dashed"), linewidth = .35,
                            color = "black", na.rm = TRUE) +
-        ggplot2::geom_line(data = daily, ggplot2::aes(x = time,y = value, linetype = 'solid'), linewidth = 2, color = "black") +
+        ggplot2::geom_line(data = daily, ggplot2::aes(x = !!sym(self$date_col),
+                                                      y = !!sym(self$flow_col),
+                                                      linetype = 'solid'),
+                           linewidth = 2, color = "black") +
         ggplot2::scale_y_log10() +
         ## Limits the number of months shown on x axis
         ggplot2::guides(x = ggplot2::guide_axis(check.overlap = TRUE)) +
