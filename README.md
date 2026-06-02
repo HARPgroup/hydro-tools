@@ -116,6 +116,7 @@ conventions
 3. `WaterGageStats` is a new R6 object that helps process and query statistics from USGS
 4. `WaterGageDaily` now has a `plot_percentiles` method to plot daily flow
 against `ggplot2::geom_ribbon()` that show day-of-year percentiles.
+5. Debug in `RomFeature$find_spatial_relations` when `return_geom = TRUE`
 
 
 ### 1.0.18 05/20/2026
