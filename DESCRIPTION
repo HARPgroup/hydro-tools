@@ -1,6 +1,6 @@
 Package: hydrotools
 Title: Data processing and accessors for VAHydro
-Version: 1.0.18
+Version: 1.0.19
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Depends: 
@@ -57,6 +57,8 @@ Collate:
     'TNC_IHA_Ports.R'
     'TNC_IHA_Ports_Utils.R'
     'WaterGageBase.R'
+    'WaterGageDaily.R'
+    'WaterGageStats.R'
     'ceds_utils.R'
     'cia_utils.R'
     'dHVariablePluginDefault.R'

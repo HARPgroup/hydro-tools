@@ -1,56 +1,31 @@
 # WaterGageBase ####
-#' Water Gage Data Object
+#' Water Gage Data Information Object
 #' @title WaterGageBase
-#' @description Utility class for interacting with water gage data from USGS or
-#'   other source
+#' @description Utility class for compiling query info for stream gage analysis
 #' @details This R6 object has standard methods for managing the data and meta
-#'   data related to stream gage data. On initialize, the object can load in USGS
-#'   gage data, a csv, or data provided by user and then offers methods to bring
-#'   in USGS geometries, OWS watersheds, calculate VPDES critical low flows, and
-#'   to provide basic drought forecasting capabilities.
+#'   data related to stream gage data. On initialize, this object sets fields
+#'   relevant for stream flow data querying and analysis. This object can retrieve
+#'   spatial data about a gage, but is not used to query streamflow itself as it
+#'   is instead inherited by subclasses like WaterGageDaily that can query data
+#'   instead
 #' @importFrom R6 R6Class  
-#' @param data_source "USGS", a file path, or a data frame of stream gage data that
-#'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
-#'   \code{flow_col} and \code{date_col} are not used as data will be pulled
-#'   directly from USGS.
-#' @param gage_id The gage ID. This should be a USGS site number if \code{data_source}
-#'   is "USGS" such as 01671020
-#' @param flow_col The column identifying the data of interest in the gage data.
-#'   Only required if \code{data_source} is a file path or a data frame
-#' @param date_col The column identifying the dates in the gage data. Only
-#'   required if \code{data_source} is a file path or a data frame
-#' @param start_date Optional. The first date to include in data get
-#' @param end_date Optional. The last date to include in data get
-#' @param approval_status 'all', 'approved', or 'provisional'. What kind of
-#'   data should be used from USGS? Defaults to that set in the field on
-#'   this object, which itself defaults to 'all'   
-#' @param ds_in An optional RomDataSource to allow for querying of additional
-#'   information. May be provided by OWS config files.
+#' @param config A named list containing the names of fields to set on the
+#'   object. This may contain any of the named public fields on WaterGageBase or
+#'   on the inherited object i.e. on WaterGageDaily
 #' @return R6 Object of class WaterGageBase
 #' @export WaterGageBase
 #' @examples \dontrun{
 #'  #Spatial Info:
-#' SA_Ashland <- WaterGageBase$new(gage_id = "01672500", ds_in = ds,
+#' SA_Ashland <- WaterGageBase$new(config = list(gage_id = "01672500", ds_in = ds,
 #'                                 end_date = "2021-11-11",
-#'                                 approval_status = "Approved")
+#'                                 approval_status = "Approved"))
 #'  SA_Ashland$load_sf_da()
 #'  SA_Ashland$drainage_area
-#'  #Flow metrics:
-#'  SA_Ashland$comp_xQy()
-#'  SA_Ashland$low_flows
-#'  SA_Ashland$nep_table()
-#'  SA_Ashland$days_below(75)
-#'  #Plots:
-#'  SA_Ashland$plot_rechare_context(2026,c(12,1,2))
-#'  SA_Ashland$plot_low_flows("boxplot")
 #'  #If data source provided:
 #'  SA_Ashland$load_wshd_feat()
-#'  SA_Ashland$plot_precip_data(targetYear = 2022,include_months = c(10:12,1:4))
-#'  #All plots:
-#'  SA_Ashland$plot_all()
 #' }
 WaterGageBase <- R6::R6Class(
-  "waterGageBase",
+  "WaterGageBase",
   public = list(
     #' @field ds RomDataSource often provided in DEQ config files and features a
     #'   local data storage or a connection to a database/RESTful service
@@ -68,190 +43,59 @@ WaterGageBase <- R6::R6Class(
     #' @field drainage_area The drainage area of the gage, populated on
     #'   initialize if possible
     drainage_area = NA,
-    #' @field gage_data The gage data from data_source
-    gage_data = NA,
     #' @field gage_data_sf A simple feature of the gage data
     gage_data_sf = NA,
     #'@field gage_feature a VA Hydro feature of the gage if available from ds
     gage_feature = NA,
-    #' @field statistic_id The kind of stream data to pull
-    statistic_id = "00003",
-    #'@field parameter_code Which USGS paramter to analyze? Defaults to 00060
-    #'  for discharge
-    parameter_code = "00060",
-    #' @field usgs_properties The fields to pull from USGS
-    usgs_properties = c("monitoring_location_id", "parameter_code",
-                        "time", "value", "unit_of_measure", "approval_status"),
-    #'@field approval_status Either 'approved', 'provisional', or 'all'.
-    #'  Determines what kind of data should be retrieved from USGS: all data or
-    #'  only those marked approved or provisional?
-    approval_status = "all",
     #'@field start_date The first date to include in the data
     start_date = "",
     #'@field end_date The last date to include in the data
     end_date = "",
-    #'@field low_flows Critical low flows calculated by hydrotools::xQy() via
-    #'  \code{self$comp_xQy()}
-    low_flows = NA,
-    #' @field precip_data A daily precipitation data frame
-    precip_data = NA,
-    #' @field stats A data.frame returned from \code{dataRetrieval::read_waterdata_stats_por}
-    #'  which shows the historic max,min and percentile flows for each day of the year.
-    stats = NA,
-    #'@field plots A container to hold plots generated by methods on this object
-    plots = list(),
-    
+    #'@field parameter_code Which USGS paramter to analyze? Defaults to 00060
+    #'  for discharge
+    parameter_code = "00060",
+    #'@field approval_status Either 'approved', 'provisional', or 'all'.
+    #'  Determines what kind of data should be retrieved from USGS: all data or
+    #'  only those marked approved or provisional?
+    approval_status = "all",
     #' @description
-    #' Initialize a WaterGageBase() instance, returning an R6 object that is
-    #' now populated with gage data in its fields either by querying USGS or
-    #' through user upload of data. This object offers various standard methods
-    #' to analyze USGS gage data
-    #' @param data_source "USGS" (default), a file path, or a data frame of stream gage data that
-    #'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
-    #'   \code{flow_col} and \code{date_col} are not used as data will be pulled
-    #'   directly from USGS.
-    #' @param gage_id The gage ID. This should be a USGS site number if \code{data_source}
-    #'   is "USGS" such as 01671020
-    #' @param flow_col The column identifying the data of interest in the gage data.
-    #'   Only required if \code{data_source} is a file path or a data frame
-    #' @param date_col The column identifying the dates in the gage data. Only
-    #'   required if \code{data_source} is a file path or a data frame
-    #' @param start_date The first date to include in data get
-    #' @param end_date The last date to include in data get
-    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
-    #'   data should be used from USGS? Defaults to that set in the field on
-    #'   this object, which itself defaults to 'all'
-    #' @param ds_in An optional RomDataSource to allow for querying of additional
-    #'   information. May be provided by OWS config files.
-    #' @return object instance
-    initialize = function(data_source = "USGS", gage_id = NA,
-                          flow_col, date_col,
-                          start_date = self$start_date, end_date = self$end_date,
-                          approval_status = self$approval_status,
-                          ds_in = NA){
-      #Set the data source and gage fields
-      self$data_source <- data_source
-      self$gage_id <- gage_id
-      self$start_date <- start_date
-      self$end_date <- end_date
-      self$approval_status <- approval_status
-      #If user is using USGS, use dataRetrieval
-      if(inherits(data_source, "character") && data_source == "USGS"){
-        #Use either the new dataRetrieval functions or those slated for
-        #deprecation based on version number
-        if(packageVersion("dataRetrieval") >= "2.7.23") {
-          self$get_gage_data(start_date = start_date, end_date = end_date,
-                             approval_status = approval_status)
-        }else{
-          #Deprecated with new dataRetrieval
-          self$get_gage_data_old(start_date = start_date, end_date = end_date,
-                                 approval_status = approval_status)
-        }
-      }else if (inherits(data_source, "character")){
-        #if the user has set data_source to a single character vector, assume a
-        #file path to a csv and attempt to read in the data, setting flow and
-        #date col fields based on user input
-        self$gage_data <- read.csv(data_source)
-        self$flow_col <- flow_col
-        self$date_col <- date_col
-        #Limit based on user input dates, if any
-        if(start_date != ""){
-          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] >= as.Date(start_date),]
-        }
-        if(end_date != ""){
-          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] <= as.Date(end_date),]
-        }
-      }else if(inherits(data_source,"data.frame")){
-        #If user simply provides the data as a data frame, simply set the fields
-        self$flow_col <- flow_col
-        self$date_col <- date_col
-        self$gage_data <- data_source
-        #Limit based on user input dates, if any
-        if(start_date != ""){
-          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] >= as.Date(start_date),]
-        }
-        if(end_date != ""){
-          self$gage_data <- self$gage_data[self$gage_data[,self$date_col] <= as.Date(end_date),]
-        }
-      }
-      #If the user has provided a RomDataSource ds, set the appropriate field
-      if(inherits(ds_in, "RomDataSource")){
-        self$ds <- ds_in
-      }
+    #' Initialize a WaterGageBase() instance populating all fields passed to
+    #' object by the named list config. Only valid public fields are populated.
+    #' The object will iterate over config to set fields.
+    #' @param config A named list of public fields with values to set
+    #' @return object instance, with fields populated by values in config
+    initialize = function(config = list()){
+      self$handle_config(config)
     },
     #' @description
-    #' Using the new \code{dataRetrieval::read_waterdata_daily()}, query USGS
-    #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
-    #' and \code{self$statistic_id}. Fields returned can be controlled by
-    #' \code{usgs_properties} field
-    #' @param start_date The first date to include in data get
-    #' @param end_date The last date to include in data get
-    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
-    #'   data should be used from USGS? Defaults to that set in the field on
-    #'   this object, which itself defaults to 'all'
-    #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
-    #'   \code{gage_data} fields on object
-    get_gage_data = function(start_date, end_date, approval_status){
-      #Get start and end date in vector
-      time_limit <- c(start_date, end_date)
-      #Replace empty character with datetime due to USGS dataretrieval bug
-      time_limit[time_limit != ""] <- paste0(time_limit[time_limit != ""],"T00:00:00Z")
-      #Half bounded intervals use .. to indicate all data
-      time_limit[time_limit == ""] <- ".."
-      #If no bounds, set to NA
-      if(all(time_limit == "..")){
-        time_limit <- NA_character_
-      }else{
-        time_limit <- paste0(time_limit,collapse = "/")
-      }
-      
-      #If approval_status is all, set to NA for query
-      if(tolower(approval_status) == "all"){
-        approval_status <- NA_character_
-      }
-      
-      #Retrieve data
-      self$gage_data <- dataRetrieval::read_waterdata_daily(
-        monitoring_location_id = paste0("USGS-",self$gage_id),
-        parameter_code = self$parameter_code,
-        statistic_id = self$statistic_id, skipGeometry = TRUE,
-        properties = self$usgs_properties,
-        time = time_limit,
-        approval_status = approval_status
-      )
-      self$gage_data <- as.data.frame(self$gage_data)
-      self$flow_col <- "value"
-      self$date_col <- "time"
+    #' Handles the config passed in initialize to set all fields on the object
+    #' by calling \code{self$handle_config_item()}
+    #' @param config A named list of public fields with values to set
+    #' @return NULL
+    handle_config = function(config = list()){
+      mapply(config, names(config), FUN = self$handle_config_item)
     },
     #' @description
-    #' Using the deprecated \code{dataRetrieval::readNWISdv()}, query USGS
-    #' for the \code{self$gage_id} based on the set \code{self$paramter_code}
-    #' and \code{self$statistic_id}. Fields are renamed via
-    #' \code{dataRetrieval::renameNWISColumns()}
-    #' @param start_date The first date to include in data get
-    #' @param end_date The last date to include in data get
-    #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
-    #'   data should be used from USGS? Defaults to that set in the field on
-    #'   this object, which itself defaults to 'all'
-    #' @return Nothing, but sets \code{flow_col}, \code{date_col}, and
-    #'   \code{gage_data} fields on object
-    get_gage_data_old = function(start_date, end_date, approval_status){
-      gage_data <- dataRetrieval::readNWISdv(
-        siteNumbers = self$gage_id, parameterCd = self$parameter_code,
-        statCd = self$statistic_id,startDate = start_date,endDate = end_date
-      )
-      gage_data <- dataRetrieval::renameNWISColumns(gage_data)
-      #Retrieve only the data that is requested by user
-      if(tolower(approval_status) != "all"){
-        if(tolower(approval_status) == "approved"){
-          gage_data <- gage_data[grepl("A",gage_data$Flow_cd),]
-        }else if(tolower(approval_status) == "provisional"){
-          gage_data <- gage_data[grepl("P",gage_data$Flow_cd),]
-        }
+    #' For a given item in the user config, check to see if the name of the
+    #' config list item is a field on this object. If so, set it to the value of
+    #' the config_item
+    #' @param config_item A value to set on the field in config_item_name, if it
+    #'   exists on this object
+    #' @param config_item_name A field to set with the value config_item, if the
+    #'   field exists on this object
+    #' @return The target field, may be NULL if it does not exist
+    handle_config_item = function(config_item, config_item_name){
+      #Try to extract only fields from self by eliminating functions and
+      #environments
+      all_self_fields_methods <- names(self)
+      all_self_fields <- unlist(lapply(all_self_fields_methods, function(x) (!is.function(self[[x]]) && !is.environment(self[[x]]))))
+      all_self_fields <- all_self_fields_methods[all_self_fields]
+      
+      #If the name of the config item is a field on this object, set it
+      if(config_item_name %in% names(self)){
+        self[[config_item_name]] <- config_item
       }
-      self$gage_data <- gage_data
-      self$flow_col <- "Flow"
-      self$date_col <- "Date"
+      return(self[[config_item_name]])
     },
     #' @description
     #' If a valid USGS gage_id is set on object, use
@@ -264,7 +108,7 @@ WaterGageBase <- R6::R6Class(
     load_sf_da = function(){
       #If user is using USGS or has provided a gage id, try to use dataRetrieval
       #to get additional info about gage/site
-      if(self$data_source == "USGS" || !is.na(self$gage_id)){
+      if(!is.na(self$gage_id)){
         #Based on dataRetrieval pacakge version, use either new or deprecated
         #NWIS functions
         if(packageVersion("dataRetrieval") >= "2.7.23") {
@@ -302,484 +146,7 @@ WaterGageBase <- R6::R6Class(
         self$gage_feature <- found_feature
         return(found_feature)
       }
-    },
-    #' @description Calculate critical low flows like the 1Q10, 7Q10, 30Q10,
-    #' 30Q5, and harmonic mean using the VPDES standard
-    #' \code{hydrotools::xQy()}. Custom parameters may be entered to customize
-    #' the low flow calculation
-    #' @param AYS The start of the analysis season in the format MM-DD. For
-    #'   instance, to calculate low flows across the water year, AYS = '10-01'
-    #' @param AYE The end of the analysis season in the format MM-DD. For instance,
-    #'   to calculate low flows across the water year, AYE = '09-31'
-    #' @param startYear Any calendar year prior to this year will not be included.
-    #'   User can leave this as NULL (default) to include all data.
-    #' @param endYear Any calendar year after this year will not be included. User
-    #'   can leave this as NULL (default) to include all data.
-    #' @param x User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-    #'   90Q10, and 30Q5 are included in the results already. This input serves as
-    #'   the averaging period.
-    #' @param y User may optionally calculate a custom xQy flow. 1Q10, 7Q10, 30Q10,
-    #'   90Q10, and 30Q5 are included in the results already. This input serves as
-    #'   the return period
-    #' @seealso [xQy()]
-    #' @return Sets the low_flow field on the object but also returns the list
-    #'   from \code{hydrotools::xQy()}
-    comp_xQy = function(AYS = "04-01", AYE = "03-31",
-                        startYear = NULL, endYear = NULL,
-                        x = 7, y = 10){
-      critical_flows <- xQy(
-        gageDataIn = self$gage_data, flowColumn = self$flow_col, 
-        dateColumn = self$date_col,
-        AYS = AYS, AYE = AYE, startYear = startYear,
-        endYear = endYear, x = x, y = y)
-      self$low_flows <- critical_flows
-      return(critical_flows)
-      
-    },
-    #' @description
-    #' Calculate non-exceedance flows for standard OWS percentiles in each month
-    #' of the year using \code{hydrotools::om_flow_table()}
-    #' @seealso [om_flow_table()]
-    #' @return A non-exceedance from table from \code{hydrotools::om_flow_table()}
-    nep_table = function(){
-      table_data <- self$gage_data
-      #Create a field for the month
-      table_data$month <- as.numeric(format(table_data[,self$date_col],"%m"))
-      #Use hydrotools om_flow_table() to calculate the non-exceedance
-      #probabilities for each month
-      nep_data <- om_flow_table(table_data, q_col = self$flow_col,
-                                            mo_col = "month", rdigits = 2)
-      
-      return(nep_data)
-    },
-    #' @description Derive relevant baseflow recession parameters
-    baseflow_analysis = function(){
-      #HARP 2026 workflow here, maybe set and AGWRC to use in a forecast method
-    },
-    #' @description Using the regression derived from baseflow_analysis method,
-    #'   what may flows look like if no rain occurs for the next ndays?
-    baseflow_forecast = function(){
-    },
-    #'@description How many days, on average, each month are below a threshold
-    #'  value?
-    #'@param threshold The value to assess
-    #'@return A data frame with the number of days, on average, where the gage
-    #'  value fell below the user input threshold
-    days_below = function(threshold = 100){
-      #Add in a column for the month
-      gage_data <- self$gage_data
-      gage_data$month <- as.numeric(format(gage_data[,self$date_col], "%m"))
-      #Set-up an arbitrary month data frame
-      monthtotals <- data.frame(mo = month.abb, val = NA)
-      for (i in 1:12) {
-        # Sum the days each month where the flow was below the threshold, then
-        # divide by the number of years for each month on record
-        daysbelow <- sum(gage_data[gage_data$month == i,self$flow_col] < threshold, na.rm = T)
-        
-        # Determining the number of years for a given month on the record
-        yearsonrecord <- length(
-          unique(
-            format(gage_data[gage_data$month == i,self$date_col],"%Y")
-        ))
-        
-        ## Finding the average days per month 
-        avgdaysbelow <- daysbelow / yearsonrecord
-        #Store the data in the data frame
-        monthtotals$val[i] <- avgdaysbelow
-      }
-      
-      return(monthtotals)
-    },
-    #' @description Use the watershed feature to find precipitation from 1980
-    #'   onward using \code{RomFeature$get_raster_ts()}. Join this data to the
-    #'   stream data and return to the user. Inputs are further described in
-    #'   \code{RomFeature}.
-    #' @param varkey What variable to retrieve? This should be a varkey that has
-    #'   been used to create raster summaries in dh_timeseries_weather. Relevant
-    #'   meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
-    #'   'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
-    #'   'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'
-    #' @param aggregateData Should data be aggregated and if so, how? FALSE will
-    #'   return 1 record for every date. Otheriwse, can use basic aggregate
-    #'   functions like mean, min, max to summarize data
-    #' @param metric default mean, which aspect of the ST_SummaryStats() to return
-    #' @param touched Defaults to FALSE. Should PostGIS ST_Clip() use the
-    #'   touched argument to return all raster cells touched by the feature? Or,
-    #'   if FALSE, should only pixels that have centroids within the feature be
-    #'   considered?
-    #' @return The gage_data data frame now with a column of precip_mm joined
-    #'     on. Also set in the precip_data field on this object.
-    join_precip_data = function(metric = "mean", aggregateData = FALSE,
-                                varkey = 'prism_mod_daily', touched = FALSE){
-      #We will use RomFeature$get_raster_ts() so we need to make sure the
-      #feature is loaded
-      if(!inherits(self$gage_feature,"RomFeature")){
-        self$load_wshd_feat()
-      }
-      if(!inherits(self$gage_feature,"RomFeature")){
-        message("A RomFeature is required to join precip data. Contact OWS for assistance.")
-        return(NULL)
-      }
-      #Store a copy of the data for sqldf below
-      gage_data <- self$gage_data
-      #Get the precip data based on user input
-      precip_data <- self$gage_feature$get_raster_ts(
-        varkey = varkey,
-        starttime = min(gage_data[,self$date_col]),
-        endtime = max(gage_data[,self$date_col]),
-        band = '1',
-        aggregate = aggregateData,
-        metric = metric,
-        touched = touched)
-      #Convert the end date from posixct to date for joining
-      precip_data$end_date <- as.Date(precip_data$end_date)
-      #Join precip in mm to the streamflow and return to user
-      join_data <- sqldf::sqldf(
-        paste0(
-          "SELECT a.*, b.value as precip_mm
-        FROM gage_data as a
-        LEFT JOIN precip_data as b
-        ON b.end_date = a.",self$date_col)
-      )
-      self$precip_data <- join_data
-      return(join_data)
-    },
-    #' @description Create a boxplot of the monthly metric requested by user at
-    #'   this gage (or of a user input data frame) and then plot the target year
-    #'   as highlighted points on the plot. Often used in OWS to assess
-    #'   potential winter baseflow recharge when using gage data and evaluting
-    #'   between October - March (include_months = c(10,11,12,1,2,3)). 
-    #' @param targetYear What year should be highlighted on the plot? Defaults
-    #'   to this year. If left as NULL, no additional point data will be included
-    #' @param include_months What months should be included in plot/analysis?
-    #' @param AYS Which month begins the analysis year? The plot will start in
-    #'   this month and then proceed through the next 12 months or those
-    #'   included by user in include_months
-    #' @param metric A function to pass to \code{dplyr::summarize()} to control
-    #'   how data monthly data is aggregated
-    #' @param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
-    #'   to TRUE
-    #' @param ylab Character. The text to display on the y-axis of the plot.
-    #' @return A boxplot of monthly mean flows with highlighted points
-    plot_rechare_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
-                                    include_months = 1:12,
-                                    AYS = 10,
-                                    metric = mean,
-                                    use_y_log = TRUE,
-                                    ylab = "Monthly Mean Flow (cfs)"){
-      #Create a recharge context plot using user inputs and the data stored on
-      #this object
-      p <- plot_boxplot_context(targetYear = targetYear,
-                           include_months = include_months,
-                           AYS = AYS,
-                           dataframe_in = self$gage_data,
-                           value_col = self$flow_col,
-                           date_col = self$date_col,
-                           gage_id = self$gage_id,
-                           metric = metric,
-                           metric_name = as.character(substitute(metric)),
-                           use_y_log = use_y_log,
-                           ylab = ylab)
-      
-      #metric name for plot name
-      metric_name <- as.character(substitute(metric))
-      metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
-  
-      #Create a name for the plot to store in the plots field that is tied to
-      #metric, value_col, and targetYear
-      plotName <- paste0("recharge_context_",metric_name,"_",self$value_col)
-      if(!is.null(targetYear)){
-        plotName <- paste0(plotName,"_",targetYear)
-      }
-      
-      #Store in the list of plots on this object
-      self$plots[[plotName]] <- p
-      #Return the plot
-      return(p)
-    },
-    #'@description Create a boxplot of monthly sums of precipitation using the
-    #'  data provided in either the precip_data field or by join_precip_data(). 
-    #'  The boxplot is created by plot_recharge_context(). This will ONLY use
-    #'  days where the data in the input precip column is not NA
-    #'@param targetYear What year should be highlighted on the plot? Defaults
-    #'   to this year. If left as NULL, no additional point data will be included
-    #'@param include_months What months should be included in plot/analysis?
-    #'@param AYS Which month begins the analysis year? The plot will start in
-    #'   this month and then proceed through the next 12 months or those
-    #'   included by user in include_months
-    #'@param precip_col The column to plot in the precip data frame
-    #' @param metric A function to pass to \code{dplyr::summarize()} to control
-    #'   how data monthly data is aggregated
-    #'@param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
-    #'   to FALSE
-    #'@param ylab Character. The text to display on the y-axis of the plot.
-    #'@return A boxplot of precipitation data, also set in the plots field
-    plot_precip_data = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
-                                include_months = 1:12,
-                                AYS = 10, metric = sum, precip_col = "precip_mm",
-                                use_y_log = FALSE, ylab = "Monthly Precip (mm)"){
-      #If precip data has already been loaded in on the object, use it for plot.
-      #Otherwise, reload the data using default arguments
-      if(!inherits(self$precip_data,"data.frame")){
-        message("No precip data found, loading via join_precip_data()")
-        all_data <- self$join_precip_data()
-      }else{
-        all_data <- self$precip_data
-      }
-      #Plot the data with plot_recharge_context
-      p <- plot_boxplot_context(targetYear = targetYear,
-                                include_months = include_months,
-                                AYS = AYS,
-                                dataframe_in = self$precip_data[!is.na(self$precip_data[,precip_col]),],
-                                value_col = precip_col,
-                                date_col = self$date_col,
-                                gage_id = self$gage_id,
-                                metric = metric,
-                                metric_name = as.character(substitute(metric)),
-                                use_y_log = FALSE,
-                                ylab = "Monthly Precip (mm)")
-      
-      #metric name for plot name
-      metric_name <- as.character(substitute(metric))
-      metric_name <- paste0(toupper(substring(metric_name, 1, 1)), substring(metric_name, 2))
-      
-      #Create a name for the plot to store in the plots field that is tied to
-      #metric, value_col, and targetYear
-      plotName <- paste0("precip_context_",metric_name,"_",precip_col)
-      if(!is.null(targetYear)){
-        plotName <- paste0(plotName,"_",targetYear)
-      }
-      
-      #Store in the list of plots on this object
-      self$plots[[plotName]] <- p
-      #Return the plot
-      
-      return(p)
-    },
-    #' @description Create a line plot of the lowest x-day average flow recorded
-    #'   each analysis year as set in \code{comp_xQy()}. For instance, the plot
-    #'   will include the lowest 7-day average flow recorded each analysis year.
-    #' @param plot_type Either "lineplot" or "boxplot". plot_type will control
-    #'   which kind of plot is returned to user and set in the plots field,
-    #'   either a "lineplot" of the low flow time series or a "boxplot" per
-    #'   average low flow metric
-    #' @return A line plot of the x-day average low flow recorded each analysis
-    #'   year. Will set in the plots list as well.
-    plot_low_flows = function(plot_type = "lineplot"){
-      if(!(plot_type %in% c("lineplot","boxplot"))){
-        warning("Only 'lineplot' and 'boxplot' have been implemented as valid plot_type. Please check inputs.")
-      }
-      
-      #User must calculate low_flows, so if NA populate with default method
-      if(!is.list(self$low_flows) && is.na(self$low_flows)){
-        message("Calculating default low flows with self$comp_xQy()")
-        self$comp_xQy()
-      }
-      #Store the annual minimums
-      annualLows <- self$low_flows$annualMinimums
-      #If the user hasn't calculated a custom xQy, it will be identical to the
-      #7Q10 so remove from data.frame
-      if(all(annualLows$nxQy_ann == annualLows$n7Q10_ann,na.rm = TRUE)){
-        annualLows <- annualLows[,names(annualLows) != "nxQy_ann"]
-      }
-      
-      #Add more readable names for the legend:
-      newDFNames <- data.frame(
-        oldName = c("nxQy_ann", "n1Q10_ann", "n7Q10_ann", "n30Q10_ann", "n90Q10_ann"),
-        newName = c("x-day", "1-day", "7-day", "30-day", "90-day")
-      )
-      
-      #Pivot the data longer to have a names column populated by flow metric
-      #name and a value field with the xQy flow values
-      annualLows <- self$low_flows$annualMinimums |> 
-        tidyr::pivot_longer(nxQy_ann:n90Q10_ann ) |> 
-        dplyr::mutate(name = newDFNames$newName[match(name,newDFNames$oldName)])
-      
-      if(plot_type == "lineplot"){
-        #Create a plot of annual low flows
-        p <- ggplot2::ggplot(data = annualLows) + 
-          ggplot2::geom_line(ggplot2::aes(x = AY, y = value, color = name)) + 
-          ggplot2::scale_y_log10() + 
-          ggplot2::theme_minimal() +
-          ggplot2::xlab(ggplot2::element_blank()) + ggplot2::ylab("Mean/Daily Flow (cfs)") +
-          ggplot2::labs(color = ggplot2::element_blank()) + 
-          ggplot2::ggtitle(paste("Annual Low Flows\nUSGS",self$gage_id)) + 
-          ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
-      }else if(plot_type == "boxplot"){
-        #Create a boxplot of annual low flows separated by metrix
-        p <- ggplot2::ggplot(data = annualLows) + 
-          ggplot2::geom_boxplot(ggplot2::aes(x = name, y = value,
-                                             group = name)) + 
-          ggplot2::scale_y_log10() + 
-          ggplot2::theme_minimal() +
-          ggplot2::xlab(ggplot2::element_blank()) + ggplot2::ylab("Mean/Daily Flow (cfs)") +
-          ggplot2::ggtitle(paste("Low Flows\nUSGS",self$gage_id)) + 
-          ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
-      }
-      
-      plotName <- paste0("annual_low_flows_",plot_type)
-      #Store in the list of plots on this object
-      self$plots[[plotName]] <- p
-      
-      return(p)
-    },
-    
-    
-    #' @description Creates a plot of the the daily historic flow percentiles, in bands from
-    #' 100, 95, 90, 75, 50, 25, 10, 5, and 0. Also plots the daily flow, to show where 
-    #' the flow is in term sof historic flows of that day. This uses
-    #'  \code{dataRetrieval::read_waterdata_stats_por} to retrieve the percentiles
-    #' @param start_date The lower bound of the daily flows to put on the plot, in YYYY-MM-DD.
-    #'  If more than#' a year is selected, the percentiles repeat (i.e. the bands for 
-    #'  2024-01-01 will be the #' same as the bands for 2025-01-01)
-    #' @param end_date The upper bound of daily flows to show, in YYYY-MM-DD.. Defaults to 
-    #' today's date
-    #' @return A plot showing the daily flow and the percentile bands for each day
-    plot_percentiles = function(start_date = "2025-01-01", end_date = Sys.Date()) {
-      
-      ## Check if the stats are already run
-      if (is.na(self$stats) || is.null(self$stats)) {
-        ## Else, pull the stats
-        stat_df <- read_waterdata_stats_por(
-          monitoring_location_id = paste0("USGS-",self$gage_id),
-          parameter_code         = "00060",             # discharge
-          computation            = c("minimum", "maximum", "median", "percentile"),
-          start_date             = "01-01",
-          end_date               = "12-31"
-        ) |> 
-          sf::st_drop_geometry()
-        
-        ## Drops monthly stats out
-        stat_df <- stat_df[stat_df$time_of_year_type == "day_of_year", 
-                           c("time_of_year","value","percentile","sample_count")]
-        
-        self$stats <- stat_df
-        
-      } else {
-        ## Read in stats from object
-        stat_df <- self$stats
-        
-      }
-      
-      ## Pivoting wider (using sqldf)
-      ## Ecentricity of sqldf. Must first widen, then aggregate
-      stat_df_wide <- sqldf('
-          SELECT time_of_year,
-          MAX(p100) AS "100", MAX(p95) AS "95", MAX(p90) AS "90",
-          MAX(p75) AS "75", MAX(p50) AS "50", MAX(p25) AS "25",
-          MAX(p10) AS "10", MAX(p5) AS "5", MAX(p0) AS "0"
-          
-          FROM (
-            SELECT time_of_year,
-            CASE WHEN percentile = 100 THEN value END AS p100,
-            CASE WHEN percentile = 95 THEN value END AS p95,
-            CASE WHEN percentile = 90 THEN value END AS p90,
-            CASE WHEN percentile = 75 THEN value END AS p75,
-            CASE WHEN percentile = 50 THEN value END AS p50,
-            CASE WHEN percentile = 25 THEN value END AS p25,
-            CASE WHEN percentile = 10 THEN value END AS p10,
-            CASE WHEN percentile = 5 THEN value END AS p5,
-            CASE WHEN percentile = 0 THEN value END AS p0
-            FROM stat_df
-          ) AS sub_stats
-        
-          GROUP BY time_of_year
-      ')
-      
-      ## Pull gage data in the date range
-      daily <- self$gage_data[self$gage_data$time > start_date &
-                                self$gage_data$time < end_date,]
-      
-      ## Attach stats to a date df that limits it to the date range,
-      ## but repeats if the range covers multiple years
-      days_df <- data.frame(date = seq.Date(as.Date(start_date), 
-                                            as.Date(end_date), by = "day"))
-      
-      ## Adding a %m-%d column to join on stats
-      days_df$mmdd <- format(days_df$date,"%m-%d")
-      
-      stats_df_plot <- sqldf("
-        SELECT days_df.date,
-        stats.*
-        
-        FROM days_df 
-        LEFT JOIN stat_df_wide stats
-          ON stats.time_of_year  = days_df.mmdd
-      ")
-        
-
-      # Fill bins
-      bins <- c("95 - Max", "90 - 95", "75 - 90", "25 - 75", 
-                "10 - 25", "5 - 10", "Min - 5")
-      bins <- factor(bins,levels = bins)
-      
-      g <- ggplot(data = stats_df_plot, aes(x = date)) +
-        geom_ribbon(aes(ymin = `95`, ymax = `100`, fill = bins[1]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `90`, ymax = `95`, fill = bins[2]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `75`, ymax = `90`, fill = bins[3]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `25`, ymax = `75`,  fill = bins[4]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `10`, ymax = `25`,  fill = bins[5]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `5`,  ymax = `10`,  fill = bins[6]), na.rm = TRUE) +
-        geom_ribbon(aes(ymin = `0`,  ymax = `5`,   fill = bins[7]), na.rm = TRUE) +
-            geom_line(aes(y = `50`, linetype = "dashed"), linewidth = .35,
-                      color = "black", na.rm = TRUE) +
-        geom_line(data = daily, aes(x = time,y = value, linetype = 'solid'), linewidth = 2, color = "black") +
-        scale_y_log10() +
-        ## Limits the number of months shown on x axis
-        guides(x = ggplot2::guide_axis(check.overlap = TRUE)) +
-        labs(x = "Date",y = "Discharge (cfs)") +
-        theme_bw() +
-        ## Coloring the ribbons
-        scale_fill_manual("Historical Percentiles",
-                          values = c("95 - Max" = "#292f6b",
-                                     "90 - 95" = "#5699c0",
-                                     "75 - 90" = "#aacee0",
-                                     "25 - 75" = "#e9e9e9",
-                                     "10 - 25" = "#ebd6ab",
-                                     "5 - 10" = "#dcb668",
-                                     "Min - 5" = "#8f4f1f"),
-                          labels = c("95th Percentile - Max",
-                                     "90th - 95th Percentile",
-                                     "75th - 90th Percentile",
-                                     "25th - 75th Percentile",
-                                     "10th - 25th Percentile",
-                                     "5th - 10th Percentile",
-                                     "Min - 5th Percentile")) +
-        ## Adding a legend to the line type
-        scale_linetype_manual("Lines:",
-                              values = c("dashed" ,
-                                         "solid" ),
-                              labels = c("Median (50th Percentile)",
-                                         "Daily Flow"))
-      
-      ## Adding to plot list
-      self$plots[["Percentile_Plot"]] <- g
-      
-      return(g)
-    },
-    
-    #' @description Run all plotting methods and populate the plots field accordingly
-    #' @param recharge_targetYear What year should be highlighted on the recharge plot?
-    #'   See \code{self$plot_recharge_context()} for more information.
-    #' @param recharge_include_months What months (numeric) should be included in plot/analysis?
-    #' @param recharge_AYS Which month begins the recharge analysis year? 
-    #'   See \code{self$plot_recharge_context()} for more information.
-    #' @return A list of all plots created by methods in this objects. Will also
-    #'   populate the plots field.
-    plot_all = function(recharge_targetYear = as.numeric(format(Sys.Date(),"%Y")),
-                        recharge_include_months = 1:12,
-                        recharge_AYS = 10){
-      self$plot_rechare_context(targetYear = recharge_targetYear,
-                                     include_months = recharge_include_months,
-                                     AYS = recharge_AYS)
-      self$plot_low_flows("lineplot")
-      self$plot_low_flows("boxplot")
-      self$plot_precip_data()
-      self$plot_percentiles()
-      
-      return(self$plots)
     }
     
-  )# End Public
-) # End R6
-    
+  )
+)

@@ -108,6 +108,16 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.0.19 05/27/2026
+1. Reclassified `WaterGageBase` to `WaterGageDaily` to allow for clearer naming
+conventions
+2. `WaterGageBase` is now a parent object to `WaterGageDaily` and
+`WaterGageStats` that has general object initialization and gage methods
+3. `WaterGageStats` is a new R6 object that helps process and query statistics from USGS
+4. `WaterGageDaily` now has a `plot_percentiles` method to plot daily flow
+against `ggplot2::geom_ribbon()` that show day-of-year percentiles.
+
+
 ### 1.0.18 05/20/2026
 1. Corrected example code in `WaterGageBase`
 2. Fixed a bug introduced in version 1.0.12 that caused
