@@ -63,7 +63,6 @@ om_vahydro_metric_grid <- function (
   #mandated this)
   if (is.data.frame((runids))) {
     message("Found info")
-    message(runinfo)
     # user is passing in other params in data frame format
     runid <- as.character(runids$runid)
     if (!is.null(runids$model_version)) model_version <- unique(as.character(runids$model_version))
@@ -146,7 +145,17 @@ om_vahydro_metric_grid <- function (
     #label
     names(alldata)[match(join_data$dataname, names(alldata))] <- 
       join_data$runlabel[match(names(alldata), join_data$dataname)]
+    
+    #To ensure consistent performance with legacy form of this function, add
+    #empty columns for any unused runlabels e.g. any metric that is NA for all
+    #features such as a non-existant or not-run metric
+    if(!all(unique(runlabel) %in% names(alldata))){
+      missingCols <- unique(runlabel)[!(unique(runlabel) %in% names(alldata))]
+      message("The following columns returned no metrics from the database: ",paste(missingCols, collapse = ", "))
+      alldata[,missingCols] <- NA
+    }
   }
+  
   #Return the long-style data frame
   return(alldata)
 }
