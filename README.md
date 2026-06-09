@@ -108,6 +108,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.1.0 06/08/2026
+1. `om_vahydro_metric_grid` and the corresponding SQL function have been
+rewritten for clarity and speed
+
 ### 1.0.19 05/27/2026
 1. Reclassified `WaterGageBase` to `WaterGageDaily` to allow for clearer naming
 conventions

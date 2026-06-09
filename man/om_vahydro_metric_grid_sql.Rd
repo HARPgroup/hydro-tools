@@ -2,8 +2,7 @@
 % Please edit documentation in R/om_vahydro_metric_grid.R
 \name{om_vahydro_metric_grid_sql}
 \alias{om_vahydro_metric_grid_sql}
-\title{Helper function to generate a metric grid via SQL
-featureid,entity_type,bundle,ftype,model_version, runid, metric}
+\title{Build model metric SQL}
 \usage{
 om_vahydro_metric_grid_sql(
   featureid,
@@ -16,30 +15,49 @@ om_vahydro_metric_grid_sql(
 )
 }
 \arguments{
-\item{featureid}{integer or 'all'}
+\item{featureid}{integer or 'all', representing which specific features to
+query for models}
 
-\item{entity_type}{character}
+\item{entity_type}{character (single-length) to represent the table to query
+for models, e.g. \code{dh_feature}}
 
-\item{bundle}{character}
+\item{bundle}{character vector representing feature types. Only these 
+features will be queried for models of \code{model_version}. May be 'all' to
+query all bundle types.}
 
-\item{ftype}{character feature type}
+\item{ftype}{character vector representing feature types, i.e. the bundle
+subclass. Only these features will be queried for models of
+\code{model_version}. May be 'all' to query all ftypes.}
 
-\item{model_version}{character default 'vahydro-1.0'}
+\item{model_version}{character vector. This will
+be used to determine which models to find on \code{entity_type}}
 
-\item{runid}{run info}
+\item{runid}{Either a character vector of model run ids or a dataframe with
+model_version, runid, metric, and runlabel specified. The data frame is
+generally deprecated in favor of using the individual arguments on this
+function}
 
-\item{metric}{character deprecated in favor of runids array}
+\item{metric}{character vector of requested metrics}
 }
 \value{
-string with executable SQL query
+Character with executable SQL query
 }
 \description{
 Helper function to generate a metric grid via SQL
-featureid,entity_type,bundle,ftype,model_version, runid, metric
+}
+\details{
+This function builds a character vector of executable SQL to query
+ model \code{metric} of version \code{model_version} based on user input.
+ Used in \code{hydrotools::om_vahydro_metric_grid()}
 }
 \examples{
-NA
-}
-\seealso{
-NA
+entity_type <- 'dh_feature'
+featureid <- 'all'
+bundle <- 'all'
+ftype <- 'all'
+model_version <- 'vahydro-1.0'
+runid <- c('runid_600','runid_400')
+metric <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg")
+om_vahydro_metric_grid_sql(featureid,entity_type,bundle,
+  ftype,model_version, runid, metric) 
 }
