@@ -152,7 +152,7 @@ om_vahydro_metric_grid <- function (
     if(!all(unique(runlabel) %in% names(alldata))){
       missingCols <- unique(runlabel)[!(unique(runlabel) %in% names(alldata))]
       message("The following columns returned no metrics from the database: ",paste(missingCols, collapse = ", "))
-      alldata[,missingCols] <- NA
+      alldata[,missingCols] <- NA_real_
     }
   }
   
