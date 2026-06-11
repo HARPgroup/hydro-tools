@@ -8,6 +8,7 @@ RomMetricNetwork <- R6::R6Class(
     dest_node_col = NA,
     src_node_col = NA,
     network_data = NA,
+    network_graph = NA
     
     
     #' @description
@@ -48,6 +49,7 @@ RomMetricNetwork <- R6::R6Class(
           entity_type = self$entity_type,
           ds = self$ds
         )
+        
         #Get network mapping for all returned features
         all_nodes <- self$get_om_rseg_node(df = om_data)
         om_data$src_node <- all_nodes$src_node
@@ -57,6 +59,7 @@ RomMetricNetwork <- R6::R6Class(
         self$dest_node_col <- "dest_node"
         self$src_node_col <- "src_node"
         
+        
       }else if(inherits(self$datasource,"data.frame")){
         if(is.na(self$dest_node_col) | is.na(self$src_node_col)){
           warning("Source and destination nodes must be provided for datasource
@@ -65,6 +68,17 @@ RomMetricNetwork <- R6::R6Class(
         #Set object on node
         self$network_data <- self$datasource
       }
+      
+      # Create igraph directed network where each element in the vector flows to
+      # the next element
+      edges <- c(
+        rbind(
+          self$network_data[,self$src_node_col],
+          self$network_data[,self$dest_node_col]
+        )
+      )
+      #Create the directed graph from igraph
+      self$network_graph <- igraph::make_graph(edges, directed = TRUE)
       
     },
     get_om_rseg_node = function(df, om_rseg_col = "riverseg",
@@ -99,6 +113,12 @@ RomMetricNetwork <- R6::R6Class(
         #river segment to indicate the model is on that node
         join_data$src_node <- gsub("(.+)_(.+)_(.+)","\\2",df[,om_rseg_col])
         join_data$dest_node <- gsub("(.+)_(.+)_(.+)","\\3",df[,om_rseg_col])
+        
+        #If data is missing a riversegment, destination node will not work so
+        #set to hydrocode
+        join_data$src_node[is.na(join_data$riverseg) | join_data$riverseg == ""] <- 
+          join_data[is.na(join_data$riverseg) | join_data$riverseg == "",om_hydrocode_col]
+        
         #For non-watersheds, the destination node is the riversegment its in
         #(src_node above) and the source is the name of the model
         join_data$dest_node[join_data$bundle != "watershed"] <- 
@@ -122,21 +142,47 @@ RomMetricNetwork <- R6::R6Class(
       self$network_data[,self$dest_node_col] <- allids_numeric[match(self$network_data[,self$dest_node_col],allids)]
     },
     
-    set_upstream_nodes = function(){
-      # #fn_upstream - can this work on numeric columns?
-      # library(igraph)
-      # 
-      # # 1. Create a dummy directed network (e.g., a river flow or dependency graph)
-      # edges <- c("A", "B",  # A flows to B
-      #            "B", "C",  # B flows to C
-      #            "D", "B",  # D flows to B
-      #            "E", "A")  # E flows to A
-      # g <- make_graph(edges, directed = TRUE)
-      # 
-      # # 2. Find all upstream nodes for target node "C"
-      # target_node <- "C"
-      # upstream_dfs <- dfs(g, root = target_node, mode = "in", unreachable = FALSE)$order
-      # 
+    get_node_relation = function(direction = "upstream", value = NA){
+      #If user has provided a value and the value is a column name in the
+      #network data, assign and attribute to the graph matching to ensure proper
+      #order
+      g <- self$network_graph
+      if(!is.na(value) && value %in% names(self$network_data)){
+        # g <- igraph::set_vertex_attr(
+        #   graph = g,
+        #   name = value,
+        #   value = self$network_data[match(igraph::as_ids(igraph::V(g)),
+        #                                   self$network_data[,self$src_node_col]),
+        #                             value]
+        # )
+        igraph::V(g)$value <- self$network_data[match(igraph::as_ids(igraph::V(g)),
+                                                      self$network_data[,self$src_node_col]),
+                                                value]
+      }
+      
+      #Set the direction variable for a depth first search in igraph
+      direction <- switch(direction, upstream = "in", downstream = "out")
+      
+      #For each vertex, find all upstream and downstream vertex
+      allSearch <- mapply(
+        FUN = function(target_node, direction, inetwork){
+          #Find fastest way upstream
+          depths <- igraph::dfs(inetwork, root = target_node,
+                                mode = direction, unreachable = FALSE)
+          #If value is set, return the value attribute set of the vertices of
+          #the graph; otherwise, return the vertices
+          if(!is.null(V(inetwork)$value)){
+            out <- igraph::V(inetwork)$value[depths$order]
+          }else{
+            out <- igraph::as_ids(depths$order)
+          }
+          return(out)
+        }, 
+        target_node = self$network_data[,self$src_node_col],
+        MoreArgs = list(inetwork = g, direction = direction)
+      )
+      
+      return(allSearch)
     },
     
     
@@ -180,10 +226,21 @@ self <- RomMetricNetwork$new(
   ds = ds,
   datasource = "om",
   metrics = c('Qout','wd_cumulative_mgd','l90_Qout', 'Qavailable_90_mgd'),
-  runid = c("runid_400", "runid_600"),
+  runids = c("runid_400", "runid_600"),
   featureid = 'all',
   bundle = 'all',
   ftype = 'all',
   model_version = 'vahydro-1.0',
 )
 View(self$network_data)
+#Need to check a few of these against fn_upstream.ALL and fn_downstream.ALL
+#Need to also consider this is only considering itself. It DOES NOT consider the
+#full riversegment network
+test1 <- self$get_node_relation(value = "riverseg")
+self$set_numeric_nodes()
+test2 <- self$get_node_relation(value = "riverseg")
+
+#Proof equality:
+names(test1) <- NULL
+all.equal(unlist(test1)[order(unlist(test1))], unlist(test2)[order(unlist(test2))])
+
