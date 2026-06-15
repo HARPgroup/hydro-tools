@@ -50,6 +50,7 @@ Collate:
     'RomDataSource.R'
     'RomEntity.R'
     'RomFeature.R'
+    'RomMetricNetwork.R'
     'RomProperty.R'
     'RomPropertyTree.R'
     'RomTS.R'

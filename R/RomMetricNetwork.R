@@ -8,7 +8,7 @@ RomMetricNetwork <- R6::R6Class(
     dest_node_col = NA,
     src_node_col = NA,
     network_data = NA,
-    network_graph = NA
+    network_graph = NA,
     
     
     #' @description
@@ -26,7 +26,8 @@ RomMetricNetwork <- R6::R6Class(
       dest_node_col = self$dest_node_col,
       src_node_col = self$src_node_col,
       entity_type = self$entity_type,
-      entity_id_col = self$entity_id_col
+      entity_id_col = self$entity_id_col, 
+      force_unique_src = FALSE
     ){
       #Store data passed by user
       self$handle_config(
@@ -55,18 +56,26 @@ RomMetricNetwork <- R6::R6Class(
         om_data$src_node <- all_nodes$src_node
         om_data$dest_node <- all_nodes$dest_node
         #Set object on node
-        self$network_data <- om_data
         self$dest_node_col <- "dest_node"
         self$src_node_col <- "src_node"
         
-        
       }else if(inherits(self$datasource,"data.frame")){
+          om_data <- self$datasource
         if(is.na(self$dest_node_col) | is.na(self$src_node_col)){
           warning("Source and destination nodes must be provided for datasource
-                  = data frame.")
+                  = data frame. If src_col set to 'riverseg', this object will try 
+                  standard om network eveluation")
+        }else if(self$src_node_col == "riverseg"){
+          all_nodes <- self$get_om_rseg_node(df = om_data)
+          om_data$src_node <- all_nodes$src_node
+          om_data$dest_node <- all_nodes$dest_node
         }
-        #Set object on node
-        self$network_data <- self$datasource
+      }
+      #Set object on node
+      self$network_data <- om_data
+      #Force unique ids if user wants
+      if(force_unique_src){
+        self$force_unique_src_ids()
       }
       
       # Create igraph directed network where each element in the vector flows to
@@ -114,6 +123,13 @@ RomMetricNetwork <- R6::R6Class(
         join_data$src_node <- gsub("(.+)_(.+)_(.+)","\\2",df[,om_rseg_col])
         join_data$dest_node <- gsub("(.+)_(.+)_(.+)","\\3",df[,om_rseg_col])
         
+        #For old school naming convention like OR3_7740_8271_catawba we append
+        #remaining characters onto the src id and ensure proper dest id
+        join_data$src_node[grepl("(.+)_(.+)_(.+)_(.+)", df[,om_rseg_col])] <- 
+          gsub("(.+)_(.+)_(.+)_(.+)", "\\2_\\4", df[grepl("(.+)_(.+)_(.+)_(.+)", df[,om_rseg_col]) ,om_rseg_col])
+        join_data$dest_node[grepl("(.+)_(.+)_(.+)_(.+)", df[,om_rseg_col])] <- 
+          gsub("(.+)_(.+)_(.+)_(.+)", "\\3", df[grepl("(.+)_(.+)_(.+)_(.+)", df[,om_rseg_col]) ,om_rseg_col])
+        
         #If data is missing a riversegment, destination node will not work so
         #set to hydrocode
         join_data$src_node[is.na(join_data$riverseg) | join_data$riverseg == ""] <- 
@@ -131,15 +147,32 @@ RomMetricNetwork <- R6::R6Class(
         )
       }
     },
-    set_numeric_nodes = function(){
+    force_unique_src_ids = function(){
+      #If user wants to ensure all source ids are unique, add iterator to node ids
+      it <- 1
+      while(any(duplicated(self$network_data[,self$src_node_col]))){
+        self$network_data[,self$src_node_col][duplicated(self$network_data[,self$src_node_col])] <- 
+          paste0(self$network_data[,self$src_node_col][duplicated(self$network_data[,self$src_node_col])], "_", it)
+        it <- it + 1
+      }
+    },
+    set_numeric_nodes = function(force_unique_src_ids = FALSE){
       #Convert src_node_col and dest_node_col to numeric fields
       allids <- factor(c(self$network_data[,self$src_node_col],self$network_data[,self$dest_node_col]))
       allids_numeric <- as.integer(allids)
-      
-      # self$network_data$src_node_num <- allids_numeric[match(self$network_data[,self$src_node_col],allids)]
-      # self$network_data$dest_node_num <- allids_numeric[match(self$network_data[,self$dest_node_col],allids)]
+      #Update source and destination node columns with integer ids
       self$network_data[,self$src_node_col] <- allids_numeric[match(self$network_data[,self$src_node_col],allids)]
       self$network_data[,self$dest_node_col] <- allids_numeric[match(self$network_data[,self$dest_node_col],allids)]
+      
+      #Update the igraph with numeric ids
+      edges <- c(
+        rbind(
+          self$network_data[,self$src_node_col],
+          self$network_data[,self$dest_node_col]
+        )
+      )
+      #Create the directed graph from igraph
+      self$network_graph <- igraph::make_graph(edges, directed = TRUE)
     },
     
     get_node_relation = function(direction = "upstream", value = NA){
@@ -148,16 +181,14 @@ RomMetricNetwork <- R6::R6Class(
       #order
       g <- self$network_graph
       if(!is.na(value) && value %in% names(self$network_data)){
-        # g <- igraph::set_vertex_attr(
-        #   graph = g,
-        #   name = value,
-        #   value = self$network_data[match(igraph::as_ids(igraph::V(g)),
-        #                                   self$network_data[,self$src_node_col]),
-        #                             value]
-        # )
-        igraph::V(g)$value <- self$network_data[match(igraph::as_ids(igraph::V(g)),
-                                                      self$network_data[,self$src_node_col]),
-                                                value]
+        g <- igraph::set_vertex_attr(
+          graph = g,
+          name = value,
+          value = self$network_data[match(igraph::as_ids(igraph::V(g)),
+                                          self$network_data[,self$src_node_col]),
+                                    value]
+        )
+        self$network_graph <- g
       }
       
       #Set the direction variable for a depth first search in igraph
@@ -165,25 +196,96 @@ RomMetricNetwork <- R6::R6Class(
       
       #For each vertex, find all upstream and downstream vertex
       allSearch <- mapply(
-        FUN = function(target_node, direction, inetwork){
+        FUN = function(target_node, direction, inetwork, value){
           #Find fastest way upstream
           depths <- igraph::dfs(inetwork, root = target_node,
                                 mode = direction, unreachable = FALSE)
           #If value is set, return the value attribute set of the vertices of
           #the graph; otherwise, return the vertices
-          if(!is.null(V(inetwork)$value)){
-            out <- igraph::V(inetwork)$value[depths$order]
+          if(!is.null(igraph::vertex_attr(g,value))){
+            out <- igraph::vertex_attr(g,value)[depths$order]
           }else{
             out <- igraph::as_ids(depths$order)
           }
           return(out)
         }, 
         target_node = self$network_data[,self$src_node_col],
-        MoreArgs = list(inetwork = g, direction = direction)
+        MoreArgs = list(inetwork = g, direction = direction, value = value)
       )
       
       return(allSearch)
     },
+    
+    calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
+      #Store data frame with network data
+      network_data <- self$network_data
+      #Create columns for a cumulative allocation and a new WA (in mgd)
+      network_data[,out_col_name] <- 0
+      
+      # Find the upstream segments for each nod in network_data. Store as a list
+      # col on network_data
+      network_data$upstream_nodes <- self$get_node_relation()
+      #Create a column that indicates if a node is completed
+      network_data$calculations_completed <- FALSE
+      it <- 0
+      #Run a loop on each node that checks to see if that watershed has been
+      #mark completed and, if not, iterates through it's upstream nodes
+      #beginning at the top and moving downstream. This nested while loop within
+      #the broader for loop allows network_data to be completely disorganized
+      #and the network math will still be correct.
+      for (j in 1:nrow(network_data)) {
+        if(network_data$calculations_completed[j]){
+          next
+        }else{
+          #If not completed, find just this whole watershed in network_data
+          #incluing upstream segments. In case of non-unique source nodes, we
+          #check that the node is in the upstream nodes and its destination node
+          #is also in upstream nodes OR both the source and destination node are
+          #equal to this row
+          thisBasin <- network_data[network_data[,self$src_node_col] %in% network_data$upstream_nodes[[j]] &
+                                      network_data[,self$dest_node_col] %in% network_data$upstream_nodes[[j]] |
+                                      (network_data[,self$src_node_col] == network_data[j,self$src_node_col] &
+                                         network_data[,self$dest_node_col] == network_data[j,self$dest_node_col]),]
+          #While any row in thisBasin is not yet mark completed, run a for
+          #loop that iterates through thisBasin and totals the newAlloation
+          #and adjustedWA when all subwatersheds have been run. This will
+          #first run for headwaters, then the while loop will iterate and the
+          #for loop will effectively only run second order streams and so on
+          while(any(!thisBasin$calculations_completed)){
+            for (k in 1:nrow(thisBasin)) {
+              #if thisBasin$upstream_nodes is only one segment and identical to
+              #src_id, its a headwater and can be completed now
+              if(identical(thisBasin$upstream_nodes[[k]],thisBasin[k,self$src_node_col])){
+                thisBasin[k,out_col_name] <- thisBasin[k,value_col]
+                thisBasin$calculations_completed[k] <- TRUE
+              }else if(
+                all(
+                  thisBasin$calculations_completed[match(thisBasin$upstream_nodes[[k]], thisBasin[,self$src_node_col])] |
+                  thisBasin$upstream_nodes[[k]] == thisBasin[k, self$src_node_col]
+                )
+              ){
+                #Otherwise, only run a basin if all the segments in
+                #upstream_nodes has either been mark completed already or is
+                #this segment
+                thisBasin[k,out_col_name] <- sum(thisBasin[thisBasin[,self$src_node_col] %in% thisBasin$upstream_nodes[[k]], value_col])
+                thisBasin$calculations_completed[k] <- TRUE
+              }
+            }
+            #Total number of while loop iterations, for record keeping
+            #purposes but not used
+            it <- it + 1
+          }
+          #Find where source and destination match in both data frames
+          data_lookup <- match(paste0(thisBasin[,self$src_node_col], thisBasin[,self$dest_node_col]), paste0(network_data[,self$src_node_col],network_data[,self$dest_node_col]))
+          #Store data in network_data
+          network_data[data_lookup,out_col_name] <- thisBasin[,out_col_name]
+          network_data$calculations_completed[data_lookup] <- thisBasin$calculations_completed
+          
+        }
+      }
+      return(network_data)
+    },
+    
     
     
     #' @description
@@ -231,6 +333,7 @@ self <- RomMetricNetwork$new(
   bundle = 'all',
   ftype = 'all',
   model_version = 'vahydro-1.0',
+  force_unique_src = TRUE
 )
 View(self$network_data)
 #Need to check a few of these against fn_upstream.ALL and fn_downstream.ALL
@@ -239,6 +342,16 @@ View(self$network_data)
 test1 <- self$get_node_relation(value = "riverseg")
 self$set_numeric_nodes()
 test2 <- self$get_node_relation(value = "riverseg")
+
+self$network_data$newdist <- 1
+test2 <- self$calc_cumulative("newdist")
+all(lengths(test$upstream_nodes) == test$cumultive_sum )
+
+
+#Bengees branch reservoir featid 617491 and South Fork Powell River - Below Big Cherry Reservoir featureid 477140
+# cd /opt/model/p53/p532c-sova/
+# cbp basingen.csh subsheds 8880
+# cbp get_riversegs TU3_8880_9230  
 
 #Proof equality:
 names(test1) <- NULL
