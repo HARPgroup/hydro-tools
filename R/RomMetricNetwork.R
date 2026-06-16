@@ -76,6 +76,10 @@ RomMetricNetwork <- R6::R6Class(
       #Force unique ids if user wants
       if(force_unique_src){
         self$force_unique_src_ids()
+      }else if(any(duplicated(self$network_data[,self$src_node_col]))){
+        message("Non-unique source nodes found. Use the
+        self$force_unique_src_ids() method to force uniqueness. With
+        non-unique src_ids, some cumulative calculations may be counter-inituitive")
       }
       
       # Create igraph directed network where each element in the vector flows to
@@ -175,7 +179,7 @@ RomMetricNetwork <- R6::R6Class(
       self$network_graph <- igraph::make_graph(edges, directed = TRUE)
     },
     
-    get_node_relation = function(direction = "upstream", value = NA){
+    get_node_relation = function(direction = "upstream", value = NA, src_nodes = "all"){
       #If user has provided a value and the value is a column name in the
       #network data, assign and attribute to the graph matching to ensure proper
       #order
@@ -194,6 +198,11 @@ RomMetricNetwork <- R6::R6Class(
       #Set the direction variable for a depth first search in igraph
       direction <- switch(direction, upstream = "in", downstream = "out")
       
+      if(any(src_nodes == "all")){
+        target_node <- self$network_data[,self$src_node_col]
+      }else{
+        target_node <- src_nodes
+      }
       #For each vertex, find all upstream and downstream vertex
       allSearch <- mapply(
         FUN = function(target_node, direction, inetwork, value){
@@ -209,11 +218,39 @@ RomMetricNetwork <- R6::R6Class(
           }
           return(out)
         }, 
-        target_node = self$network_data[,self$src_node_col],
+        target_node = target_node,
         MoreArgs = list(inetwork = g, direction = direction, value = value)
       )
       
       return(allSearch)
+    },
+    
+    extact_node_network = function(src_node, dest_node = NA, direction = "upstream"){
+      node_relation <- self$get_node_relation(direction, src_nodes = src_node)
+      #Store data frame with network data
+      network_data <- self$network_data
+      
+      if(is.na(dest_node)){
+        #If now dest_node specified, assume src_node is unique and return first
+        #instance of matching src node only but warn user if multiple found
+        thisNode <- self$network_data[self$network_data[,self$src_node_col] == src_node,]
+        if(nrow(thisNode) > 1){
+          thisNode <- thisNode[1,]
+          message("Multiple src_nodes found with id ",src_node," using only the first")
+        }
+      }else{
+        #If a destination node is specified, find the node with the matching src
+        #and destination nodes
+        thisNode <- self$network_data[self$network_data[,self$src_node_col] == src_node &
+                                        self$network_data[,self$dest_node_col] == dest_node,]
+      }
+      
+      thisNetwork <- network_data[(network_data[,self$src_node_col] %in% node_relation &
+                                  network_data[,self$dest_node_col] %in% node_relation) |
+                                  (network_data[,self$src_node_col] == thisNode[,self$src_node_col] &
+                                     network_data[,self$dest_node_col] == thisNode[,self$dest_node_col]),]
+      
+      return(thisNetwork)
     },
     
     calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
@@ -242,8 +279,8 @@ RomMetricNetwork <- R6::R6Class(
           #check that the node is in the upstream nodes and its destination node
           #is also in upstream nodes OR both the source and destination node are
           #equal to this row
-          thisBasin <- network_data[network_data[,self$src_node_col] %in% network_data$upstream_nodes[[j]] &
-                                      network_data[,self$dest_node_col] %in% network_data$upstream_nodes[[j]] |
+          thisBasin <- network_data[(network_data[,self$src_node_col] %in% network_data$upstream_nodes[[j]] &
+                                      network_data[,self$dest_node_col] %in% network_data$upstream_nodes[[j]]) |
                                       (network_data[,self$src_node_col] == network_data[j,self$src_node_col] &
                                          network_data[,self$dest_node_col] == network_data[j,self$dest_node_col]),]
           #While any row in thisBasin is not yet mark completed, run a for
@@ -286,8 +323,51 @@ RomMetricNetwork <- R6::R6Class(
       return(network_data)
     },
     
+    get_spatial_network <- function(pkid_col = "featureid", value_col = NA, value_label = "value"){
+      
+      network_data <- self$network_data
+      # Join on river segment hydroids and then query dh_feature_fielded for
+      # geometries Filter down the list of features to only match model
+      # results
+      hydroFeats <- dbGetQuery(
+        paste0("SELECT f.hydroid, f.hydrocode, f.name, f.dh_geofield
+                  FROM dh_feature_fielded as f
+                  WHERE f.dh_geofield_geom IS NOT NULL
+                    AND f.hydroid IN (",paste0(network_data[,pkid_col],collapse = ","),")
+                 ORDER BY st_area(f.dh_geofield_geom) DESC
+                 "),
+        conn = ds$connection)
+      
+      #Join in the results data
+      feat_results <- sqldf(
+        paste0(
+          "SELECT *
+           FROM hydroFeats as feat
+           
+           LEFT JOIN network_data as nd
+           ON nd.",pkid_col," = feat.hydroid"
+        )
+      )
+      
+      if(!is.na(value_col)){
+        feat_results$popup <- paste0('Hydrocode: ',feat_results$hydrocode,"<br>",
+                                     "Name: ",feat_results$name,"<br>",
+                                     value_label,round(feat_results[,value_col],4), "<br>" )
+
+        feat_results$label <- paste0('Hydrocode: ',feat_results$hydrocode,"; ",
+                                     value_label,round(feat_results[,value_col],4))
+        feat_results$color <- colorQuantile("RdYlBu",domain = feat_results[,value_col])(feat_results[,value_col])
+      }
+      
+      ## Making it spatial
+      feat_results_sf <- st_as_sf(feat_results, wkt = "dh_geofield", crs = 4326)
+      feat_results_sf <- sf::st_make_valid(feat_results_sf)
+      return(feat_results_sf)
+    },
     
-    
+    render_force_diagram = function(){
+      
+    },
     #' @description
     #' Handles the config passed in initialize to set all fields on the object
     #' by calling \code{self$handle_config_item()}
@@ -333,7 +413,7 @@ self <- RomMetricNetwork$new(
   bundle = 'all',
   ftype = 'all',
   model_version = 'vahydro-1.0',
-  force_unique_src = TRUE
+  force_unique_src = FALSE
 )
 View(self$network_data)
 #Need to check a few of these against fn_upstream.ALL and fn_downstream.ALL
@@ -342,18 +422,26 @@ View(self$network_data)
 test1 <- self$get_node_relation(value = "riverseg")
 self$set_numeric_nodes()
 test2 <- self$get_node_relation(value = "riverseg")
+#Proof equality:
+names(test1) <- NULL
+all.equal(unlist(test1)[order(unlist(test1))], unlist(test2)[order(unlist(test2))])
+
 
 self$network_data$newdist <- 1
 test2 <- self$calc_cumulative("newdist")
-all(lengths(test$upstream_nodes) == test$cumultive_sum )
+all(lengths(test2$upstream_nodes) == test2$cumultive_sum )
 
+self$network_data$upstream_nodes <- test1
+wshd <- self$extact_node_network(src_node = self$network_data$src_node[1])
+wshd <- self$extact_node_network(src_node = self$network_data$src_node[1],
+                                 direction = "downstream")
+
+#Need to test get_spatial_network and build out render_force_diagram
+#THen need to FULLY document RomMetricNetwork and RomMetricAllocation...
 
 #Bengees branch reservoir featid 617491 and South Fork Powell River - Below Big Cherry Reservoir featureid 477140
 # cd /opt/model/p53/p532c-sova/
 # cbp basingen.csh subsheds 8880
 # cbp get_riversegs TU3_8880_9230  
 
-#Proof equality:
-names(test1) <- NULL
-all.equal(unlist(test1)[order(unlist(test1))], unlist(test2)[order(unlist(test2))])
 
