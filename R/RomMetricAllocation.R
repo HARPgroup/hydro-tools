@@ -1,10 +1,84 @@
+# RomMetricAllocation ####
+#' Network Data With Allocationing Object
+#' @title RomMetricAllocation
+#' @description Utility class for examining, querying, and manipulating
+#'   network-style data and adding/subtracting additional allocations
+#' @details This R6 object has standard methods for managing the data and meta
+#'   data related to network-style data allocations like river networks loads.
+#'   This initializes a \code{RomMetricNetwork()} object and creates an
+#'   allocation data frame that adds and subtracts additional loads to initial
+#'   values in network_data to assist in cumulative calculation scenarios.
+#' @importFrom R6 R6Class  
+#' @param value_col Character, defaults to NA. A field in network data from
+#'   \code{RomMetricNetwork$network_data} that contains initial allocations
+#' @return R6 Object of class RomMetricAllocation
+#' @export RomMetricAllocation
+#' @examples \dontrun{
+#' basepath='/var/www/R';
+#' source("/var/www/R/config.R")
+#' self <- RomMetricAllocation$new(
+#'   ds = ds,
+#'   datasource = "om",
+#'   metrics = c('Qout','wd_cumulative_mgd',
+#'   'l90_Qout', 'Qavailable_90_mgd'),
+#'   runids = c("runid_400", "runid_600"),
+#'   featureid = 'all',
+#'   bundle = 'all',
+#'   ftype = 'all',
+#'   model_version = 'vahydro-1.0',
+#'   force_unique_src = TRUE,
+#'   value_col = "Qavailable_90_mgd_runid_600"
+#' )
+#' View(self$network_data)
+#' View(self$allocation_df)
+#' 
+#' self$add_node_allocation(nodes = "all", values = 1)
+#' all.equal((self$network_data$Qavailable_90_mgd_runid_600 + 1),
+#'  self$allocation_df$allocation)
+#' 
+#' self$add_distributed_allocation(nodes = "all", value = 20,
+#'  dist_type = "flat_percent")
+#' all.equal((self$network_data$Qavailable_90_mgd_runid_600 + 1) * 1.2,
+#'  self$allocation_df$allocation)
+#' 
+#' og <- self$allocation_df$allocation[4:6]
+#' self$add_node_allocation(nodes = self$allocation_df$src_node[4:6],
+#'  values = 1:3)
+#' new <- self$allocation_df$allocation[4:6]
+#' all.equal(og + 1:3, new)
+#' 
+#' og <- self$allocation_df$allocation[4:6]
+#' self$add_distributed_allocation(nodes = self$allocation_df$src_node[4:6],
+#'  value = 20, dist_type = "flat_percent")
+#' new <- self$allocation_df$allocation[4:6]
+#' all.equal(og * 1.2, new)
+#' 
+#' chk <- self$add_distributed_allocation(
+#'    value = 20,
+#'    dist_type = "outlet_percent",
+#'    outlet_node = 7260)
+#' 
+#' test <- self$calc_cumulative()
+#' }
 RomMetricAllocation <- R6::R6Class(
   "RomMetricAllocation",
   inherit = RomMetricNetwork,
   public = list(
+    #' @field allocation_df A data frame containing an allocation for each node
+    #'   in network_data as well as a list-col of upstream nodes from
+    #'   \code{get_node_relation()}
     allocation_df = NA,
     
-    initialize = function(..., value_col = NA){
+    #' @description
+    #' Initialize a RomMetricAllocation object by loading in data following
+    #' \code{RomMetricNetwork}. An allocation data frame will be created from
+    #' values of the field value_col in network_data if provided (otherwise
+    #' initialized as 0 for all nodes)
+    #' @param value_col Character, defaults to NA. A field in network data from
+    #'   \code{RomMetricNetwork$network_data} that contains initial allocations
+    #' @param ... Other named arguments supplied to \code{RomMetricNetwork()}
+    #' @return object instance, with fields populated by user values
+    initialize = function(value_col = NA, ...){
       #Initialize a RomMetricNetwork
       super$initialize(...)
       #If a value column is specified, store the data locally
@@ -24,6 +98,16 @@ RomMetricAllocation <- R6::R6Class(
       self$allocation_df$upstream_nodes = self$get_node_relation()
       
     },
+    
+    #' @description
+    #' Add an allocation to allocation_df for 'all' nodes or a vector of nodes
+    #' with provided values
+    #' @param nodes Character. Either 'all' or a vector of nodes to apply values
+    #'   allocations to in allocation_df
+    #' @param values Character. A vector of new allocations to apply to
+    #'   allocation_df for nodes. Must be either single length of the length of
+    #'   nodes (will be applied in order of nodes).
+    #' @return Invisibly returns allocation_df where new allocations are set
     add_node_allocation = function(nodes, values){
       if(any(nodes == "all")){
         if(length(values) != nrow(self$allocation_df) & length(values) != 1){
@@ -36,7 +120,27 @@ RomMetricAllocation <- R6::R6Class(
         self$allocation_df$allocation[match(nodes, self$allocation_df[,self$src_node_col])] <- 
           self$allocation_df$allocation[match(nodes, self$allocation_df[,self$src_node_col])] + values
       }
+      
+      invisible(self$allocation_df)
     },
+    #' @description
+    #' Add an allocation to allocation_df for 'all' nodes or a vector of nodes
+    #' with by increasing allocations by a flat percent or by incrementing
+    #' allocations proportional to positive values at the outlet (e.g. for water
+    #' availability, consume all outlet WA by incrementing loads proportional to
+    #' current WA). The latter method requires outlet_node
+    #' @param nodes Character. Either 'all' or a vector of nodes to apply values
+    #'   allocations to in allocation_df
+    #' @param value Numeric. A vector of PERCENTAGES to increase allocations.
+    #'   Either used in flat multiplication in dist_type = 'flat_percent' or as
+    #'   a percentage of outlet value in 'outlet_percent'.
+    #' @param dist_type Character. Either 'flat_percent' or 'outlet_percent' to
+    #'   determine if value should be applied as a percentage increase of
+    #'   current allocation or as percent of outlet allocation (requires
+    #'   outlet_node)
+    #' @param outlet_node Character. The source ID of the target outlet node for
+    #'   dist_type = 'outlet_percent'
+    #' @return Invisibly returns allocation_df where new allocations are set
     add_distributed_allocation = function(nodes = "all", value,
                                           dist_type = "flat_percent",
                                           outlet_node = NA){
@@ -88,10 +192,18 @@ RomMetricAllocation <- R6::R6Class(
         
         #Add new distributed allocation
         self$add_node_allocation(nodes = wshd_data[,self$src_node_col], values = wshd_data$new_distributed_mgd)
-        
-        invisible(wshd_data)
       }
+      invisible(self$allocation_df)
     },
+    #' @description
+    #' Joins new allocations in allocatoin_df to network_data and runs
+    #' \code{RomMetricNetwork$calc_cumulative()} on network_data
+    #' @param value_col Character. The value in network_data to sum across
+    #'   upstream nodes
+    #' @param out_col_name Character. Default "cumulative_sum" and represents
+    #'   where output network cumulative sum should be stored.
+    #' @return A data frame of network_data now containing a field named by
+    #'   out_col_name for the cumulative sum of the values in value_col
     calc_cumulative = function(value_col = "allocation", out_col_name = "cumultive_sum"){
       #Join allocations onto network data
       self$network_data[,value_col] <- self$allocation_df[match(self$network_data[,self$src_node_col], self$allocation_df[,self$src_node_col]), value_col]
@@ -102,59 +214,3 @@ RomMetricAllocation <- R6::R6Class(
 )#End R6Class()
     
 
-
-basepath='/var/www/R';
-source("/var/www/R/config.R")
-self <- RomMetricAllocation$new(
-  ds = ds,
-  datasource = "om",
-  metrics = c('Qout','wd_cumulative_mgd','l90_Qout', 'Qavailable_90_mgd'),
-  runids = c("runid_400", "runid_600"),
-  featureid = 'all',
-  bundle = 'all',
-  ftype = 'all',
-  model_version = 'vahydro-1.0',
-  force_unique_src = TRUE,
-  value_col = "Qavailable_90_mgd_runid_600"
-)
-View(self$network_data)
-View(self$allocation_df)
-
-self$add_node_allocation(nodes = "all", values = 1)
-all.equal((self$network_data$Qavailable_90_mgd_runid_600 + 1), self$allocation_df$allocation)
-
-self$add_distributed_allocation(nodes = "all", value = 20, dist_type = "flat_percent")
-all.equal((self$network_data$Qavailable_90_mgd_runid_600 + 1) * 1.2, self$allocation_df$allocation)
-
-
-og <- self$allocation_df$allocation[4:6]
-self$add_node_allocation(nodes = self$allocation_df$src_node[4:6], values = 1:3)
-new <- self$allocation_df$allocation[4:6]
-all.equal(og + 1:3, new)
-
-
-og <- self$allocation_df$allocation[4:6]
-self$add_distributed_allocation(nodes = self$allocation_df$src_node[4:6], value = 20, dist_type = "flat_percent")
-new <- self$allocation_df$allocation[4:6]
-all.equal(og * 1.2, new)
-
-chk <- self$add_distributed_allocation(value = 20, dist_type = "outlet_percent",
-                                outlet_node = 7260)
-test2 <- self$allocation_df
-
-
-self <- RomMetricAllocation$new(
-  ds = ds,
-  datasource = "om",
-  metrics = c('Qout','wd_cumulative_mgd','l90_Qout', 'Qavailable_90_mgd'),
-  runids = c("runid_400", "runid_600"),
-  featureid = 'all',
-  bundle = 'all',
-  ftype = 'all',
-  model_version = 'vahydro-1.0',
-  force_unique_src = TRUE
-)
-
-self$add_node_allocation(nodes = "all", values = 1)
-test <- self$calc_cumulative()
-all(lengths(test$upstream_nodes) == test$cumultive_sum )
