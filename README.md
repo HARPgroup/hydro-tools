@@ -108,6 +108,10 @@ Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@d
 This package is in active development.
 
 ## Release notes
+### 1.1.1 06/08/2026
+1. Added `RomMetricNetwork` and child `RomMetricAllocation` R6 objects to allow
+for easier river network calculations, mapping, and tracing.
+
 ### 1.1.0 06/08/2026
 1. `om_vahydro_metric_grid` and the corresponding SQL function have been
 rewritten for clarity and speed
