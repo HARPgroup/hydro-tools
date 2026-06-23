@@ -102,13 +102,14 @@ Begin by cloning the [hydrotools package](https://github.com/HARPgroup/hydro-too
 
 Connor Brogan ([connor.brogan\@deq.virginia.gov](mailto:connor.brogan@deq.virginia.gov){.email}) <br/>
 Rob Burgholzer ([robert.burgholzer\@deq.virginia.gov](mailto:robert.burgholzer@deq.virginia.gov){.email})<br/> 
+Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.virginia.gov){.email}) <br/>
 
 ## Project status
 
 This package is in active development.
 
 ## Release notes
-### 1.1.1 06/08/2026
+### 1.1.1 06/23/2026
 1. Added `RomMetricNetwork` and child `RomMetricAllocation` R6 objects to allow
 for easier river network calculations, mapping, and tracing.
 
