@@ -2,7 +2,7 @@
 % Please edit documentation in R/om_vahydro_metric_grid.R
 \name{om_vahydro_metric_grid}
 \alias{om_vahydro_metric_grid}
-\title{The base class for executable equation based meta-model components.}
+\title{Query Model Metrics}
 \usage{
 om_vahydro_metric_grid(
   metric,
@@ -18,35 +18,66 @@ om_vahydro_metric_grid(
 )
 }
 \arguments{
-\item{metric}{character deprecated in favor of runids array}
+\item{metric}{character vector of requested metrics}
 
-\item{runids}{dataframe with model and run info}
+\item{runids}{Either a character vector of model run ids (in the form
+'runid_600', for example) or a dataframe with model_version, runid, metric,
+and runlabel specified. The data frame is generally deprecated in favor of
+using the individual arguments on this function}
 
-\item{featureid}{integer or 'all'}
+\item{featureid}{integer or 'all', representing which specific features to
+query for models}
 
-\item{entity_type}{character}
+\item{entity_type}{character (single-length) to represent the table to query
+for models, defaults to \code{dh_feature}}
 
-\item{bundle}{character}
+\item{bundle}{character vector representing feature types. Only these 
+features will be queried for models of \code{model_version}. May be 'all' to
+query all bundle types. Defaults to 'watershed'}
 
-\item{ftype}{character feature type}
+\item{ftype}{character vector representing feature types, i.e. the bundle
+subclass. Only these features will be queried for models of
+\code{model_version}. May be 'all' to query all ftypes. Defaults to 'vahydro'}
 
-\item{model_version}{character default 'vahydro-1.0'}
+\item{model_version}{character vector with default 'vahydro-1.0'. This will
+be used to determine which models to find on \code{entity_type}}
 
-\item{base_url}{character deprecated to be replaced by global datasource}
+\item{base_url}{character, deprecated replaced by global datasource}
 
-\item{ds}{datasource object of class RomDataSource}
+\item{ds}{datasource object of class \code{RomDataSource} often created in DEQ
+config files}
 
-\item{debug}{prints out sql of query}
+\item{debug}{Logical. If TRUE, this function will message out the SQL query
+used to find model scenario metrics}
 }
 \value{
-reference class of type openmi.om.equation
+A long-style data frame in which each row represents a model and
+ columns are present for each combination of runid and metric input by user,
+ populated by the model scenario metric value
 }
 \description{
-The base class for executable equation based meta-model components.
+Get scenario model metrics from runids
+}
+\details{
+This function queries a table in the datasource (default dh_feature)
+ for models of \code{model_version} metrics. These metrics are specific to
+ the \code{metric} and \code{runid} provided by user. Each combination of
+ metric and runid will be a separate column in the resulting long-style data
+ frame
 }
 \examples{
-NA
+\dontrun{
+library("hydrotools")
+basepath='/var/www/R'
+source(paste(basepath,'config.R',sep='/'))
+m_version = c('vahydro-1.0')
+runids <- c('runid_600','runid_400')
+metrics <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg"
+om_vahydro_metric_grid(
+ metric = metrics,
+ runids = runid,
+ bundle = "watershed",
+ ftype = "vahydro",
+ ds = ds)
 }
-\seealso{
-NA
 }

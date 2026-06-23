@@ -1,142 +1,203 @@
-#' The base class for executable equation based meta-model components.
-#'
-#' @param metric character deprecated in favor of runids array
-#' @param runids dataframe with model and run info
-#' @param featureid integer or 'all' 
-#' @param entity_type character
-#' @param bundle character 
-#' @param ftype character feature type
-#' @param model_version character default 'vahydro-1.0'
-#' @param base_url character deprecated to be replaced by global datasource
-#' @param ds datasource object of class RomDataSource
-#' @param debug prints out sql of query
-#' @return reference class of type openmi.om.equation
-#' @seealso NA
-#' @export om_vahydro_metric_grid
-#' @examples NA
+#'@name om_vahydro_metric_grid
+#'@title Query Model Metrics
+#'@description Get scenario model metrics from runids
+#'@details This function queries a table in the datasource (default dh_feature)
+#'  for models of \code{model_version} metrics. These metrics are specific to
+#'  the \code{metric} and \code{runid} provided by user. Each combination of
+#'  metric and runid will be a separate column in the resulting long-style data
+#'  frame
+#' @param metric character vector of requested metrics
+#' @param runids Either a character vector of model run ids (in the form
+#'   'runid_600', for example) or a dataframe with model_version, runid, metric,
+#'   and runlabel specified. The data frame is generally deprecated in favor of
+#'   using the individual arguments on this function
+#' @param featureid integer or 'all', representing which specific features to
+#'   query for models
+#' @param entity_type character (single-length) to represent the table to query
+#'   for models, defaults to \code{dh_feature}
+#' @param bundle character vector representing feature types. Only these 
+#'  features will be queried for models of \code{model_version}. May be 'all' to
+#'  query all bundle types. Defaults to 'watershed'
+#' @param ftype character vector representing feature types, i.e. the bundle
+#'   subclass. Only these features will be queried for models of
+#'   \code{model_version}. May be 'all' to query all ftypes. Defaults to 'vahydro'
+#' @param model_version character vector with default 'vahydro-1.0'. This will
+#'   be used to determine which models to find on \code{entity_type}
+#' @param base_url character, deprecated replaced by global datasource
+#' @param ds datasource object of class \code{RomDataSource} often created in DEQ
+#'   config files
+#' @param debug Logical. If TRUE, this function will message out the SQL query
+#'   used to find model scenario metrics
+#'@return A long-style data frame in which each row represents a model and
+#'  columns are present for each combination of runid and metric input by user,
+#'  populated by the model scenario metric value
+#'@examples 
+#'\dontrun{
+#'library("hydrotools")
+#'basepath='/var/www/R'
+#'source(paste(basepath,'config.R',sep='/'))
+#'m_version = c('vahydro-1.0')
+#'runids <- c('runid_600','runid_400')
+#'metrics <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg"
+#'om_vahydro_metric_grid(
+#'  metric = metrics,
+#'  runids = runid,
+#'  bundle = "watershed",
+#'  ftype = "vahydro",
+#'  ds = ds)
+#'}
+#'@export om_vahydro_metric_grid
 om_vahydro_metric_grid <- function (
-  metric,
-  runids,
-  featureid = 'all',
-  entity_type = 'dh_feature',
-  bundle = 'watershed',
-  ftype = 'vahydro',
-  model_version = 'vahydro-1.0',
-  base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
-  ds = FALSE,
-  debug = FALSE
+    metric,
+    runids,
+    featureid = 'all',
+    entity_type = 'dh_feature',
+    bundle = 'watershed',
+    ftype = 'vahydro',
+    model_version = 'vahydro-1.0',
+    base_url = "http://deq1.bse.vt.edu/d.dh/entity-model-prop-level-export",
+    ds = FALSE,
+    debug = FALSE
 ) {
-  alldata = NULL
-  mv_base = NULL
-  for (i in 1:nrow(runids)) {
-    runinfo = runids[i,]
-    if (is.data.frame((runinfo))) {
-      message("Found info")
-      message(runinfo)
-      # user is passing in other params in data frame format
-      runid = as.character(runinfo$runid)
-      if (!is.null(runinfo$model_version)) model_version = as.character(runinfo$model_version)
-      if (!is.null(runinfo$metric)) metric = as.character(runinfo$metric)
-      if (!is.null(runinfo$runlabel)) runlabel = as.character(runinfo$runlabel)
-    } else {
-      # only runid is passed in
-      runid = runinfo
-      runlabel = runid
-    }
-    if (is.null(mv_base)) {
-      # Annotate the first model version here in order to prevent
-      # redundant joins if we are comparing models from 
-      # features that have multiple models in the same version domain
-      # as happens with some facility/riverseg models
-      mv_base <- model_version
-    }
-    runlabel <- stringr::str_replace_all(runlabel, '-', '_')
-    runlabel <- stringr::str_replace_all(runlabel, ' ', '_')
+  #Parse out inputs if user submits a data frame as runinfo (legacy version
+  #mandated this)
+  if (is.data.frame((runids))) {
+    message("Found info")
+    # user is passing in other params in data frame format
+    runid <- as.character(runids$runid)
+    if (!is.null(runids$model_version)) model_version <- unique(as.character(runids$model_version))
+    if (!is.null(runids$metric)) metric <- unique(as.character(runids$metric))
+    #We don't need unique runlabels as we will match these later on
+    if (!is.null(runids$runlabel)) runlabel <- as.character(runids$runlabel)
+  } else {
+    # All arguments passed as vectors, set runid
+    runid <- runids
+  }
+  
+  # Run either odbc query to get model metric data or try auth_read on a REST
+  # service depending on user request
+  if (is.logical(ds)) {
+    # using old method with global expected token.
+    # warn that this is deprecated.
+    message("om_vahydro_metric_grid() called without RomDataSource ")
+    message("Global token is deprecated, please call with parameter ds = [RomDataSource]")
     params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
     url <- paste(base_url,params,sep="/")
-    if (is.logical(ds)) {
-      # using old method with global expected token.
-      # warn that this is deprecated.
-      message("om_vahydro_metric_grid() called without RomDataSource ")
-      message("Global token is deprecated, please call with parameter ds = [RomDataSource]")
-      rawdat <- httr::GET(
-        url,
-        httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-        encode = "xml", httr::content_type("text/csv")
-      );
-      dat <- httr::content(rawdat)
-    } else {
-      if (ds$connection_type == 'odbc') {
-        #message("om_vahydro_metric_grid() called using ODBC ")
-        prop_sql = om_vahydro_metric_grid_sql(featureid,entity_type,bundle,ftype,model_version, runid, metric) 
-        if (debug) {
-          message(prop_sql)
-        }
-        message(paste("retrieving via ODBC"))
-        dat <- DBI::dbGetQuery(conn = ds$connection, prop_sql)
-        #message(paste("returned", nrow(dat),"rows"))
-      } else {
-        message(paste("retrieving ", url))
-        dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
-        #message("om_vahydro_metric_grid() called using http views ")
+    rawdat <- httr::GET(
+      url,
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+      encode = "xml", httr::content_type("text/csv")
+    )
+    dat <- httr::content(rawdat)
+  } else {
+    if (ds$connection_type == 'odbc') {
+      #If odbc, devleop SQL query to send to data base
+      prop_sql <- om_vahydro_metric_grid_sql(featureid,entity_type,bundle,
+                                              ftype,model_version, runid, metric) 
+      #If debug flag is TRUE, show query in message for debugging:
+      if (debug) {
+        message(prop_sql)
       }
-      
+      message(paste("retrieving via ODBC"))
+      #Query ds for metrics
+      dat <- DBI::dbGetQuery(conn = ds$connection, prop_sql)
+    } else {
+      #Deprecated VA Hydro REST service - preserved in case REST is requried
+      #in the future by OIS
+      message(paste("retrieving ", url))
+      dat <- ds$auth_read(url, content_type = "text/csv", delim=',')
     }
-    meta_cols <- c('pid', 'propname', 'hydrocode', 'featureid', 'riverseg')
-    rawdata <- as.data.frame(dat)
-    if (is.null(alldata) ) {
-      alldata = sqldf(
-        paste(
-          "select a.pid, a.propname, a.hydrocode, a.featureid, a.riverseg, a.attribute_value as ",
-          runlabel, 
-          "from rawdata as a "
-        ), method = "raw"
-      )
-    } else {
-      data_cols <- paste(names(alldata)[ !names(alldata) %in% meta_cols],collapse=' ,')
-      mergeq = paste(
-        "select CASE WHEN a.pid is NULL THEN b.pid ELSE a.pid END as pid,
-            CASE WHEN a.propname is null then b.propname ELSE a.propname END AS propname,
-            CASE WHEN a.hydrocode is null THEN b.hydrocode ELSE a.hydrocode END as hydrocode,
-            CASE WHEN a.featureid is null THEN b.featureid ELSE a.featureid END AS featureid,
-            CASE WHEN a.riverseg is null THEN b.riverseg ELSE a.riverseg END AS riverseg,",
-            data_cols, ",",
-            "b.attribute_value as ",
-        runlabel, 
-        "from alldata as a 
-        full join rawdata as b 
-        on (
-          a.featureid = b.featureid
-        "
-      )
-      onclause <- ""
-      if (model_version == mv_base) {
-        mergeq <- paste(mergeq, " and a.pid = b.pid")
-      }
-      mergeq <- paste(mergeq, ")")
-      message(mergeq)
-      alldata = sqldf(
-        mergeq
-      )
+    
+  }
+  #Pivot wider and simplify so that each name/run is a column with the
+  #corresponding metric value
+  alldata <- dat |> 
+    dplyr::select(pid, propname, hydrocode, featureid, riverseg,
+                  run_name, attribute_name, attribute_value) |> 
+    tidyr::pivot_wider(names_from = c(attribute_name, run_name), 
+                       values_from = attribute_value,
+                       names_sep = "_") |> 
+    as.data.frame()
+  
+  #Older versions of VA Hydro metric grid allowed for runlabel specification. In
+  #this case, we need to rename the appropriate columns with the user provided
+  #value
+  if(is.data.frame((runids)) && !is.null(runlabel)){
+    #Create a data frame with the runids and metrics from the names of alldata. 
+    #This preserves the order of the data and ensures proper name replacement
+    df_runid <- gsub(".*_(runid.*)","\\1",names(alldata))
+    df_metric <- gsub("(.*)_runid.*","\\1",names(alldata))
+    df_data <- data.frame(dataname = names(alldata), datarunid = df_runid,
+                          datametric = df_metric)
+    #Join on the user provided runlabels by joining in the runids data frame by
+    #runid and metric
+    join_data <- sqldf::sqldf(
+      "SELECT *
+      FROM df_data as d
+      LEFT JOIN runids as r
+      ON r.runid = d.datarunid
+      AND r.metric = d.datametric"
+    )
+    #Columns like pid and propname will not have a run label, so just set these
+    #equivalent to the base column name stored in dataname
+    join_data$runlabel[is.na(join_data$runlabel)] <- join_data$dataname[is.na(join_data$runlabel)]
+    #Replace all the appropriate column names in order with the user provided
+    #label
+    names(alldata)[match(join_data$dataname, names(alldata))] <- 
+      join_data$runlabel[match(names(alldata), join_data$dataname)]
+    
+    #To ensure consistent performance with legacy form of this function, add
+    #empty columns for any unused runlabels e.g. any metric that is NA for all
+    #features such as a non-existant or not-run metric
+    if(!all(unique(runlabel) %in% names(alldata))){
+      missingCols <- unique(runlabel)[!(unique(runlabel) %in% names(alldata))]
+      message("The following columns returned no metrics from the database: ",paste(missingCols, collapse = ", "))
+      alldata[,missingCols] <- NA_real_
     }
   }
+  
+  #Return the long-style data frame
   return(alldata)
 }
 
-#' Helper function to generate a metric grid via SQL
-#' featureid,entity_type,bundle,ftype,model_version, runid, metric
-#' @param featureid integer or 'all' 
-#' @param entity_type character
-#' @param bundle character 
-#' @param ftype character feature type
-#' @param model_version character default 'vahydro-1.0'
-#' @param runid run info
-#' @param metric character deprecated in favor of runids array
-#' @return string with executable SQL query
-#' @seealso NA
+ 
+#'@name om_vahydro_metric_grid_sql
+#'@title Build model metric SQL
+#'@description Helper function to generate a metric grid via SQL
+#'@details This function builds a character vector of executable SQL to query
+#'  model \code{metric} of version \code{model_version} based on user input.
+#'  Used in \code{hydrotools::om_vahydro_metric_grid()}
+#' @param metric character vector of requested metrics
+#' @param runid Either a character vector of model run ids or a dataframe with
+#'   model_version, runid, metric, and runlabel specified. The data frame is
+#'   generally deprecated in favor of using the individual arguments on this
+#'   function
+#' @param featureid integer or 'all', representing which specific features to
+#'   query for models
+#' @param entity_type character (single-length) to represent the table to query
+#'   for models, e.g. \code{dh_feature}
+#' @param bundle character vector representing feature types. Only these 
+#'  features will be queried for models of \code{model_version}. May be 'all' to
+#'  query all bundle types.
+#' @param ftype character vector representing feature types, i.e. the bundle
+#'   subclass. Only these features will be queried for models of
+#'   \code{model_version}. May be 'all' to query all ftypes. 
+#' @param model_version character vector. This will
+#'   be used to determine which models to find on \code{entity_type}
+#' @return Character with executable SQL query
+#'@examples 
+#'entity_type <- 'dh_feature'
+#'featureid <- 'all'
+#'bundle <- 'all'
+#'ftype <- 'all'
+#'model_version <- 'vahydro-1.0'
+#'runid <- c('runid_600','runid_400')
+#'metric <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg")
+#'om_vahydro_metric_grid_sql(featureid,entity_type,bundle,
+#'   ftype,model_version, runid, metric) 
 #' @export om_vahydro_metric_grid_sql
-#' @examples NA
-om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_version, runid, metric) {
+om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,
+                                        ftype,model_version, runid, metric) {
   prop_sql <- "
     SELECT model.pid AS pid, model.propname as propname, 
     model.propcode AS propcode, 
@@ -165,40 +226,52 @@ om_vahydro_metric_grid_sql <- function(featureid,entity_type,bundle,ftype,model_
     LEFT JOIN dh_variabledefinition 
     ON model.varid = dh_variabledefinition.hydroid
     WHERE model.entity_type = '[entity_type]'
-      AND model.propcode = '[model_version]' 
-      AND scenario.propname = '[runid]' 
-      AND metric.propname = '[metric]' 
+      AND model.propcode IN ([model_version])
+      AND scenario.propname IN ([runid]) 
+      AND metric.propname IN ([metric])
   "
-  if ( (bundle != '') & (bundle != 'all')) {
-    prop_sql <- paste(prop_sql, " AND base_entity.bundle = '[bundle]' ")
+  if ( all(bundle != '') & all(bundle != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.bundle IN ([bundle]) ")
   }
-  if ( (ftype != '') & (ftype != 'all')) {
-    prop_sql <- paste(prop_sql, " AND base_entity.ftype = '[ftype]' ")
+  if ( all(ftype != '') & all(ftype != 'all')) {
+    prop_sql <- paste(prop_sql, " AND base_entity.ftype IN ([ftype]) ")
   }
-  prop_sql <- str_replace_all(prop_sql, "\\[bundle\\]", bundle)
-  prop_sql <- str_replace_all(prop_sql, "\\[entity_type\\]", entity_type)
-  prop_sql <- str_replace_all(prop_sql, "\\[ftype\\]", ftype)
-  prop_sql <- str_replace_all(prop_sql, "\\[model_version\\]", model_version)
-  prop_sql <- str_replace_all(prop_sql, "\\[runid\\]", runid)
-  prop_sql <- str_replace_all(prop_sql, "\\[metric\\]", metric)
+  prop_sql <- gsub("\\[entity_type\\]", entity_type, prop_sql)
+  prop_sql <- gsub("\\[bundle\\]", paste0("'",bundle,"'",collapse = ","), prop_sql)
+  prop_sql <- gsub("\\[ftype\\]", paste0("'",ftype,"'",collapse = ","), prop_sql)
+  prop_sql <- gsub("\\[model_version\\]", paste0("'",model_version,"'",collapse = ","), prop_sql)
+  prop_sql <- gsub("\\[runid\\]", paste0("'",runid,"'",collapse = ","), prop_sql)
+  prop_sql <- gsub("\\[metric\\]", paste0("'",metric,"'",collapse = ", "), prop_sql)
   return(prop_sql)
 }
 
 
+#'@name om_metric_matrix
+#'@title Build om_vahydro_metric_grid data frame input
+#'@description Helper function to generate old-style inputs for
+#'  om_vahydro_metric_grid
+#'@details Builds a data frame of runids, metrics, and runlabels to provide as
+#'  the runids argument in \code{om_vahydro_metric_grid()}
+#'@param metrics character vector of requested metrics
+#'@param runids Either a character vector of model run ids or a dataframe with
+#'   model_version, runid, metric, and runlabel specified. The data frame is
+#'   generally deprecated in favor of using the individual arguments on this
+#'   function
+#'@param m_version character vector. This will
+#'   be used to determine which models to find on \code{entity_type}
+#'@return data frame to provide to \code{om_vahydro_metric_grid()}
+#'@examples 
+#'m_version <- c('vahydro-1.0')
+#'runids <- c('runid_600','runid_400')
+#'metrics <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg")
+#'omgrid_df <- om_metric_matrix(m_version, runids, metrics) 
+#'@export
 om_metric_matrix <- function(m_version, runids, metrics) {
-  df = FALSE
-  for (mv in m_version) {
-    for (r in runids) {
-      for (m in metrics) {
-        dr <- data.frame(mv, r, m, paste0(m,"_", r))
-        if (!is.logical(df)) {
-          df <- rbind(df,dr)
-        } else {
-          df = as.data.frame(dr)
-        }
-      }
-    }
-  }
-  colnames(df) <-  c('model_version','runid','metric','runlabel')
+  df <- data.frame(
+    model_version = rep(m_version, each = length(runids) * length(metrics)),
+    runid = rep(runids, length(metrics) * length(m_version)),
+    metric = rep(rep(metrics,each = length(runids)), length(m_version))
+  )
+  df$runlabel <- paste0(df$metric,"_",df$runid)
   return(df)
 }
