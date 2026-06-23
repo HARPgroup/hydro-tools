@@ -187,6 +187,7 @@ RomMetricNetwork <- R6::R6Class(
           entity_id_col = entity_id_col
         )
       )
+      
       #If user requests datasource = om, use om_vahydro_metric_grid()
       if(inherits(self$datasource, "character") && self$datasource == "om"){
         #Call om_vahydro_metric_grid() and allow either data frame runids input
@@ -302,10 +303,14 @@ RomMetricNetwork <- R6::R6Class(
                                 ds = self$ds){
       if(((inherits(self$datasource, "character") && self$datasource == "om")) ||
               self$src_node_col == "riverseg"){
+        if(!(all(c(om_rseg_col, om_hydrocode_col, om_propname_col, om_featureid_col) %in% names(df)))){
+          warning("Missing columns for om_rseg_node tracing. Need 'riverseg',
+          'hydrocode', 'propname', and 'featureid' columns")
+        }
         #Join in bundle if not present from initialize (which can happen if a
         #data frame was loaded in data source)
         if(!("bundle" %in% names(df))){
-          if(entity_type == "dh_feature_fielded"){
+          if(self$entity_type == "dh_feature_fielded"){
             entity_type <- "dh_feature"
           }else{
             entity_type <- self$entity_type
