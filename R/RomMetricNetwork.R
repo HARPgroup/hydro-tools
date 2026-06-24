@@ -459,7 +459,7 @@ RomMetricNetwork <- R6::R6Class(
                                 mode = direction, unreachable = FALSE)
           #If value is set, return the value attribute set of the vertices of
           #the graph; otherwise, return the vertices
-          if(!is.null(igraph::vertex_attr(g,value))){
+          if(!is.na(value) && !is.null(igraph::vertex_attr(g,value))){
             out <- igraph::vertex_attr(g,value)[depths$order]
           }else{
             out <- igraph::as_ids(depths$order)
