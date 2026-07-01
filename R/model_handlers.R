@@ -363,7 +363,7 @@ ModelElementBase <- R6Class(
                 OR ('", target_custom1, "' = '-1') );"
       )
       message(sql)
-      elids = sqldf(sql, connection=self$ds_om$connection)
+      elids = sqldf::sqldf(sql, connection=self$ds_om$connection)
       return(elids)
     },
     #' @description Render the CIA brief with basic parameters set by user for

@@ -183,7 +183,7 @@ RomFeature <- R6Class(
     get_mps = function () {
       if (self$datasource$connection_type == 'odbc') {
         sql = paste("select * from dh_feature_fielded where parent_id =",self$get_id())
-        mps <- sqldf(sql,connection = self$datasource$connection)
+        mps <- sqldf::sqldf(sql,connection = self$datasource$connection)
         return(mps)
       } else {
         message("get_mps() is not enabled for non-ODBC data sources")

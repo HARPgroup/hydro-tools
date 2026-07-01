@@ -215,10 +215,10 @@ WaterGageBase <- R6::R6Class(
     #'@return A list that returns different data frames from files from the
     #'  webserver defined by omsite
     baseflow_workflow_data = function(omsite = omsite){
-      events_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_stats_",self$gage_id,".csv"))
-      trimmed_events_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_trimmed_stats_",self$gage_id,".csv"))
-      event_summary_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
-      lm_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_regression_df_",self$gage_id,".csv"))
+      events_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_stats_",self$gage_id,".csv"))
+      trimmed_events_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_trimmed_stats_",self$gage_id,".csv"))
+      event_summary_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
+      lm_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_regression_df_",self$gage_id,".csv"))
       
       return(
         list(
