@@ -108,12 +108,12 @@ RomEntity <- R6Class(
       }
       self$load_data(config, load_remote)
     },
-    #' @param config 
+    #' @param config a named list to pass to query
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
       return(config)
     },
-    #' @param config 
+    #' @param config a named list to pass to query
     #' @returns loads the varid
     insure_varid = function(config) {
       # this is used by variable enabled objects properties, timeseries, ...
@@ -261,7 +261,7 @@ RomEntity <- R6Class(
     from_list = function(config) {
       return(TRUE)
     },
-    #' @param config 
+    #' @param config a named list to pass to quer
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {

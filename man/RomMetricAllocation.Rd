@@ -8,16 +8,16 @@ R6 Object of class RomMetricAllocation
 }
 \description{
 Utility class for examining, querying, and manipulating
-  network-style data and adding/subtracting additional allocations
+network-style data and adding/subtracting additional allocations
 }
 \details{
 Network Data With Allocationing Object
 
 This R6 object has standard methods for managing the data and meta
-  data related to network-style data allocations like river networks loads.
-  This initializes a \code{RomMetricNetwork()} object and creates an
-  allocation data frame that adds and subtracts additional loads to initial
-  values in network_data to assist in cumulative calculation scenarios.
+data related to network-style data allocations like river networks loads.
+This initializes a \code{RomMetricNetwork()} object and creates an
+allocation data frame that adds and subtracts additional loads to initial
+values in network_data to assist in cumulative calculation scenarios.
 }
 \examples{
 \dontrun{
@@ -69,180 +69,182 @@ test <- self$calc_cumulative()
 }
 }
 \section{Super class}{
-\code{\link[hydrotools:RomMetricNetwork]{hydrotools::RomMetricNetwork}} -> \code{RomMetricAllocation}
+\code{\link[hydrotools:RomMetricNetwork]{RomMetricNetwork}} -> \code{RomMetricAllocation}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{allocation_df}}{A data frame containing an allocation for each node
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{allocation_df}}{A data frame containing an allocation for each node
 in network_data as well as a list-col of upstream nodes from
 \code{get_node_relation()}}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomMetricAllocation-new}{\code{RomMetricAllocation$new()}}
-\item \href{#method-RomMetricAllocation-add_node_allocation}{\code{RomMetricAllocation$add_node_allocation()}}
-\item \href{#method-RomMetricAllocation-add_distributed_allocation}{\code{RomMetricAllocation$add_distributed_allocation()}}
-\item \href{#method-RomMetricAllocation-calc_cumulative}{\code{RomMetricAllocation$calc_cumulative()}}
-\item \href{#method-RomMetricAllocation-clone}{\code{RomMetricAllocation$clone()}}
+  \itemize{
+    \item \href{#method-RomMetricAllocation-initialize}{\code{RomMetricAllocation$new()}}
+    \item \href{#method-RomMetricAllocation-add_node_allocation}{\code{RomMetricAllocation$add_node_allocation()}}
+    \item \href{#method-RomMetricAllocation-add_distributed_allocation}{\code{RomMetricAllocation$add_distributed_allocation()}}
+    \item \href{#method-RomMetricAllocation-calc_cumulative}{\code{RomMetricAllocation$calc_cumulative()}}
+    \item \href{#method-RomMetricAllocation-clone}{\code{RomMetricAllocation$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="extact_node_network"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-extact_node_network'><code>hydrotools::RomMetricNetwork$extact_node_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="force_unique_src_ids"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-force_unique_src_ids'><code>hydrotools::RomMetricNetwork$force_unique_src_ids()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_node_relation"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_node_relation'><code>hydrotools::RomMetricNetwork$get_node_relation()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_om_rseg_node"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_om_rseg_node'><code>hydrotools::RomMetricNetwork$get_om_rseg_node()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_spatial_network"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_spatial_network'><code>hydrotools::RomMetricNetwork$get_spatial_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="handle_config"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-handle_config'><code>hydrotools::RomMetricNetwork$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="handle_config_item"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-handle_config_item'><code>hydrotools::RomMetricNetwork$handle_config_item()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="render_force_diagram"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-render_force_diagram'><code>hydrotools::RomMetricNetwork$render_force_diagram()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="set_numeric_nodes"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-set_numeric_nodes'><code>hydrotools::RomMetricNetwork$set_numeric_nodes()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="extact_node_network"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-extact_node_network'><code>RomMetricNetwork$extact_node_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="force_unique_src_ids"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-force_unique_src_ids'><code>RomMetricNetwork$force_unique_src_ids()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_node_relation"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_node_relation'><code>RomMetricNetwork$get_node_relation()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_om_rseg_node"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_om_rseg_node'><code>RomMetricNetwork$get_om_rseg_node()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="get_spatial_network"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-get_spatial_network'><code>RomMetricNetwork$get_spatial_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="handle_config"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-handle_config'><code>RomMetricNetwork$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="handle_config_item"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-handle_config_item'><code>RomMetricNetwork$handle_config_item()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="render_force_diagram"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-render_force_diagram'><code>RomMetricNetwork$render_force_diagram()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="set_numeric_nodes"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-set_numeric_nodes'><code>RomMetricNetwork$set_numeric_nodes()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomMetricAllocation-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomMetricAllocation-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a RomMetricAllocation object by loading in data following
+\if{html}{\out{<a id="method-RomMetricAllocation-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomMetricAllocation-initialize}{}}}
+\subsection{\code{RomMetricAllocation$new()}}{
+  Initialize a RomMetricAllocation object by loading in data following
 \code{RomMetricNetwork}. An allocation data frame will be created from
 values of the field value_col in network_data if provided (otherwise
 initialized as 0 for all nodes)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomMetricAllocation$new(value_col = NA, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{value_col}}{Character, defaults to NA. A field in network data from
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricAllocation$new(value_col = NA, ...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{value_col}}{Character, defaults to NA. A field in network data from
 \code{RomMetricNetwork$network_data} that contains initial allocations}
+      \item{\code{...}}{Other named arguments supplied to \code{RomMetricNetwork()}}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance, with fields populated by user values
+  }
+}
 
-\item{\code{...}}{Other named arguments supplied to \code{RomMetricNetwork()}}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance, with fields populated by user values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomMetricAllocation-add_node_allocation"></a>}}
 \if{latex}{\out{\hypertarget{method-RomMetricAllocation-add_node_allocation}{}}}
-\subsection{Method \code{add_node_allocation()}}{
-Add an allocation to allocation_df for 'all' nodes or a vector of nodes
+\subsection{\code{RomMetricAllocation$add_node_allocation()}}{
+  Add an allocation to allocation_df for 'all' nodes or a vector of nodes
 with provided values
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomMetricAllocation$add_node_allocation(nodes, values)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{nodes}}{Character. Either 'all' or a vector of nodes to apply values
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricAllocation$add_node_allocation(nodes, values)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{nodes}}{Character. Either 'all' or a vector of nodes to apply values
 allocations to in allocation_df}
-
-\item{\code{values}}{Character. A vector of new allocations to apply to
+      \item{\code{values}}{Character. A vector of new allocations to apply to
 allocation_df for nodes. Must be either single length of the length of
 nodes (will be applied in order of nodes).}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisibly returns allocation_df where new allocations are set
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns allocation_df where new allocations are set
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomMetricAllocation-add_distributed_allocation"></a>}}
 \if{latex}{\out{\hypertarget{method-RomMetricAllocation-add_distributed_allocation}{}}}
-\subsection{Method \code{add_distributed_allocation()}}{
-Add an allocation to allocation_df for 'all' nodes or a vector of nodes
+\subsection{\code{RomMetricAllocation$add_distributed_allocation()}}{
+  Add an allocation to allocation_df for 'all' nodes or a vector of nodes
 with by increasing allocations by a flat percent or by incrementing
 allocations proportional to positive values at the outlet (e.g. for water
 availability, consume all outlet WA by incrementing loads proportional to
 current WA). The latter method requires outlet_node
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomMetricAllocation$add_distributed_allocation(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricAllocation$add_distributed_allocation(
   nodes = "all",
   value,
   dist_type = "flat_percent",
   outlet_node = NA
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{nodes}}{Character. Either 'all' or a vector of nodes to apply values
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{nodes}}{Character. Either 'all' or a vector of nodes to apply values
 allocations to in allocation_df}
-
-\item{\code{value}}{Numeric. A vector of PERCENTAGES to increase allocations.
+      \item{\code{value}}{Numeric. A vector of PERCENTAGES to increase allocations.
 Either used in flat multiplication in dist_type = 'flat_percent' or as
 a percentage of outlet value in 'outlet_percent'.}
-
-\item{\code{dist_type}}{Character. Either 'flat_percent' or 'outlet_percent' to
+      \item{\code{dist_type}}{Character. Either 'flat_percent' or 'outlet_percent' to
 determine if value should be applied as a percentage increase of
 current allocation or as percent of outlet allocation (requires
 outlet_node)}
-
-\item{\code{outlet_node}}{Character. The source ID of the target outlet node for
+      \item{\code{outlet_node}}{Character. The source ID of the target outlet node for
 dist_type = 'outlet_percent'}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisibly returns allocation_df where new allocations are set
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns allocation_df where new allocations are set
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomMetricAllocation-calc_cumulative"></a>}}
 \if{latex}{\out{\hypertarget{method-RomMetricAllocation-calc_cumulative}{}}}
-\subsection{Method \code{calc_cumulative()}}{
-Joins new allocations in allocatoin_df to network_data and runs
+\subsection{\code{RomMetricAllocation$calc_cumulative()}}{
+  Joins new allocations in allocatoin_df to network_data and runs
 \code{RomMetricNetwork$calc_cumulative()} on network_data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomMetricAllocation$calc_cumulative(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricAllocation$calc_cumulative(
   value_col = "allocation",
   out_col_name = "cumultive_sum"
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{value_col}}{Character. The value in network_data to sum across
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{value_col}}{Character. The value in network_data to sum across
 upstream nodes}
-
-\item{\code{out_col_name}}{Character. Default "cumulative_sum" and represents
+      \item{\code{out_col_name}}{Character. Default "cumulative_sum" and represents
 where output network cumulative sum should be stored.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data frame of network_data now containing a field named by
+out_col_name for the cumulative sum of the values in value_col
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A data frame of network_data now containing a field named by
-  out_col_name for the cumulative sum of the values in value_col
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomMetricAllocation-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomMetricAllocation-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomMetricAllocation$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomMetricAllocation$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricAllocation$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

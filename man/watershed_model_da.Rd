@@ -14,5 +14,5 @@ Find the drainage area from a json model collection.
 }
 \details{
 This function handles the varying area data formats that these models
- have historically used.
+have historically used.
 }

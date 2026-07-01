@@ -31,7 +31,7 @@ query for models}
 \item{entity_type}{character (single-length) to represent the table to query
 for models, defaults to \code{dh_feature}}
 
-\item{bundle}{character vector representing feature types. Only these 
+\item{bundle}{character vector representing feature types. Only these
 features will be queried for models of \code{model_version}. May be 'all' to
 query all bundle types. Defaults to 'watershed'}
 
@@ -52,18 +52,18 @@ used to find model scenario metrics}
 }
 \value{
 A long-style data frame in which each row represents a model and
- columns are present for each combination of runid and metric input by user,
- populated by the model scenario metric value
+columns are present for each combination of runid and metric input by user,
+populated by the model scenario metric value
 }
 \description{
 Get scenario model metrics from runids
 }
 \details{
 This function queries a table in the datasource (default dh_feature)
- for models of \code{model_version} metrics. These metrics are specific to
- the \code{metric} and \code{runid} provided by user. Each combination of
- metric and runid will be a separate column in the resulting long-style data
- frame
+for models of \code{model_version} metrics. These metrics are specific to
+the \code{metric} and \code{runid} provided by user. Each combination of
+metric and runid will be a separate column in the resulting long-style data
+frame
 }
 \examples{
 \dontrun{

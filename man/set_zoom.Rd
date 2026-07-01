@@ -14,5 +14,5 @@ Determine general zoom level for maptiles
 }
 \details{
 This function was taken from \code{nhdplusTools:::set_zoom} verbatim
- and is used to set default zoom levels to grab maptiles background maps
+and is used to set default zoom levels to grab maptiles background maps
 }

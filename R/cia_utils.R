@@ -6,11 +6,10 @@
 #' @param elid Desired elementid
 #' @param ds RomDataSource
 #' @return data frame of info about the target elementid
-#' @import sqldf
 #' @export om_find_dh_elid
 om_find_dh_elid <- function(elid, ds) {
   
-  model_search_elid <- sqldf(
+  model_search_elid <- sqldf::sqldf(
     paste0(
     "select a.name, a.hydrocode, 
    CASE 
@@ -54,7 +53,6 @@ om_find_dh_elid <- function(elid, ds) {
 #' @param elids Desired elementid(s) FALSE retrieves all
 #' @param limit total number of records to return
 #' @return data frame of info about the target elementid
-#' @import sqldf
 #' @export om_model_run_monitor
 om_model_run_monitor <- function(ds_model, minspast=60, elids = FALSE, limit = 100) {
   status_sql = "select a.elementid, a.elemname, b.status_mesg, b.runid, b.host, b.last_updated, 
@@ -95,7 +93,6 @@ om_model_run_monitor <- function(ds_model, minspast=60, elids = FALSE, limit = 1
 #' @param flow_metric Desired flow metric
 #' @param AllSegList A list of all river segments
 #' @return data frame of river segments downstream and upstream of inputed segment
-#' @import sqldf
 #' @export CIA_data
 CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
@@ -121,14 +118,14 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   )
   
   #importing dataframe of river segment metrics
-  wshed_data <- om_vahydro_metric_grid(metric, df)
+  wshed_data <- om_vahydro_metric_grid(metric = NULL, df)
   
   #triming dataframe to just river segments on river of interest
-  cia_data <- sqldf("SELECT * FROM river join wshed_data
+  cia_data <- sqldf::sqldf("SELECT * FROM river join wshed_data
                     WHERE riverseg like riv_seg")
   
   #pull the values that exist from length and subcomp_da (One of the two will be NA for each segment)
-  da_data <- sqldf("SELECT pid, length, sub_length,
+  da_data <- sqldf::sqldf("SELECT pid, length, sub_length,
                     CASE
                     WHEN length is null then sub_length
                     ELSE length
@@ -149,7 +146,7 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
   cia_data$metric_pc <- ((abs(cia_data$Metric_2 - cia_data$Metric_1))/cia_data$Metric_1)*100
   
   #creating column describing - vs + change
-  cia_data <- sqldf("select *, CASE
+  cia_data <- sqldf::sqldf("select *, CASE
                      WHEN Metric_1 > Metric_2 
                      THEN -1 
                      WHEN Metric_2 < Metric_1
@@ -168,7 +165,6 @@ CIA_data <- function(riv_seg, runid1, runid2, flow_metric, AllSegList){
 #' @param AllSegList List of all vahydro river segments
 #' @param cia_data_frame CIA data frame with specific columns
 #' @return data frame of river segments, and associated river miles
-#' @import sqldf
 #' @export fn_river_network
 fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   
@@ -196,7 +192,7 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
       names(river)[names(river) == colnames(river)[1]] <- "riv_seg"
       
       #pulls river data from river segments that match headwater and its downstream segs
-      cia_data_loop <- sqldf("SELECT * FROM river join cia_data_frame
+      cia_data_loop <- sqldf::sqldf("SELECT * FROM river join cia_data_frame
                         WHERE riv_seg like riverseg")
       
       #Adding length segments together to form river mile (distance from headwater) column
@@ -239,7 +235,7 @@ fn_river_network <- function(riv_seg, AllSegList, cia_data_frame){
   cia_data <- cia_data[order(cia_data$rmile, decreasing = TRUE),]
   cia_data$seglist <- 1:nrow(cia_data)
   #Triming to only solumns needed in fn_plot_cia_dend
-  cia_data <- sqldf("SELECT seglist, riverseg, propname, rmile, Metric_1,
+  cia_data <- sqldf::sqldf("SELECT seglist, riverseg, propname, rmile, Metric_1,
                     Metric_2, metric_pc, Metric_change
                     FROM cia_data")
   return(cia_data)
@@ -610,7 +606,7 @@ fn_downstream <- function(riv.seg, AllSegList) {
     Upstream <- which(as.character(ModelSegments$Downstream)==as.character(ModelSegments$RiverSeg[k]))
     NumUp <- ModelSegments$RiverSeg[Upstream]
     ModelSegments[k,6]<- paste(NumUp, collapse = '+')
-    if (hydrotools:::is.empty(ModelSegments[k,6])==TRUE){
+    if (is.empty(ModelSegments[k,6])==TRUE){
       ModelSegments[k,6]<- 'NA'
     } 
     k<-k+1
@@ -681,7 +677,7 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
     )
   }
   message(dsql)
-  rets <- sqldf(
+  rets <- sqldf::sqldf(
     dsql
   )
   return(rets)

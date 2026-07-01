@@ -1,13 +1,14 @@
 Package: hydrotools
 Title: Data processing and accessors for VAHydro
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+License: GPL
 Depends: 
     R (>= 3.5)
-License: GPL
 Encoding: UTF-8
-RoxygenNote: 7.3.2
 Imports: 
     stringr,
     zoo,
@@ -16,9 +17,9 @@ Imports:
     jsonlite,
     ggplot2,
     httr,
+    RCurl,
     graphics,
     flextable,
-    bit64,
     caTools,
     lubridate,
     plyr,
@@ -36,9 +37,12 @@ Imports:
     lmomco,
     e1071,
     elfgen,
-    ggspatial
-Suggests: 
-    dataRetrieval
+    rlang,
+    ggspatial,
+    dataRetrieval,
+    agws
+Remotes:
+  agws=github::HARPgroup/baseflow_storage
 Collate: 
     'CEDSEntity.R'
     'CEDSFacility.R'

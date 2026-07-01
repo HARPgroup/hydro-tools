@@ -573,13 +573,13 @@ fn_get_rest <- function(entity_type, pk, inputs, site, token){
 
 fn_storeprop_vahydro1 = function(site = "http://deq2.bse.vt.edu"){
   # NOT FINISHED - JUST PASTED CODE
-  url <- paste(site,"om/remote/setModelData.php?hash=", sep='/');
-  message (paste("Setting 7Q10 for element ", id, " run id ", rid, " to ", x7q10 , sep = "") )
-  # building the correct url
-  ins_url <- paste(url, hash, "&username=", username, "&elementid=", id, "&runid=", rid, "&dataname=7q10&reporting_frequency=single&dataval=", x7q10, "&starttime=1984-10-01&endtime=2005-09-30&temporal_res=water_year", sep = "")  
-  #shell.exec(alf_url)  # opening the webpage
-  #message(ins_url);
-  readLines(ins_url)
+  # url <- paste(site,"om/remote/setModelData.php?hash=", sep='/');
+  # message (paste("Setting 7Q10 for element ", id, " run id ", rid, " to ", x7q10 , sep = "") )
+  # # building the correct url
+  # ins_url <- paste(url, hash, "&username=", username, "&elementid=", id, "&runid=", rid, "&dataname=7q10&reporting_frequency=single&dataval=", x7q10, "&starttime=1984-10-01&endtime=2005-09-30&temporal_res=water_year", sep = "")  
+  # #shell.exec(alf_url)  # opening the webpage
+  # #message(ins_url);
+  # readLines(ins_url)
 }
 
 #' Retrieve TS data from tsvalues style data frame
@@ -908,7 +908,7 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
 #' @examples NA
 find_name <- function(haystack, needle) {
   # this fn came from https://stackoverflow.com/questions/58400176/r-find-object-by-name-in-deeply-nested-list
-  if (hasName(haystack, needle)) {
+  if (utils::hasName(haystack, needle)) {
     haystack[[needle]]
   } else if (is.list(haystack)) {
     for (obj in haystack) {

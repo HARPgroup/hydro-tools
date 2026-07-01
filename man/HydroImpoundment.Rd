@@ -13,11 +13,11 @@ Utility class for interacting with an impoundment feature/model combo
 Reservoir object
 
 This R6 object has standard methods for managing the data and meta
-  data related to OWS model data for impoundments (often contained in river
-  segment or feature models). These objects may be initialized with OWS model
-  data. The objects will store relevant model data and has methods to load
-  related feautre or model data. Inherits additional methods from
-  \code{ModelElementBase()}.
+data related to OWS model data for impoundments (often contained in river
+segment or feature models). These objects may be initialized with OWS model
+data. The objects will store relevant model data and has methods to load
+related feautre or model data. Inherits additional methods from
+\code{ModelElementBase()}.
 }
 \examples{
 NA
@@ -26,112 +26,111 @@ NA
 WatershedModelNode
 }
 \section{Super class}{
-\code{\link[hydrotools:ModelElementBase]{hydrotools::ModelElementBase}} -> \code{HydroImpoundment}
+\code{\link[hydrotools:ModelElementBase]{ModelElementBase}} -> \code{HydroImpoundment}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-HydroImpoundment-new}{\code{HydroImpoundment$new()}}
-\item \href{#method-HydroImpoundment-ssa_lookup}{\code{HydroImpoundment$ssa_lookup()}}
-\item \href{#method-HydroImpoundment-clone}{\code{HydroImpoundment$clone()}}
+  \itemize{
+    \item \href{#method-HydroImpoundment-initialize}{\code{HydroImpoundment$new()}}
+    \item \href{#method-HydroImpoundment-ssa_lookup}{\code{HydroImpoundment$ssa_lookup()}}
+    \item \href{#method-HydroImpoundment-clone}{\code{HydroImpoundment$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_broadcast_summary"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_broadcast_summary'><code>hydrotools::ModelElementBase$get_broadcast_summary()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_elem_xml"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_elem_xml'><code>hydrotools::ModelElementBase$get_elem_xml()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_feature"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_feature'><code>hydrotools::ModelElementBase$get_feature()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_json_model'><code>hydrotools::ModelElementBase$get_json_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model'><code>hydrotools::ModelElementBase$get_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model_pid"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model_pid'><code>hydrotools::ModelElementBase$get_model_pid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_om_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_om_model'><code>hydrotools::ModelElementBase$get_om_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_run_data"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_run_data'><code>hydrotools::ModelElementBase$get_run_data()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="handle_config"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-handle_config'><code>hydrotools::ModelElementBase$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="load_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-load_json_model'><code>hydrotools::ModelElementBase$load_json_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="om_element_tree"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-om_element_tree'><code>hydrotools::ModelElementBase$om_element_tree()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="render_cia_brief"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-render_cia_brief'><code>hydrotools::ModelElementBase$render_cia_brief()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_broadcast_summary"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_broadcast_summary'><code>ModelElementBase$get_broadcast_summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_elem_xml"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_elem_xml'><code>ModelElementBase$get_elem_xml()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_feature"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_feature'><code>ModelElementBase$get_feature()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_json_model'><code>ModelElementBase$get_json_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model'><code>ModelElementBase$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model_pid"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model_pid'><code>ModelElementBase$get_model_pid()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_om_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_om_model'><code>ModelElementBase$get_om_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_run_data"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_run_data'><code>ModelElementBase$get_run_data()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="handle_config"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-handle_config'><code>ModelElementBase$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="load_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-load_json_model'><code>ModelElementBase$load_json_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="om_element_tree"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-om_element_tree'><code>ModelElementBase$om_element_tree()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="render_cia_brief"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-render_cia_brief'><code>ModelElementBase$render_cia_brief()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-HydroImpoundment-new"></a>}}
-\if{latex}{\out{\hypertarget{method-HydroImpoundment-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a HydroImpoundment() instance, returning an R6 object that is
+\if{html}{\out{<a id="method-HydroImpoundment-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-HydroImpoundment-initialize}{}}}
+\subsection{\code{HydroImpoundment$new()}}{
+  Initialize a HydroImpoundment() instance, returning an R6 object that is
 now populated with model data in its fields through queries of the
 provided ds using the \code{ModelElementBase$initialize()} inherited method.
-This object will also have numerous methods that are described in 
+This object will also have numerous methods that are described in
 \code{?HydroImpoundment()}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{HydroImpoundment$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{HydroImpoundment$new(ds, config = list(), ds_om = NA, site = omsite)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ds}}{RomDataSource object mandatory. This is most often created in
 DEQ config files and will feature connections to local or OWS data
 bases}
-
-\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+      \item{\code{config}}{list of attributes to set, may include pid, hydroid,
 hydrocode, feature, bundle, etc. These will be used in the
 \code{get_model()} and \code{get_feature()} methods to identify the
 users model and feature}
-
-\item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
-
-\item{\code{site}}{URI base for the legacy model scripts assumes global var
+      \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
+      \item{\code{site}}{URI base for the legacy model scripts assumes global var
 omsite exists for default (}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-HydroImpoundment-ssa_lookup"></a>}}
 \if{latex}{\out{\hypertarget{method-HydroImpoundment-ssa_lookup}{}}}
-\subsection{Method \code{ssa_lookup()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{HydroImpoundment$ssa_lookup(
+\subsection{\code{HydroImpoundment$ssa_lookup()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{HydroImpoundment$ssa_lookup(
   storage = FALSE,
   stage = FALSE,
   surface_area = FALSE
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{storage}}{lookup/interpolate by storage}
+      \item{\code{stage}}{lookup/interpolate by stage}
+      \item{\code{surface_area}}{lookup/interpolate by surface area}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    file path of rendered output
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{storage}}{lookup/interpolate by storage}
-
-\item{\code{stage}}{lookup/interpolate by stage}
-
-\item{\code{surface_area}}{lookup/interpolate by surface area}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-file path of rendered output
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-HydroImpoundment-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-HydroImpoundment-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{HydroImpoundment$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{HydroImpoundment$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{HydroImpoundment$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -21,7 +21,7 @@ query for models}
 \item{entity_type}{character (single-length) to represent the table to query
 for models, e.g. \code{dh_feature}}
 
-\item{bundle}{character vector representing feature types. Only these 
+\item{bundle}{character vector representing feature types. Only these
 features will be queried for models of \code{model_version}. May be 'all' to
 query all bundle types.}
 
@@ -47,8 +47,8 @@ Helper function to generate a metric grid via SQL
 }
 \details{
 This function builds a character vector of executable SQL to query
- model \code{metric} of version \code{model_version} based on user input.
- Used in \code{hydrotools::om_vahydro_metric_grid()}
+model \code{metric} of version \code{model_version} based on user input.
+Used in \code{hydrotools::om_vahydro_metric_grid()}
 }
 \examples{
 entity_type <- 'dh_feature'

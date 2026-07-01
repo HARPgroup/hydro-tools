@@ -20,9 +20,9 @@ the following or previous year}
 }
 \value{
 a matrix with the rolling means of all the data combined into columns.
- Each column represents a different rolling average and is either the 1-day,
- 3-day, 7-day, 30-day, or 90-day average. NAs will be present at the start and
- end of each year if \code{mimic.tnc = TRUE}
+Each column represents a different rolling average and is either the 1-day,
+3-day, 7-day, 30-day, or 90-day average. NAs will be present at the start and
+end of each year if \code{mimic.tnc = TRUE}
 }
 \description{
 Calculate centered rolling means four group2 statsistics.  Uses runmean from caTools

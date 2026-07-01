@@ -17,5 +17,5 @@ Check vector for leap years
 }
 \details{
 lapply wrapper for leapYearAssessment(). Used to determine which
-  years in a vector of years are leap years
+years in a vector of years are leap years
 }

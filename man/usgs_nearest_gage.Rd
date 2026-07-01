@@ -4,18 +4,21 @@
 \alias{usgs_nearest_gage}
 \title{usgs_nearest_gage}
 \usage{
-usgs_nearest_gage(watershed_feature, watershed_json)
+usgs_nearest_gage(watershed_feature, watershed_json, ds = ds)
 }
 \arguments{
 \item{watershed_feature}{a valid RomFeature for the watershed of interest}
 
 \item{watershed_json}{a valid json model for the watershed of interest}
+
+\item{ds}{datasource object of class \code{RomDataSource} often created in DEQ
+config files}
 }
 \description{
 Find the closest gage for a watershed feature and model.
 }
 \details{
 This function finds full drainage watersheds that contain a feature,
- and make an area match to choose a gage with the closest drainage area to
- the watershed feature
+and make an area match to choose a gage with the closest drainage area to
+the watershed feature
 }

@@ -7,7 +7,8 @@
 #'   users an easy way to query for a feature and then get additional data like
 #'   measuring points, properties, and spatial information. Inherits additional
 #'   methods from \code{RomEntity}
-#' @importFrom R6 R6Class  
+#' @importFrom R6 R6Class
+#' @importFrom ggspatial layer_spatial
 #' @param datasource optional RomDataSource for remote and local storage
 #'   (required; often provided in DEQ config files)
 #' @param config list of attributes to use to query for the feature. May include

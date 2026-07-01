@@ -19,6 +19,6 @@ Trimmed cumulative impact data frame containing the outlet and all upstream segm
 }
 \description{
 Trims data frame to include only segments upstream of end
-  segment. It is inclusive of the end segment and will thus include the
-  outlet and all upstream segments
+segment. It is inclusive of the end segment and will thus include the
+outlet and all upstream segments
 }

@@ -19,174 +19,184 @@ NA
 NA
 }
 \section{Super class}{
-\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomAdminFeature}
+\code{\link[hydrotools:RomEntity]{RomEntity}} -> \code{RomAdminFeature}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{base_entity_type}}{kind of entity}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+    \item{\code{pk_name}}{the name of this entity's pk column}
 
-\item{\code{name}}{of this entity}
+    \item{\code{name}}{of this entity}
 
-\item{\code{admincode}}{alpha code for this entity from original dataset}
+    \item{\code{admincode}}{alpha code for this entity from original dataset}
 
-\item{\code{ftype}}{feature type}
+    \item{\code{ftype}}{feature type}
 
-\item{\code{adminid}}{unique ID (integer)}
+    \item{\code{adminid}}{unique ID (integer)}
 
-\item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
+    \item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
 
-\item{\code{fstatus}}{entity status}
+    \item{\code{fstatus}}{entity status}
 
-\item{\code{description}}{notes field}
+    \item{\code{description}}{notes field}
 
-\item{\code{mps}}{linked features}
+    \item{\code{mps}}{linked features}
 
-\item{\code{geom}}{feature geometry WKT}
+    \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
-}
-\if{html}{\out{</div>}}
+    \item{\code{base_only}}{\itemize{
+\item how to export to list in case of complex multi table entity and ODBC
+}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomAdminFeature-new}{\code{RomAdminFeature$new()}}
-\item \href{#method-RomAdminFeature-get_id}{\code{RomAdminFeature$get_id()}}
-\item \href{#method-RomAdminFeature-to_list}{\code{RomAdminFeature$to_list()}}
-\item \href{#method-RomAdminFeature-from_list}{\code{RomAdminFeature$from_list()}}
-\item \href{#method-RomAdminFeature-add_mp}{\code{RomAdminFeature$add_mp()}}
-\item \href{#method-RomAdminFeature-clone}{\code{RomAdminFeature$clone()}}
+  \itemize{
+    \item \href{#method-RomAdminFeature-initialize}{\code{RomAdminFeature$new()}}
+    \item \href{#method-RomAdminFeature-get_id}{\code{RomAdminFeature$get_id()}}
+    \item \href{#method-RomAdminFeature-to_list}{\code{RomAdminFeature$to_list()}}
+    \item \href{#method-RomAdminFeature-from_list}{\code{RomAdminFeature$from_list()}}
+    \item \href{#method-RomAdminFeature-add_mp}{\code{RomAdminFeature$add_mp()}}
+    \item \href{#method-RomAdminFeature-clone}{\code{RomAdminFeature$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>hydrotools::RomEntity$delete_props()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save'><code>hydrotools::RomEntity$save()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>hydrotools::RomEntity$set_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>RomEntity$delete()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>RomEntity$delete_props()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>RomEntity$get_prop()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>RomEntity$get_vardef()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>RomEntity$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>RomEntity$insure_varid()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>RomEntity$load_data()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>RomEntity$load_plugin()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>RomEntity$propvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save'><code>RomEntity$save()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>RomEntity$save_field()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>RomEntity$set_prop()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>RomEntity$tsvalues()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomAdminFeature-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomAdminFeature-new}{}}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$new(datasource = NULL, config, load_remote = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-RomAdminFeature-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomAdminFeature-initialize}{}}}
+\subsection{\code{RomAdminFeature$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$new(datasource = NULL, config, load_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{RESTful repository object}
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{load_remote}}{automatically query REST data source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{RESTful repository object}
-
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomAdminFeature-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-get_id}{}}}
-\subsection{Method \code{get_id()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$get_id()}\if{html}{\out{</div>}}
+\subsection{\code{RomAdminFeature$get_id()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$get_id()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    get_id the unique id of this entity alias to remote pkid, subclassed as function
+  }
 }
 
-\subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid, subclassed as function
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomAdminFeature-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-to_list}{}}}
-\subsection{Method \code{to_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$to_list(base_only)}\if{html}{\out{</div>}}
+\subsection{\code{RomAdminFeature$to_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$to_list(base_only)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    list of object attributes suitable for input to new() and from_list() methods
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{base_only}}{include only base table columns (TRUE) or add fields (FALSE)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-list of object attributes suitable for input to new() and from_list() methods
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomAdminFeature-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-from_list}{}}}
-\subsection{Method \code{from_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$from_list(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomAdminFeature$from_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$from_list(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomAdminFeature-add_mp"></a>}}
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-add_mp}{}}}
-\subsection{Method \code{add_mp()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$add_mp(thismp)}\if{html}{\out{</div>}}
+\subsection{\code{RomAdminFeature$add_mp()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$add_mp(thismp)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{thismp}}{mp entity}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    add a connected MP. TBD
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{thismp}}{mp entity}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-add a connected MP. TBD
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomAdminFeature-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomAdminFeature-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomAdminFeature$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomAdminFeature$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomAdminFeature$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

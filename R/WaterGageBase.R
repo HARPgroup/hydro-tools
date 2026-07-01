@@ -8,7 +8,8 @@
 #'   spatial data about a gage, but is not used to query streamflow itself as it
 #'   is instead inherited by subclasses like WaterGageDaily that can query data
 #'   instead
-#' @importFrom R6 R6Class  
+#' @importFrom R6 R6Class 
+#' @importFrom dataRetrieval read_waterdata_monitoring_location readNWISsite
 #' @param config A named list containing the names of fields to set on the
 #'   object. This may contain any of the named public fields on WaterGageBase or
 #'   on the inherited object i.e. on WaterGageDaily
@@ -58,6 +59,12 @@ WaterGageBase <- R6::R6Class(
     #'  Determines what kind of data should be retrieved from USGS: all data or
     #'  only those marked approved or provisional?
     approval_status = "all",
+    #'@field agwrc_lm_m The slope of the linear model of active groundwater
+    #'  recession coefficient AGWRC ~ log(Q). Stored in database.
+    agwrc_lm_m = NA,
+    #'@field agwrc_lm_b The intercept of the linear model of active groundwater
+    #'  recession coefficient AGWRC ~ log(Q). Stored in database.
+    agwrc_lm_b = NA,
     #' @description
     #' Initialize a WaterGageBase() instance populating all fields passed to
     #' object by the named list config. Only valid public fields are populated.
@@ -111,7 +118,7 @@ WaterGageBase <- R6::R6Class(
       if(!is.na(self$gage_id)){
         #Based on dataRetrieval pacakge version, use either new or deprecated
         #NWIS functions
-        if(packageVersion("dataRetrieval") >= "2.7.23") {
+        if(utils::packageVersion("dataRetrieval") >= "2.7.23") {
           #New functions return an sf already. so just parse out drainage area
           #for separate field
           self$gage_data_sf <- dataRetrieval::read_waterdata_monitoring_location(paste0("USGS-",self$gage_id))
@@ -146,7 +153,129 @@ WaterGageBase <- R6::R6Class(
         self$gage_feature <- found_feature
         return(found_feature)
       }
+    },
+    #'@description Read all scenario properties of a model on this object
+    #'  RomEntity
+    #'@param target_entity The RomEntity (RomFeature or RomProperty) that
+    #'  contains the model of interest
+    #'@param model_prop_code The propcode of the model on the feature
+    #'@param scenario_prop_code The scenario propcode on the model property
+    #'@return A data frame of all properties on the model scenario
+    get_model_scenario_props = function(target_entity = self$gage_feature, model_prop_code, scenario_prop_code){
+      #Read data in from data base
+      if(!inherits(target_entity,"RomFeature") && !inherits(target_entity,"RomProperty")){
+        warning("target_entity must be a RomFeature or RomProperty")
+      }
+      model_prop <- target_entity$get_prop(propcode = model_prop_code)
+      if(is.na(model_prop$pid)){
+       warning("No model with propcode ", model_prop_code," found") 
+      }
+      scen_prop <- model_prop$get_prop(propcode = scenario_prop_code)
+      if(is.na(model_prop$pid)){
+        warning("No model scenario with propcode ", scenario_prop_code," found") 
+      }
+      all_props <- scen_prop$propvalues()
+      return(all_props)
+    },
+    #'@description Reads in JSON or csv file from a webserver
+    #'@param omsite The base URL of the webserver, often
+    #'  https://deq1.bse.vt.edu:443
+    #'@param url_resource The remaining path to the file e.g. "/path/to/my.csv"
+    #'@return A data frame of the resource read using \code{read.csv()} or
+    #'  \code{jsonlite::read_json()}
+    read_om_file = function(omsite = omsite, url_resource){
+      if(grepl("\\.json$",url_resource)){
+        out <- jsonlite::read_json(paste0(omsite,url_resource))
+      }else{
+        out <- tryCatch({
+          read.csv(paste0(omsite,url_resource))
+        },
+        warning = function(w){
+          print(w)
+          return(NULL)
+        },
+        error = function(e){
+          print(e)
+          return(NULL)
+        })
+      }
+      return(out)
+    },
+    #' @description Get relevant baseflow workflow data frames from web server
+    #' @details The 2025 - 2027 HARP projects worked on compiling a bash-R
+    #'   workflow that could analyze a gage record and identify periods of
+    #'   baseflow. The recession of these baseflow events were characterized by
+    #'   regressions to compile a relationship of flow vs AGWRC (active ground
+    #'   water recession coefficient). The results of these analyses can be used
+    #'   to create baseflow forecasts. This functions returns all data generated
+    #'   from the AGWS workflow by reading in the relevant data from the VT
+    #'   Apache web server
+    #'@param omsite The URL of the base VT Apache webserver, often defined in
+    #'  /var/www/R/config.R
+    #'@return A list that returns different data frames from files from the
+    #'  webserver defined by omsite
+    baseflow_workflow_data = function(omsite = omsite){
+      events_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_stats_",self$gage_id,".csv"))
+      trimmed_events_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_trimmed_stats_",self$gage_id,".csv"))
+      event_summary_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
+      lm_df <- self$read_om_file(paste0(omsite,"/usgs/agws/baseflow_regression_df_",self$gage_id,".csv"))
+      
+      return(
+        list(
+          events_df = events_df, 
+          trimmed_events_df = trimmed_events_df, 
+          event_summary_df = event_summary_df, 
+          lm_df = lm_df
+        )
+      )
+    },
+    #' @description Query the db for AGWRC regression coefficients
+    #' @details Get the statistical model coefficients to create a relationship
+    #'   of active groundwater recession coefficients (AGWRC) vs log(Flow).
+    #'   These are stored as scenario properties on the feature model. User can
+    #'   optionally return a function that will calculate AGWRC from Q using the
+    #'   regression coefficients, though this funciton inherits data from this
+    #'   object that are not explicitly passed in.
+    #'@param force_refresh logical, defaults to TRUE. Should the data base be
+    #'  queried and the agwrc_lm_m and agwrc_lm_b fields on this object be
+    #'  overwritten?
+    #'@param return_fun logical, defaults to FALSE. Should a function be
+    #'  returned to calculate AGWRC for a given flow?
+    agwrc_fun = function(return_fun = FALSE, force_refresh = TRUE){
+      #If user wishes to reload the agwrc lm coefficients, pull from DB
+      if(force_refresh || (is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
+        #Load feature if not yet loaded
+        if(!inherits(self$gage_feature, "RomFeature")){
+          self$load_wshd_feat()
+        }
+        #Get all AGWRC simple_lm properties for this gage and store the
+        #regression coefficients
+        lm_props <- self$get_model_scenario_props(
+          target_entity = self$gage_feature,
+          model_prop_code = "AGWRC-1.0",
+          scenario_prop_code = "simple_lm")
+        self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
+        self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
+      }
+      #Return a function to calc AGWRC ~ log(Q)
+      if(return_fun){
+        #Is this problematic? Below, in calc_agwrc() lm_props is not defined; it's
+        #an implicit global in the parent.frame of agwrc_fun. We can either accept
+        #this and hope R keeps the parent tidy despite possible values in the
+        #global environment i.e. http://adv-r.had.co.nz/Environments.html 
+        #OR we can write the WHOLE function as a string and use
+        #eval(parse(function_text)) to "sub" in the values for these variables via
+        #conversion to text
+        #https://stackoverflow.com/questions/15260245/r-convert-text-field-to-function
+        message("This function has a implicit/undeclared variable lm_props that
+      is defined in the parent environment (e.g. self$agwrc_fun()). Use at
+      your own risk.")
+        calc_agwrc <- function(Q){
+          out <- self$b + (log(Q) * self$m)
+          return(out)
+        }
+        return(calc_agwrc)
+      }
     }
-    
   )
 )

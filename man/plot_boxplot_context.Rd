@@ -55,8 +55,8 @@ A boxplot of monthly mean flows with highlighted points
 }
 \description{
 Create a boxplot of the monthly metric requested by user at
-  this gage (or of a user input data frame) and then plot the target year
-  as highlighted points on the plot. Often used in OWS to assess
-  potential winter baseflow recharge when using gage data and evaluting
-  between October - March (include_months = c(10,11,12,1,2,3)).
+this gage (or of a user input data frame) and then plot the target year
+as highlighted points on the plot. Often used in OWS to assess
+potential winter baseflow recharge when using gage data and evaluting
+between October - March (include_months = c(10,11,12,1,2,3)).
 }

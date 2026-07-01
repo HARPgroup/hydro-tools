@@ -5,18 +5,18 @@
 \title{Feature entity data object}
 \value{
 Instance of RomFeature populated by returned query attributes or by
-  config inputs
+config inputs
 }
 \description{
 Object for storing a single feature with attribute and
-  timeseries related
+timeseries related
 }
 \details{
 Has standard methods for managing data and meta data for features in
-  the dh_feature table within the OWS database. \code{RomFeature} provides
-  users an easy way to query for a feature and then get additional data like
-  measuring points, properties, and spatial information. Inherits additional
-  methods from \code{RomEntity}
+the dh_feature table within the OWS database. \code{RomFeature} provides
+users an easy way to query for a feature and then get additional data like
+measuring points, properties, and spatial information. Inherits additional
+methods from \code{RomEntity}
 }
 \examples{
 \dontrun{
@@ -30,325 +30,336 @@ feat$plot_feat(TRUE)
 RomProperty
 }
 \section{Super class}{
-\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomFeature}
+\code{\link[hydrotools:RomEntity]{RomEntity}} -> \code{RomFeature}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{base_entity_type}}{kind of entity (general OWS database structure)}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{base_entity_type}}{kind of entity (general OWS database structure)}
 
-\item{\code{pk_name}}{The name of this entity's primary key column that can be
+    \item{\code{pk_name}}{The name of this entity's primary key column that can be
 used as a unique identifier for this entity}
 
-\item{\code{name}}{The name of the feature}
+    \item{\code{name}}{The name of the feature}
 
-\item{\code{hydrocode}}{Code for this entity from original dataset (sometimes
+    \item{\code{hydrocode}}{Code for this entity from original dataset (sometimes
 alpha code)}
 
-\item{\code{ftype}}{Feature type. Depends on the bundle. See hydrotools ReadMe
+    \item{\code{ftype}}{Feature type. Depends on the bundle. See hydrotools ReadMe
 for additional infomraiton but these may include use types and much
 more}
 
-\item{\code{hydroid}}{unique ID (integer) to identify features (primary key)}
+    \item{\code{hydroid}}{unique ID (integer) to identify features (primary key)}
 
-\item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
+    \item{\code{bundle}}{main content type, i.e. facility, well, intake, ...}
 
-\item{\code{fstatus}}{entity status e.g. active, inactive, abandonded, etc.}
+    \item{\code{fstatus}}{entity status e.g. active, inactive, abandonded, etc.}
 
-\item{\code{description}}{notes field}
+    \item{\code{description}}{notes field}
 
-\item{\code{mps}}{linked features that may represent measuring points like
+    \item{\code{mps}}{linked features that may represent measuring points like
 intakes, wells, etc.}
 
-\item{\code{geom}}{feature geometry WKT}
+    \item{\code{geom}}{feature geometry WKT}
 
-\item{\code{geom_CRS}}{What is the coordinate system to use to convert geom
+    \item{\code{geom_CRS}}{What is the coordinate system to use to convert geom
 field to SF?}
 
-\item{\code{feat_sf}}{An SF data frame to represent the feature}
+    \item{\code{feat_sf}}{An SF data frame to represent the feature}
 
-\item{\code{nextdown_id}}{"Downstream" entity where applicable}
+    \item{\code{nextdown_id}}{"Downstream" entity where applicable}
 
-\item{\code{parent_id}}{"Upstream" entity where applicable}
+    \item{\code{parent_id}}{"Upstream" entity where applicable}
 
-\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+    \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
-\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
-}
-\if{html}{\out{</div>}}
+    \item{\code{base_only}}{\itemize{
+\item how to export to list in case of complex multi table entity and ODBC
+}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomFeature-new}{\code{RomFeature$new()}}
-\item \href{#method-RomFeature-get_id}{\code{RomFeature$get_id()}}
-\item \href{#method-RomFeature-load_data}{\code{RomFeature$load_data()}}
-\item \href{#method-RomFeature-to_list}{\code{RomFeature$to_list()}}
-\item \href{#method-RomFeature-from_list}{\code{RomFeature$from_list()}}
-\item \href{#method-RomFeature-get_mps}{\code{RomFeature$get_mps()}}
-\item \href{#method-RomFeature-add_mp}{\code{RomFeature$add_mp()}}
-\item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
-\item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
-\item \href{#method-RomFeature-get_raster_ts}{\code{RomFeature$get_raster_ts()}}
-\item \href{#method-RomFeature-wkt_to_sf}{\code{RomFeature$wkt_to_sf()}}
-\item \href{#method-RomFeature-plot_feat}{\code{RomFeature$plot_feat()}}
-\item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
+  \itemize{
+    \item \href{#method-RomFeature-initialize}{\code{RomFeature$new()}}
+    \item \href{#method-RomFeature-get_id}{\code{RomFeature$get_id()}}
+    \item \href{#method-RomFeature-load_data}{\code{RomFeature$load_data()}}
+    \item \href{#method-RomFeature-to_list}{\code{RomFeature$to_list()}}
+    \item \href{#method-RomFeature-from_list}{\code{RomFeature$from_list()}}
+    \item \href{#method-RomFeature-get_mps}{\code{RomFeature$get_mps()}}
+    \item \href{#method-RomFeature-add_mp}{\code{RomFeature$add_mp()}}
+    \item \href{#method-RomFeature-save}{\code{RomFeature$save()}}
+    \item \href{#method-RomFeature-find_spatial_relations}{\code{RomFeature$find_spatial_relations()}}
+    \item \href{#method-RomFeature-get_raster_ts}{\code{RomFeature$get_raster_ts()}}
+    \item \href{#method-RomFeature-wkt_to_sf}{\code{RomFeature$wkt_to_sf()}}
+    \item \href{#method-RomFeature-plot_feat}{\code{RomFeature$plot_feat()}}
+    \item \href{#method-RomFeature-clone}{\code{RomFeature$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>hydrotools::RomEntity$delete_props()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>hydrotools::RomEntity$set_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>RomEntity$delete()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>RomEntity$delete_props()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>RomEntity$get_prop()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>RomEntity$get_vardef()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>RomEntity$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>RomEntity$insure_varid()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>RomEntity$load_plugin()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>RomEntity$propvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>RomEntity$save_field()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="set_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-set_prop'><code>RomEntity$set_prop()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>RomEntity$tsvalues()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomFeature-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomFeature-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize an instance of RomFeature. This method will create an
+\if{html}{\out{<a id="method-RomFeature-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomFeature-initialize}{}}}
+\subsection{\code{RomFeature$new()}}{
+  Initialize an instance of RomFeature. This method will create an
 instance of RomFeature populated with fields based on the user query
 inputs passed via config. This method first calls the RomEntity inherited
 \code{RomEntity$initialize()} to populate fields then posts the feature
 in the internal feature database in the datasource (via
 \code{self$datasource$set_feature()}).
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$new(datasource = NULL, config, load_remote = FALSE)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$new(datasource = NULL, config, load_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{RESTful repository object}
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{load_remote}}{automatically query REST dataa source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance with populated fields based on user config and
+methods to manipulate the feature
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{RESTful repository object}
-
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{load_remote}}{automatically query REST dataa source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance with populated fields based on user config and
-  methods to manipulate the feature
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_id}{}}}
-\subsection{Method \code{get_id()}}{
-A simple function that returns the primary key associated
-  with this feature. There should be a \code{get_id} on all children of
-  \code{RomEntity} objects to allow easy query
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_id()}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$get_id()}}{
+  A simple function that returns the primary key associated
+with this feature. There should be a \code{get_id} on all children of
+\code{RomEntity} objects to allow easy query
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$get_id()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    get_id the unique id of this entity alias to remote pkid,
+subclassed as function.
+  }
 }
 
-\subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid,
-  subclassed as function.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-load_data}{}}}
-\subsection{Method \code{load_data()}}{
-Populates fields on the object based on the queried results from the
+\subsection{\code{RomFeature$load_data()}}{
+  Populates fields on the object based on the queried results from the
 user config. It will save a copy of the feature to the local
 repository. The feature plugin and variable definitions will be
 loaded automatically as the inherited \code{RomEntity$load_data()} is
 called. The SF field will then be populated by any geometry on the
 feature
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$load_data(config, load_remote)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$load_data(config, load_remote)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{Populated by the config field (provided by user)}
+      \item{\code{load_remote}}{automatically query remote data source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the data from the remote connection
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{Populated by the config field (provided by user)}
-
-\item{\code{load_remote}}{automatically query remote data source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-the data from the remote connection
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-to_list}{}}}
-\subsection{Method \code{to_list()}}{
-Create a list of all the fields on this feature object instance to allow
+\subsection{\code{RomFeature$to_list()}}{
+  Create a list of all the fields on this feature object instance to allow
 easy data sharing with R
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$to_list(base_only = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{base_only}}{include only base table columns (TRUE) or add fields
+(FALSE)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    list of object attributes suitable for input to \code{new()} and
+\code{from_list()} methods
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{base_only}}{include only base table columns (TRUE) or add fields
-(FALSE)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-list of object attributes suitable for input to \code{new()} and
-  \code{from_list()} methods
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-from_list}{}}}
-\subsection{Method \code{from_list()}}{
-Populate fields of this object based on the named entries in
-  list config. Searches specifically for hydroid, name, hydrocode, ftype,
-  bundle, fstatus, dh_geofield, nextdown_id, parent_id
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$from_list(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$from_list()}}{
+  Populate fields of this object based on the named entries in
+list config. Searches specifically for hydroid, name, hydrocode, ftype,
+bundle, fstatus, dh_geofield, nextdown_id, parent_id
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$from_list(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Object instance now with fields populated by config
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Object instance now with fields populated by config
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_mps"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_mps}{}}}
-\subsection{Method \code{get_mps()}}{
-Queries dh_feature_fielded for any entities that have a
-  parent_id equal to this objects ID. These will include a facility's
-  measuring points (wells, intakes, etc.)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_mps()}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$get_mps()}}{
+  Queries dh_feature_fielded for any entities that have a
+parent_id equal to this objects ID. These will include a facility's
+measuring points (wells, intakes, etc.)
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$get_mps()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a dataframe of connected MPs
+  }
 }
 
-\subsection{Returns}{
-a dataframe of connected MPs
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-add_mp"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-add_mp}{}}}
-\subsection{Method \code{add_mp()}}{
-Add a connected MP to local mp storage (mps field). This
-  will hopefully be expanded to include remote saving.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$add_mp(thismp)}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$add_mp()}}{
+  Add a connected MP to local mp storage (mps field). This
+will hopefully be expanded to include remote saving.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$add_mp(thismp)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{thismp}}{mp entity}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    add a connected MP to local mp storage.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{thismp}}{mp entity}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-add a connected MP to local mp storage.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-save}{}}}
-\subsection{Method \code{save()}}{
-Save changes to this feature to remote or local database based on
+\subsection{\code{RomFeature$save()}}{
+  Save changes to this feature to remote or local database based on
 push_remote by first getting all fields via \code{self$to_list()} and
 then subsequently using the \code{self$datasource$post()} as described in
 \code{RomDataSource()}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$save(push_remote = FALSE)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$save(push_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{push_remote}}{update locally only or push to remote database}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{push_remote}}{update locally only or push to remote database}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-find_spatial_relations"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-find_spatial_relations}{}}}
-\subsection{Method \code{find_spatial_relations()}}{
-Find target entities via spatial query of this RomFeature
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$find_spatial_relations(
+\subsection{\code{RomFeature$find_spatial_relations()}}{
+  Find target entities via spatial query of this RomFeature
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$find_spatial_relations(
   target_entity = "dh_feature",
   inputs = list(bundle = NA, ftype = NA),
   operator = "st_contains",
   return_geoms = FALSE,
   query_remote = TRUE,
   plot_results = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{target_entity}}{what type to relate to (default dh_feature)}
-
-\item{\code{inputs}}{Criteria to search for entered as a list key = value
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{target_entity}}{what type to relate to (default dh_feature)}
+      \item{\code{inputs}}{Criteria to search for entered as a list key = value
 format. For instance, the list may contain a bundle or ftype via
 \code{list(bundle = 'watershed', ftype = 'vahydro')}}
-
-\item{\code{operator}}{what type of spatial function to perform to search for
+      \item{\code{operator}}{what type of spatial function to perform to search for
 entities, default to 'st_contains'. Other options include
 'st_contains_centroid' (is the centroid of the other feature contained
 in this feature?),'st_centroid_within' (is the centroid of this feature
 in another feature?), 'overlaps', or 'st_within'}
-
-\item{\code{return_geoms}}{FALSE will return a smaller dataframe by excluding
+      \item{\code{return_geoms}}{FALSE will return a smaller dataframe by excluding
 the geometry fields. "SF" will return an SF and TRUE will return a data
 frame}
-
-\item{\code{query_remote}}{FALSE will search on in local datasource only, TRUE
+      \item{\code{query_remote}}{FALSE will search on in local datasource only, TRUE
 will search the DS connection}
-
-\item{\code{plot_results}}{If TRUE, a plot will be included in the return that
+      \item{\code{plot_results}}{If TRUE, a plot will be included in the return that
 shows the base feature and the related entities returned from the query}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    If plot_results is FALSE, a dataframe or SF dataframe of
+spatially related entities is returned bsaed on returns_geom. If
+plot_results is TRUE, then a list is returned with an entry plot that
+is the ggplot of the feature and queried entities and the other entry,
+spatial_relations, is a data.frame or SF data.frame of the related
+entities
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If plot_results is FALSE, a dataframe or SF dataframe of
-  spatially related entities is returned bsaed on returns_geom. If
-  plot_results is TRUE, then a list is returned with an entry plot that
-  is the ggplot of the feature and queried entities and the other entry,
-  spatial_relations, is a data.frame or SF data.frame of the related
-  entities
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-get_raster_ts"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-get_raster_ts}{}}}
-\subsection{Method \code{get_raster_ts()}}{
-Get raw or summarized raster values for this RomFeature from
-  dh_timeseries_weather using PostGIS
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$get_raster_ts(
+\subsection{\code{RomFeature$get_raster_ts()}}{
+  Get raw or summarized raster values for this RomFeature from
+dh_timeseries_weather using PostGIS
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$get_raster_ts(
   varkey = "prism_mod_daily",
   starttime = FALSE,
   endtime = Sys.Date(),
@@ -356,100 +367,100 @@ Get raw or summarized raster values for this RomFeature from
   aggregate = FALSE,
   metric = "mean",
   touched = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{varkey}}{What variable to retrieve? This should be a varkey that has
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{varkey}}{What variable to retrieve? This should be a varkey that has
 been used to create raster summaries in dh_timeseries_weather. Relevant
 meteorology varkeys include 'prism_mod_daily', 'daymet_mod_daily',
 'nldas2_obs_hourly', 'nldas2_precip_hourly_tiled_16x16',
 'nldas2_precip_daily', 'amalgamate_simple_lm', 'amalgamate_storm_vol'}
-
-\item{\code{starttime}}{begin date-time to limit query (default FALSE to remove a
+      \item{\code{starttime}}{begin date-time to limit query (default FALSE to remove a
 tstime filter)}
-
-\item{\code{endtime}}{last date-time to limit query (default to Sys.Date())}
-
-\item{\code{band}}{which raster band to query (default = 1)?}
-
-\item{\code{aggregate}}{Should data be aggregated and if so, how? FALSE will
+      \item{\code{endtime}}{last date-time to limit query (default to Sys.Date())}
+      \item{\code{band}}{which raster band to query (default = 1)?}
+      \item{\code{aggregate}}{Should data be aggregated and if so, how? FALSE will
 return 1 record for every date. Otheriwse, can use basic aggregate
 functions like mean, min, max to summarize data}
-
-\item{\code{metric}}{default mean, which aspect of the ST_SummaryStats() to return}
-
-\item{\code{touched}}{Defaults to FALSE. Should PostGIS ST_Clip() use the
+      \item{\code{metric}}{default mean, which aspect of the ST_SummaryStats() to return}
+      \item{\code{touched}}{Defaults to FALSE. Should PostGIS ST_Clip() use the
 touched argument to return all raster cells touched by the feature? Or,
 if FALSE, should only pixels that have centroids within the feature be
 considered?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    dataframe of timeseries values
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-dataframe of timeseries values
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-wkt_to_sf"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-wkt_to_sf}{}}}
-\subsection{Method \code{wkt_to_sf()}}{
-Convert the WKT field geom of this entity to an SF data
-  frame for easy R GIS analysis. Will not work if geom field is not
-  populated
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$wkt_to_sf()}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$wkt_to_sf()}}{
+  Convert the WKT field geom of this entity to an SF data
+frame for easy R GIS analysis. Will not work if geom field is not
+populated
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$wkt_to_sf()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, but will try to set the feat_sf field. Will message
+errors if encountered.
+  }
 }
 
-\subsection{Returns}{
-Nothing, but will try to set the feat_sf field. Will message
-  errors if encountered.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-plot_feat"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-plot_feat}{}}}
-\subsection{Method \code{plot_feat()}}{
-Plot this feature on a basic GIS map for QC purposes. If the
-  package ggspatial is loaded, plot may be returned as a ggplot
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$plot_feat(useggplot = TRUE, other_geom = list())}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{useggplot}}{Defaults to TRUE. If TRUE, a ggplot is returned using
+\subsection{\code{RomFeature$plot_feat()}}{
+  Plot this feature on a basic GIS map for QC purposes. If the
+package ggspatial is loaded, plot may be returned as a ggplot
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$plot_feat(useggplot = TRUE, other_geom = list())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{useggplot}}{Defaults to TRUE. If TRUE, a ggplot is returned using
 ggspatial; if FALSE, a plot is sent to the viewer}
-
-\item{\code{other_geom}}{Named list of other SF data frames to include on plot
+      \item{\code{other_geom}}{Named list of other SF data frames to include on plot
 (only used in ggplot)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    If useggplot is FALSE, nothing is returned but a plot is
+printed to the viewer. If useggplot is TRUE, a ggplot object is
+returned
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-If useggplot is FALSE, nothing is returned but a plot is
-  printed to the viewer. If useggplot is TRUE, a ggplot object is
-  returned
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomFeature-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomFeature-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomFeature$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomFeature$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomFeature$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

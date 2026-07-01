@@ -13,9 +13,9 @@ Utility class for interacting with a watershed feature/model combo
 Watershed Model Node data object
 
 . This R6 object has standard methods for managing the data and meta
-  data related to OWS model data. These objects may be initialized with OWS
-  model data. The objects will store relevant model data and has methods to
-  load related feautre or model data.
+data related to OWS model data. These objects may be initialized with OWS
+model data. The objects will store relevant model data and has methods to
+load related feautre or model data.
 }
 \examples{
 NA
@@ -24,357 +24,370 @@ NA
 NA
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
 local data storage or a connection to a database/RESTful service}
 
-\item{\code{ds_om}}{RomDataSource points to legacy model database and may also
+    \item{\code{ds_om}}{RomDataSource points to legacy model database and may also
 be provided in DEQ config file upon request to OWS modelling staff}
 
-\item{\code{hydroid}}{unique ID from dh_feature database to identify the
+    \item{\code{hydroid}}{unique ID from dh_feature database to identify the
 physical feature that is or has been modelled by OWS}
 
-\item{\code{hydrocode}}{non-numeric identifier in dh_feature that often defines
+    \item{\code{hydrocode}}{non-numeric identifier in dh_feature that often defines
 external data source connections or identifiers}
 
-\item{\code{bundle}}{type of feature in dh_feature. See ReadMe for more details.}
+    \item{\code{bundle}}{type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{ftype}}{sub-type of feature in dh_feature. See ReadMe for more details.}
+    \item{\code{ftype}}{sub-type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{feature}}{a \code{RomFeature} entity that has found a valid feature in dh_feature}
+    \item{\code{feature}}{a \code{RomFeature} entity that has found a valid feature in dh_feature}
 
-\item{\code{pid}}{integer identifier of the model as found in dh_properties}
+    \item{\code{pid}}{integer identifier of the model as found in dh_properties}
 
-\item{\code{version}}{descriptive code for the model version. Often 'vahydro-1.0'}
+    \item{\code{version}}{descriptive code for the model version. Often 'vahydro-1.0'}
 
-\item{\code{prop}}{a RomProperty that is defined by the model base property}
+    \item{\code{prop}}{a RomProperty that is defined by the model base property}
 
-\item{\code{json}}{Modelling data (inputs) JSON}
+    \item{\code{json}}{Modelling data (inputs) JSON}
 
-\item{\code{xml}}{as list}
+    \item{\code{xml}}{as list}
 
-\item{\code{elementid}}{An integer identifier of the OM model element}
+    \item{\code{elementid}}{An integer identifier of the OM model element}
 
-\item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
+    \item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
 
-\item{\code{name}}{The model name}
+    \item{\code{name}}{The model name}
 
-\item{\code{riverseg}}{The riverseg code defined for the watershed node in VA
+    \item{\code{riverseg}}{The riverseg code defined for the watershed node in VA
 Hydro OM model (often derived or related to the river segment codes
 used in the CB Watershed Model)}
 
-\item{\code{site}}{URI base for the legacy model scripts assumes global var omsite exists for default}
-}
-\if{html}{\out{</div>}}
+    \item{\code{site}}{URI base for the legacy model scripts assumes global var omsite exists for default}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-ModelElementBase-new}{\code{ModelElementBase$new()}}
-\item \href{#method-ModelElementBase-handle_config}{\code{ModelElementBase$handle_config()}}
-\item \href{#method-ModelElementBase-get_feature}{\code{ModelElementBase$get_feature()}}
-\item \href{#method-ModelElementBase-get_model_pid}{\code{ModelElementBase$get_model_pid()}}
-\item \href{#method-ModelElementBase-get_model}{\code{ModelElementBase$get_model()}}
-\item \href{#method-ModelElementBase-get_om_model}{\code{ModelElementBase$get_om_model()}}
-\item \href{#method-ModelElementBase-get_run_data}{\code{ModelElementBase$get_run_data()}}
-\item \href{#method-ModelElementBase-load_json_model}{\code{ModelElementBase$load_json_model()}}
-\item \href{#method-ModelElementBase-get_json_model}{\code{ModelElementBase$get_json_model()}}
-\item \href{#method-ModelElementBase-get_broadcast_summary}{\code{ModelElementBase$get_broadcast_summary()}}
-\item \href{#method-ModelElementBase-get_elem_xml}{\code{ModelElementBase$get_elem_xml()}}
-\item \href{#method-ModelElementBase-om_element_tree}{\code{ModelElementBase$om_element_tree()}}
-\item \href{#method-ModelElementBase-render_cia_brief}{\code{ModelElementBase$render_cia_brief()}}
-\item \href{#method-ModelElementBase-clone}{\code{ModelElementBase$clone()}}
-}
+  \itemize{
+    \item \href{#method-ModelElementBase-initialize}{\code{ModelElementBase$new()}}
+    \item \href{#method-ModelElementBase-handle_config}{\code{ModelElementBase$handle_config()}}
+    \item \href{#method-ModelElementBase-get_feature}{\code{ModelElementBase$get_feature()}}
+    \item \href{#method-ModelElementBase-get_model_pid}{\code{ModelElementBase$get_model_pid()}}
+    \item \href{#method-ModelElementBase-get_model}{\code{ModelElementBase$get_model()}}
+    \item \href{#method-ModelElementBase-get_om_model}{\code{ModelElementBase$get_om_model()}}
+    \item \href{#method-ModelElementBase-get_run_data}{\code{ModelElementBase$get_run_data()}}
+    \item \href{#method-ModelElementBase-load_json_model}{\code{ModelElementBase$load_json_model()}}
+    \item \href{#method-ModelElementBase-get_json_model}{\code{ModelElementBase$get_json_model()}}
+    \item \href{#method-ModelElementBase-get_broadcast_summary}{\code{ModelElementBase$get_broadcast_summary()}}
+    \item \href{#method-ModelElementBase-get_elem_xml}{\code{ModelElementBase$get_elem_xml()}}
+    \item \href{#method-ModelElementBase-om_element_tree}{\code{ModelElementBase$om_element_tree()}}
+    \item \href{#method-ModelElementBase-render_cia_brief}{\code{ModelElementBase$render_cia_brief()}}
+    \item \href{#method-ModelElementBase-clone}{\code{ModelElementBase$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ModelElementBase-new"></a>}}
-\if{latex}{\out{\hypertarget{method-ModelElementBase-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a ModelElementBase instance, returning an R6 object that is
+\if{html}{\out{<a id="method-ModelElementBase-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-ModelElementBase-initialize}{}}}
+\subsection{\code{ModelElementBase$new()}}{
+  Initialize a ModelElementBase instance, returning an R6 object that is
 now populated with model data in its fields through queries of the
 provided ds using the \code{handle_config()}, \code{get_feature()} and
 \code{get_model()} methods. This object will also have numerous methods
 that are described in \code{?ModelElementBase}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$new(ds, config = list(), ds_om = NA, site = omsite)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ds}}{RomDataSource object mandatory. This is most often created in
 DEQ config files and will feature connections to local or OWS data
 bases}
-
-\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+      \item{\code{config}}{list of attributes to set, may include pid, hydroid,
 hydrocode, feature, bundle, etc. These will be used in the
 \code{get_model()} and \code{get_feature()} methods to identify the
 users model and feature}
-
-\item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
-
-\item{\code{site}}{URI base for the legacy model scripts assumes global var
+      \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
+      \item{\code{site}}{URI base for the legacy model scripts assumes global var
 omsite exists for default (as often created in DEQ config files)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-handle_config"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-handle_config}{}}}
-\subsection{Method \code{handle_config()}}{
-Parse the user provided config list to define essential fields to be used
+\subsection{\code{ModelElementBase$handle_config()}}{
+  Parse the user provided config list to define essential fields to be used
 in ds queries to identify relevant model and feature
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$handle_config(config)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$handle_config(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format,
+often provided in initialize call of the instance}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    TRUE, to indicate successful config parsing. Populates pid,
+hydroid, bundle, ftype, hydrocode, version, and rocode fields on instance
+depending on user config.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format,
-often provided in initialize call of the instance}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-TRUE, to indicate successful config parsing. Populates pid,
-  hydroid, bundle, ftype, hydrocode, version, and rocode fields on instance
-  depending on user config.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_feature"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_feature}{}}}
-\subsection{Method \code{get_feature()}}{
-Initialize a \code{RomFeature()} using the data source and either the hydroid
+\subsection{\code{ModelElementBase$get_feature()}}{
+  Initialize a \code{RomFeature()} using the data source and either the hydroid
 field or the hydrocode, bundle, and ftype on this object instance. Some
 of these latter fields may be NULL per RomFeature.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_feature()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_feature()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The R6 RomFeature found. This will also populate the feature
+field of this object instance.
+  }
 }
 
-\subsection{Returns}{
-The R6 RomFeature found. This will also populate the feature
-  field of this object instance.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_model_pid"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_model_pid}{}}}
-\subsection{Method \code{get_model_pid()}}{
-A simple function that gets the self pid or returns FALSE if not
+\subsection{\code{ModelElementBase$get_model_pid()}}{
+  A simple function that gets the self pid or returns FALSE if not
 populated. A placeholder for future development that serves as QC to
 ensure a PID has been populated.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_model_pid()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_model_pid()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Self PID field if present or FALSE if not.
+  }
 }
 
-\subsection{Returns}{
-Self PID field if present or FALSE if not.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_model}{}}}
-\subsection{Method \code{get_model()}}{
-Populates the prop field of this object instance by either querying the
+\subsection{\code{ModelElementBase$get_model()}}{
+  Populates the prop field of this object instance by either querying the
 datasource field (if the PID field of this object is populated) or
 otherwise using the \code{get_prop(propcode = self$version)} method on
 the feature field to find the appropriate property by querying off the
 feature
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_model()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_model()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The R6 RomProperty found. This will also populate the prop field of
+this object instance.
+  }
 }
 
-\subsection{Returns}{
-The R6 RomProperty found. This will also populate the prop field of
-  this object instance.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_om_model"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_om_model}{}}}
-\subsection{Method \code{get_om_model()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_om_model(refresh = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$get_om_model()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_om_model(refresh = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{refresh}}{TRUE/FALSE use XML if already retrieved}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    xml of model from om
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{refresh}}{TRUE/FALSE use XML if already retrieved}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-xml of model from om
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_run_data"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_run_data}{}}}
-\subsection{Method \code{get_run_data()}}{
-Gets and returns the model run data for a given model
+\subsection{\code{ModelElementBase$get_run_data()}}{
+  Gets and returns the model run data for a given model
 elementID and scenario runID. Model data will be returned as a zoo or a
 data frame depending on user request
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_run_data(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_run_data(
   runid,
   cached = FALSE,
   hydrowarmup = TRUE,
   cleanup = FALSE,
   outaszoo = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{runid}}{integer run id representing the scenario. Ask the modeling team
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{runid}}{integer run id representing the scenario. Ask the modeling team
 for scenario IDs if you are unsure otherwise see the WSPA Shiny Dashboard
 for more information}
-
-\item{\code{cached}}{boolean - if TRUE will use recently stored local copy}
-
-\item{\code{hydrowarmup}}{boolean - if TRUE will trim beginning of model time frame
+      \item{\code{cached}}{boolean - if TRUE will use recently stored local copy}
+      \item{\code{hydrowarmup}}{boolean - if TRUE will trim beginning of model time frame
 to account for potential model warm up as water routes downstream from the
 headwaters and operational rules engage}
-
-\item{\code{cleanup}}{Logical. Should the function delete the log file create for
+      \item{\code{cleanup}}{Logical. Should the function delete the log file create for
 the cached argument? If this is TRUE, the .log files will be deleted after
 download from OM server}
-
-\item{\code{outaszoo}}{boolean return as a zoo timeseries with numeric mode if TRUE,
+      \item{\code{outaszoo}}{boolean return as a zoo timeseries with numeric mode if TRUE,
 or as data frame if FALSE. Default is TRUE.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    timeseries of run file as either data frame or zoo depending on
+user input
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-timeseries of run file as either data frame or zoo depending on
-  user input
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-load_json_model"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-load_json_model}{}}}
-\subsection{Method \code{load_json_model()}}{
-Uses the \code{get_json_prop()} method on this objects data
-  source to get model json from this object's PID field. Stores the json
-  as a field on this object. This method will then try to populate the
-  elementid and riverseg fields on this object based on values in the
-  JSON, if they exist
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$load_json_model()}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$load_json_model()}}{
+  Uses the \code{get_json_prop()} method on this objects data
+source to get model json from this object's PID field. Stores the json
+as a field on this object. This method will then try to populate the
+elementid and riverseg fields on this object based on values in the
+JSON, if they exist
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$load_json_model()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing
+  }
 }
 
-\subsection{Returns}{
-Nothing
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_json_model"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_json_model}{}}}
-\subsection{Method \code{get_json_model()}}{
-Calls the \code{load_json_model()} method to load the model
-  json and returns it. If the json field on this object is already
-  populated, will return what's available
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_json_model()}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$get_json_model()}}{
+  Calls the \code{load_json_model()} method to load the model
+json and returns it. If the json field on this object is already
+populated, will return what's available
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_json_model()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    json of model from dh_properties as set in
+  }
 }
 
-\subsection{Returns}{
-json of model from dh_properties as set in
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_broadcast_summary"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_broadcast_summary}{}}}
-\subsection{Method \code{get_broadcast_summary()}}{
-Summarizes all variables that are cast or listened for in
-  model broadcast objects (dHOMbroadCastObject) by parsing model json. If
-  model JSON is not loaded, will first call \code{load_json_model()}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_broadcast_summary()}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$get_broadcast_summary()}}{
+  Summarizes all variables that are cast or listened for in
+model broadcast objects (dHOMbroadCastObject) by parsing model json. If
+model JSON is not loaded, will first call \code{load_json_model()}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_broadcast_summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data.frame of all the variables cast and listened for in this
+model from dHOMbroadCastObject
+  }
 }
 
-\subsection{Returns}{
-A data.frame of all the variables cast and listened for in this
-  model from dHOMbroadCastObject
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-get_elem_xml"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-get_elem_xml}{}}}
-\subsection{Method \code{get_elem_xml()}}{
-Grabs the original model XML file and converts it to a
-  readible list to return to the use
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$get_elem_xml(elementid = FALSE, oborops = "object")}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$get_elem_xml()}}{
+  Grabs the original model XML file and converts it to a
+readible list to return to the use
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$get_elem_xml(elementid = FALSE, oborops = "object")}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{elementid}}{target model container to search (OM model ID)}
+      \item{\code{oborops}}{target container to search}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    elemxml converted to list
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{elementid}}{target model container to search (OM model ID)}
-
-\item{\code{oborops}}{target container to search}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-elemxml converted to list
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-om_element_tree"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-om_element_tree}{}}}
-\subsection{Method \code{om_element_tree()}}{
-Returns all model elementids that are upstream and
-  optionally downstream of the target model. These VAHydro OM elementids
-  can be used to identify related models within a modelElementBase()
-  object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$om_element_tree(
+\subsection{\code{ModelElementBase$om_element_tree()}}{
+  Returns all model elementids that are upstream and
+optionally downstream of the target model. These VAHydro OM elementids
+can be used to identify related models within a modelElementBase()
+object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$om_element_tree(
   elementid = FALSE,
   include_children = 1,
   max_recursion_level = -1,
   exclude_custom1 = -1,
   target_custom1 = -1
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{elementid}}{target OM elementid to build the tree off of (e.g. the container to search)}
+      \item{\code{include_children}}{recurse through children? default = 1}
+      \item{\code{max_recursion_level}}{integer how far to search if include_children = 1}
+      \item{\code{exclude_custom1}}{custom1 to exclude (use cova_upstream prevent upstream recursion)}
+      \item{\code{target_custom1}}{custom1 to find}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    dataframe of elementids
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{elementid}}{target OM elementid to build the tree off of (e.g. the container to search)}
-
-\item{\code{include_children}}{recurse through children? default = 1}
-
-\item{\code{max_recursion_level}}{integer how far to search if include_children = 1}
-
-\item{\code{exclude_custom1}}{custom1 to exclude (use cova_upstream prevent upstream recursion)}
-
-\item{\code{target_custom1}}{custom1 to find}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-dataframe of elementids
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-render_cia_brief"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-render_cia_brief}{}}}
-\subsection{Method \code{render_cia_brief()}}{
-Render the CIA brief with basic parameters set by user for
-  this model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$render_cia_brief(
+\subsection{\code{ModelElementBase$render_cia_brief()}}{
+  Render the CIA brief with basic parameters set by user for
+this model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$render_cia_brief(
   runid,
   export_path = export_path,
   github_location = github_location,
@@ -383,54 +396,50 @@ Render the CIA brief with basic parameters set by user for
   doc_title = "auto",
   cu_threshold = c(-10, -20, -30),
   include_appendices = c()
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{runid}}{runid to summarize}
-
-\item{\code{export_path}}{path to render the word document}
-
-\item{\code{github_location}}{library to load rendering code (R markdown), may
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{runid}}{runid to summarize}
+      \item{\code{export_path}}{path to render the word document}
+      \item{\code{github_location}}{library to load rendering code (R markdown), may
 be set in DEQ config file}
-
-\item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
+      \item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
 implementation}
-
-\item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
+      \item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
 implementation}
-
-\item{\code{doc_title}}{document title page text. The default value, auto, will
+      \item{\code{doc_title}}{document title page text. The default value, auto, will
 create a title based on the feature name}
-
-\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
+      \item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
 display CIA tables drawn from \code{om_cu_table()}}
+      \item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    file path of rendered output
+  }
+}
 
-\item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-file path of rendered output
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ModelElementBase-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-ModelElementBase-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModelElementBase$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{ModelElementBase$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ModelElementBase$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

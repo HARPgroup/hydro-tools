@@ -53,34 +53,34 @@ included in hydrotools.}
 }
 \value{
 A list of relevant objects that includes a list of the calculated low
-  flows Flows, the percentile of the calculate low flows pctg, the formatted
-  gage data formatted_data (which includes only data considered in analysis and the
-  rolling average flows), a data frame (annualMinimums) that includes a
-  summary of the rolling flows in each year and identifies the minimum flows,
-  data frames that identify when minimum flows occurred in each analysis year
-  for each flow (e.g., n1Q10_annDate), a series of vectors line
-  n1Q10_ModeMin that identifies the month when annual low flows of that
-  averaging period most commonly occur, a numeric timecheck that indicates
-  the number of days in each analysis year on a non-leap year
+flows Flows, the percentile of the calculate low flows pctg, the formatted
+gage data formatted_data (which includes only data considered in analysis and the
+rolling average flows), a data frame (annualMinimums) that includes a
+summary of the rolling flows in each year and identifies the minimum flows,
+data frames that identify when minimum flows occurred in each analysis year
+for each flow (e.g., n1Q10_annDate), a series of vectors line
+n1Q10_ModeMin that identifies the month when annual low flows of that
+averaging period most commonly occur, a numeric timecheck that indicates
+the number of days in each analysis year on a non-leap year
 }
 \description{
 Compute VPDES low flows and other xQy style flows
 }
 \details{
 This function calculates xQy style low flows from USGS or other flow
-  gage data. It takes in a dataframe that has at least a flow column and date
-  column specified by the user. From there, it divides the data into user
-  defined analysis seasons, using only complete seasons (adjusted for leap
-  years) in the analysis. It then used xQyComp() to calculte the probability
-  adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5,
-  90Q10, and the harmonic mean.\cr
-  Users may enter analysis years or seasons such that the low flows can be
-  computed across entire user defined years (like the climate or water year)
-  or across only certain months. The function is careful to use only
-  independent analysis years, removing any averaged flow that may extend into
-  the next analysis year. This makes choosing the correct analysis season
-  very important.\cr
-  This is functionally equivalent to the VPDES' DFLOW R Shiny application.
+gage data. It takes in a dataframe that has at least a flow column and date
+column specified by the user. From there, it divides the data into user
+defined analysis seasons, using only complete seasons (adjusted for leap
+years) in the analysis. It then used xQyComp() to calculte the probability
+adjusted xQy flows and includes by deafult the 1Q10, 7Q10, 30Q10, 30Q5,
+90Q10, and the harmonic mean.\cr
+Users may enter analysis years or seasons such that the low flows can be
+computed across entire user defined years (like the climate or water year)
+or across only certain months. The function is careful to use only
+independent analysis years, removing any averaged flow that may extend into
+the next analysis year. This makes choosing the correct analysis season
+very important.\cr
+This is functionally equivalent to the VPDES' DFLOW R Shiny application.
 }
 \examples{
 gageDat <- dataRetrieval::readNWISdv("01631000","00060")

@@ -77,22 +77,22 @@ value, or the upper bound of the piecewise range and defaults to
 }
 \value{
 A list with elfgen as the list with plot image and dataframe of ELF statistics (see
- \code{elfgen::elfgen()} for more details), the flow and fish data used in
- the ELF derived from dataset, and the threshold/breakpoint that is set or
- calculated
+\code{elfgen::elfgen()} for more details), the flow and fish data used in
+the ELF derived from dataset, and the threshold/breakpoint that is set or
+calculated
 }
 \description{
 A wrapper that makes it easier to access VA Hydro's imported EDAS
- dataset and provides simple arguments to eflgen package.
+dataset and provides simple arguments to eflgen package.
 }
 \details{
 This function provides the necessary inputs to call the
- elfgen::elfgen() function. Simply, this wrapper function uses easily
- accessible input to find the necessary NHD Plus watersheds and fish taxa
- data to create the \code{watershed.df} input in elfgen() and returns its
- output. The function will use the largest NHDPlus feature of the input code
- that is contained within the user input hydro feature based on the provided
- hydroid
+elfgen::elfgen() function. Simply, this wrapper function uses easily
+accessible input to find the necessary NHD Plus watersheds and fish taxa
+data to create the \code{watershed.df} input in elfgen() and returns its
+output. The function will use the largest NHDPlus feature of the input code
+that is contained within the user input hydro feature based on the provided
+hydroid
 }
 \examples{
 \dontrun{simple_elfgen( ds = ds, ws_code = 68069, huc_level = "huc8",

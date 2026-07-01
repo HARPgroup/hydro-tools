@@ -28,6 +28,7 @@
 #'   config files
 #' @param debug Logical. If TRUE, this function will message out the SQL query
 #'   used to find model scenario metrics
+#' @importFrom rlang .data
 #'@return A long-style data frame in which each row represents a model and
 #'  columns are present for each combination of runid and metric input by user,
 #'  populated by the model scenario metric value
@@ -112,10 +113,10 @@ om_vahydro_metric_grid <- function (
   #Pivot wider and simplify so that each name/run is a column with the
   #corresponding metric value
   alldata <- dat |> 
-    dplyr::select(pid, propname, hydrocode, featureid, riverseg,
-                  run_name, attribute_name, attribute_value) |> 
-    tidyr::pivot_wider(names_from = c(attribute_name, run_name), 
-                       values_from = attribute_value,
+    dplyr::select(.data$pid, .data$propname, .data$hydrocode, .data$featureid, .data$riverseg,
+                  .data$run_name, .data$attribute_name, .data$attribute_value) |> 
+    tidyr::pivot_wider(names_from = c(.data$attribute_name, .data$run_name), 
+                       values_from = .data$attribute_value,
                        names_sep = "_") |> 
     as.data.frame()
   

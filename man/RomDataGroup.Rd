@@ -5,21 +5,15 @@
 \title{Nested Property Object}
 \value{
 Instance of RomDataGroup or, more likely, RomPropertyTree which is
-  the only Rom object to inherit this object class
-
-an updated config if necessary or FALSE if it fails
-
-the data from the remote connection
-
-the variable definition object for this entity
+the only Rom object to inherit this object class
 }
 \description{
 Object for storing a group of properties
 }
 \details{
 Has standard methods for managing data and meta data related to
-  groups of related properties (e.g. children and parents). Typically called
-  from RomPropertyTree, which inherits this object class
+groups of related properties (e.g. children and parents). Typically called
+from RomPropertyTree, which inherits this object class
 }
 \examples{
 NA
@@ -28,154 +22,173 @@ NA
 NA
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{datasource}}{RomDataSource typically estbalished via the DEQ config
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{datasource}}{RomDataSource typically estbalished via the DEQ config
 file and should contain any relevant database connections}
 
-\item{\code{pk_name}}{the name of this entity's primary key column. Most often
+    \item{\code{pk_name}}{the name of this entity's primary key column. Most often
 root_pid, but consult the Hydrotools ReadMe for more information}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomDataGroup-new}{\code{RomDataGroup$new()}}
-\item \href{#method-RomDataGroup-handle_config}{\code{RomDataGroup$handle_config()}}
-\item \href{#method-RomDataGroup-from_list}{\code{RomDataGroup$from_list()}}
-\item \href{#method-RomDataGroup-load_data}{\code{RomDataGroup$load_data()}}
-\item \href{#method-RomDataGroup-get_vardef}{\code{RomDataGroup$get_vardef()}}
-\item \href{#method-RomDataGroup-load_plugin}{\code{RomDataGroup$load_plugin()}}
-\item \href{#method-RomDataGroup-clone}{\code{RomDataGroup$clone()}}
-}
+  \itemize{
+    \item \href{#method-RomDataGroup-initialize}{\code{RomDataGroup$new()}}
+    \item \href{#method-RomDataGroup-handle_config}{\code{RomDataGroup$handle_config()}}
+    \item \href{#method-RomDataGroup-from_list}{\code{RomDataGroup$from_list()}}
+    \item \href{#method-RomDataGroup-load_data}{\code{RomDataGroup$load_data()}}
+    \item \href{#method-RomDataGroup-get_vardef}{\code{RomDataGroup$get_vardef()}}
+    \item \href{#method-RomDataGroup-load_plugin}{\code{RomDataGroup$load_plugin()}}
+    \item \href{#method-RomDataGroup-clone}{\code{RomDataGroup$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomDataGroup-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomDataGroup-new}{}}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$new(datasource = NULL, config, load_remote = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{URL of some RESTful repository or the host of the
+\if{html}{\out{<a id="method-RomDataGroup-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataGroup-initialize}{}}}
+\subsection{\code{RomDataGroup$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$new(datasource = NULL, config, load_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{URL of some RESTful repository or the host of the
 target database. At DEQ, this is defined in the default config files.}
-
-\item{\code{config}}{list of attributes to get, see also: to_list() for format.
+      \item{\code{config}}{list of attributes to get, see also: to_list() for format.
 These are passed to RomDataSource$get()}
-
-\item{\code{load_remote}}{automatically query REST data source or remote
+      \item{\code{load_remote}}{automatically query REST data source or remote
 datasource for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance of RomDataGroup or instance of whatever object
+inherited this class, most likely RomPropertyTree. It will be populated
+with relevant fields.
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance of RomDataGroup or instance of whatever object
-  inherited this class, most likely RomPropertyTree. It will be populated
-  with relevant fields.
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-handle_config"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-handle_config}{}}}
-\subsection{Method \code{handle_config()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$handle_config(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$handle_config()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$handle_config(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{#A list of requests to pass to RomDataSource$get()}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{#A list of requests to pass to RomDataSource$get()}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-from_list}{}}}
-\subsection{Method \code{from_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$from_list(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$from_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$from_list(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-load_data}{}}}
-\subsection{Method \code{load_data()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$load_data(config, load_remote)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$load_data()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$load_data(config, load_remote)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{a named list of potential configs to pass to query}
+      \item{\code{load_remote}}{automatically query remote data source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the data from the remote connection
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{}
-
-\item{\code{load_remote}}{automatically query remote data source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-get_vardef"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-get_vardef}{}}}
-\subsection{Method \code{get_vardef()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$get_vardef(config = FALSE, refresh = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$get_vardef()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$get_vardef(config = FALSE, refresh = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{refresh}}{automatically refresh var info?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the variable definition object for this entity
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{refresh}}{automatically refresh var info?}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-load_plugin"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-load_plugin}{}}}
-\subsection{Method \code{load_plugin()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$load_plugin()}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$load_plugin()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$load_plugin()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing, but loads the objects plugin
+  }
 }
 
-\subsection{Returns}{
-nothing, but loads the objects plugin
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataGroup-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataGroup-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataGroup$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataGroup$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataGroup$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

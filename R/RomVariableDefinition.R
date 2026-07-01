@@ -94,7 +94,7 @@ RomVariableDefinition <- R6Class(
       }
       self$datasource$set_vardef(self$to_list())
     },
-    #' @param config 
+    #' @param config a named list to pass to query
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {

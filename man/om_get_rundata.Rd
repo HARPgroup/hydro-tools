@@ -41,15 +41,15 @@ data.frame of model results
 }
 \description{
 Retrieve model results (run data) from the VA Hydro server for a
-  particular model and run ID (scenario ID).
+particular model and run ID (scenario ID).
 }
 \details{
 A wrapper of \code{hydrotools::fn_get_runfile()}. This function
-  returns the results in a zoo (see zoo::zoo()) that has the timestamp as the
-  index. See \code{hydrotools::fn_get_runfile()} for more details. If
-  outaszoo is TRUE, the output will be a zoo TS with numeric mode. Please note
-  that zoo's are matrices and cannot hold more than one data type such that
-  character and date fields will be set to NA.
+returns the results in a zoo (see zoo::zoo()) that has the timestamp as the
+index. See \code{hydrotools::fn_get_runfile()} for more details. If
+outaszoo is TRUE, the output will be a zoo TS with numeric mode. Please note
+that zoo's are matrices and cannot hold more than one data type such that
+character and date fields will be set to NA.
 }
 \examples{
 #om_get_rundata(72446, 600, site=omsite)

@@ -21,140 +21,149 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMDataMatrix]{hydrotools::dHOMDataMatrix}} -> \code{dHOMWaterSystemTieredFlowBy}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMDataMatrix]{dHOMDataMatrix}} -> \code{dHOMWaterSystemTieredFlowBy}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{object_class}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMWaterSystemTieredFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemTieredFlowBy$exportOpenMIBase()}}
-\item \href{#method-dHOMWaterSystemTieredFlowBy-om_valnames}{\code{dHOMWaterSystemTieredFlowBy$om_valnames()}}
-\item \href{#method-dHOMWaterSystemTieredFlowBy-om_codenames}{\code{dHOMWaterSystemTieredFlowBy$om_codenames()}}
-\item \href{#method-dHOMWaterSystemTieredFlowBy-list2matrix}{\code{dHOMWaterSystemTieredFlowBy$list2matrix()}}
-\item \href{#method-dHOMWaterSystemTieredFlowBy-translateOMtoDH}{\code{dHOMWaterSystemTieredFlowBy$translateOMtoDH()}}
-\item \href{#method-dHOMWaterSystemTieredFlowBy-clone}{\code{dHOMWaterSystemTieredFlowBy$clone()}}
+  \itemize{
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemTieredFlowBy$exportOpenMIBase()}}
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-om_valnames}{\code{dHOMWaterSystemTieredFlowBy$om_valnames()}}
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-om_codenames}{\code{dHOMWaterSystemTieredFlowBy$om_codenames()}}
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-list2matrix}{\code{dHOMWaterSystemTieredFlowBy$list2matrix()}}
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-translateOMtoDH}{\code{dHOMWaterSystemTieredFlowBy$translateOMtoDH()}}
+    \item \href{#method-dHOMWaterSystemTieredFlowBy-clone}{\code{dHOMWaterSystemTieredFlowBy$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>hydrotools::dHOMDataMatrix$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>hydrotools::dHOMDataMatrix$param_info()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>dHVariablePluginDefault$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>dHOMDataMatrix$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>dHOMDataMatrix$param_info()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-om_valnames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-om_valnames}{}}}
-\subsection{Method \code{om_valnames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$om_valnames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$om_valnames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$om_valnames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as string values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as string values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-om_codenames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-om_codenames}{}}}
-\subsection{Method \code{om_codenames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$om_codenames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$om_codenames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$om_codenames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as numeric values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as numeric values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-list2matrix"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-list2matrix}{}}}
-\subsection{Method \code{list2matrix()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$list2matrix(l)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$list2matrix()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$list2matrix(l)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{l}}{The list to convert to matrix}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A matrix of values from the list, with one value per row
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{l}}{The list to convert to matrix}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A matrix of values from the list, with one value per row
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-translateOMtoDH"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-translateOMtoDH}{}}}
-\subsection{Method \code{translateOMtoDH()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$translateOMtoDH(entity, om_json)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$translateOMtoDH()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$translateOMtoDH(entity, om_json)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{The object to store the translated JSON on via set_matrix()}
+      \item{\code{om_json}}{The JSON to translate to a matrix and set on entity}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The entity, but the method is primarily designed to set useful
+values on entity not return anything useful
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{The object to store the translated JSON on via set_matrix()}
-
-\item{\code{om_json}}{The JSON to translate to a matrix and set on entity}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The entity, but the method is primarily designed to set useful
- values on entity not return anything useful
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemTieredFlowBy-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemTieredFlowBy-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemTieredFlowBy$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemTieredFlowBy$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemTieredFlowBy$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

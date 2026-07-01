@@ -9,16 +9,16 @@ reference class of type openmi.om.base.
 }
 \description{
 RomDataSource is an object that contains tables and methods of
-  model data objects. It serves as a global object store that references to
-  all objects of a given domain and pointers to remote data source if
-  applicable. It offers the flexibility of synching (via POST or
-  INSERT/UPDATE) to a remote data source OR allows users to update local data
-  bases or sources. It does not permit a mix of these data streams, keeping
-  the RomDataSource object consistent.
+model data objects. It serves as a global object store that references to
+all objects of a given domain and pointers to remote data source if
+applicable. It offers the flexibility of synching (via POST or
+INSERT/UPDATE) to a remote data source OR allows users to update local data
+bases or sources. It does not permit a mix of these data streams, keeping
+the RomDataSource object consistent.
 }
 \details{
 Provides integrated, queryable universe of features, observations
-  and meta data
+and meta data
 }
 \examples{
 \dontrun{
@@ -36,220 +36,222 @@ ds$connection
 NA
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{site}}{URL of some RESTful repository}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{site}}{URL of some RESTful repository}
 
-\item{\code{json_obj_url}}{URL for retrieving full objects}
+    \item{\code{json_obj_url}}{URL for retrieving full objects}
 
-\item{\code{connection_type}}{rest or odbc}
+    \item{\code{connection_type}}{rest or odbc}
 
-\item{\code{connection}}{rest or odbc}
+    \item{\code{connection}}{rest or odbc}
 
-\item{\code{rest_uname}}{username to connect to RESTful repository}
+    \item{\code{rest_uname}}{username to connect to RESTful repository}
 
-\item{\code{dbname}}{DATABASE TO USE IN odbC CONNECTION}
+    \item{\code{dbname}}{DATABASE TO USE IN odbC CONNECTION}
 
-\item{\code{debug}}{show debug info for queries}
+    \item{\code{debug}}{show debug info for queries}
 
-\item{\code{timeline}}{for default time series data}
+    \item{\code{timeline}}{for default time series data}
 
-\item{\code{tsvalues}}{table of time series data}
+    \item{\code{tsvalues}}{table of time series data}
 
-\item{\code{propvalues}}{table of object properties (can be contained by objects)}
+    \item{\code{propvalues}}{table of object properties (can be contained by objects)}
 
-\item{\code{features}}{table of physical features}
+    \item{\code{features}}{table of physical features}
 
-\item{\code{var_defs}}{table of variable definitions}
+    \item{\code{var_defs}}{table of variable definitions}
 
-\item{\code{admin_features}}{table of adminreg features}
+    \item{\code{admin_features}}{table of adminreg features}
 
-\item{\code{prop_json_cache}}{list of json objects retrieved, keyed by ID}
+    \item{\code{prop_json_cache}}{list of json objects retrieved, keyed by ID}
 
-\item{\code{ts_cache}}{list of ts objects instantiated}
+    \item{\code{ts_cache}}{list of ts objects instantiated}
 
-\item{\code{feature_cache}}{list of feature objects instantiated}
+    \item{\code{feature_cache}}{list of feature objects instantiated}
 
-\item{\code{prop_cache}}{list of prop objects instantiated}
+    \item{\code{prop_cache}}{list of prop objects instantiated}
 
-\item{\code{var_cache}}{list of var objects instantiated}
-}
-\if{html}{\out{</div>}}
+    \item{\code{var_cache}}{list of var objects instantiated}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomDataSource-new}{\code{RomDataSource$new()}}
-\item \href{#method-RomDataSource-reset}{\code{RomDataSource$reset()}}
-\item \href{#method-RomDataSource-get_token}{\code{RomDataSource$get_token()}}
-\item \href{#method-RomDataSource-get_vardef}{\code{RomDataSource$get_vardef()}}
-\item \href{#method-RomDataSource-get_prop}{\code{RomDataSource$get_prop()}}
-\item \href{#method-RomDataSource-get_ts}{\code{RomDataSource$get_ts()}}
-\item \href{#method-RomDataSource-auth_read}{\code{RomDataSource$auth_read()}}
-\item \href{#method-RomDataSource-set_ts}{\code{RomDataSource$set_ts()}}
-\item \href{#method-RomDataSource-set_prop}{\code{RomDataSource$set_prop()}}
-\item \href{#method-RomDataSource-insure_cols}{\code{RomDataSource$insure_cols()}}
-\item \href{#method-RomDataSource-set_vardef}{\code{RomDataSource$set_vardef()}}
-\item \href{#method-RomDataSource-store_features}{\code{RomDataSource$store_features()}}
-\item \href{#method-RomDataSource-set_feature}{\code{RomDataSource$set_feature()}}
-\item \href{#method-RomDataSource-get}{\code{RomDataSource$get()}}
-\item \href{#method-RomDataSource-post}{\code{RomDataSource$post()}}
-\item \href{#method-RomDataSource-delete}{\code{RomDataSource$delete()}}
-\item \href{#method-RomDataSource-get_json_prop}{\code{RomDataSource$get_json_prop()}}
-\item \href{#method-RomDataSource-get_nested_export}{\code{RomDataSource$get_nested_export()}}
-\item \href{#method-RomDataSource-clone}{\code{RomDataSource$clone()}}
-}
+  \itemize{
+    \item \href{#method-RomDataSource-initialize}{\code{RomDataSource$new()}}
+    \item \href{#method-RomDataSource-reset}{\code{RomDataSource$reset()}}
+    \item \href{#method-RomDataSource-get_token}{\code{RomDataSource$get_token()}}
+    \item \href{#method-RomDataSource-get_vardef}{\code{RomDataSource$get_vardef()}}
+    \item \href{#method-RomDataSource-get_prop}{\code{RomDataSource$get_prop()}}
+    \item \href{#method-RomDataSource-get_ts}{\code{RomDataSource$get_ts()}}
+    \item \href{#method-RomDataSource-auth_read}{\code{RomDataSource$auth_read()}}
+    \item \href{#method-RomDataSource-set_ts}{\code{RomDataSource$set_ts()}}
+    \item \href{#method-RomDataSource-set_prop}{\code{RomDataSource$set_prop()}}
+    \item \href{#method-RomDataSource-insure_cols}{\code{RomDataSource$insure_cols()}}
+    \item \href{#method-RomDataSource-set_vardef}{\code{RomDataSource$set_vardef()}}
+    \item \href{#method-RomDataSource-store_features}{\code{RomDataSource$store_features()}}
+    \item \href{#method-RomDataSource-set_feature}{\code{RomDataSource$set_feature()}}
+    \item \href{#method-RomDataSource-get}{\code{RomDataSource$get()}}
+    \item \href{#method-RomDataSource-post}{\code{RomDataSource$post()}}
+    \item \href{#method-RomDataSource-delete}{\code{RomDataSource$delete()}}
+    \item \href{#method-RomDataSource-get_json_prop}{\code{RomDataSource$get_json_prop()}}
+    \item \href{#method-RomDataSource-get_nested_export}{\code{RomDataSource$get_nested_export()}}
+    \item \href{#method-RomDataSource-clone}{\code{RomDataSource$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomDataSource-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomDataSource-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a RomDataSource, returning a RomDataSource R6 object that is
+\if{html}{\out{<a id="method-RomDataSource-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomDataSource-initialize}{}}}
+\subsection{\code{RomDataSource$new()}}{
+  Initialize a RomDataSource, returning a RomDataSource R6 object that is
 now populated with site, username, connection type, database name, and
 any connection string details if using ODBC. This object will also have numerous methods that are
 described in \code{?RomDataSource}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$new(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$new(
   site,
   rest_uname = NULL,
   connection_type = "rest",
   dbname = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{site}}{URL of some RESTful repository or the host of the target
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{site}}{URL of some RESTful repository or the host of the target
 database. At DEQ, this is defined in the default config files.}
-
-\item{\code{rest_uname}}{username to connect to RESTful repository or database.
+      \item{\code{rest_uname}}{username to connect to RESTful repository or database.
 At DEQ, this should be defined within local config files}
-
-\item{\code{connection_type}}{String, either 'rest' or 'odbc' depending on
+      \item{\code{connection_type}}{String, either 'rest' or 'odbc' depending on
 target database}
-
-\item{\code{dbname}}{Used only when connection_type = 'odbc'. This is the
+      \item{\code{dbname}}{Used only when connection_type = 'odbc'. This is the
 database name of the database that supports the ODBC connection. At
 DEQ, this should generally target the active dbase, not alpha, although
 both are supported}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Instance of RomDataSource, now with populated site, rest_uname,
+connection_type, and dbname data
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Instance of RomDataSource, now with populated site, rest_uname,
-  connection_type, and dbname data
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-reset"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-reset}{}}}
-\subsection{Method \code{reset()}}{
-Clear entries and reset tables stored in RomDataSource. Used to clean out
+\subsection{\code{RomDataSource$reset()}}{
+  Clear entries and reset tables stored in RomDataSource. Used to clean out
 features, properties, tsvalues, or variable definitions
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$reset(table)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{table}}{Which table(s) should be cleared? . Defaults to 'all', but will
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$reset(table)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{table}}{Which table(s) should be cleared? . Defaults to 'all', but will
 also accept a vector that contains any or all of: \code{c('props', 'features', 'tsvalues', 'var_defs')}}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing, but will clear requested data tables stored on this object
-#'@description 
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing, but will clear requested data tables stored on this object
+#'@description
 Set the connection to either the database via ODBC or to a REST service
 (through the act of obtaining a token). OFten done in DEQ config.R files.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_token"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_token}{}}}
-\subsection{Method \code{get_token()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_token(
+\subsection{\code{RomDataSource$get_token()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_token(
   rest_pw = NULL,
   odbc_port = 5431,
   dbConnectType = "dbi"
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{rest_pw}}{Password to REST/odbc service requested. Will prompt user
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{rest_pw}}{Password to REST/odbc service requested. Will prompt user
 for entry if not provided}
-
-\item{\code{odbc_port}}{If using odbc, which port should be used? Will prompt
+      \item{\code{odbc_port}}{If using odbc, which port should be used? Will prompt
 user for entry if not provided. Defaults to DEQ port approved by OIS}
-
-\item{\code{dbConnectType}}{Should DBI::dbConnect (dbConnectType = "dbi") or
+      \item{\code{dbConnectType}}{Should DBI::dbConnect (dbConnectType = "dbi") or
 pool::dbPool (dbConnectType = "pool") be used to establish the ODBC
 connection with the database? Pool connections are recommended for
 Shiny development so that one connection pool may be shared by many
 instances. Defaults to dbi}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, but sets internal private token. Private fields are not
+visible via \code{RomDataSource$token} notation and are hidden for
+security
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Nothing, but sets internal private token. Private fields are not
-  visible via \code{RomDataSource$token} notation and are hidden for
-  security
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_vardef"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_vardef}{}}}
-\subsection{Method \code{get_vardef()}}{
-Queries first local variable definitions and if necessary
+\subsection{\code{RomDataSource$get_vardef()}}{
+  Queries first local variable definitions and if necessary
 dh_variabledefinition for a varkey, setting the varid within RomDataSource
 instance
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_vardef(varkey, force_refresh = FALSE, debug = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{varkey}}{Variable key as defined in dh_variabledefinition as
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_vardef(varkey, force_refresh = FALSE, debug = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{varkey}}{Variable key as defined in dh_variabledefinition as
 varkey. See Hydrotools readme for more information, but represents an
 abbreviated variable name to define a property or timeseries.}
-
-\item{\code{force_refresh}}{Should the remote database be checked for new info?}
-
-\item{\code{debug}}{Show relevant debugging info}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Nothing, but sets variable definitions on RomDataSource
+      \item{\code{force_refresh}}{Should the remote database be checked for new info?}
+      \item{\code{debug}}{Show relevant debugging info}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, but sets variable definitions on RomDataSource
 Queries first local properties and if needed or requested dh_property for
 the properties specified in the user config file. This method creates a
 WHERE clause from the config file for an SQL query of the user input for
 entity_type provided by user. Will only return the first found property.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_prop}{}}}
-\subsection{Method \code{get_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_prop(
+\subsection{\code{RomDataSource$get_prop()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_prop(
   config,
   return_type = "data.frame",
   force_refresh = FALSE,
   obj = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{A list of values that includes query constructors. Each entry
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{A list of values that includes query constructors. Each entry
 in this list and its corresponding value will be added to the WHERE clause
 of a query that queries the table specified in entity_type with the
 exception of "limit", which will only be used to generate the LIMIT clause
@@ -258,40 +260,39 @@ that is used in the WHERE clause. Relevant data for list may include
 propname, propvalue, hydrocode, or other fields shown in the Hydrotools
 Readme e.g. list(entity_type, featureid, pid, varid, tstime,
 tsendtime). See Readme for more options}
-
-\item{\code{return_type}}{'data.frame' or 'list'}
-
-\item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
+      \item{\code{return_type}}{'data.frame' or 'list'}
+      \item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
 just local properties stored on the RomDataSource instance}
-
-\item{\code{obj}}{(optional) object class calling this routine, can supply a
+      \item{\code{obj}}{(optional) object class calling this routine, can supply a
 base query via sql_select_from field as would otherwise be returned via
 hydrotools:::fn_guess_sql()}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Data frame of the first property returned from query of
+properties based on data provided in config
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Data frame of the first property returned from query of
-  properties based on data provided in config
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_ts"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_ts}{}}}
-\subsection{Method \code{get_ts()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_ts(
+\subsection{\code{RomDataSource$get_ts()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_ts(
   config,
   return_type = "data.frame",
   force_refresh = FALSE,
   obj = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{A list of values that includes query constructors. Each entry
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{A list of values that includes query constructors. Each entry
 in this list and its corresponding value will be added to the WHERE clause
 of a query that queries the table specified in entity_type with the
 exception of "limit", which will only be used to generate the LIMIT clause
@@ -301,316 +302,325 @@ propname, propvalue, hydrocode, or other fields shown in the Hydrotools
 Readme e.g. list(entity_type, featureid, tid = NULL, varid = NULL,
 tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline
 ID (not yet used). See Readme for more options}
-
-\item{\code{return_type}}{'data.frame' or 'list', but will default to data.frame}
-
-\item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
+      \item{\code{return_type}}{'data.frame' or 'list', but will default to data.frame}
+      \item{\code{force_refresh}}{Should the remote data source be queried (TRUE) or
 just local properties stored on the RomDataSource instance}
-
-\item{\code{obj}}{(optional) object class calling this routine, can supply a
+      \item{\code{obj}}{(optional) object class calling this routine, can supply a
 base query via sql_select_from field as would otherwise be returned via
 hydrotools:::fn_guess_sql()}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Data frame of the first TS returned from query of dh_timeseries
+based on data provided in config
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Data frame of the first TS returned from query of dh_timeseries
-  based on data provided in config
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-auth_read"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-auth_read}{}}}
-\subsection{Method \code{auth_read()}}{
-Used to read views from a REST service.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$auth_read(
+\subsection{\code{RomDataSource$auth_read()}}{
+  Used to read views from a REST service.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$auth_read(
   uri,
   content_type = "text/csv",
   delim = ",",
   enc = "xml"
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{uri}}{remote address to retrieve data}
+      \item{\code{content_type}}{http content-type}
+      \item{\code{delim}}{delimiter}
+      \item{\code{enc}}{encoding}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    result of web request
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{uri}}{remote address to retrieve data}
-
-\item{\code{content_type}}{http content-type}
-
-\item{\code{delim}}{delimiter}
-
-\item{\code{enc}}{encoding}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-result of web request
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-set_ts"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-set_ts}{}}}
-\subsection{Method \code{set_ts()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_ts(ts)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$set_ts()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$set_ts(ts)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ts}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing sets internal private token
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ts}}{= list(entity_type, featureid, tid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing sets internal private token
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-set_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-set_prop}{}}}
-\subsection{Method \code{set_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_prop(prop)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$set_prop()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$set_prop(prop)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{prop}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing seprop internal private token
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{prop}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing seprop internal private token
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-insure_cols"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-insure_cols}{}}}
-\subsection{Method \code{insure_cols()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$insure_cols(src_df, dest_df)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$insure_cols()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$insure_cols(src_df, dest_df)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{src_df}}{= df to verify/insure}
+      \item{\code{dest_df}}{= df template to supply valid names}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    local df index?
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{src_df}}{= df to verify/insure}
-
-\item{\code{dest_df}}{= df template to supply valid names}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-local df index?
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-set_vardef"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-set_vardef}{}}}
-\subsection{Method \code{set_vardef()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_vardef(vardef)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$set_vardef()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$set_vardef(vardef)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{vardef}}{= list(varid, varkey, varname, varunits, varcode,...)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    local df index?
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{vardef}}{= list(varid, varkey, varname, varunits, varcode,...)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-local df index?
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-store_features"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-store_features}{}}}
-\subsection{Method \code{store_features()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$store_features(features)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$store_features()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$store_features(features)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{features}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing seprop internal private token
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{features}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing seprop internal private token
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-set_feature"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-set_feature}{}}}
-\subsection{Method \code{set_feature()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$set_feature(feature)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$set_feature()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$set_feature(feature)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{feature}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing seprop internal private token
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{feature}}{= list(entity_type, featureid, pid = NULL, varid = NULL, tstime = NULL, tsendtime = NULL, tscode = NULL, tlid = NULL) timeline ID (not yet used)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing seprop internal private token
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get}{}}}
-\subsection{Method \code{get()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get(entity_type, pk, config, obj = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity_type}}{Most often dh_feature or dh_properties. Indicates which 
+\subsection{\code{RomDataSource$get()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get(entity_type, pk, config, obj = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity_type}}{Most often dh_feature or dh_properties. Indicates which
 table to retrieve data from. This will be the target table for the query
 constructed from user inputs input list}
-
-\item{\code{pk}}{Primary key column name, often hydroid or pid. See Readme for
+      \item{\code{pk}}{Primary key column name, often hydroid or pid. See Readme for
 additional information or contact OWSPA Data Coordinatory if you do not
 know the appropriate primary key for the table of interest. If
 referenced in config, will be the only item in the WHERE clause of the
 user query}
-
-\item{\code{config}}{A list of potential values to be added to an SQL query that
+      \item{\code{config}}{A list of potential values to be added to an SQL query that
 targets entity_type. This list will be iterated through and added to a
 WHERE clause to ensure user query operates. If a primary key id is
 provided named the same as the user input pk, the WHERE clause will
 only contain a statement on this key id. "limit" may also be in this
 list to limit query results}
-
-\item{\code{obj}}{(optional) object class calling this routine, can supply a
+      \item{\code{obj}}{(optional) object class calling this routine, can supply a
 base query via sql_select_from field as would otherwise be returned via
 hydrotools:::fn_guess_sql()}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Results of the query of entity_type constructed from the config
+supplied by user. Typically a data frame.
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Results of the query of entity_type constructed from the config
-  supplied by user. Typically a data frame.
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-post"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-post}{}}}
-\subsection{Method \code{post()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$post(entity_type, pk, config)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$post()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$post(entity_type, pk, config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+      \item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+      \item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    local df index?
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
-
-\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
-
-\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-local df index?
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-delete"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-delete}{}}}
-\subsection{Method \code{delete()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$delete(entity_type, pk, config, obj = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$delete()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$delete(entity_type, pk, config, obj = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity_type}}{= dh_feature, dh_properties, ...}
+      \item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
+      \item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
+      \item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    local df index?
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity_type}}{= dh_feature, dh_properties, ...}
-
-\item{\code{pk}}{= primary key column name, e.g. hydroid, pid, ...}
-
-\item{\code{config}}{= contents of record to post in list(pid, propname, propvalue, ...)}
-
-\item{\code{obj}}{= (optional) object class calling this routine, can supply extra info}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-local df index?
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_json_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_json_prop}{}}}
-\subsection{Method \code{get_json_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_json_prop(pid)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$get_json_prop()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_json_prop(pid)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{pid}}{= object pid}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    unserialized json as list, with object stored in ds$prop_json_cache
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{pid}}{= object pid}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-unserialized json as list, with object stored in ds$prop_json_cache
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-get_nested_export"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-get_nested_export}{}}}
-\subsection{Method \code{get_nested_export()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$get_nested_export(ds, featureid, props, depth = 0)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$get_nested_export()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$get_nested_export(ds, featureid, props, depth = 0)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ds}}{= satasource object, kept for posterity, as this may not always live here}
+      \item{\code{featureid}}{= object pid}
+      \item{\code{props}}{= container for stashing}
+      \item{\code{depth}}{= depth limit for nesting (rarely used)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    unserialized json as list, with object stored in ds$prop_json_cache
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ds}}{= satasource object, kept for posterity, as this may not always live here}
-
-\item{\code{featureid}}{= object pid}
-
-\item{\code{props}}{= container for stashing}
-
-\item{\code{depth}}{= depth limit for nesting (rarely used)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-unserialized json as list, with object stored in ds$prop_json_cache
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomDataSource-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomDataSource-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomDataSource$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomDataSource$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomDataSource$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

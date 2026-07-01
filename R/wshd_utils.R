@@ -379,7 +379,9 @@ set_zoom <- function(pb){
 #'  the watershed feature
 #'@param watershed_feature a valid RomFeature for the watershed of interest
 #'@param watershed_json a valid json model for the watershed of interest
-usgs_nearest_gage <- function(watershed_feature, watershed_json) {
+#'@param ds datasource object of class \code{RomDataSource} often created in DEQ
+#'   config files
+usgs_nearest_gage <- function(watershed_feature, watershed_json, ds = ds) {
   # get gages
   gages <- watershed_feature$find_spatial_relations(
     inputs=list(bundle='watershed', ftype='usgs_full_drainage'), 
@@ -387,7 +389,7 @@ usgs_nearest_gage <- function(watershed_feature, watershed_json) {
     TRUE
   )
   # get DA
-  gages = sqldf(
+  gages = sqldf::sqldf(
     paste0(
       "select *, ST_Area(dh_geofield_geom::geography) / 1609.34^2 as area_sqmi
        from dh_feature_fielded as g ",
@@ -473,6 +475,8 @@ usgs_calib_rarray <- function (riverseg_json, gage_info, model_runid) {
 #'@param touched Defaults to FALSE. Should PostGIS ST_Clip() use the touched
 #'  argument to return all raster cells touched by the feature? Or, if FALSE,
 #'  should only pixels that have centroids within the feature be considered?
+#'@param ds A datasource provided by the user, usally the RomDataSource instance
+#'  create in DEQ config.R files, querying drupal.dh03
 #'@return A list with parameters for the gage_vs_model.Rmd markdown
 #'@export get_weather_raster_data
 get_weather_raster_data <- function(
@@ -484,7 +488,8 @@ get_weather_raster_data <- function(
     varkey = "prism_mod_daily",
     band = 1,
     metric = "mean",
-    touched = FALSE
+    touched = FALSE, 
+    ds = ds
 ){
   #User may identify features through hydroid(s) or a bundle and ftype
   if(!is.null(hydroid)){

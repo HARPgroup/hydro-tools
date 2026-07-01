@@ -17,5 +17,5 @@ Find the mode of a vector
 }
 \details{
 Find the mode of any kind of vector. In the case of ties, it will
-  return all values that tied in frequency
+return all values that tied in frequency
 }

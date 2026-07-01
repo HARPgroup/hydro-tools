@@ -35,14 +35,14 @@ model valid range as output will be NA}
 }
 \value{
 A data frame that has either the percent or absolute difference in
-  monthly percentile between cu_pre_var and cu_post_var depending on
-  output_style. The month is included as the first column. Subsequent columns
-  are those output by cu_flow_table i.e. minimum, 5%, 10%, 25%, 50%, and
-  median
+monthly percentile between cu_pre_var and cu_post_var depending on
+output_style. The month is included as the first column. Subsequent columns
+are those output by cu_flow_table i.e. minimum, 5\%, 10\%, 25\%, 50\%, and
+median
 }
 \description{
 Using a data frame provided by user, find the monthly
-  percentiles of cu_pre_var and cu_post_var using om_flow_table. Report the
-  differences in these monthly percentiles or the percentage change (post to
-  pre)
+percentiles of cu_pre_var and cu_post_var using om_flow_table. Report the
+differences in these monthly percentiles or the percentage change (post to
+pre)
 }

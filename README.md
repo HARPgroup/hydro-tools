@@ -109,6 +109,13 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.2 07/01/2026
+1. Added baseflow forecasting methods to `WaterGageBase` and `WaterGageDaily` to
+interface with the new HARP agws package (added as suggests due to circular
+dependency)
+2. Modified a number of functions to have more explicit import calls to clean-up
+build notes
+
 ### 1.1.1 06/23/2026
 1. Added `RomMetricNetwork` and child `RomMetricAllocation` R6 objects to allow
 for easier river network calculations, mapping, and tracing.

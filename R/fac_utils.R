@@ -190,6 +190,7 @@ om_quantile_table <- function(
 #' @param use_y_log Boolean. Should the y axis be on a log10 scale? Defaults
 #'   to TRUE
 #' @param ylab Character. The text to display on the y-axis of the plot.
+#' @importFrom rlang .data
 #' @return A boxplot of monthly mean flows with highlighted points
 #' @export plot_boxplot_context
 plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y")),
@@ -218,11 +219,11 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
   #user in every month-year. Then filter out month-years with incomplete
   #data
   plotData <- plotData |> 
-    dplyr::group_by(month,analysis_year) |> 
+    dplyr::group_by(.data$month,.data$analysis_year) |> 
     dplyr::summarise(aggregateValue = metric(!!dplyr::sym(value_col), na.rm = TRUE),
                      ndays = dplyr::n()) |> 
-    dplyr::mutate(daysInMonth = lubridate::days_in_month(paste0(analysis_year,"-",month,"-01"))) |> 
-    dplyr::filter(daysInMonth == ndays) |> 
+    dplyr::mutate(daysInMonth = lubridate::days_in_month(paste0(.data$analysis_year,"-",month,"-01"))) |> 
+    dplyr::filter(.data$daysInMonth == .data$ndays) |> 
     #Only include the months requested by the user and relabel all months
     #using their abbreviations
     dplyr::filter(month %in% include_months) |> 
@@ -233,7 +234,7 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
   #Create a boxplot of the month-year mean flows and include the targetData
   #as point data to highlight this year's trends
   p <- ggplot() + 
-    geom_boxplot(data = plotData, aes(group = month, x = month, y = aggregateValue)) +
+    geom_boxplot(data = plotData, aes(group = .data$month, x = .data$month, y = .data$aggregateValue)) +
     ggplot2::labs(color = element_blank()) + 
     ggplot2::xlab(element_blank()) + 
     ggplot2::ylab(ylab) + 
@@ -250,7 +251,7 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
     targetData <- plotData[plotData$analysis_year == targetYear,]
     
     p <- p + 
-      geom_point(data = targetData, aes(x = month, y = aggregateValue,
+      geom_point(data = targetData, aes(x = .data$month, y = .data$aggregateValue,
                                         col = as.character(targetYear)),
                  pch = 12) +
       #Color and label the point values

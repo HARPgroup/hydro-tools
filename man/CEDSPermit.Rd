@@ -13,7 +13,7 @@ CEDSPermit is an object that contains  CEDS information on a permit from CEDS.
 Contains standard methods to extract information from permits, such as GIS data,
 measuring points, and contacts. \code{CEDSPermit} is meant to provide an easier
 method to retrieve data from CEDS than writing queries to ODS, as those queries are contained
-in the methods. This is a child of \code{CEDSEntity}, which contains more generic search 
+in the methods. This is a child of \code{CEDSEntity}, which contains more generic search
 methods and fields that this R6 will call for permit specific information
 See fields/methods for available data
 }
@@ -26,147 +26,147 @@ p2 <- CEDSPermit$new(dsCEDS, permit_type = "GWP", permit_number = "GWI000344")
 }
 }
 \section{Super class}{
-\code{hydrotools::CEDS_Facility} -> \code{CEDSPermit}
+\code{CEDS_Facility} -> \code{CEDSPermit}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{permit_number}}{The permit number of this permit}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{permit_number}}{The permit number of this permit}
 
-\item{\code{facility}}{The facility ID that the permit is connected to. \code{CEDSPermit$pull_facility}
+    \item{\code{facility}}{The facility ID that the permit is connected to. \code{CEDSPermit$pull_facility}
 sets this field as the \code{CEDSFacility} object of that facility}
 
-\item{\code{use_type}}{The water use type of the permit (applicable to withdrawal permits)}
-}
-\if{html}{\out{</div>}}
+    \item{\code{use_type}}{The water use type of the permit (applicable to withdrawal permits)}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-CEDSPermit-new}{\code{CEDSPermit$new()}}
-\item \href{#method-CEDSPermit-get_mps}{\code{CEDSPermit$get_mps()}}
-\item \href{#method-CEDSPermit-pull_facility}{\code{CEDSPermit$pull_facility()}}
-\item \href{#method-CEDSPermit-clone}{\code{CEDSPermit$clone()}}
+  \itemize{
+    \item \href{#method-CEDSPermit-initialize}{\code{CEDSPermit$new()}}
+    \item \href{#method-CEDSPermit-get_mps}{\code{CEDSPermit$get_mps()}}
+    \item \href{#method-CEDSPermit-pull_facility}{\code{CEDSPermit$pull_facility()}}
+    \item \href{#method-CEDSPermit-clone}{\code{CEDSPermit$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="CEDS_Facility" data-id="get_contacts"><a href='../../hydrotools/html/CEDS_Facility.html#method-CEDS_Facility-get_contacts'><code>hydrotools::CEDS_Facility$get_contacts()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="CEDS_Facility" data-id="get_withdrawals"><a href='../../hydrotools/html/CEDS_Facility.html#method-CEDS_Facility-get_withdrawals'><code>hydrotools::CEDS_Facility$get_withdrawals()</code></a></span></li>
+  <li><code>CEDS_Facility$get_contacts()</code></li>
+  <li><code>CEDS_Facility$get_withdrawals()</code></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CEDSPermit-new"></a>}}
-\if{latex}{\out{\hypertarget{method-CEDSPermit-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize the CEDSPermit object. Requires either a pkid or a list of other column names.
+\if{html}{\out{<a id="method-CEDSPermit-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-CEDSPermit-initialize}{}}}
+\subsection{\code{CEDSPermit$new()}}{
+  Initialize the CEDSPermit object. Requires either a pkid or a list of other column names.
 When supplying a config list, it will only select the first permit, even if multiple exist.
 This function works primarily by calling \code{CEDSEntity$initialize}, then setting local fields
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSPermit$new(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSPermit$new(
   datasource,
   permit_type = c("WWR", "VWP", "GWP", "VPDES"),
   pkid = NA,
   permit_number = NA,
   config = list(),
   fully_populate = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{\code{CEDSDataSource} object, which serves as the connection for this object
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{\code{CEDSDataSource} object, which serves as the connection for this object
 to ODS}
-
-\item{\code{permit_type}}{A character string specifying what the permit of interest is. Could
+      \item{\code{permit_type}}{A character string specifying what the permit of interest is. Could
 be one of "WWR","VWP","GWP", or "VPDES". This field is required}
-
-\item{\code{pkid}}{The CEDS ID of the permit of interest. This or config are required to
+      \item{\code{pkid}}{The CEDS ID of the permit of interest. This or config are required to
 find this permit If pkid is provided, config is ignored}
-
-\item{\code{permit_number}}{The permit number to search for. The pkid is prioritized over this}
-
-\item{\code{config}}{A list of column name value pairs to search for the permit by. These must be
+      \item{\code{permit_number}}{The permit number to search for. The pkid is prioritized over this}
+      \item{\code{config}}{A list of column name value pairs to search for the permit by. These must be
 column names from the permit table, else it will return an error}
-
-\item{\code{fully_populate}}{Should all fields that can be populated in for CEDSPermit be ran.
+      \item{\code{fully_populate}}{Should all fields that can be populated in for CEDSPermit be ran.
 This means it will pull the contacts, MPs, and withdrawals, and load them ahead of time}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Instance of CEDSPermit with populated permit information
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Instance of CEDSPermit with populated permit information
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CEDSPermit-get_mps"></a>}}
 \if{latex}{\out{\hypertarget{method-CEDSPermit-get_mps}{}}}
-\subsection{Method \code{get_mps()}}{
-Pulls the measuring points associated with the permit (that have measuring
-points of the type corresponding to .source). Returns a data.frame of all 
+\subsection{\code{CEDSPermit$get_mps()}}{
+  Pulls the measuring points associated with the permit (that have measuring
+points of the type corresponding to .source). Returns a data.frame of all
 MPs found. No arguments are needed, as it searches based on the permit ID of this object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSPermit$get_mps(.source = "SW/GW", return_df = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{.source}}{What type of measuring points to search for. Options are \code{"SW/GW",
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSPermit$get_mps(.source = "SW/GW", return_df = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{.source}}{What type of measuring points to search for. Options are \code{"SW/GW",
 "GW","SW","All"}. "All" is the only option that will include transfers}
-
-\item{\code{return_df}}{Should a data.frame be returned. Defaults to TRUE}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A dataframe of the measuring points found. This data.frame is a snip form the
+      \item{\code{return_df}}{Should a data.frame be returned. Defaults to TRUE}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A dataframe of the measuring points found. This data.frame is a snip form the
 measuring points view, and contains no withdrawal information. Also sets the mps field
 of the \code{CEDSPermit} object. If no MPs are found, it returns a message.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CEDSPermit-pull_facility"></a>}}
 \if{latex}{\out{\hypertarget{method-CEDSPermit-pull_facility}{}}}
-\subsection{Method \code{pull_facility()}}{
-Pulls the facility this permit is associated with and creates a \code{CEDSFacility} object
+\subsection{\code{CEDSPermit$pull_facility()}}{
+  Pulls the facility this permit is associated with and creates a \code{CEDSFacility} object
 of it.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSPermit$pull_facility(return_fac = F)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{return_fac}}{A logical where if TRUE this method will return the object, in addition
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSPermit$pull_facility(return_fac = F)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{return_fac}}{A logical where if TRUE this method will return the object, in addition
 to setting the facility field}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Instance of \code{CEDSFacility} for the facility this permit is associated with.
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Instance of \code{CEDSFacility} for the facility this permit is associated with.
 It sets the facility field as this R6 object, and will return nothing unless return_fac is
 set to TRUE.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CEDSPermit-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-CEDSPermit-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSPermit$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{CEDSPermit$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSPermit$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

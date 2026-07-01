@@ -26,10 +26,10 @@ string next upstream segment ID
 }
 \description{
 Returns a vector of the segments upstream of riv.seg based on
-  the list in AllSegList
+the list in AllSegList
 }
 \details{
-Find Upstream Segments: A basic function that finds the segments 
+Find Upstream Segments: A basic function that finds the segments
 upstream of a given segment(s). riv.seg may be a character vector of segments.
 and AllSegList must be a dataframe. This function returns a vector of
 upstream segments

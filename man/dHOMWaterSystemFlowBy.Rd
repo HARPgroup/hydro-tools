@@ -21,97 +21,103 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMEquation]{hydrotools::dHOMEquation}} -> \code{dHOMWaterSystemFlowBy}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMEquation]{dHOMEquation}} -> \code{dHOMWaterSystemFlowBy}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{object_class}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMWaterSystemFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemFlowBy$exportOpenMIBase()}}
-\item \href{#method-dHOMWaterSystemFlowBy-om_valnames}{\code{dHOMWaterSystemFlowBy$om_valnames()}}
-\item \href{#method-dHOMWaterSystemFlowBy-om_codenames}{\code{dHOMWaterSystemFlowBy$om_codenames()}}
-\item \href{#method-dHOMWaterSystemFlowBy-clone}{\code{dHOMWaterSystemFlowBy$clone()}}
+  \itemize{
+    \item \href{#method-dHOMWaterSystemFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemFlowBy$exportOpenMIBase()}}
+    \item \href{#method-dHOMWaterSystemFlowBy-om_valnames}{\code{dHOMWaterSystemFlowBy$om_valnames()}}
+    \item \href{#method-dHOMWaterSystemFlowBy-om_codenames}{\code{dHOMWaterSystemFlowBy$om_codenames()}}
+    \item \href{#method-dHOMWaterSystemFlowBy-clone}{\code{dHOMWaterSystemFlowBy$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>hydrotools::dHVariablePluginDefault$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>hydrotools::dHVariablePluginDefault$param_info()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMEquation" data-id="initialize"><a href='../../hydrotools/html/dHOMEquation.html#method-dHOMEquation-initialize'><code>hydrotools::dHOMEquation$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>dHVariablePluginDefault$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>dHVariablePluginDefault$param_info()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMEquation" data-id="initialize"><a href='../../hydrotools/html/dHOMEquation.html#method-dHOMEquation-initialize'><code>dHOMEquation$initialize()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemFlowBy-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemFlowBy-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemFlowBy$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemFlowBy$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemFlowBy$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemFlowBy-om_valnames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemFlowBy-om_valnames}{}}}
-\subsection{Method \code{om_valnames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemFlowBy$om_valnames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemFlowBy$om_valnames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemFlowBy$om_valnames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as string values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as string values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemFlowBy-om_codenames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemFlowBy-om_codenames}{}}}
-\subsection{Method \code{om_codenames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemFlowBy$om_codenames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemFlowBy$om_codenames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemFlowBy$om_codenames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as numeric values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as numeric values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMWaterSystemFlowBy-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMWaterSystemFlowBy-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMWaterSystemFlowBy$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMWaterSystemFlowBy$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemFlowBy$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -17,8 +17,8 @@ month name as labels, FALSE will return a numeric}
 }
 \value{
 If x is numeric, then returns a numeric. Otherwise, if label is TRUE,
- returns an ordered factor indicating the equivalent month of the water year.
- Otherwise, returns only the numeric that represents the month.
+returns an ordered factor indicating the equivalent month of the water year.
+Otherwise, returns only the numeric that represents the month.
 }
 \description{
 Extract the month of the water year from a date or time object.

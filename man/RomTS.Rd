@@ -19,201 +19,208 @@ NA
 NA
 }
 \section{Super class}{
-\code{\link[hydrotools:RomEntity]{hydrotools::RomEntity}} -> \code{RomTS}
+\code{\link[hydrotools:RomEntity]{RomEntity}} -> \code{RomTS}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{base_entity_type}}{kind of entity}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+    \item{\code{pk_name}}{the name of this entity's pk column}
 
-\item{\code{has_vardef}}{is pluggable?}
+    \item{\code{has_vardef}}{is pluggable?}
 
-\item{\code{tid}}{unique ID in this RomDataSource}
+    \item{\code{tid}}{unique ID in this RomDataSource}
 
-\item{\code{featureid}}{id of entity this is attached to}
+    \item{\code{featureid}}{id of entity this is attached to}
 
-\item{\code{entity_type}}{type of entity this is attached to}
+    \item{\code{entity_type}}{type of entity this is attached to}
 
-\item{\code{tstime}}{begin timestamp}
+    \item{\code{tstime}}{begin timestamp}
 
-\item{\code{tsendtime}}{end time stamp}
+    \item{\code{tsendtime}}{end time stamp}
 
-\item{\code{tsvalue}}{numerical value}
+    \item{\code{tsvalue}}{numerical value}
 
-\item{\code{tscode}}{alphanumeric value}
+    \item{\code{tscode}}{alphanumeric value}
 
-\item{\code{tlid}}{timeline ID (for future use)}
+    \item{\code{tlid}}{timeline ID (for future use)}
 
-\item{\code{varid}}{variable ID from RomDataSource}
+    \item{\code{varid}}{variable ID from RomDataSource}
 
-\item{\code{bundle}}{(for future use)}
+    \item{\code{bundle}}{(for future use)}
 
-\item{\code{uid}}{user id of creator}
+    \item{\code{uid}}{user id of creator}
 
-\item{\code{modified}}{timestamp}
+    \item{\code{modified}}{timestamp}
 
-\item{\code{datasource}}{RomDataSource}
+    \item{\code{datasource}}{RomDataSource}
 
-\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
-}
-\if{html}{\out{</div>}}
+    \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomTS-get_id}{\code{RomTS$get_id()}}
-\item \href{#method-RomTS-new}{\code{RomTS$new()}}
-\item \href{#method-RomTS-from_list}{\code{RomTS$from_list()}}
-\item \href{#method-RomTS-to_list}{\code{RomTS$to_list()}}
-\item \href{#method-RomTS-set_prop}{\code{RomTS$set_prop()}}
-\item \href{#method-RomTS-save}{\code{RomTS$save()}}
-\item \href{#method-RomTS-clone}{\code{RomTS$clone()}}
+  \itemize{
+    \item \href{#method-RomTS-get_id}{\code{RomTS$get_id()}}
+    \item \href{#method-RomTS-initialize}{\code{RomTS$new()}}
+    \item \href{#method-RomTS-from_list}{\code{RomTS$from_list()}}
+    \item \href{#method-RomTS-to_list}{\code{RomTS$to_list()}}
+    \item \href{#method-RomTS-set_prop}{\code{RomTS$set_prop()}}
+    \item \href{#method-RomTS-save}{\code{RomTS$save()}}
+    \item \href{#method-RomTS-clone}{\code{RomTS$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>hydrotools::RomEntity$delete()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>hydrotools::RomEntity$delete_props()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>hydrotools::RomEntity$get_prop()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>hydrotools::RomEntity$get_vardef()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>hydrotools::RomEntity$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>hydrotools::RomEntity$insure_varid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>hydrotools::RomEntity$load_data()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>hydrotools::RomEntity$load_plugin()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>hydrotools::RomEntity$propvalues()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>hydrotools::RomEntity$save_field()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>hydrotools::RomEntity$tsvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete'><code>RomEntity$delete()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="delete_props"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-delete_props'><code>RomEntity$delete_props()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_prop"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_prop'><code>RomEntity$get_prop()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="get_vardef"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-get_vardef'><code>RomEntity$get_vardef()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="handle_config"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-handle_config'><code>RomEntity$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="insure_varid"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-insure_varid'><code>RomEntity$insure_varid()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_data"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_data'><code>RomEntity$load_data()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="load_plugin"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-load_plugin'><code>RomEntity$load_plugin()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="propvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-propvalues'><code>RomEntity$propvalues()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="save_field"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-save_field'><code>RomEntity$save_field()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomEntity" data-id="tsvalues"><a href='../../hydrotools/html/RomEntity.html#method-RomEntity-tsvalues'><code>RomEntity$tsvalues()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-get_id}{}}}
-\subsection{Method \code{get_id()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$get_id()}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$get_id()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$get_id()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    get_id the id of this entity alias to remote pkid, subclassed as function
+  }
 }
 
-\subsection{Returns}{
-get_id the id of this entity alias to remote pkid, subclassed as function
-}
-}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomTS-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomTS-new}{}}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$new(datasource = NULL, config = list(), load_remote = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-RomTS-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomTS-initialize}{}}}
+\subsection{\code{RomTS$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$new(datasource = NULL, config = list(), load_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{optional RomDataSource for remote and local storage}
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{load_remote}}{automatically query REST data source for matches?}
+      \item{\code{site}}{URL of some RESTful repository}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{optional RomDataSource for remote and local storage}
-
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
-
-\item{\code{site}}{URL of some RESTful repository}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-from_list}{}}}
-\subsection{Method \code{from_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$from_list(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$from_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$from_list(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-to_list}{}}}
-\subsection{Method \code{to_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$to_list()}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$to_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$to_list()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    list of object attributes suitable for input to new() and from_list() methods
+  }
 }
 
-\subsection{Returns}{
-list of object attributes suitable for input to new() and from_list() methods
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-set_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-set_prop}{}}}
-\subsection{Method \code{set_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$set_prop(name, value, format = "default")}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$set_prop()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$set_prop(name, value, format = "default")}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{name}}{attribute name}
+      \item{\code{value}}{attribute value}
+      \item{\code{format}}{type of data being sent (default, json, ...)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{name}}{attribute name}
-
-\item{\code{value}}{attribute value}
-
-\item{\code{format}}{type of data being sent (default, json, ...)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-save}{}}}
-\subsection{Method \code{save()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$save(push_remote = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$save()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$save(push_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{push_remote}}{whether to automatically propagate changes to remote data source}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    boolean TRUE on success, FALSE on failure
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{push_remote}}{whether to automatically propagate changes to remote data source}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-boolean TRUE on success, FALSE on failure
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomTS-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomTS-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomTS$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomTS$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomTS$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

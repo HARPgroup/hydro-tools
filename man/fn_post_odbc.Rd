@@ -8,7 +8,7 @@ update entities within database.}
 fn_post_odbc(entity_type, pk, inputs, con, obj = FALSE, debug = FALSE)
 }
 \arguments{
-\item{entity_type}{Most often dh_feature or dh_properties. Indicates which 
+\item{entity_type}{Most often dh_feature or dh_properties. Indicates which
 table to retrieve data from. This will be the target table for the query
 constructed from user inputs input list}
 

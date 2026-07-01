@@ -22,11 +22,11 @@ data frame to provide to \code{om_vahydro_metric_grid()}
 }
 \description{
 Helper function to generate old-style inputs for
- om_vahydro_metric_grid
+om_vahydro_metric_grid
 }
 \details{
 Builds a data frame of runids, metrics, and runlabels to provide as
- the runids argument in \code{om_vahydro_metric_grid()}
+the runids argument in \code{om_vahydro_metric_grid()}
 }
 \examples{
 m_version <- c('vahydro-1.0')

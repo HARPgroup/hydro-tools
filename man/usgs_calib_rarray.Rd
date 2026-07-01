@@ -21,5 +21,5 @@ Create a best guess calibration render script param set.
 }
 \details{
 Prepares a params list for the gage_vs_model.Rmd in hydro-tools/USGS
- to include a title, runid, gageid, model_da, and model element id (elid)
+to include a title, runid, gageid, model_da, and model element id (elid)
 }

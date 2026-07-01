@@ -21,73 +21,75 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMDataMatrix]{hydrotools::dHOMDataMatrix}} -> \code{dHOMConsumptiveUseFractionsPWS}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMDataMatrix]{dHOMDataMatrix}} -> \code{dHOMConsumptiveUseFractionsPWS}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{object_class}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMConsumptiveUseFractionsPWS-exportOpenMIBase}{\code{dHOMConsumptiveUseFractionsPWS$exportOpenMIBase()}}
-\item \href{#method-dHOMConsumptiveUseFractionsPWS-clone}{\code{dHOMConsumptiveUseFractionsPWS$clone()}}
+  \itemize{
+    \item \href{#method-dHOMConsumptiveUseFractionsPWS-exportOpenMIBase}{\code{dHOMConsumptiveUseFractionsPWS$exportOpenMIBase()}}
+    \item \href{#method-dHOMConsumptiveUseFractionsPWS-clone}{\code{dHOMConsumptiveUseFractionsPWS$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>hydrotools::dHOMDataMatrix$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_codenames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_codenames'><code>hydrotools::dHOMDataMatrix$om_codenames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_valnames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_valnames'><code>hydrotools::dHOMDataMatrix$om_valnames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>hydrotools::dHOMDataMatrix$param_info()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>dHVariablePluginDefault$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="fromOM"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-fromOM'><code>dHOMDataMatrix$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_codenames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_codenames'><code>dHOMDataMatrix$om_codenames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="om_valnames"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-om_valnames'><code>dHOMDataMatrix$om_valnames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMDataMatrix" data-id="param_info"><a href='../../hydrotools/html/dHOMDataMatrix.html#method-dHOMDataMatrix-param_info'><code>dHOMDataMatrix$param_info()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMConsumptiveUseFractionsPWS-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMConsumptiveUseFractionsPWS-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMConsumptiveUseFractionsPWS$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMConsumptiveUseFractionsPWS$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMConsumptiveUseFractionsPWS$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMConsumptiveUseFractionsPWS-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMConsumptiveUseFractionsPWS-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMConsumptiveUseFractionsPWS$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMConsumptiveUseFractionsPWS$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMConsumptiveUseFractionsPWS$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

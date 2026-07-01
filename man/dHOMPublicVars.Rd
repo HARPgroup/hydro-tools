@@ -19,45 +19,45 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMAlphanumericConstant]{hydrotools::dHOMAlphanumericConstant}} -> \code{dHVarImage}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{\link[hydrotools:dHOMAlphanumericConstant]{dHOMAlphanumericConstant}} -> \code{dHVarImage}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHVarImage-clone}{\code{dHOMPublicVars$clone()}}
+  \itemize{
+    \item \href{#method-dHVarImage-clone}{\code{dHVarImage$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>hydrotools::dHVariablePluginDefault$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>hydrotools::dHVariablePluginDefault$om_codenames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>hydrotools::dHVariablePluginDefault$om_valnames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>hydrotools::dHVariablePluginDefault$param_info()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="exportOpenMIBase"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-exportOpenMIBase'><code>hydrotools::dHOMAlphanumericConstant$exportOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="initialize"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-initialize'><code>hydrotools::dHOMAlphanumericConstant$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>dHVariablePluginDefault$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>dHVariablePluginDefault$om_codenames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>dHVariablePluginDefault$om_valnames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>dHVariablePluginDefault$param_info()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="exportOpenMIBase"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-exportOpenMIBase'><code>dHOMAlphanumericConstant$exportOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHOMAlphanumericConstant" data-id="initialize"><a href='../../hydrotools/html/dHOMAlphanumericConstant.html#method-dHOMAlphanumericConstant-initialize'><code>dHOMAlphanumericConstant$initialize()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVarImage-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVarImage-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMPublicVars$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHVarImage$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVarImage$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -8,15 +8,15 @@ R6 Object of class WaterGageBase
 }
 \description{
 Utility class for querying stream gage statistics or developing
-  monthly/annual statistics
+monthly/annual statistics
 }
 \details{
 Water Gage Statistics Object
 
 This R6 object has standard methods for managing the data and meta
-  data related to stream gage statistics. On initialize, this object can
-  query USGS for flow statistics and will store on object. Other methods may
-  be available to summarize existing daily stream data
+data related to stream gage statistics. On initialize, this object can
+query USGS for flow statistics and will store on object. Other methods may
+be available to summarize existing daily stream data
 }
 \examples{
 \dontrun{
@@ -25,55 +25,58 @@ SA_Ashland <- WaterGageStats$new(gage_id = "01672500")
 }
 }
 \section{Super class}{
-\code{\link[hydrotools:WaterGageBase]{hydrotools::WaterGageBase}} -> \code{WaterGageStats}
+\code{\link[hydrotools:WaterGageBase]{WaterGageBase}} -> \code{WaterGageStats}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{gage_data}}{The gage data from data_source}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{gage_data}}{The gage data from data_source}
 
-\item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
+    \item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
 to retrieve day-of-year statistics or can be 'daterange' to retrieve
 monthly, yearly, and water year statistics}
 
-\item{\code{computation_type}}{The statistics to use when summarize data}
+    \item{\code{computation_type}}{The statistics to use when summarize data}
 
-\item{\code{start_date}}{The start of the period to consider for statistical
+    \item{\code{start_date}}{The start of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
 
-\item{\code{end_date}}{The end of the period to consider for statistical
+    \item{\code{end_date}}{The end of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-WaterGageStats-new}{\code{WaterGageStats$new()}}
-\item \href{#method-WaterGageStats-clone}{\code{WaterGageStats$clone()}}
+  \itemize{
+    \item \href{#method-WaterGageStats-initialize}{\code{WaterGageStats$new()}}
+    \item \href{#method-WaterGageStats-clone}{\code{WaterGageStats$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config'><code>hydrotools::WaterGageBase$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config_item"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config_item'><code>hydrotools::WaterGageBase$handle_config_item()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_sf_da"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_sf_da'><code>hydrotools::WaterGageBase$load_sf_da()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_wshd_feat"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_wshd_feat'><code>hydrotools::WaterGageBase$load_wshd_feat()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="agwrc_fun"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-agwrc_fun'><code>WaterGageBase$agwrc_fun()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="baseflow_workflow_data"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-baseflow_workflow_data'><code>WaterGageBase$baseflow_workflow_data()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="get_model_scenario_props"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-get_model_scenario_props'><code>WaterGageBase$get_model_scenario_props()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config'><code>WaterGageBase$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config_item"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config_item'><code>WaterGageBase$handle_config_item()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_sf_da"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_sf_da'><code>WaterGageBase$load_sf_da()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_wshd_feat"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_wshd_feat'><code>WaterGageBase$load_wshd_feat()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="read_om_file"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-read_om_file'><code>WaterGageBase$read_om_file()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-WaterGageStats-new"></a>}}
-\if{latex}{\out{\hypertarget{method-WaterGageStats-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a WaterGageStats() instance, returning an R6 object that is
+\if{html}{\out{<a id="method-WaterGageStats-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageStats-initialize}{}}}
+\subsection{\code{WaterGageStats$new()}}{
+  Initialize a WaterGageStats() instance, returning an R6 object that is
 now populated with gage statistics. This object offers various standard
 methods to retrieve and analyze USGS gage statistics
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageStats$new(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageStats$new(
   data_source = "USGS",
   gage_id = NA,
   start_date = self$start_date,
@@ -82,61 +85,57 @@ methods to retrieve and analyze USGS gage statistics
   computation_type = self$computation_type,
   statistic_type = "doy",
   ds_in = NA
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data_source}}{For now, this must be "USGS" but may be a data frame in
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data_source}}{For now, this must be "USGS" but may be a data frame in
 later versions to allow statistics to be developed from a data frame}
-
-\item{\code{gage_id}}{The gage ID. This should be a USGS site number if \code{data_source}
+      \item{\code{gage_id}}{The gage ID. This should be a USGS site number if \code{data_source}
 is "USGS" such as 01671020}
-
-\item{\code{start_date}}{The end of the period to consider for statistical
+      \item{\code{start_date}}{The end of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
-
-\item{\code{end_date}}{The end of the period to consider for statistical
+      \item{\code{end_date}}{The end of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
-
-\item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
+      \item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
 data should be used from USGS? Defaults to that set in the field on
 this object, which itself defaults to 'all'. Please note USGS usually can
 only provide statistics for approved values.}
-
-\item{\code{computation_type}}{The statistics to use when summarize data}
-
-\item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
+      \item{\code{computation_type}}{The statistics to use when summarize data}
+      \item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
 to retrieve day-of-year statistics or can be 'daterange' to retrieve
 monthly, yearly, and water year statistics}
-
-\item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
+      \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageStats-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageStats-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageStats$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{WaterGageStats$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageStats$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

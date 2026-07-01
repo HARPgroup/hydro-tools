@@ -121,7 +121,7 @@ getGIS <- function(pkid, tbl_info, ds) {
   
   gis_sql <- paste(sql_select,sql_from,sql_where)
   
-  coords <- dbGetQuery(ds$connection, gis_sql)
+  coords <- DBI::dbGetQuery(ds$connection, gis_sql)
   
   return(coords)
 }

@@ -11,7 +11,7 @@
 #' @param flow_metric Flow metric that corresponds to data in data frame
 #' @param cia_data_frame Data frame of cumulative impact data
 #' @return A dendritic plot of segments from data frame
-#' @import sqldf
+#' @importFrom rlang .data
 #' @import ggplot2
 #' @export fn_plot_cia_dend
 fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, cia_data_frame){
@@ -43,12 +43,14 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
       names(river)[names(river) == colnames(river)[1]] <- "riv_seg"
       
       #pulls river data from river segments that match headwater and its downstream segs
-      cia_data_loop <- sqldf("SELECT * FROM river join cia_data_frame
+      cia_data_loop <- sqldf::sqldf("SELECT * FROM river join cia_data_frame
                         WHERE riv_seg like riverseg")
       
       #plot graph
       p <- p +
-        geom_line(data = cia_data_loop, aes(x = rmile, y = Metric_1, colour = Metric_change, size = metric_pc))
+        geom_line(data = cia_data_loop,
+                  aes(x = .data$rmile, y = .data$Metric_1,
+                      colour = .data$Metric_change, size = .data$metric_pc))
       
     }
     
@@ -63,8 +65,8 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
   riv_seg_og <- cia_data_frame[cia_data_frame$riverseg == riv_seg_i,]
   
   p <- p +
-    geom_point(data = riv_seg_og, aes(x = rmile, y = Metric_1)) +
-    geom_text(data = cia_data_frame, aes(x = rmile, y = Metric_1, label = seglist, vjust = 1.0)) + 
+    geom_point(data = riv_seg_og, aes(x = .data$rmile, y = .data$Metric_1)) +
+    geom_text(data = cia_data_frame, aes(x = .data$rmile, y = .data$Metric_1, label = .data$seglist, vjust = 1.0)) + 
     scale_size_continuous(range = c(0.2, 3), name = "PC Magnitude") +
     scale_colour_gradientn(colours = c("blue", "grey"), values = c(-1, 1), name = "PC Sign", breaks = c(-1, 1)) +
     theme_bw() +

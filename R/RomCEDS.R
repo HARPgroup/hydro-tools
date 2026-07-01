@@ -48,11 +48,11 @@ CEDSDataSource <- R6Class(
       localDriver <- sort(decreasing = TRUE, ((drivers[grepl("ODBC Driver .* for SQL Server", 
                                                              drivers)])))[1]
       if (grepl("C:\\\\Users", Sys.getenv("USERPROFILE"))) {
-        self$connection <- dbPool(odbc::odbc(), Driver = localDriver, Server = serverAddress, 
+        self$connection <- pool::dbPool(odbc::odbc(), Driver = localDriver, Server = serverAddress, 
                                   database = "ODS", trusted_connection = "yes", TrustServerCertificate = "yes")
       }
       else {
-        self$connection <- dbPool(drv = odbc::odbc(), Driver = Sys.getenv("driver"), 
+        self$connection <- pool::dbPool(drv = odbc::odbc(), Driver = Sys.getenv("driver"), 
                                   Server = Sys.getenv("server"), dbname = Sys.getenv("db"), 
                                   UID = Sys.getenv("userid"), PWD = Sys.getenv("pwd"))
       }
