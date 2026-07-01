@@ -7,8 +7,8 @@
 Instance of CEDSDataSource, which can be fed into other CEDS R6 objects
 }
 \description{
-CEDSDataSource mirrors the functionality of RomDataSource, but for the CEDS 
-ODS server. It servees as the connection to ODS to be passed into the other CEDS R6 
+CEDSDataSource mirrors the functionality of RomDataSource, but for the CEDS
+ODS server. It servees as the connection to ODS to be passed into the other CEDS R6
 objects. This is a read only connection, as there can be no programatic writing to CEDS
 }
 \details{
@@ -23,101 +23,104 @@ dsCEDS <- CEDSDatasource()
 }
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{connection}}{The pool connection to ODS. This is called by \code{dbGetQuery} to access CEDS data}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{connection}}{The pool connection to ODS. This is called by \code{dbGetQuery} to access CEDS data}
 
-\item{\code{dbname}}{The server its connected to, either TEST or PROD}
-}
-\if{html}{\out{</div>}}
+    \item{\code{dbname}}{The server its connected to, either TEST or PROD}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-CEDSDataSource-new}{\code{CEDSDataSource$new()}}
-\item \href{#method-CEDSDataSource-get}{\code{CEDSDataSource$get()}}
-\item \href{#method-CEDSDataSource-clone}{\code{CEDSDataSource$clone()}}
-}
+  \itemize{
+    \item \href{#method-CEDSDataSource-initialize}{\code{CEDSDataSource$new()}}
+    \item \href{#method-CEDSDataSource-get}{\code{CEDSDataSource$get()}}
+    \item \href{#method-CEDSDataSource-clone}{\code{CEDSDataSource$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CEDSDataSource-new"></a>}}
-\if{latex}{\out{\hypertarget{method-CEDSDataSource-new}{}}}
-\subsection{Method \code{new()}}{
-Initializes the instance of CEDSDataSource. This can then be fed into other CEDS r6 objects. 
+\if{html}{\out{<a id="method-CEDSDataSource-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-CEDSDataSource-initialize}{}}}
+\subsection{\code{CEDSDataSource$new()}}{
+  Initializes the instance of CEDSDataSource. This can then be fed into other CEDS r6 objects.
 May require up to date drivers (used 'ODBC Driver 18 for SQL Server' at the time of development).
 Set up with code form DEQmethods::databaseconnect, so if running on the posit server will use its drivers
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSDataSource$new(server)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSDataSource$new(server)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{server}}{The ODS server the object is connected to. Defaults to PROD, but can be set to TEST}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance of CEDSDataSource with populated connection
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{server}}{The ODS server the object is connected to. Defaults to PROD, but can be set to TEST}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance of CEDSDataSource with populated connection
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CEDSDataSource-get"></a>}}
 \if{latex}{\out{\hypertarget{method-CEDSDataSource-get}{}}}
-\subsection{Method \code{get()}}{
-A generic function to find a variety of 'features', be it a facility or different kind of permits, from
+\subsection{\code{CEDSDataSource$get()}}{
+  A generic function to find a variety of 'features', be it a facility or different kind of permits, from
 their respective table. Since these tables can have different column names and setups, requires using
 the \code{fn_get_table_names} to attempt to standardize. Set up similar to its respective function in
 \code{RomDataSource}, in which it searches either by a primary key ID or a list of other supplied fields
- This function will return the row of the respective table.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSDataSource$get(
+This function will return the row of the respective table.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSDataSource$get(
   entity_type = c("facility", "WWR", "VWP", "GWP", "VPDES"),
   pkid = NA,
   config = list(),
   tbl_info
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity_type}}{What type of feature are you looking for. Either a facility, or the specific type of 
-permit. This is a set list, of either facility, WWR, VWP, GWP, or VPDES. THe function will fail if it is 
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity_type}}{What type of feature are you looking for. Either a facility, or the specific type of
+permit. This is a set list, of either facility, WWR, VWP, GWP, or VPDES. THe function will fail if it is
 not one of the required types.}
-
-\item{\code{pkid}}{The priamry ID of the feature you are searching for. This is the CEDS ID of the permit or facility
+      \item{\code{pkid}}{The priamry ID of the feature you are searching for. This is the CEDS ID of the permit or facility
 that will be returned. This has to be the ID of the feature you are looking for, so if the entity_type is a
 VWP, it cannot be a facility ID.}
-
-\item{\code{config}}{A list of column names and their values to search by. This can be any column in the table, but
+      \item{\code{config}}{A list of column names and their values to search by. This can be any column in the table, but
 it must match the exact column name. Since the tables are all different, the values in config must line up with
 the respective columns for the entity_type.}
-
-\item{\code{tbl_info}}{A list as supplied by \code{fn_get_table_names} for the desired entity_type. This is always already created
+      \item{\code{tbl_info}}{A list as supplied by \code{fn_get_table_names} for the desired entity_type. This is always already created
 before \code{get()} is called, so it was added as a parameter instead of rerunning it within the function.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object A dataframe of the row of the entity from the table (as determined by entity_type)
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object A dataframe of the row of the entity from the table (as determined by entity_type)
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CEDSDataSource-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-CEDSDataSource-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CEDSDataSource$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{CEDSDataSource$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{CEDSDataSource$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

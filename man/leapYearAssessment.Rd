@@ -17,5 +17,5 @@ Check if year is leap year
 }
 \details{
 Check if the numeric year is a leap year i.e., is the year divisible
-  by 4 but not 100, unless it is also divisible by 400?
+by 4 but not 100, unless it is also divisible by 400?
 }

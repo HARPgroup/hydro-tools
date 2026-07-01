@@ -39,55 +39,55 @@ information}
 }
 \value{
 A list with the bank full stage (h), bank full width (bf), base width
- (b), side slope (z), and mannings roughness (n)
+(b), side slope (z), and mannings roughness (n)
 }
 \description{
 A function that can create a simple GIS map using the maptiles
- library and watershed hydroids input by user
+library and watershed hydroids input by user
 }
 \details{
 This function takes in a data source and a watershed hydroid. It then
- optionally queries the datasource to identify upstream watersheds. It
- creates a simple map of the watershed with a basemap populated by the
- maptiles R package following the \code{nhdplusTools:::set_zoom()} function.
- A series of point labels can be included to provide more context to the map
- An outlet point must be provided to ensure proper map tiles are gotten from
- basemap providers. This function creates a plot that is placed in the file
- path provided by the user
- 
- Understanding the config input is important to styling the map as needed.
- The config should be provided with a list and may include any of the
- following elements:
- \describe{
-    \item{zoomNHDPlusTools}{If provided, will set the zoom used to get the
-    basemap tiles. If not, \code{nhdplusTools:::set_zoom()} will be used}
-    \item{tileProvider}{The basemap of choice. See , otherwise defaults to
-    "Esri.NatGeoWorldMap". See \code{?maptiles::get_tiles} for more options}
-    \item{pointBuffer}{A vector of length 1 or 2 OR a data frame with a
-    number of rows equal to the number of points to plot in pointSF input and
-    two columns, latbuffer and lngbuffer. These values will be used to adjust
-    the location of point labels on the map, allowing for fine tuning of map
-    labels. See example.}
-    \item{wshdBuffer}{A vector of length 1 or 2 OR a data frame with a
-    number of rows equal to the number of watersheds in the plot input and
-    two columns, latbuffer and lngbuffer. These values will be used to adjust
-    the location of watershed labels on the map, allowing for fine tuning of map
-    labels. See example.}
-    \item{textSize}{Label font size using R base::plot units. Defaults to 0.4}
-    \item{pointpch}{Numeric. The pch to use to display the points on the map
-    e.g. the point type. See base R pch details for more information}
-    \item{width}{numeric. The width of the image. If specified, height and
-    units must be provided. res can be provided but will default to 300 ppi.
-    Defaults to 5 inches}
-    \item{height}{numeric. The height of the image. If specified, width and
-    units must be provided. res can be provided but will default to 300 ppi.
-    Defaults to 4 inches.}
-    \item{units}{numeric. The units of the height and width inputs. Defaults 
-    to 'in' but see \code{?plot()} for more options. If specified, width and
-    height must be provided. res can be provided but will default to 300 ppi}
-    \item{res}{numeric. The resolution of the image. If specified, height, width,
-    and units must be provided. res defaults to 300 ppi}
- }
+optionally queries the datasource to identify upstream watersheds. It
+creates a simple map of the watershed with a basemap populated by the
+maptiles R package following the \code{nhdplusTools:::set_zoom()} function.
+A series of point labels can be included to provide more context to the map
+An outlet point must be provided to ensure proper map tiles are gotten from
+basemap providers. This function creates a plot that is placed in the file
+path provided by the user
+
+Understanding the config input is important to styling the map as needed.
+The config should be provided with a list and may include any of the
+following elements:
+\describe{
+\item{zoomNHDPlusTools}{If provided, will set the zoom used to get the
+basemap tiles. If not, \code{nhdplusTools:::set_zoom()} will be used}
+\item{tileProvider}{The basemap of choice. See , otherwise defaults to
+"Esri.NatGeoWorldMap". See \code{?maptiles::get_tiles} for more options}
+\item{pointBuffer}{A vector of length 1 or 2 OR a data frame with a
+number of rows equal to the number of points to plot in pointSF input and
+two columns, latbuffer and lngbuffer. These values will be used to adjust
+the location of point labels on the map, allowing for fine tuning of map
+labels. See example.}
+\item{wshdBuffer}{A vector of length 1 or 2 OR a data frame with a
+number of rows equal to the number of watersheds in the plot input and
+two columns, latbuffer and lngbuffer. These values will be used to adjust
+the location of watershed labels on the map, allowing for fine tuning of map
+labels. See example.}
+\item{textSize}{Label font size using R base::plot units. Defaults to 0.4}
+\item{pointpch}{Numeric. The pch to use to display the points on the map
+e.g. the point type. See base R pch details for more information}
+\item{width}{numeric. The width of the image. If specified, height and
+units must be provided. res can be provided but will default to 300 ppi.
+Defaults to 5 inches}
+\item{height}{numeric. The height of the image. If specified, width and
+units must be provided. res can be provided but will default to 300 ppi.
+Defaults to 4 inches.}
+\item{units}{numeric. The units of the height and width inputs. Defaults
+to 'in' but see \code{?plot()} for more options. If specified, width and
+height must be provided. res can be provided but will default to 300 ppi}
+\item{res}{numeric. The resolution of the image. If specified, height, width,
+and units must be provided. res defaults to 300 ppi}
+}
 }
 \examples{
 #wshdHydroid <- 67704

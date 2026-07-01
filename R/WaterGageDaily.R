@@ -8,7 +8,8 @@
 #'   gage data, a csv, or data provided by user and then offers methods to bring
 #'   in USGS geometries, OWS watersheds, calculate VPDES critical low flows, and
 #'   to provide basic drought forecasting capabilities.
-#' @importFrom R6 R6Class  
+#' @importFrom R6 R6Class
+#' @importFrom agws forwardForecast
 #' @param data_source "USGS", a file path, or a data frame of stream gage data that
 #'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
 #'   \code{flow_col} and \code{date_col} are not used as data will be pulled
@@ -292,13 +293,48 @@ WaterGageDaily <- R6::R6Class(
       
       return(nep_data)
     },
-    #' @description Derive relevant baseflow recession parameters
-    baseflow_analysis = function(){
-      #HARP 2026 workflow here, maybe set and AGWRC to use in a forecast method
-    },
-    #' @description Using the regression derived from baseflow_analysis method,
-    #'   what may flows look like if no rain occurs for the next ndays?
-    baseflow_forecast = function(){
+    #' @description Flow forecast
+    #' @details Using the regressions from the 2025 - 2027 HARP projects, allow
+    #'   users to forecast baseflow from a given start_date. Forecasts can have
+    #'   static or variable decay coefficients (AGWRC) and these may be
+    #'   calculated from the regression or input directly as vectors by users.
+    #'   Observed flow is joined onto the output data frame for comparison if a
+    #'   "historic" forecast was run.
+    #'@param start_date Character. The date to begin the forecast, i.e. the flow
+    #'  on this day will be used to run forecast calculations
+    #'@param forecast_days numeric vector, defaults to 0:90. Days where forcast
+    #'  should be calculated and will use corresponding AGWRC if provided
+    #'  vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"
+    #'@param AGWRC numeric or character. The decay coefficient to regress the
+    #'  flow on start_date for forecast. May be a single numeric to allow for a
+    #'  constant forecast or a vector of numeric values to allow for a variable
+    #'  forecast but must be of length days. Otherwise, may be "lm_constant" to
+    #'  calculate a constant value from m and b or "lm_variable" to have a
+    #'  variable value
+    #'@returns A data.frame of date, AGWRC, forecasted flow, and observed flow
+    baseflow_forecast = function(start_date,
+                                 forecast_days = 0:90,
+                                 AGWRC = "lm_constant"){
+      #If the user has not provided a numeric vector of AGWRCs, ensure
+      #regression values have been loaded in from the database
+      if(!is.numeric(AGWRC)){
+        self$agwrc_fun(force_refresh = FALSE)
+      }
+      #Get the starting flow based on the user input date
+      Q0 <- self$gage_data[self$gage_data[,self$date_col] == start_date,self$flow_col]
+      #Forecast out the days of the user request using the agws package
+      bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
+                                           AGWRC = AGWRC, 
+                                           m = self$agwrc_lm_m, 
+                                           b = self$agwrc_lm_b)
+      #Join back in the observed flow, when possible, to allow for easier
+      #historic lookback comparisons
+      bf_forecast$Date <- as.Date(start_date) + bf_forecast$Day
+      
+      #Join in the observed flow where possible:
+      bf_forecast$obs_flow <- self$gage_data[match(bf_forecast$Date, self$gage_data[,self$date_col]),self$flow_col]
+      
+      return(bf_forecast)
     },
     #'@description How many days, on average, each month are below a threshold
     #'  value?

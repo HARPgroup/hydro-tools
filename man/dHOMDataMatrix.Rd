@@ -21,130 +21,140 @@ NA
 NA
 }
 \section{Super class}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{dHOMDataMatrix}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{dHOMDataMatrix}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
+    \item{\code{object_class}}{model object type}
 
-\item{\code{entity_bundle}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{entity_bundle}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
-\item \href{#method-dHOMDataMatrix-om_valnames}{\code{dHOMDataMatrix$om_valnames()}}
-\item \href{#method-dHOMDataMatrix-om_codenames}{\code{dHOMDataMatrix$om_codenames()}}
-\item \href{#method-dHOMDataMatrix-fromOM}{\code{dHOMDataMatrix$fromOM()}}
-\item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
-\item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
+  \itemize{
+    \item \href{#method-dHOMDataMatrix-exportOpenMIBase}{\code{dHOMDataMatrix$exportOpenMIBase()}}
+    \item \href{#method-dHOMDataMatrix-om_valnames}{\code{dHOMDataMatrix$om_valnames()}}
+    \item \href{#method-dHOMDataMatrix-om_codenames}{\code{dHOMDataMatrix$om_codenames()}}
+    \item \href{#method-dHOMDataMatrix-fromOM}{\code{dHOMDataMatrix$fromOM()}}
+    \item \href{#method-dHOMDataMatrix-param_info}{\code{dHOMDataMatrix$param_info()}}
+    \item \href{#method-dHOMDataMatrix-clone}{\code{dHOMDataMatrix$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>dHVariablePluginDefault$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-om_valnames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-om_valnames}{}}}
-\subsection{Method \code{om_valnames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$om_valnames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$om_valnames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$om_valnames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as string values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as string values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-om_codenames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-om_codenames}{}}}
-\subsection{Method \code{om_codenames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$om_codenames()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$om_codenames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$om_codenames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as numeric values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as numeric values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-fromOM"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-fromOM}{}}}
-\subsection{Method \code{fromOM()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$fromOM(om_list)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$fromOM()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$fromOM(om_list)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{om_list}}{the simple OM format export array/list to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    properly formatted list to be used by RomProperty$from_list() FALSE if not successful
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{om_list}}{the simple OM format export array/list to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-properly formatted list to be used by RomProperty$from_list() FALSE if not successful
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-param_info"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-param_info}{}}}
-\subsection{Method \code{param_info()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$param_info()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$param_info()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$param_info()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    info regarding the needs and capabilities of this object
+  }
 }
 
-\subsection{Returns}{
-info regarding the needs and capabilities of this object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMDataMatrix-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMDataMatrix-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMDataMatrix$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMDataMatrix$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMDataMatrix$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

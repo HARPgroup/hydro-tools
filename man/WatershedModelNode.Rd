@@ -13,11 +13,11 @@ Utility class for interacting with a watershed feature/model combo
 Watershed Model Node data object
 
 This R6 object has standard methods for managing the data and meta
-  data related to OWS model data for watershed model nodes (e.g. river
-  segment models). These objects may be initialized with OWS model data. The
-  objects will store relevant model data and has methods to load related
-  feautre or model data. Inherits additional methods from
-  \code{ModelElementBase()}.
+data related to OWS model data for watershed model nodes (e.g. river
+segment models). These objects may be initialized with OWS model data. The
+objects will store relevant model data and has methods to load related
+feautre or model data. Inherits additional methods from
+\code{ModelElementBase()}.
 }
 \examples{
 \dontrun{
@@ -34,183 +34,185 @@ ds,list(
  }
 }
 \section{Super class}{
-\code{\link[hydrotools:ModelElementBase]{hydrotools::ModelElementBase}} -> \code{WatershedModelNode}
+\code{\link[hydrotools:ModelElementBase]{ModelElementBase}} -> \code{WatershedModelNode}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
 local data storage or a connection to a database/RESTful service}
 
-\item{\code{ds_om}}{RomDataSource points to legacy model database and may also
+    \item{\code{ds_om}}{RomDataSource points to legacy model database and may also
 be provided in DEQ config file upon request to OWS modelling staff}
 
-\item{\code{hydroid}}{unique ID from dh_feature database to identify the
+    \item{\code{hydroid}}{unique ID from dh_feature database to identify the
 physical feature that is or has been modelled by OWS}
 
-\item{\code{hydrocode}}{non-numeric identifier in dh_feature that often defines
+    \item{\code{hydrocode}}{non-numeric identifier in dh_feature that often defines
 external data source connections or identifiers}
 
-\item{\code{bundle}}{type of feature in dh_feature. See ReadMe for more details.}
+    \item{\code{bundle}}{type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{ftype}}{sub-type of feature in dh_feature. See ReadMe for more details.}
+    \item{\code{ftype}}{sub-type of feature in dh_feature. See ReadMe for more details.}
 
-\item{\code{feature}}{a \code{RomFeature} entity that has found a valid feature in dh_feature}
+    \item{\code{feature}}{a \code{RomFeature} entity that has found a valid feature in dh_feature}
 
-\item{\code{pid}}{integer identifier of the model as found in dh_properties}
+    \item{\code{pid}}{integer identifier of the model as found in dh_properties}
 
-\item{\code{version}}{descriptive code for the model version. Often 'vahydro-1.0'}
+    \item{\code{version}}{descriptive code for the model version. Often 'vahydro-1.0'}
 
-\item{\code{prop}}{a RomProperty that is defined by the model base property}
+    \item{\code{prop}}{a RomProperty that is defined by the model base property}
 
-\item{\code{json}}{Modelling data (inputs) JSON}
+    \item{\code{json}}{Modelling data (inputs) JSON}
 
-\item{\code{elementid}}{An integer identifier of the OM model element}
+    \item{\code{elementid}}{An integer identifier of the OM model element}
 
-\item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
+    \item{\code{rocode}}{describes runoff type default = 'cbp6_lrseg'}
 
-\item{\code{name}}{The model name}
+    \item{\code{name}}{The model name}
 
-\item{\code{riverseg}}{The riverseg code defined for the watershed node in VA
+    \item{\code{riverseg}}{The riverseg code defined for the watershed node in VA
 Hydro OM model (often derived or related to the river segment codes
 used in the CB Watershed Model)}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-WatershedModelNode-new}{\code{WatershedModelNode$new()}}
-\item \href{#method-WatershedModelNode-get_runoff_elids}{\code{WatershedModelNode$get_runoff_elids()}}
-\item \href{#method-WatershedModelNode-nearest_gage}{\code{WatershedModelNode$nearest_gage()}}
-\item \href{#method-WatershedModelNode-render_cia_detailed}{\code{WatershedModelNode$render_cia_detailed()}}
-\item \href{#method-WatershedModelNode-render_cia_brief}{\code{WatershedModelNode$render_cia_brief()}}
-\item \href{#method-WatershedModelNode-gage_vs_model}{\code{WatershedModelNode$gage_vs_model()}}
-\item \href{#method-WatershedModelNode-clone}{\code{WatershedModelNode$clone()}}
+  \itemize{
+    \item \href{#method-WatershedModelNode-initialize}{\code{WatershedModelNode$new()}}
+    \item \href{#method-WatershedModelNode-get_runoff_elids}{\code{WatershedModelNode$get_runoff_elids()}}
+    \item \href{#method-WatershedModelNode-nearest_gage}{\code{WatershedModelNode$nearest_gage()}}
+    \item \href{#method-WatershedModelNode-render_cia_detailed}{\code{WatershedModelNode$render_cia_detailed()}}
+    \item \href{#method-WatershedModelNode-render_cia_brief}{\code{WatershedModelNode$render_cia_brief()}}
+    \item \href{#method-WatershedModelNode-gage_vs_model}{\code{WatershedModelNode$gage_vs_model()}}
+    \item \href{#method-WatershedModelNode-clone}{\code{WatershedModelNode$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_broadcast_summary"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_broadcast_summary'><code>hydrotools::ModelElementBase$get_broadcast_summary()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_elem_xml"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_elem_xml'><code>hydrotools::ModelElementBase$get_elem_xml()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_feature"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_feature'><code>hydrotools::ModelElementBase$get_feature()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_json_model'><code>hydrotools::ModelElementBase$get_json_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model'><code>hydrotools::ModelElementBase$get_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model_pid"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model_pid'><code>hydrotools::ModelElementBase$get_model_pid()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_om_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_om_model'><code>hydrotools::ModelElementBase$get_om_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_run_data"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_run_data'><code>hydrotools::ModelElementBase$get_run_data()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="handle_config"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-handle_config'><code>hydrotools::ModelElementBase$handle_config()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="load_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-load_json_model'><code>hydrotools::ModelElementBase$load_json_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="om_element_tree"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-om_element_tree'><code>hydrotools::ModelElementBase$om_element_tree()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_broadcast_summary"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_broadcast_summary'><code>ModelElementBase$get_broadcast_summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_elem_xml"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_elem_xml'><code>ModelElementBase$get_elem_xml()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_feature"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_feature'><code>ModelElementBase$get_feature()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_json_model'><code>ModelElementBase$get_json_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model'><code>ModelElementBase$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_model_pid"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_model_pid'><code>ModelElementBase$get_model_pid()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_om_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_om_model'><code>ModelElementBase$get_om_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="get_run_data"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-get_run_data'><code>ModelElementBase$get_run_data()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="handle_config"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-handle_config'><code>ModelElementBase$handle_config()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="load_json_model"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-load_json_model'><code>ModelElementBase$load_json_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="ModelElementBase" data-id="om_element_tree"><a href='../../hydrotools/html/ModelElementBase.html#method-ModelElementBase-om_element_tree'><code>ModelElementBase$om_element_tree()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-WatershedModelNode-new"></a>}}
-\if{latex}{\out{\hypertarget{method-WatershedModelNode-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a WatershedModelNode() instance, returning an R6 object that is
+\if{html}{\out{<a id="method-WatershedModelNode-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-WatershedModelNode-initialize}{}}}
+\subsection{\code{WatershedModelNode$new()}}{
+  Initialize a WatershedModelNode() instance, returning an R6 object that is
 now populated with model data in its fields through queries of the
 provided ds using the \code{ModelElementBase$initialize()} inherited method.
-This object will also have numerous methods that are described in 
+This object will also have numerous methods that are described in
 \code{?WatershedModelNode()}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$new(ds, config = list(), ds_om = NA, site = omsite)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ds}}{RomDataSource object mandatory. This is most often created in
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$new(ds, config = list(), ds_om = NA, site = omsite)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{ds}}{RomDataSource object mandatory. This is most often created in
 DEQ config files and will feature connections to local or OWS data
 bases}
-
-\item{\code{config}}{list of attributes to set, may include pid, hydroid,
+      \item{\code{config}}{list of attributes to set, may include pid, hydroid,
 hydrocode, feature, bundle, etc. These will be used in the
 \code{get_model()} and \code{get_feature()} methods to identify the
 users model and feature}
-
-\item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
-
-\item{\code{site}}{URI base for the legacy model scripts assumes global var
+      \item{\code{ds_om}}{RomDataSource object pointing to OM (optional)}
+      \item{\code{site}}{URI base for the legacy model scripts assumes global var
 omsite exists for default (as often created in DEQ config files)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-get_runoff_elids"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-get_runoff_elids}{}}}
-\subsection{Method \code{get_runoff_elids()}}{
-Based on the rocode field (default is cbp6_lrseg), return a list of model
+\subsection{\code{WatershedModelNode$get_runoff_elids()}}{
+  Based on the rocode field (default is cbp6_lrseg), return a list of model
 OM elementids that correspond to the runoff models upstream by leveraging
 the inherited \code{om_element_tree()} method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$get_runoff_elids()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$get_runoff_elids()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    list of elementids corresponding to runoff props uses rocode prop to filter
+  }
 }
 
-\subsection{Returns}{
-list of elementids corresponding to runoff props uses rocode prop to filter
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-nearest_gage"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-nearest_gage}{}}}
-\subsection{Method \code{nearest_gage()}}{
-Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
+\subsection{\code{WatershedModelNode$nearest_gage()}}{
+  Uses \code{usgs_nearest_gage()} to find all intersecting USGS gaged
 watersheds and returns that with a drainage area closest to the target
 watershed feature (i.e. the feature in the feature field on this object)
 drainage area
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$nearest_gage()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$nearest_gage()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    data frame with the closest gage
+  }
 }
 
-\subsection{Returns}{
-data frame with the closest gage
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-render_cia_detailed"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-render_cia_detailed}{}}}
-\subsection{Method \code{render_cia_detailed()}}{
-Coming Soon!!!
-  Render the detailed CIA R markdown with basic parameters set
-  by user for this model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$render_cia_detailed(runids, export_path, github_location)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{runids}}{runids to summarize}
-
-\item{\code{export_path}}{path to render the word document}
-
-\item{\code{github_location}}{library to load rendering code (R markdown), may
+\subsection{\code{WatershedModelNode$render_cia_detailed()}}{
+  Coming Soon!!!
+Render the detailed CIA R markdown with basic parameters set
+by user for this model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$render_cia_detailed(runids, export_path, github_location)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{runids}}{runids to summarize}
+      \item{\code{export_path}}{path to render the word document}
+      \item{\code{github_location}}{library to load rendering code (R markdown), may
 be set in DEQ config file}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    file path of rendered output
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-file path of rendered output
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-render_cia_brief"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-render_cia_brief}{}}}
-\subsection{Method \code{render_cia_brief()}}{
-Render the CIA brief R markdownd with basic parameters set
-  by user for this model. This method calls the inherited
-  \code{ModelElementBase$render_cia_brief()} method and is largely
-  identical to that method, but was included here for future
-  customization
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$render_cia_brief(
+\subsection{\code{WatershedModelNode$render_cia_brief()}}{
+  Render the CIA brief R markdownd with basic parameters set
+by user for this model. This method calls the inherited
+\code{ModelElementBase$render_cia_brief()} method and is largely
+identical to that method, but was included here for future
+customization
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$render_cia_brief(
   runid,
   export_path = export_path,
   github_location = github_location,
@@ -219,90 +221,85 @@ Render the CIA brief R markdownd with basic parameters set
   doc_title = "auto",
   cu_threshold = c(-10, -20, -30),
   include_appendices = c()
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{runid}}{runid to summarize}
-
-\item{\code{export_path}}{ath to render the word document}
-
-\item{\code{github_location}}{library to load rendering code (R markdown), may
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{runid}}{runid to summarize}
+      \item{\code{export_path}}{ath to render the word document}
+      \item{\code{github_location}}{library to load rendering code (R markdown), may
 be set in DEQ config file}
-
-\item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
+      \item{\code{cu_pre_var}}{variable for "BEFORE" flow values e.g. before permit
 implementation}
-
-\item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
+      \item{\code{cu_post_var}}{variable for "AFTER" flow values e.g. after permit
 implementation}
-
-\item{\code{doc_title}}{document title page text. The default value, auto, will
+      \item{\code{doc_title}}{document title page text. The default value, auto, will
 create a title based on the feature name}
-
-\item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
+      \item{\code{cu_threshold}}{thresholds of change to code yellow, orange, red in
 display CIA tables drawn from \code{om_cu_table()}}
+      \item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    file path of rendered output
+  }
+}
 
-\item{\code{include_appendices}}{options for appendices like 'hydropower', ...}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-file path of rendered output
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-gage_vs_model"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-gage_vs_model}{}}}
-\subsection{Method \code{gage_vs_model()}}{
-Render gage vs model calibration description markdown. This
-  markdown will provide information about how gage and model flows
-  compare.
-  \code{ModelElementBase$render_cia_brief()} method and is largely
-  identical to that method, but was included here for future
-  customization
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$gage_vs_model(
+\subsection{\code{WatershedModelNode$gage_vs_model()}}{
+  Render gage vs model calibration description markdown. This
+markdown will provide information about how gage and model flows
+compare.
+\code{ModelElementBase$render_cia_brief()} method and is largely
+identical to that method, but was included here for future
+customization
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$gage_vs_model(
   runid,
   gage = "auto",
   export_path = export_path,
   github_location = github_location
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{runid}}{runid to summarize}
-
-\item{\code{gage}}{A USGS gage to compare model flows to. If gage is set to
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{runid}}{runid to summarize}
+      \item{\code{gage}}{A USGS gage to compare model flows to. If gage is set to
 auto, the \code{nearest_gage()} method will be called and the selected
 gage used automatically}
-
-\item{\code{export_path}}{where to render the word document to}
-
-\item{\code{github_location}}{library to load rendering code (R markdown), may
+      \item{\code{export_path}}{where to render the word document to}
+      \item{\code{github_location}}{library to load rendering code (R markdown), may
 be set in DEQ config file}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WatershedModelNode-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-WatershedModelNode-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WatershedModelNode$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{WatershedModelNode$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WatershedModelNode$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

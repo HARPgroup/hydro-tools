@@ -2,7 +2,7 @@
 % Please edit documentation in R/fac_utils.R
 \name{om_flow_table}
 \alias{om_flow_table}
-\title{Display the monthly percentiles of flows from minimum to 50% and mean flows
+\title{Display the monthly percentiles of flows from minimum to 50\% and mean flows
 of the given flow data}
 \usage{
 om_flow_table(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
@@ -18,14 +18,14 @@ om_flow_table(df2sum, q_col = "Qout", mo_col = "month", rdigits = 1)
 \item{rdigits}{The number of digits to report/round percentiles to}
 }
 \value{
-A data frame that has 8 columns: Month, Minimum, 5%, 10%, 25%, 30%,
-  50%, Mean. These columns represent the correponsing percentile or statistic
-  of q_col grouped by mo_col and rounded to rdigits. the names of the data
-  frame correspond to these statistics. The data is organized by month.
+A data frame that has 8 columns: Month, Minimum, 5\%, 10\%, 25\%, 30\%,
+50\%, Mean. These columns represent the correponsing percentile or statistic
+of q_col grouped by mo_col and rounded to rdigits. the names of the data
+frame correspond to these statistics. The data is organized by month.
 }
 \description{
 Using a data frame provided by user, summarize the q_col to
-  create an output that shows the minimum, 5 - 50%, and mean of that column,
-  grouped by mo_col. The most common use is to quickly see flow percentiles
-  of model or gage data across months
+create an output that shows the minimum, 5 - 50\%, and mean of that column,
+grouped by mo_col. The most common use is to quickly see flow percentiles
+of model or gage data across months
 }

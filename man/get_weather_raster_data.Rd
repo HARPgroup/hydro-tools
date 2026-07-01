@@ -13,7 +13,8 @@ get_weather_raster_data(
   varkey = "prism_mod_daily",
   band = 1,
   metric = "mean",
-  touched = FALSE
+  touched = FALSE,
+  ds = ds
 )
 }
 \arguments{
@@ -46,17 +47,20 @@ applied? Defaults to mean. These are taken from PostGIS
 \item{touched}{Defaults to FALSE. Should PostGIS ST_Clip() use the touched
 argument to return all raster cells touched by the feature? Or, if FALSE,
 should only pixels that have centroids within the feature be considered?}
+
+\item{ds}{A datasource provided by the user, usally the RomDataSource instance
+create in DEQ config.R files, querying drupal.dh03}
 }
 \value{
 A list with parameters for the gage_vs_model.Rmd markdown
 }
 \description{
 Summary dh_timeseries_weather raster for one or many entities in
- dh_feature
+dh_feature
 }
 \details{
 Summarize raster data over one or many features as identified by the
- user. Users may identify this feature through a vector of hydroids or
- through a general bundle and ftype. By default, this will get the mean value
- of the raster each day.
+user. Users may identify this feature through a vector of hydroids or
+through a general bundle and ftype. By default, this will get the mean value
+of the raster each day.
 }

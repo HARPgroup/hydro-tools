@@ -115,7 +115,7 @@ RomProperty <- R6Class(
         }
       }
     },
-    #' @param config 
+    #' @param config a named list to pass to query
     #' @returns an updated config if necessary or FALSE if it fails
     handle_config = function(config) {
       config = self$insure_varid(config)

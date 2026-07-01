@@ -1,3 +1,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^USGS$
+^dfiles$
+^sql$
+^GIS_functions$
+^LowFlow$
+^VAHydro-1.0$
+^VAHydro-2.0$
+^ows-model-postproc$
+^OWS$
+^examples$

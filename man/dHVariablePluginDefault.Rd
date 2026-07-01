@@ -21,215 +21,236 @@ NA
 NA
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
+    \item{\code{object_class}}{model object type}
 
-\item{\code{entity_bundle}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{entity_bundle}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHVariablePluginDefault-new}{\code{dHVariablePluginDefault$new()}}
-\item \href{#method-dHVariablePluginDefault-populate}{\code{dHVariablePluginDefault$populate()}}
-\item \href{#method-dHVariablePluginDefault-om_codenames}{\code{dHVariablePluginDefault$om_codenames()}}
-\item \href{#method-dHVariablePluginDefault-om_valnames}{\code{dHVariablePluginDefault$om_valnames()}}
-\item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
-\item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
-\item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
-\item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
-\item \href{#method-dHVariablePluginDefault-fromOM}{\code{dHVariablePluginDefault$fromOM()}}
-\item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
-\item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
-}
+  \itemize{
+    \item \href{#method-dHVariablePluginDefault-initialize}{\code{dHVariablePluginDefault$new()}}
+    \item \href{#method-dHVariablePluginDefault-populate}{\code{dHVariablePluginDefault$populate()}}
+    \item \href{#method-dHVariablePluginDefault-om_codenames}{\code{dHVariablePluginDefault$om_codenames()}}
+    \item \href{#method-dHVariablePluginDefault-om_valnames}{\code{dHVariablePluginDefault$om_valnames()}}
+    \item \href{#method-dHVariablePluginDefault-exportOpenMI}{\code{dHVariablePluginDefault$exportOpenMI()}}
+    \item \href{#method-dHVariablePluginDefault-exportOpenMIBase}{\code{dHVariablePluginDefault$exportOpenMIBase()}}
+    \item \href{#method-dHVariablePluginDefault-exportOpenMIpost}{\code{dHVariablePluginDefault$exportOpenMIpost()}}
+    \item \href{#method-dHVariablePluginDefault-fromOpenMIBase}{\code{dHVariablePluginDefault$fromOpenMIBase()}}
+    \item \href{#method-dHVariablePluginDefault-fromOM}{\code{dHVariablePluginDefault$fromOM()}}
+    \item \href{#method-dHVariablePluginDefault-param_info}{\code{dHVariablePluginDefault$param_info()}}
+    \item \href{#method-dHVariablePluginDefault-clone}{\code{dHVariablePluginDefault$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-dHVariablePluginDefault-new"></a>}}
-\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-new}{}}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$new(config = list())}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-dHVariablePluginDefault-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-initialize}{}}}
+\subsection{\code{dHVariablePluginDefault$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$new(config = list())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-populate"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-populate}{}}}
-\subsection{Method \code{populate()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$populate(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$populate()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$populate(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{a valid RomEntity object}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{a valid RomEntity object}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-om_codenames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-om_codenames}{}}}
-\subsection{Method \code{om_codenames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$om_codenames()}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$om_codenames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$om_codenames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as string values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as string values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-om_valnames"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-om_valnames}{}}}
-\subsection{Method \code{om_valnames()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$om_valnames()}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$om_valnames()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$om_valnames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    names that come from json as numeric values
+  }
 }
 
-\subsection{Returns}{
-names that come from json as numeric values
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-exportOpenMI"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-exportOpenMI}{}}}
-\subsection{Method \code{exportOpenMI()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$exportOpenMI(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$exportOpenMI()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$exportOpenMI(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-exportOpenMIpost"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-exportOpenMIpost}{}}}
-\subsection{Method \code{exportOpenMIpost()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$exportOpenMIpost(entity, export)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$exportOpenMIpost()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$exportOpenMIpost(entity, export)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+      \item{\code{export}}{list of properties and subproperties to export}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-
-\item{\code{export}}{list of properties and subproperties to export}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-fromOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOpenMIBase}{}}}
-\subsection{Method \code{fromOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOpenMIBase(openmi_list)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$fromOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$fromOpenMIBase(openmi_list)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{openmi_list}}{the open MI export array/list to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a Rom importable config or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{openmi_list}}{the open MI export array/list to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a Rom importable config or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-fromOM"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-fromOM}{}}}
-\subsection{Method \code{fromOM()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$fromOM(om_list)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$fromOM()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$fromOM(om_list)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{om_list}}{the simple OM format export array/list to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    properly formatted list to be used by RomProperty$from_list() FALSE if not successful
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{om_list}}{the simple OM format export array/list to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-properly formatted list to be used by RomProperty$from_list() FALSE if not successful
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-param_info"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-param_info}{}}}
-\subsection{Method \code{param_info()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$param_info()}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$param_info()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$param_info()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    detailed information about this object in markdown list format
+  }
 }
 
-\subsection{Returns}{
-detailed information about this object in markdown list format
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHVariablePluginDefault-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHVariablePluginDefault-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHVariablePluginDefault$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHVariablePluginDefault$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHVariablePluginDefault$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

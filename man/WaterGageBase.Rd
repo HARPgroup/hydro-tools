@@ -13,11 +13,27 @@ Utility class for compiling query info for stream gage analysis
 Water Gage Data Information Object
 
 This R6 object has standard methods for managing the data and meta
-  data related to stream gage data. On initialize, this object sets fields
-  relevant for stream flow data querying and analysis. This object can retrieve
-  spatial data about a gage, but is not used to query streamflow itself as it
-  is instead inherited by subclasses like WaterGageDaily that can query data
-  instead
+data related to stream gage data. On initialize, this object sets fields
+relevant for stream flow data querying and analysis. This object can retrieve
+spatial data about a gage, but is not used to query streamflow itself as it
+is instead inherited by subclasses like WaterGageDaily that can query data
+instead
+
+The 2025 - 2027 HARP projects worked on compiling a bash-R
+workflow that could analyze a gage record and identify periods of
+baseflow. The recession of these baseflow events were characterized by
+regressions to compile a relationship of flow vs AGWRC (active ground
+water recession coefficient). The results of these analyses can be used
+to create baseflow forecasts. This functions returns all data generated
+from the AGWS workflow by reading in the relevant data from the VT
+Apache web server
+
+Get the statistical model coefficients to create a relationship
+of active groundwater recession coefficients (AGWRC) vs log(Flow).
+These are stored as scenario properties on the feature model. User can
+optionally return a function that will calculate AGWRC from Q using the
+regression coefficients, though this funciton inherits data from this
+object that are not explicitly passed in.
 }
 \examples{
 \dontrun{
@@ -32,168 +48,291 @@ SA_Ashland <- WaterGageBase$new(config = list(gage_id = "01672500", ds_in = ds,
 }
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
 local data storage or a connection to a database/RESTful service}
 
-\item{\code{data_source}}{May be either USGS or the path to gage data. If a file
+    \item{\code{data_source}}{May be either USGS or the path to gage data. If a file
 path is used, both the flow_col and date_col fields should be populated}
 
-\item{\code{gage_id}}{The USGS ID of the gage}
+    \item{\code{gage_id}}{The USGS ID of the gage}
 
-\item{\code{date_col}}{The column containing "date" R class date times for the
+    \item{\code{date_col}}{The column containing "date" R class date times for the
 date_source}
 
-\item{\code{flow_col}}{The column containing the flow values from the data_source}
+    \item{\code{flow_col}}{The column containing the flow values from the data_source}
 
-\item{\code{drainage_area}}{The drainage area of the gage, populated on
+    \item{\code{drainage_area}}{The drainage area of the gage, populated on
 initialize if possible}
 
-\item{\code{gage_data_sf}}{A simple feature of the gage data}
+    \item{\code{gage_data_sf}}{A simple feature of the gage data}
 
-\item{\code{gage_feature}}{a VA Hydro feature of the gage if available from ds}
+    \item{\code{gage_feature}}{a VA Hydro feature of the gage if available from ds}
 
-\item{\code{start_date}}{The first date to include in the data}
+    \item{\code{start_date}}{The first date to include in the data}
 
-\item{\code{end_date}}{The last date to include in the data}
+    \item{\code{end_date}}{The last date to include in the data}
 
-\item{\code{parameter_code}}{Which USGS paramter to analyze? Defaults to 00060
+    \item{\code{parameter_code}}{Which USGS paramter to analyze? Defaults to 00060
 for discharge}
 
-\item{\code{approval_status}}{Either 'approved', 'provisional', or 'all'.
+    \item{\code{approval_status}}{Either 'approved', 'provisional', or 'all'.
 Determines what kind of data should be retrieved from USGS: all data or
 only those marked approved or provisional?}
-}
-\if{html}{\out{</div>}}
+
+    \item{\code{agwrc_lm_m}}{The slope of the linear model of active groundwater
+recession coefficient AGWRC ~ log(Q). Stored in database.}
+
+    \item{\code{agwrc_lm_b}}{The intercept of the linear model of active groundwater
+recession coefficient AGWRC ~ log(Q). Stored in database.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-WaterGageBase-new}{\code{WaterGageBase$new()}}
-\item \href{#method-WaterGageBase-handle_config}{\code{WaterGageBase$handle_config()}}
-\item \href{#method-WaterGageBase-handle_config_item}{\code{WaterGageBase$handle_config_item()}}
-\item \href{#method-WaterGageBase-load_sf_da}{\code{WaterGageBase$load_sf_da()}}
-\item \href{#method-WaterGageBase-load_wshd_feat}{\code{WaterGageBase$load_wshd_feat()}}
-\item \href{#method-WaterGageBase-clone}{\code{WaterGageBase$clone()}}
-}
+  \itemize{
+    \item \href{#method-WaterGageBase-initialize}{\code{WaterGageBase$new()}}
+    \item \href{#method-WaterGageBase-handle_config}{\code{WaterGageBase$handle_config()}}
+    \item \href{#method-WaterGageBase-handle_config_item}{\code{WaterGageBase$handle_config_item()}}
+    \item \href{#method-WaterGageBase-load_sf_da}{\code{WaterGageBase$load_sf_da()}}
+    \item \href{#method-WaterGageBase-load_wshd_feat}{\code{WaterGageBase$load_wshd_feat()}}
+    \item \href{#method-WaterGageBase-get_model_scenario_props}{\code{WaterGageBase$get_model_scenario_props()}}
+    \item \href{#method-WaterGageBase-read_om_file}{\code{WaterGageBase$read_om_file()}}
+    \item \href{#method-WaterGageBase-baseflow_workflow_data}{\code{WaterGageBase$baseflow_workflow_data()}}
+    \item \href{#method-WaterGageBase-agwrc_fun}{\code{WaterGageBase$agwrc_fun()}}
+    \item \href{#method-WaterGageBase-clone}{\code{WaterGageBase$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-WaterGageBase-new"></a>}}
-\if{latex}{\out{\hypertarget{method-WaterGageBase-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a WaterGageBase() instance populating all fields passed to
+\if{html}{\out{<a id="method-WaterGageBase-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-initialize}{}}}
+\subsection{\code{WaterGageBase$new()}}{
+  Initialize a WaterGageBase() instance populating all fields passed to
 object by the named list config. Only valid public fields are populated.
 The object will iterate over config to set fields.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$new(config = list())}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$new(config = list())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{A named list of public fields with values to set}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance, with fields populated by values in config
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{A named list of public fields with values to set}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance, with fields populated by values in config
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageBase-handle_config"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageBase-handle_config}{}}}
-\subsection{Method \code{handle_config()}}{
-Handles the config passed in initialize to set all fields on the object
+\subsection{\code{WaterGageBase$handle_config()}}{
+  Handles the config passed in initialize to set all fields on the object
 by calling \code{self$handle_config_item()}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$handle_config(config = list())}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$handle_config(config = list())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{A named list of public fields with values to set}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{A named list of public fields with values to set}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageBase-handle_config_item"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageBase-handle_config_item}{}}}
-\subsection{Method \code{handle_config_item()}}{
-For a given item in the user config, check to see if the name of the
+\subsection{\code{WaterGageBase$handle_config_item()}}{
+  For a given item in the user config, check to see if the name of the
 config list item is a field on this object. If so, set it to the value of
 the config_item
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$handle_config_item(config_item, config_item_name)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config_item}}{A value to set on the field in config_item_name, if it
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$handle_config_item(config_item, config_item_name)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config_item}}{A value to set on the field in config_item_name, if it
 exists on this object}
-
-\item{\code{config_item_name}}{A field to set with the value config_item, if the
+      \item{\code{config_item_name}}{A field to set with the value config_item, if the
 field exists on this object}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The target field, may be NULL if it does not exist
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The target field, may be NULL if it does not exist
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageBase-load_sf_da"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageBase-load_sf_da}{}}}
-\subsection{Method \code{load_sf_da()}}{
-If a valid USGS gage_id is set on object, use
+\subsection{\code{WaterGageBase$load_sf_da()}}{
+  If a valid USGS gage_id is set on object, use
 \code{dataRetrieval::read_waterdata_monitoring_location()} or
 \code{dataRetrieval::readNWISsite()} to get an sf data frame with
 additional details about the gage and use it to set the
 \code{gage_data_sf} and \code{drainage_area} fields
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$load_sf_da()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$load_sf_da()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, but sets \code{gage_data_sf} and \code{drainage_area}
+fields on object
+  }
 }
 
-\subsection{Returns}{
-Nothing, but sets \code{gage_data_sf} and \code{drainage_area}
-  fields on object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageBase-load_wshd_feat"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageBase-load_wshd_feat}{}}}
-\subsection{Method \code{load_wshd_feat()}}{
-If a valid RomDataSource has been provided and the gage_id field has been
+\subsection{\code{WaterGageBase$load_wshd_feat()}}{
+  If a valid RomDataSource has been provided and the gage_id field has been
 set, query the ds field for the corresponding USGS watershed feature
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$load_wshd_feat()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$load_wshd_feat()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The RomFeature if found or NA. Also sets \code{gage_feature} field on the object
+  }
 }
 
-\subsection{Returns}{
-The RomFeature if found or NA. Also sets \code{gage_feature} field on the object
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageBase-get_model_scenario_props"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-get_model_scenario_props}{}}}
+\subsection{\code{WaterGageBase$get_model_scenario_props()}}{
+  Read all scenario properties of a model on this object
+RomEntity
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$get_model_scenario_props(
+  target_entity = self$gage_feature,
+  model_prop_code,
+  scenario_prop_code
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{target_entity}}{The RomEntity (RomFeature or RomProperty) that
+contains the model of interest}
+      \item{\code{model_prop_code}}{The propcode of the model on the feature}
+      \item{\code{scenario_prop_code}}{The scenario propcode on the model property}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data frame of all properties on the model scenario
+  }
 }
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageBase-read_om_file"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-read_om_file}{}}}
+\subsection{\code{WaterGageBase$read_om_file()}}{
+  Reads in JSON or csv file from a webserver
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$read_om_file(omsite = omsite, url_resource)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{omsite}}{The base URL of the webserver, often
+https://deq1.bse.vt.edu:443}
+      \item{\code{url_resource}}{The remaining path to the file e.g. "/path/to/my.csv"}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A data frame of the resource read using \code{read.csv()} or
+\code{jsonlite::read_json()}
+  }
 }
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageBase-baseflow_workflow_data"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-baseflow_workflow_data}{}}}
+\subsection{\code{WaterGageBase$baseflow_workflow_data()}}{
+  Get relevant baseflow workflow data frames from web server
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$baseflow_workflow_data(omsite = omsite)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{omsite}}{The URL of the base VT Apache webserver, often defined in
+/var/www/R/config.R}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A list that returns different data frames from files from the
+webserver defined by omsite
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageBase-agwrc_fun"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-agwrc_fun}{}}}
+\subsection{\code{WaterGageBase$agwrc_fun()}}{
+  Query the db for AGWRC regression coefficients
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$agwrc_fun(return_fun = FALSE, force_refresh = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{return_fun}}{logical, defaults to FALSE. Should a function be
+returned to calculate AGWRC for a given flow?}
+      \item{\code{force_refresh}}{logical, defaults to TRUE. Should the data base be
+queried and the agwrc_lm_m and agwrc_lm_b fields on this object be
+overwritten?}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageBase-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageBase-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{WaterGageBase$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{WaterGageBase$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

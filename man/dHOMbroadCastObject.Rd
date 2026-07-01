@@ -21,104 +21,110 @@ NA
 NA
 }
 \section{Super class}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{dHOMbroadCastObject}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{dHOMbroadCastObject}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{object_class}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMbroadCastObject-exportOpenMIBase}{\code{dHOMbroadCastObject$exportOpenMIBase()}}
-\item \href{#method-dHOMbroadCastObject-populate}{\code{dHOMbroadCastObject$populate()}}
-\item \href{#method-dHOMbroadCastObject-param_info}{\code{dHOMbroadCastObject$param_info()}}
-\item \href{#method-dHOMbroadCastObject-clone}{\code{dHOMbroadCastObject$clone()}}
+  \itemize{
+    \item \href{#method-dHOMbroadCastObject-exportOpenMIBase}{\code{dHOMbroadCastObject$exportOpenMIBase()}}
+    \item \href{#method-dHOMbroadCastObject-populate}{\code{dHOMbroadCastObject$populate()}}
+    \item \href{#method-dHOMbroadCastObject-param_info}{\code{dHOMbroadCastObject$param_info()}}
+    \item \href{#method-dHOMbroadCastObject-clone}{\code{dHOMbroadCastObject$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>hydrotools::dHVariablePluginDefault$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>hydrotools::dHVariablePluginDefault$om_codenames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>hydrotools::dHVariablePluginDefault$om_valnames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>dHVariablePluginDefault$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>dHVariablePluginDefault$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>dHVariablePluginDefault$om_codenames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>dHVariablePluginDefault$om_valnames()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMbroadCastObject-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMbroadCastObject$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMbroadCastObject$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMbroadCastObject-populate"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-populate}{}}}
-\subsection{Method \code{populate()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$populate(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMbroadCastObject$populate()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMbroadCastObject$populate(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{a valid RomEntity object}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{a valid RomEntity object}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMbroadCastObject-param_info"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-param_info}{}}}
-\subsection{Method \code{param_info()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$param_info()}\if{html}{\out{</div>}}
+\subsection{\code{dHOMbroadCastObject$param_info()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMbroadCastObject$param_info()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    info regarding the needs and capabilities of this object
+  }
 }
 
-\subsection{Returns}{
-info regarding the needs and capabilities of this object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMbroadCastObject-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMbroadCastObject-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMbroadCastObject$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMbroadCastObject$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMbroadCastObject$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -9,7 +9,9 @@
 #'   the RomDataSource object consistent.
 #' @details Provides integrated, queryable universe of features, observations
 #'   and meta data
-#' @importFrom R6 R6Class
+#' @importFrom R6 R6Class 
+#' @importFrom pool dbPool
+#' @importFrom RPostgres Postgres
 #' @param baseurl URL of remote data store with REST capabilities, optional
 #' @return reference class of type openmi.om.base.
 #' @seealso NA

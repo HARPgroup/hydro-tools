@@ -79,13 +79,13 @@ fn_get_properties <- function(inputs, site, token){
   # set morepages to true to start, if multipage = FALSE, this gets reset immediately after 1st retrieval
   morepages = TRUE
   while (morepages == TRUE) {
-    prop_rest <- GET(
+    prop_rest <- httr::GET(
       paste(site,"/dh_properties.json",sep=""), 
-      add_headers(HTTP_X_CSRF_TOKEN = token),
+      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
       query = pbody, 
       encode = "json"
     );
-    prop_cont <- content(prop_rest);
+    prop_cont <- httr::content(prop_rest);
     if (length(prop_cont$list) != 0) {
       print(paste("Number of properties found: ",length(prop_cont$list),sep=""))
       

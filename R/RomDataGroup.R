@@ -59,7 +59,7 @@ RomDataGroup <- R6Class(
     from_list = function(config) {
       return(TRUE)
     },
-    #' @param config 
+    #' @param config a named list of potential configs to pass to query
     #' @param load_remote automatically query remote data source for matches?
     #' @returns the data from the remote connection
     load_data = function(config, load_remote) {

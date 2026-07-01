@@ -8,7 +8,7 @@ all inputs to construct WHERE}
 fn_guess_sql_where(entity_type, pk, inputs, alias = "")
 }
 \arguments{
-\item{entity_type}{Most often dh_feature or dh_properties. Indicates which 
+\item{entity_type}{Most often dh_feature or dh_properties. Indicates which
 table to retrieve data from. This will be the target table for the query
 constructed from user inputs input list}
 
@@ -27,7 +27,7 @@ into the WHERE clause constructed from this query}
 }
 \value{
 A WHERE clasue to be added to an SQL query, perhaps generated via
-  fn_guess_sql
+fn_guess_sql
 }
 \description{
 Guess an SQL query with a WHERE clasue from a simple list of inputs, using

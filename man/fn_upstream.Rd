@@ -39,5 +39,5 @@ string next upstream segment ID
 }
 \description{
 Returns a vector of the segments immediately upstream of riv.seg
-  based on the list in AllSegList
+based on the list in AllSegList
 }

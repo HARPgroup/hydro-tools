@@ -5,19 +5,6 @@
 \title{Base entity data object}
 \value{
 reference class of type openmi.om.base.
-
-an updated config if necessary or FALSE if it fails
-
-loads the varid
-
-the variable definition object for this entity
-
-A property object for this entity derived from the local or
-  remote DB OR populated by user inputs if property does not exist
-
-the property object for this entity
-
-the data from the remote connection
 }
 \description{
 Object for storing a single entity with attribute and timeseries related
@@ -32,232 +19,254 @@ NA
 NA
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{base_entity_type}}{kind of entity}
+    \item{\code{base_entity_type}}{kind of entity}
 
-\item{\code{datasource}}{RomDataSource}
+    \item{\code{datasource}}{RomDataSource}
 
-\item{\code{pk_name}}{the name of this entity's pk column}
+    \item{\code{pk_name}}{the name of this entity's pk column}
 
-\item{\code{entity_id}}{unique ID of entity}
+    \item{\code{entity_id}}{unique ID of entity}
 
-\item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
+    \item{\code{sql_select_from}}{syntax to use to select via an odbc or other SQL based datasource}
 
-\item{\code{base_only}}{- how to export to list in case of complex multi table entity and ODBC}
+    \item{\code{base_only}}{\itemize{
+\item how to export to list in case of complex multi table entity and ODBC
+}}
 
-\item{\code{has_vardef}}{is pluggable?}
+    \item{\code{has_vardef}}{is pluggable?}
 
-\item{\code{varid}}{(optional) integer field for pluggable entities}
+    \item{\code{varid}}{(optional) integer field for pluggable entities}
 
-\item{\code{vardef}}{(optional) full RomVariableDefinition}
+    \item{\code{vardef}}{(optional) full RomVariableDefinition}
 
-\item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
+    \item{\code{plugin}}{(optional) instance of dHVariablePlugin class}
 
-\item{\code{matrix_revision_id}}{Populated by any use of this object's
+    \item{\code{matrix_revision_id}}{Populated by any use of this object's
 save_field() method to indicate the revision ID of this change to the
 field table. Used to match Drupal 7's now deprecated revision system.}
-}
-\if{html}{\out{</div>}}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-RomEntity-get_id}{\code{RomEntity$get_id()}}
-\item \href{#method-RomEntity-propvalues}{\code{RomEntity$propvalues()}}
-\item \href{#method-RomEntity-tsvalues}{\code{RomEntity$tsvalues()}}
-\item \href{#method-RomEntity-new}{\code{RomEntity$new()}}
-\item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
-\item \href{#method-RomEntity-insure_varid}{\code{RomEntity$insure_varid()}}
-\item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
-\item \href{#method-RomEntity-get_prop}{\code{RomEntity$get_prop()}}
-\item \href{#method-RomEntity-set_prop}{\code{RomEntity$set_prop()}}
-\item \href{#method-RomEntity-from_list}{\code{RomEntity$from_list()}}
-\item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
-\item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
-\item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
-\item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
-\item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
-\item \href{#method-RomEntity-delete_props}{\code{RomEntity$delete_props()}}
-\item \href{#method-RomEntity-save_field}{\code{RomEntity$save_field()}}
-\item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
-}
+  \itemize{
+    \item \href{#method-RomEntity-get_id}{\code{RomEntity$get_id()}}
+    \item \href{#method-RomEntity-propvalues}{\code{RomEntity$propvalues()}}
+    \item \href{#method-RomEntity-tsvalues}{\code{RomEntity$tsvalues()}}
+    \item \href{#method-RomEntity-initialize}{\code{RomEntity$new()}}
+    \item \href{#method-RomEntity-handle_config}{\code{RomEntity$handle_config()}}
+    \item \href{#method-RomEntity-insure_varid}{\code{RomEntity$insure_varid()}}
+    \item \href{#method-RomEntity-get_vardef}{\code{RomEntity$get_vardef()}}
+    \item \href{#method-RomEntity-get_prop}{\code{RomEntity$get_prop()}}
+    \item \href{#method-RomEntity-set_prop}{\code{RomEntity$set_prop()}}
+    \item \href{#method-RomEntity-from_list}{\code{RomEntity$from_list()}}
+    \item \href{#method-RomEntity-load_data}{\code{RomEntity$load_data()}}
+    \item \href{#method-RomEntity-load_plugin}{\code{RomEntity$load_plugin()}}
+    \item \href{#method-RomEntity-to_list}{\code{RomEntity$to_list()}}
+    \item \href{#method-RomEntity-save}{\code{RomEntity$save()}}
+    \item \href{#method-RomEntity-delete}{\code{RomEntity$delete()}}
+    \item \href{#method-RomEntity-delete_props}{\code{RomEntity$delete_props()}}
+    \item \href{#method-RomEntity-save_field}{\code{RomEntity$save_field()}}
+    \item \href{#method-RomEntity-clone}{\code{RomEntity$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-get_id"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-get_id}{}}}
-\subsection{Method \code{get_id()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_id()}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$get_id()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$get_id()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    get_id the unique id of this entity alias to remote pkid, subclassed as function
+  }
 }
 
-\subsection{Returns}{
-get_id the unique id of this entity alias to remote pkid, subclassed as function
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-propvalues"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-propvalues}{}}}
-\subsection{Method \code{propvalues()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$propvalues(propname = NULL, varid = NULL, propcode = NULL)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$propvalues()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$propvalues(propname = NULL, varid = NULL, propcode = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{propname}}{optional name to filter}
+      \item{\code{varid}}{option variable to filter}
+      \item{\code{propcode}}{optional code to filter}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    propvalues unique properties of this entity
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{propname}}{optional name to filter}
-
-\item{\code{varid}}{option variable to filter}
-
-\item{\code{propcode}}{optional code to filter}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-propvalues unique properties of this entity
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-tsvalues"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-tsvalues}{}}}
-\subsection{Method \code{tsvalues()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$tsvalues(varkey = NULL, tstime = NULL, tsendtime = NULL)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$tsvalues()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$tsvalues(varkey = NULL, tstime = NULL, tsendtime = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{varkey}}{option variable to filter}
+      \item{\code{tstime}}{timespan begin}
+      \item{\code{tsendtime}}{timespan end}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    tsvalues unique timeseries records for this entity
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{varkey}}{option variable to filter}
-
-\item{\code{tstime}}{timespan begin}
-
-\item{\code{tsendtime}}{timespan end}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-tsvalues unique timeseries records for this entity
-}
-}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-RomEntity-new"></a>}}
-\if{latex}{\out{\hypertarget{method-RomEntity-new}{}}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$new(datasource = NULL, config = list(), load_remote = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-RomEntity-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-RomEntity-initialize}{}}}
+\subsection{\code{RomEntity$new()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$new(datasource = NULL, config = list(), load_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{datasource}}{RESTful repository (optional)}
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{load_remote}}{automatically query REST data source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    object instance
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{datasource}}{RESTful repository (optional)}
-
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{load_remote}}{automatically query REST data source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-object instance
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-handle_config"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-handle_config}{}}}
-\subsection{Method \code{handle_config()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$handle_config(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$handle_config()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$handle_config(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{a named list to pass to query}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-insure_varid"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-insure_varid}{}}}
-\subsection{Method \code{insure_varid()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$insure_varid(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$insure_varid()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$insure_varid(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{a named list to pass to query}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    loads the varid
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-get_vardef"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-get_vardef}{}}}
-\subsection{Method \code{get_vardef()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_vardef(config = FALSE, refresh = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$get_vardef()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$get_vardef(config = FALSE, refresh = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+      \item{\code{refresh}}{automatically refresh var info?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the variable definition object for this entity
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-
-\item{\code{refresh}}{automatically refresh var info?}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-get_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-get_prop}{}}}
-\subsection{Method \code{get_prop()}}{
-Get a 1st order property from this entity (assuming this entities
+\subsection{\code{RomEntity$get_prop()}}{
+  Get a 1st order property from this entity (assuming this entities
 \code{entity_type}. This method will search for a user propname,
 varkey, or propcode from dh_properties using this entity's id
 (derived from \code{RomEntity$get_id()} as the featureid. If the
 property is not set locally (if remote = FALSE) or in the DB (if
 remote = TRUE), then it will return an instance of RomProperty with
 the specified user inputs and this entity's ID.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$get_prop(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$get_prop(
   propname = NULL,
   varkey = NULL,
   propcode = NULL,
   remote = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{propname}}{Propname of the first order property}
-
-\item{\code{varkey}}{varkey of the first order property (usually used in case of
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{propname}}{Propname of the first order property}
+      \item{\code{varkey}}{varkey of the first order property (usually used in case of
 new prop creation)}
-
-\item{\code{propcode}}{propcode of the first order property (usually used in
+      \item{\code{propcode}}{propcode of the first order property (usually used in
 case of new prop creation)}
+      \item{\code{remote}}{look at remote datasource for properties?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A property object for this entity derived from the local or
+remote DB OR populated by user inputs if property does not exist
+  }
+}
 
-\item{\code{remote}}{look at remote datasource for properties?}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-set_prop"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-set_prop}{}}}
-\subsection{Method \code{set_prop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$set_prop(
+\subsection{\code{RomEntity$set_prop()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$set_prop(
   propname,
   propcode = NULL,
   propvalue = NULL,
@@ -265,199 +274,214 @@ case of new prop creation)}
   data_matrix = NULL,
   remote = TRUE,
   proptext = NULL
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{propname}}{name or property}
+      \item{\code{propcode}}{if alpha property use this}
+      \item{\code{propvalue}}{if numeric property use this}
+      \item{\code{varkey}}{which varkey? defaults to guess Constant and AlphanumericConstant}
+      \item{\code{data_matrix}}{dataframe contained rows/cols}
+      \item{\code{remote}}{look at remote datasource?}
+      \item{\code{proptext}}{text to set on the property}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the property object for this entity
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{propname}}{name or property}
-
-\item{\code{propcode}}{if alpha property use this}
-
-\item{\code{propvalue}}{if numeric property use this}
-
-\item{\code{varkey}}{which varkey? defaults to guess Constant and AlphanumericConstant}
-
-\item{\code{data_matrix}}{dataframe contained rows/cols}
-
-\item{\code{remote}}{look at remote datasource?}
-
-\item{\code{proptext}}{text to set on the property}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-from_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-from_list}{}}}
-\subsection{Method \code{from_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$from_list(config)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$from_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$from_list(config)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{list of attributes to set, see also: to_list() for format}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{list of attributes to set, see also: to_list() for format}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-load_data"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-load_data}{}}}
-\subsection{Method \code{load_data()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_data(config, load_remote)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$load_data()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$load_data(config, load_remote)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{config}}{a named list to pass to quer}
+      \item{\code{load_remote}}{automatically query remote data source for matches?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the data from the remote connection
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{config}}{}
-
-\item{\code{load_remote}}{automatically query remote data source for matches?}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-load_plugin"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-load_plugin}{}}}
-\subsection{Method \code{load_plugin()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$load_plugin()}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$load_plugin()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$load_plugin()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    nothing, but loads the objects plugin
+  }
 }
 
-\subsection{Returns}{
-nothing, but loads the objects plugin
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-to_list"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-to_list}{}}}
-\subsection{Method \code{to_list()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$to_list(base_only = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$to_list()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$to_list(base_only = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{base_only}}{whether to only use base columns (TRUE) or add fields (FALSE)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    list of object attributes suitable for input to new() and from_list() methods
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{base_only}}{whether to only use base columns (TRUE) or add fields (FALSE)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-list of object attributes suitable for input to new() and from_list() methods
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-save"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-save}{}}}
-\subsection{Method \code{save()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$save(push_remote = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$save()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$save(push_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{push_remote}}{update locally only or push to remote database}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{push_remote}}{update locally only or push to remote database}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-delete"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-delete}{}}}
-\subsection{Method \code{delete()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete(delete_remote = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$delete()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$delete(delete_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{delete_remote}}{update locally only or push to remote database}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{delete_remote}}{update locally only or push to remote database}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-delete_props"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-delete_props}{}}}
-\subsection{Method \code{delete_props()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$delete_props(delete_remote = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$delete_props()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$delete_props(delete_remote = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{delete_remote}}{update locally only or push to remote database}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{delete_remote}}{update locally only or push to remote database}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-save_field"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-save_field}{}}}
-\subsection{Method \code{save_field()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$save_field(
+\subsection{\code{RomEntity$save_field()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$save_field(
   class_field_name,
   field_table,
   value_pairs,
   pkeys = c("entity_type", "entity_id")
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{class_field_name}}{what is this field called on this object (deprecated)}
+      \item{\code{field_table}}{table to insert into}
+      \item{\code{value_pairs}}{attriutes to add to insert above the basic entity info (field value here)}
+      \item{\code{pkeys}}{whether to automatically propagate changes to remote data source}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{class_field_name}}{what is this field called on this object (deprecated)}
-
-\item{\code{field_table}}{table to insert into}
-
-\item{\code{value_pairs}}{attriutes to add to insert above the basic entity info (field value here)}
-
-\item{\code{pkeys}}{whether to automatically propagate changes to remote data source}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-RomEntity-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-RomEntity-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RomEntity$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{RomEntity$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomEntity$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

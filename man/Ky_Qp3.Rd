@@ -19,6 +19,6 @@ Pearson III quantile
 }
 \details{
 Return the quantile of the Pearson III distribution given skewness
-  of g, and annual exceedance probability, aep. This is a wrapper for lmomco
-  package functions.
+of g, and annual exceedance probability, aep. This is a wrapper for lmomco
+package functions.
 }

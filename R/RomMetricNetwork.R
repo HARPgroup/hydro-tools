@@ -573,7 +573,7 @@ RomMetricNetwork <- R6::R6Class(
                 #Otherwise, only run a basin if all the segments in
                 #upstream_nodes has either been mark completed already or is
                 #this segment
-                thisBasin[k,out_col_name] <- sum(thisBasin[thisBasin[,self$src_node_col] %in% thisBasin$upstream_nodes[[k]], value_col])
+                thisBasin[k,out_col_name] <- sum(thisBasin[thisBasin[,self$src_node_col] %in% thisBasin$upstream_nodes[[k]], value_col], na.rm = TRUE)
                 thisBasin$calculations_completed[k] <- TRUE
               }
             }

@@ -16,13 +16,13 @@ vector of names that describe the flow column}
 }
 \value{
 An identical data frame with flow columns renamed using appropriate
- varkeys if returnPlotName is FALSE or a character vector of readible names
+varkeys if returnPlotName is FALSE or a character vector of readible names
 }
 \description{
 A function to rename the flows from NHDPlus to VAHydro varkeys
 }
 \details{
-This function takes a data.frame or tibble output from 
+This function takes a data.frame or tibble output from
 \code{nhdPlusTools::get_nhdplus()} and renames the relevant flow columns using
 VA Hydro varkeys from dh_variabledefinition to allow for consistent comparison
 to data from VA Hydro databases. Alternatively, it takes in a vector of flow

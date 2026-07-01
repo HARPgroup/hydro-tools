@@ -25,6 +25,6 @@ column names of rundata_df}
 A data frame that if has one row per variable with quantiles in columns
 }
 \description{
-Using a data frame and column list provided by user, calculate quantiles 
+Using a data frame and column list provided by user, calculate quantiles
 for desired variables.
 }

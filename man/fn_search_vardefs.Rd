@@ -8,9 +8,9 @@ fn_search_vardefs(config, var_defs_tmp)
 }
 \arguments{
 \item{config}{A list that contains either a target dh_variabledefinition
-  hydroid or varkey. The varkey is given preference. Hydroids from other
-  tables (dh_properties) may be provided but user must provide appropriate
-  table in var_defs_tmp
+hydroid or varkey. The varkey is given preference. Hydroids from other
+tables (dh_properties) may be provided but user must provide appropriate
+table in var_defs_tmp
 Definitions for these items are defined in the hydrotools readme.}
 
 \item{var_defs_tmp}{data frame to search, often those of variable definitions
@@ -20,14 +20,14 @@ RomProperty$propvalues()}
 }
 \value{
 data frame subset from var_defs_tmp based on the hydroid or varkey
-  provided by user. Returns FALSE if nothing found
+provided by user. Returns FALSE if nothing found
 }
 \description{
 Retrieve variable or property data from
-  RomDataSource$propvalues() or RomProperty$propvalues() style data frame
-  provided by user. Original intended use is to search local variable
-  definitions for a provided hydroid or varkey, but may apply to any
-  propvalues() style dataframe that has a hydroid primary key field
+RomDataSource$propvalues() or RomProperty$propvalues() style data frame
+provided by user. Original intended use is to search local variable
+definitions for a provided hydroid or varkey, but may apply to any
+propvalues() style dataframe that has a hydroid primary key field
 }
 \examples{
 NA

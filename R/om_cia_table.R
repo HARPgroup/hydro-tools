@@ -91,7 +91,7 @@ om_cia_table <- function (
     )
 
     run_info.rseg <- find_name(rseg_model_info,runid.i)
-    run_info.rseg <- merge.list(run_info.rseg, default_info.rseg)
+    run_info.rseg <- RCurl::merge.list(run_info.rseg, default_info.rseg)
     rseg_summary.i <- list()
     for (j in 1:length(rseg.metric.list)) {
       varname <- rseg.metric.list[j]
@@ -116,7 +116,7 @@ om_cia_table <- function (
     )
     elfgen.metric.list <- c('richness_change_abs','richness_change_pct')
     run_info.elfgen <- find_name(run_info.rseg,'elfgen_EDAS_huc8')
-    run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
+    run_info.elfgen <- RCurl::merge.list(run_info.elfgen, default_info.elfgen)
     
     elfgen_summary.i <- list()
     for (j in 1:length(elfgen.metric.list)) {
@@ -145,7 +145,7 @@ om_cia_table <- function (
   ################################################################################################
   rseg.met.list <- paste(rseg.metric.list, collapse = ",")
   fac.met.list <- paste(fac.metric.list, collapse = ",")
-  # fac_rseg_stats <- sqldf(
+  # fac_rseg_stats <- sqldf::sqldf(
   #   paste(
   #     "SELECT a.runid,a.run_date, a.starttime, a.endtime, a.riverseg,' ' AS Rseg_Stats,", rseg.met.list,
   #     ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,",fac.met.list," 
@@ -153,7 +153,7 @@ om_cia_table <- function (
   #     LEFT OUTER JOIN fac_summary AS b     
   #     ON a.runid = b.runid")
   # )
-  fac_rseg_stats <- sqldf(
+  fac_rseg_stats <- sqldf::sqldf(
     paste(
       "SELECT a.runid,' ' AS Rseg_Stats,a.rseg_model,", rseg.met.list,
       ", a.richness_change_abs, a.richness_change_pct, ' ' AS Facility_Stats,b.fac_model,",fac.met.list," 

@@ -21,73 +21,75 @@ NA
 NA
 }
 \section{Super classes}{
-\code{\link[hydrotools:dHVariablePluginDefault]{hydrotools::dHVariablePluginDefault}} -> \code{\link[hydrotools:dHVarAnnotation]{hydrotools::dHVarAnnotation}} -> \code{dHOMtextField}
+\code{\link[hydrotools:dHVariablePluginDefault]{dHVariablePluginDefault}} -> \code{\link[hydrotools:dHVarAnnotation]{dHVarAnnotation}} -> \code{dHOMtextField}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{what is it called}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{what is it called}
 
-\item{\code{object_class}}{model object type}
-}
-\if{html}{\out{</div>}}
+    \item{\code{object_class}}{model object type}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-dHOMtextField-exportOpenMIBase}{\code{dHOMtextField$exportOpenMIBase()}}
-\item \href{#method-dHOMtextField-clone}{\code{dHOMtextField$clone()}}
+  \itemize{
+    \item \href{#method-dHOMtextField-exportOpenMIBase}{\code{dHOMtextField$exportOpenMIBase()}}
+    \item \href{#method-dHOMtextField-clone}{\code{dHOMtextField$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>hydrotools::dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>hydrotools::dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>hydrotools::dHVariablePluginDefault$fromOM()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>hydrotools::dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>hydrotools::dHVariablePluginDefault$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>hydrotools::dHVariablePluginDefault$om_codenames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>hydrotools::dHVariablePluginDefault$om_valnames()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>hydrotools::dHVariablePluginDefault$param_info()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>hydrotools::dHVariablePluginDefault$populate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>dHVariablePluginDefault$fromOM()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="initialize"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-initialize'><code>dHVariablePluginDefault$initialize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_codenames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_codenames'><code>dHVariablePluginDefault$om_codenames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="om_valnames"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-om_valnames'><code>dHVariablePluginDefault$om_valnames()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>dHVariablePluginDefault$param_info()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="populate"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-populate'><code>dHVariablePluginDefault$populate()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMtextField-exportOpenMIBase"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMtextField-exportOpenMIBase}{}}}
-\subsection{Method \code{exportOpenMIBase()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMtextField$exportOpenMIBase(entity)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMtextField$exportOpenMIBase()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMtextField$exportOpenMIBase(entity)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    an updated config if necessary or FALSE if it fails
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{entity}}{the local object to work on}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-an updated config if necessary or FALSE if it fails
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-dHOMtextField-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-dHOMtextField-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{dHOMtextField$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{dHOMtextField$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMtextField$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

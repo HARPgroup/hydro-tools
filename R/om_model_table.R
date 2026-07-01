@@ -70,7 +70,7 @@ om_model_table <- function (
     )
 
     run_info <- find_name(model_info,runid.i)
-    run_info <- merge.list(run_info, default_info)
+    run_info <- RCurl::merge.list(run_info, default_info)
     summary.i <- list()
     for (j in 1:length(metric.list)) {
       varname <- metric.list[j]
@@ -96,7 +96,7 @@ om_model_table <- function (
       )
       elfgen.metric.list <- c('richness_change_abs','richness_change_pct')
       run_info.elfgen <- find_name(run_info,'elfgen_EDAS_huc8')
-      run_info.elfgen <- merge.list(run_info.elfgen, default_info.elfgen)
+      run_info.elfgen <- RCurl::merge.list(run_info.elfgen, default_info.elfgen)
 
       elfgen_summary.i <- list()
       for (j in 1:length(elfgen.metric.list)) {

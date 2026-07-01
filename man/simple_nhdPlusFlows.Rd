@@ -19,18 +19,18 @@ of interest based on the huc_level input}
 }
 \value{
 A list that contains the HUC code of interest and data on the nhdPlus
- segment
+segment
 }
 \description{
 A wrapper function that makes it easy to obtain HUC flows from a
- hydro feature
+hydro feature
 }
 \details{
 This function provides the necessary inputs to call nhdPlusTools
- functions to extract the relevant HUC flows from an area of interest. The
- function will use the largest NHDPlus feature of the input code that is
- contained within the user input hydro feature based on the provided hydroid.
- Output flow columns will be renamed using VA Hydro varkeys.
+functions to extract the relevant HUC flows from an area of interest. The
+function will use the largest NHDPlus feature of the input code that is
+contained within the user input hydro feature based on the provided hydroid.
+Output flow columns will be renamed using VA Hydro varkeys.
 }
 \examples{
 \dontrun{simple_nhdPlusFlows(ds = ds, hydroid = 68069, huc_level = "huc8")}

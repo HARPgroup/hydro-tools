@@ -19,6 +19,6 @@ Imported from rapportools and should be used sparingly as explicit length,
 NA, and NULL checks are better for ensuring consistent data strucutre. From
 rapportools: "Rails-inspired helper that checks if vector values are "empty",
 i.e. if it's: NULL, zero-length, NA, NaN, FALSE, an empty string or 0. Note
-that unlike its native R is.<something> sibling functions, is.empty is
+that unlike its native R is.\if{html}{\out{<something>}} sibling functions, is.empty is
 vectorised (hence the "values")."
 }
