@@ -119,7 +119,7 @@ CEDSDataSource <- R6Class(
       
       sql_query <- paste(sql_select, sql_from, sql_where, sql_order)
       
-      entity <- sqldf(sql_query, connection = self$connection, method = "raw")
+      entity <- sqldf::sqldf(sql_query, connection = self$connection, method = "raw")
       
       return(entity)
     }

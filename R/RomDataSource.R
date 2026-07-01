@@ -379,7 +379,7 @@ RomDataSource <- R6Class(
         propvalue_tmp <- self$propvalues
         # we handle this a little differently, and it may have multiples
         # as this is intended to work with RomProperty and RomPropertyTree
-        dsl <- sqldf(
+        dsl <- sqldf::sqldf(
           "select * from prop 
            where pid not in (
              select pid from propvalue_tmp
@@ -460,7 +460,7 @@ RomDataSource <- R6Class(
          where hydroid not in (
            select hydroid from var_defs
         )"
-      dsl <- sqldf(
+      dsl <- sqldf::sqldf(
         veq
       )
       if (nrow(dsl) > 0) {

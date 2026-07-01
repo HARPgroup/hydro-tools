@@ -271,7 +271,7 @@ CEDSEntity <- R6Class(
       }
       
       ## Format the result (group by year if specified)
-      withdrawals <-sqldf(paste(
+      withdrawals <- sqldf::sqldf(paste(
         "SELECT 
         mp_permits.Measuring_Point_Id AS MP_CEDSid,
         CASE 

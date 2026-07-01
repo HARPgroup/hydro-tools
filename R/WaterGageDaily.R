@@ -648,7 +648,7 @@ WaterGageDaily <- R6::R6Class(
       ## Adding a %m-%d column to join on stats
       days_df$mmdd <- format(days_df$date,"%m-%d")
       
-      stats_df_plot <- sqldf("
+      stats_df_plot <- sqldf::sqldf("
         SELECT days_df.date,
         stats.*
         FROM days_df 
