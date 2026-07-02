@@ -52,6 +52,7 @@ om_find_dh_elid <- function(elid, ds) {
 #' @param minspast integer, number of minutes from present to limit results
 #' @param elids Desired elementid(s) FALSE retrieves all
 #' @param limit total number of records to return
+#' @importFrom gsubfn fn
 #' @return data frame of info about the target elementid
 #' @export om_model_run_monitor
 om_model_run_monitor <- function(ds_model, minspast=60, elids = FALSE, limit = 100) {

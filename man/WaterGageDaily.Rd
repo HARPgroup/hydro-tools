@@ -25,6 +25,9 @@ static or variable decay coefficients (AGWRC) and these may be
 calculated from the regression or input directly as vectors by users.
 Observed flow is joined onto the output data frame for comparison if a
 "historic" forecast was run.
+
+Use \code{self$baseflow_forecast()} iteratively over a list of
+provided AGWRC options to create a plot of current potential forecasts
 }
 \examples{
 \dontrun{
@@ -88,6 +91,7 @@ monthly, yearly, and day-of-year statistics on the gage flow}
     \item \href{#method-WaterGageDaily-comp_xQy}{\code{WaterGageDaily$comp_xQy()}}
     \item \href{#method-WaterGageDaily-nep_table}{\code{WaterGageDaily$nep_table()}}
     \item \href{#method-WaterGageDaily-baseflow_forecast}{\code{WaterGageDaily$baseflow_forecast()}}
+    \item \href{#method-WaterGageDaily-plot_baseflow_forecast}{\code{WaterGageDaily$plot_baseflow_forecast()}}
     \item \href{#method-WaterGageDaily-days_below}{\code{WaterGageDaily$days_below()}}
     \item \href{#method-WaterGageDaily-join_precip_data}{\code{WaterGageDaily$join_precip_data()}}
     \item \href{#method-WaterGageDaily-plot_rechare_context}{\code{WaterGageDaily$plot_rechare_context()}}
@@ -345,6 +349,47 @@ variable value}
 }
 
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-plot_baseflow_forecast"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-plot_baseflow_forecast}{}}}
+\subsection{\code{WaterGageDaily$plot_baseflow_forecast()}}{
+  plot current flow forecasts
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$plot_baseflow_forecast(
+  start_date,
+  forecast_days = 0:90,
+  AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
+  return_plotly = FALSE
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{start_date}}{Character. The date to begin the forecast, i.e. the flow
+on this day will be used to run forecast calculations}
+      \item{\code{forecast_days}}{numeric vector, defaults to 0:90. Days where forcast
+should be calculated and will use corresponding AGWRC if provided
+vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"}
+      \item{\code{AGWRC}}{A named list of numeric or character. Each named entry is the
+decay coefficient to regress the flow on start_date for forecast. May be
+a single numeric to allow for a constant forecast or a vector of numeric
+values to allow for a variable forecast but must be of length days.
+Otherwise, may be "lm_constant" to calculate a constant value from m and
+b or "lm_variable" to have a variable value. The names are used for the
+plot legend}
+      \item{\code{return_plotly}}{logical, default to FALSE. If TRUE, a plotly object
+is returned. Otherwise, a ggplot is returned}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    either a ggplot or plotly object of forecasts, depending on user
+input
+  }
+}
+
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageDaily-days_below"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageDaily-days_below}{}}}
 \subsection{\code{WaterGageDaily$days_below()}}{
@@ -584,7 +629,8 @@ today's date}
     \preformatted{WaterGageDaily$plot_all(
   recharge_targetYear = as.numeric(format(Sys.Date(), "\%Y")),
   recharge_include_months = 1:12,
-  recharge_AYS = 10
+  recharge_AYS = 10,
+  forecast_start_date = (Sys.Date() - 15)
 )}
     \if{html}{\out{</div>}}
   }
@@ -596,6 +642,9 @@ See \code{self$plot_recharge_context()} for more information.}
       \item{\code{recharge_include_months}}{What months (numeric) should be included in plot/analysis?}
       \item{\code{recharge_AYS}}{Which month begins the recharge analysis year?
 See \code{self$plot_recharge_context()} for more information.}
+      \item{\code{forecast_start_date}}{Character. The date to begin the forecast, i.e. the flow
+on this day will be used to run forecast calculations. See
+\code{self$plot_baseflow_forecast()} for more information.}
     }
     \if{html}{\out{</div>}}
   }
