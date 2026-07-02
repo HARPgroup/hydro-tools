@@ -28,6 +28,9 @@ to create baseflow forecasts. This functions returns all data generated
 from the AGWS workflow by reading in the relevant data from the VT
 Apache web server
 
+Loads data from the 2025-2027 HARP project to draw a scatter plot
+of AGWRC vs Flow and plots the workflow regression
+
 Get the statistical model coefficients to create a relationship
 of active groundwater recession coefficients (AGWRC) vs log(Flow).
 These are stored as scenario properties on the feature model. User can
@@ -100,6 +103,7 @@ recession coefficient AGWRC ~ log(Q). Stored in database.}
     \item \href{#method-WaterGageBase-get_model_scenario_props}{\code{WaterGageBase$get_model_scenario_props()}}
     \item \href{#method-WaterGageBase-read_om_file}{\code{WaterGageBase$read_om_file()}}
     \item \href{#method-WaterGageBase-baseflow_workflow_data}{\code{WaterGageBase$baseflow_workflow_data()}}
+    \item \href{#method-WaterGageBase-plot_baseflow_agwrc}{\code{WaterGageBase$plot_baseflow_agwrc()}}
     \item \href{#method-WaterGageBase-agwrc_fun}{\code{WaterGageBase$agwrc_fun()}}
     \item \href{#method-WaterGageBase-clone}{\code{WaterGageBase$clone()}}
   }
@@ -290,6 +294,21 @@ https://deq1.bse.vt.edu:443}
   \subsection{Returns}{
     A list that returns different data frames from files from the
 webserver defined by omsite
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageBase-plot_baseflow_agwrc"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-plot_baseflow_agwrc}{}}}
+\subsection{\code{WaterGageBase$plot_baseflow_agwrc()}}{
+  Scatterplot of AGWRC vs Median Flow
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageBase$plot_baseflow_agwrc()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A ggplot scatterplot of median flow vs AGWRC
   }
 }
 

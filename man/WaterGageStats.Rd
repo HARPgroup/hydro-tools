@@ -64,6 +64,7 @@ summary. This should be in the format mm-dd if computation_type =
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config_item"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config_item'><code>WaterGageBase$handle_config_item()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_sf_da"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_sf_da'><code>WaterGageBase$load_sf_da()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_wshd_feat"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_wshd_feat'><code>WaterGageBase$load_wshd_feat()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="plot_baseflow_agwrc"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-plot_baseflow_agwrc'><code>WaterGageBase$plot_baseflow_agwrc()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="read_om_file"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-read_om_file'><code>WaterGageBase$read_om_file()</code></a></span></li>
 </ul>
 </details>}}

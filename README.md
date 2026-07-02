@@ -113,7 +113,11 @@ This package is in active development.
 1. Added baseflow forecasting methods to `WaterGageBase` and `WaterGageDaily` to
 interface with the new HARP agws package (added as suggests due to circular
 dependency)
-2. Modified a number of functions to have more explicit import calls to clean-up
+2. Added methods to `WaterGageBase` to allow for easy file reading from VT
+apache webserver
+3. Added methods to `WaterGageDaily` to easily create a zoo and to calculate
+group1 and group2 stats
+4. Modified a number of functions to have more explicit import calls to clean-up
 build notes
 
 ### 1.1.1 06/23/2026
