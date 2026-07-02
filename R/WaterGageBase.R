@@ -229,6 +229,43 @@ WaterGageBase <- R6::R6Class(
         )
       )
     },
+    #'@description Scatterplot of AGWRC vs Median Flow
+    #'@details Loads data from the 2025-2027 HARP project to draw a scatter plot
+    #'  of AGWRC vs Flow and plots the workflow regression
+    #'@return A ggplot scatterplot of median flow vs AGWRC
+    plot_baseflow_agwrc = function(){
+      event_summary_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
+      
+      if((is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
+        #Load feature if not yet loaded
+        if(!inherits(self$gage_feature, "RomFeature")){
+          self$load_wshd_feat()
+        }
+        #Get all AGWRC simple_lm properties for this gage and store the
+        #regression coefficients
+        lm_props <- self$get_model_scenario_props(
+          target_entity = self$gage_feature,
+          model_prop_code = "AGWRC-1.0",
+          scenario_prop_code = "simple_lm")
+        self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
+        self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
+      }
+      #Plot the scatterplot of AGWRC vs Flow and include a line for the
+      #regression calculated from the AGWRC workflow
+      p <- ggplot2::ggplot() + 
+        ggplot2::geom_point(data = event_summary_df, 
+                           ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC)) + 
+        ggplot2::geom_function(fun = function(Q){(log(Q) * self$agwrc_lm_m) + self$agwrc_lm_b}) + 
+        ggplot2::ylab("Event AGWRC") + 
+        ggplot2::xlab("Median Event Flow") + 
+        ggplot2::theme_bw() +
+        ggplot2::ggtitle(paste("AGWRC vs Flow","\nUSGS",self$gage_id)) + 
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
+      
+      return(p)
+      
+    },
+    
     #' @description Query the db for AGWRC regression coefficients
     #' @details Get the statistical model coefficients to create a relationship
     #'   of active groundwater recession coefficients (AGWRC) vs log(Flow).
@@ -271,7 +308,7 @@ WaterGageBase <- R6::R6Class(
       is defined in the parent environment (e.g. self$agwrc_fun()). Use at
       your own risk.")
         calc_agwrc <- function(Q){
-          out <- self$b + (log(Q) * self$m)
+          out <- self$agwrc_lm_b + (log(Q) * self$agwrc_lm_m)
           return(out)
         }
         return(calc_agwrc)

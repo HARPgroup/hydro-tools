@@ -25,6 +25,18 @@ static or variable decay coefficients (AGWRC) and these may be
 calculated from the regression or input directly as vectors by users.
 Observed flow is joined onto the output data frame for comparison if a
 "historic" forecast was run.
+
+Calculates the IHA parameter group 1: Magnitude of montly water
+conditions see \code{hydrotools::group1()}
+
+Calculates the IHA parameter group 2: Magnitude of montly water
+conditions see \code{hydrotools::group2()}
+
+Use \code{self$baseflow_forecast()} iteratively over a list of
+provided AGWRC options to create a plot of current potential forecasts
+
+Loads data from the 2025-2027 HARP project to draw a scatter plot
+of AGWRC vs Flow and plots the workflow regression
 }
 \examples{
 \dontrun{
@@ -39,6 +51,10 @@ SA_Ashland <- WaterGageDaily$new(gage_id = "01672500", ds_in = ds,
  SA_Ashland$low_flows
  SA_Ashland$nep_table()
  SA_Ashland$days_below(75)
+ #zoos and group stats
+ g1 <- SA_Ashland$group1("water", FUN = mean)
+ g2 <- SA_Ashland$group2(yearType = "water", mimic.tnc = TRUE)
+ myzoo <- SA_Ashland$as.zoo()
  #Plots:
  SA_Ashland$plot_rechare_context(2026,c(12,1,2))
  SA_Ashland$plot_low_flows("boxplot")
@@ -89,7 +105,12 @@ monthly, yearly, and day-of-year statistics on the gage flow}
     \item \href{#method-WaterGageDaily-nep_table}{\code{WaterGageDaily$nep_table()}}
     \item \href{#method-WaterGageDaily-baseflow_forecast}{\code{WaterGageDaily$baseflow_forecast()}}
     \item \href{#method-WaterGageDaily-days_below}{\code{WaterGageDaily$days_below()}}
+    \item \href{#method-WaterGageDaily-group1}{\code{WaterGageDaily$group1()}}
+    \item \href{#method-WaterGageDaily-group2}{\code{WaterGageDaily$group2()}}
+    \item \href{#method-WaterGageDaily-as.zoo}{\code{WaterGageDaily$as.zoo()}}
     \item \href{#method-WaterGageDaily-join_precip_data}{\code{WaterGageDaily$join_precip_data()}}
+    \item \href{#method-WaterGageDaily-plot_baseflow_forecast}{\code{WaterGageDaily$plot_baseflow_forecast()}}
+    \item \href{#method-WaterGageDaily-plot_baseflow_agwrc}{\code{WaterGageDaily$plot_baseflow_agwrc()}}
     \item \href{#method-WaterGageDaily-plot_rechare_context}{\code{WaterGageDaily$plot_rechare_context()}}
     \item \href{#method-WaterGageDaily-plot_precip_data}{\code{WaterGageDaily$plot_precip_data()}}
     \item \href{#method-WaterGageDaily-plot_low_flows}{\code{WaterGageDaily$plot_low_flows()}}
@@ -369,6 +390,78 @@ value fell below the user input threshold
 }
 
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-group1"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-group1}{}}}
+\subsection{\code{WaterGageDaily$group1()}}{
+  group1 stats wrapper
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$group1(yearType = "water", FUN = stats::median)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{yearType}}{The type of year factor to be used when determining
+statistcs, yr = 'water' or yr ='calendar' for water years and calculated
+years respectively}
+      \item{\code{FUN}}{the function to be applied to the monthly values. Median is the
+default here. This can be a character string of a function name but
+should ideally be a closure}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A matrix with the monthly results of FUN over each year
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-group2"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-group2}{}}}
+\subsection{\code{WaterGageDaily$group2()}}{
+  group2 stats wrapper
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$group2(yearType = "water", mimic.tnc = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{yearType}}{The type of year factor to be used when determining
+statistcs, yr = 'water' or yr ='calendar' for water years and calculated
+years respectively}
+      \item{\code{mimic.tnc}}{should the function perform the calculation like the TNC
+IHA software? If mimic.tnc is TRUE, then running means will be
+calculated for each year individually and will not use data from the
+previous or next year, thereby}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a data frame with the group 2 statistics for each year
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-as.zoo"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-as.zoo}{}}}
+\subsection{\code{WaterGageDaily$as.zoo()}}{
+  convert the flow_col to a zoo based on date_col with
+\code{zoo::as.zoo()}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$as.zoo()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A zoo where the timeseries values are those defined in gage_data
+by flow_col and the indices are in date_col
+  }
+}
+
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-WaterGageDaily-join_precip_data"></a>}}
 \if{latex}{\out{\hypertarget{method-WaterGageDaily-join_precip_data}{}}}
 \subsection{\code{WaterGageDaily$join_precip_data()}}{
@@ -408,6 +501,70 @@ considered?}
   \subsection{Returns}{
     The gage_data data frame now with a column of precip_mm joined
 on. Also set in the precip_data field on this object.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-plot_baseflow_forecast"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-plot_baseflow_forecast}{}}}
+\subsection{\code{WaterGageDaily$plot_baseflow_forecast()}}{
+  plot current flow forecasts
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$plot_baseflow_forecast(
+  start_date,
+  forecast_days = 0:90,
+  AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
+  return_plotly = FALSE
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{start_date}}{Character. The date to begin the forecast, i.e. the flow
+on this day will be used to run forecast calculations}
+      \item{\code{forecast_days}}{numeric vector, defaults to 0:90. Days where forcast
+should be calculated and will use corresponding AGWRC if provided
+vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"}
+      \item{\code{AGWRC}}{A named list of numeric or character. Each named entry is the
+decay coefficient to regress the flow on start_date for forecast. May be
+a single numeric to allow for a constant forecast or a vector of numeric
+values to allow for a variable forecast but must be of length days.
+Otherwise, may be "lm_constant" to calculate a constant value from m and
+b or "lm_variable" to have a variable value. The names are used for the
+plot legend}
+      \item{\code{return_plotly}}{logical, default to FALSE. If TRUE, a plotly object
+is returned. Otherwise, a ggplot is returned}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    either a ggplot or plotly object of forecasts, depending on user
+input
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-plot_baseflow_agwrc"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-plot_baseflow_agwrc}{}}}
+\subsection{\code{WaterGageDaily$plot_baseflow_agwrc()}}{
+  Scatterplot of AGWRC vs Median Flow
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$plot_baseflow_agwrc(return_plotly = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{return_plotly}}{logical, default to FALSE. If TRUE, a plotly object
+is returned. Otherwise, a ggplot is returned}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A ggplot scatterplot of median flow vs AGWRC
   }
 }
 
@@ -584,7 +741,8 @@ today's date}
     \preformatted{WaterGageDaily$plot_all(
   recharge_targetYear = as.numeric(format(Sys.Date(), "\%Y")),
   recharge_include_months = 1:12,
-  recharge_AYS = 10
+  recharge_AYS = 10,
+  forecast_start_date = (Sys.Date() - 15)
 )}
     \if{html}{\out{</div>}}
   }
@@ -596,6 +754,9 @@ See \code{self$plot_recharge_context()} for more information.}
       \item{\code{recharge_include_months}}{What months (numeric) should be included in plot/analysis?}
       \item{\code{recharge_AYS}}{Which month begins the recharge analysis year?
 See \code{self$plot_recharge_context()} for more information.}
+      \item{\code{forecast_start_date}}{Character. The date to begin the forecast, i.e. the flow
+on this day will be used to run forecast calculations. See
+\code{self$plot_baseflow_forecast()} for more information.}
     }
     \if{html}{\out{</div>}}
   }

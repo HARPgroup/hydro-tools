@@ -41,6 +41,10 @@
 #'  SA_Ashland$low_flows
 #'  SA_Ashland$nep_table()
 #'  SA_Ashland$days_below(75)
+#'  #zoos and group stats
+#'  g1 <- SA_Ashland$group1("water", FUN = mean)
+#'  g2 <- SA_Ashland$group2(yearType = "water", mimic.tnc = TRUE)
+#'  myzoo <- SA_Ashland$as.zoo()
 #'  #Plots:
 #'  SA_Ashland$plot_rechare_context(2026,c(12,1,2))
 #'  SA_Ashland$plot_low_flows("boxplot")
@@ -322,6 +326,11 @@ WaterGageDaily <- R6::R6Class(
       }
       #Get the starting flow based on the user input date
       Q0 <- self$gage_data[self$gage_data[,self$date_col] == start_date,self$flow_col]
+      
+      if(length(Q0) == 0){
+        stop("No Q0 found for date ",start_date)
+      }
+      
       #Forecast out the days of the user request using the agws package
       bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
                                            AGWRC = AGWRC, 
@@ -365,6 +374,48 @@ WaterGageDaily <- R6::R6Class(
       }
       
       return(monthtotals)
+    },
+    #'@description group1 stats wrapper
+    #'@details Calculates the IHA parameter group 1: Magnitude of montly water
+    #'  conditions see \code{hydrotools::group1()}
+    #'@param yearType The type of year factor to be used when determining
+    #'  statistcs, yr = 'water' or yr ='calendar' for water years and calculated
+    #'  years respectively
+    #'@param FUN the function to be applied to the monthly values. Median is the
+    #'  default here. This can be a character string of a function name but
+    #'  should ideally be a closure
+    #'@return A matrix with the monthly results of FUN over each year
+    group1 = function(yearType = "water", FUN = stats::median){
+      #Convert flows to zoo
+      value_zoo <- self$as.zoo()
+      out <- group1(x = value_zoo, yearType = yearType, FUN = FUN)
+      return(out)
+    },
+    #'@description group2 stats wrapper
+    #'@details Calculates the IHA parameter group 2: Magnitude of montly water
+    #'  conditions see \code{hydrotools::group2()}
+    #'@param yearType The type of year factor to be used when determining
+    #'  statistcs, yr = 'water' or yr ='calendar' for water years and calculated
+    #'  years respectively
+    #'@param mimic.tnc should the function perform the calculation like the TNC
+    #'  IHA software? If mimic.tnc is TRUE, then running means will be
+    #'  calculated for each year individually and will not use data from the
+    #'  previous or next year, thereby
+    #'@return a data frame with the group 2 statistics for each year
+    group2 = function(yearType = "water", mimic.tnc = TRUE){
+      #Convert flows to zoo
+      value_zoo <- self$as.zoo()
+      out <- group2(x = value_zoo, yearType = yearType, mimic.tnc = TRUE)
+      return(out)
+    },
+    #'@description convert the flow_col to a zoo based on date_col with
+    #'  \code{zoo::as.zoo()}
+    #'@return A zoo where the timeseries values are those defined in gage_data
+    #'  by flow_col and the indices are in date_col
+    as.zoo = function(){
+      value_zoo <- zoo::as.zoo(x = self$gage_data[,self$flow_col])
+      zoo::index(value_zoo) <- self$gage_data[,self$date_col]
+      return(value_zoo)
     },
     #' @description Use the watershed feature to find precipitation from 1980
     #'   onward using \code{RomFeature$get_raster_ts()}. Join this data to the
@@ -419,6 +470,97 @@ WaterGageDaily <- R6::R6Class(
       )
       self$precip_data <- join_data
       return(join_data)
+    },
+    #'@description plot current flow forecasts
+    #'@details Use \code{self$baseflow_forecast()} iteratively over a list of
+    #'  provided AGWRC options to create a plot of current potential forecasts
+    #'@param start_date Character. The date to begin the forecast, i.e. the flow
+    #'  on this day will be used to run forecast calculations
+    #'@param forecast_days numeric vector, defaults to 0:90. Days where forcast
+    #'  should be calculated and will use corresponding AGWRC if provided
+    #'  vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"
+    #'@param AGWRC A named list of numeric or character. Each named entry is the
+    #'  decay coefficient to regress the flow on start_date for forecast. May be
+    #'  a single numeric to allow for a constant forecast or a vector of numeric
+    #'  values to allow for a variable forecast but must be of length days.
+    #'  Otherwise, may be "lm_constant" to calculate a constant value from m and
+    #'  b or "lm_variable" to have a variable value. The names are used for the
+    #'  plot legend
+    #'@param return_plotly logical, default to FALSE. If TRUE, a plotly object
+    #'  is returned. Otherwise, a ggplot is returned
+    #'@return either a ggplot or plotly object of forecasts, depending on user
+    #'  input
+    plot_baseflow_forecast = function(
+    start_date,
+    forecast_days = 0:90,
+    AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
+    return_plotly = FALSE
+    ){
+      #Run the baseflow_forecast method using each AGWRC style defined by user.
+      #all_forecasts will be a list with data frames for each baseflow_forecast
+      all_forecasts <- mapply(FUN = self$baseflow_forecast,
+                              SIMPLIFY = FALSE,
+                              AGWRC = AGWRC,
+                              MoreArgs = list(forecast_days = forecast_days,
+                                              start_date = start_date))
+      #Assign names to each dataframe in all_forecasts based on the names in the
+      #user provided list or an arbitrary name
+      if(!is.null(names(AGWRC)) && length(names(AGWRC)) == length(all_forecasts)){
+        names(all_forecasts) <- names(AGWRC)
+      }else{
+        names(all_forecasts) <- paste0("forecast_",1:length(all_forecasts))
+      }
+      #Create a "name" field in each data frame that is based on the list name
+      all_forecasts <- mapply(FUN = function(X,dataname){X$name <- dataname; return(X)},
+                              SIMPLIFY = FALSE,
+                              dataname = names(all_forecasts),
+                              X = all_forecasts)
+      #Combine all data together, going from a list of data frames to one large
+      #data frame
+      plot_data <- do.call(rbind, all_forecasts)
+      #Plot the data
+      p <- ggplot2::ggplot() + 
+        ggplot2::geom_line(data = plot_data, 
+                           ggplot2::aes(x = .data$Date, y = .data$Forecast, col = .data$name)) + 
+        ggplot2::geom_line(data = all_forecasts[[1]],
+                           ggplot2::aes(x = .data$Date, y = .data$obs_flow), col = "black") + 
+        ggplot2::scale_y_log10() + 
+        ggplot2::ylab("Flow") + 
+        ggplot2::xlab(element_blank()) + 
+        ggplot2::theme_bw() +
+        ggplot2::labs(color = ggplot2::element_blank()) + 
+        ggplot2::ggtitle(paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id)) + 
+        ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
+      
+      plotName <- paste0("baseflow_forecasts_", start_date)
+      
+      #Store in the list of plots on this object
+      self$plots[[plotName]] <- p
+      
+      #Return ggplot or plotly
+      if(return_plotly){
+        p <- plotly::ggplotly(p)
+      }
+      return(p)
+    },
+    #'@description Scatterplot of AGWRC vs Median Flow
+    #'@details Loads data from the 2025-2027 HARP project to draw a scatter plot
+    #'  of AGWRC vs Flow and plots the workflow regression
+    #'@param return_plotly logical, default to FALSE. If TRUE, a plotly object
+    #'  is returned. Otherwise, a ggplot is returned
+    #'@return A ggplot scatterplot of median flow vs AGWRC
+    plot_baseflow_agwrc = function(return_plotly = FALSE){
+      p <- super$plot_baseflow_agwrc()
+      
+      plotName <- "agwrc_medianflow_scatterplot"
+      #Store in the list of plots on this object
+      self$plots[[plotName]] <- p
+      
+      #Return ggplot or plotly
+      if(return_plotly){
+        p <- plotly::ggplotly(p)
+      }
+      return(p)
     },
     #' @description Create a boxplot of the monthly metric requested by user at
     #'   this gage (or of a user input data frame) and then plot the target year
@@ -715,11 +857,15 @@ WaterGageDaily <- R6::R6Class(
     #' @param recharge_include_months What months (numeric) should be included in plot/analysis?
     #' @param recharge_AYS Which month begins the recharge analysis year? 
     #'   See \code{self$plot_recharge_context()} for more information.
+    #'@param forecast_start_date Character. The date to begin the forecast, i.e. the flow
+    #'  on this day will be used to run forecast calculations. See
+    #'  \code{self$plot_baseflow_forecast()} for more information.
     #' @return A list of all plots created by methods in this objects. Will also
     #'   populate the plots field.
     plot_all = function(recharge_targetYear = as.numeric(format(Sys.Date(),"%Y")),
                         recharge_include_months = 1:12,
-                        recharge_AYS = 10){
+                        recharge_AYS = 10,
+                        forecast_start_date = (Sys.Date() - 15)){
       self$plot_rechare_context(targetYear = recharge_targetYear,
                                 include_months = recharge_include_months,
                                 AYS = recharge_AYS)
@@ -727,6 +873,8 @@ WaterGageDaily <- R6::R6Class(
       self$plot_low_flows("boxplot")
       self$plot_precip_data()
       self$plot_percentiles()
+      self$plot_baseflow_forecast(start_date = forecast_start_date)
+      self$plot_baseflow_agwrc()
       
       return(self$plots)
     }

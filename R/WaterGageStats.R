@@ -111,7 +111,7 @@ WaterGageStats <- R6::R6Class(
           }
           
           if(self$statistic_type == "doy"){
-            self$gage_data <- read_waterdata_stats_por(
+            self$gage_data <- dataRetrieval::read_waterdata_stats_por(
               monitoring_location_id = paste0("USGS-",self$gage_id),
               parameter_code         = self$parameter_code,
               computation_type       = self$computation_type,
@@ -122,7 +122,7 @@ WaterGageStats <- R6::R6Class(
             self$flow_col <- "value"
             self$date_col <- "time_of_year"
           }else if(self$statistic_type == "daterange"){
-            self$gage_data <- read_waterdata_stats_daterange(
+            self$gage_data <- dataRetrieval::read_waterdata_stats_daterange(
               monitoring_location_id = paste0("USGS-",self$gage_id),
               parameter_code         = self$parameter_code,
               computation_type       = self$computation_type,
@@ -137,7 +137,7 @@ WaterGageStats <- R6::R6Class(
           if(self$statistic_type == "doy"){
             #Get doy statistics
             #statType = c("Min", "Max", paste0("p",c("05",10,25,50,75,90,95)))
-            stats_data <- readNWISstat(
+            stats_data <- dataRetrieval::readNWISstat(
               siteNumbers = self$gage_id,
               parameterCd = self$parameter_code,
               statReportType = "daily",

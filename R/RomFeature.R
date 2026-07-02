@@ -9,6 +9,7 @@
 #'   methods from \code{RomEntity}
 #' @importFrom R6 R6Class
 #' @importFrom ggspatial layer_spatial
+#' @importFrom gsubfn fn
 #' @param datasource optional RomDataSource for remote and local storage
 #'   (required; often provided in DEQ config files)
 #' @param config list of attributes to use to query for the feature. May include

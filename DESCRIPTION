@@ -21,6 +21,7 @@ Imports:
     graphics,
     flextable,
     caTools,
+    gsubfn,
     lubridate,
     plyr,
     dplyr,
@@ -43,6 +44,8 @@ Imports:
     agws
 Remotes:
   agws=github::HARPgroup/baseflow_storage
+Suggests:
+  plotly
 Collate: 
     'CEDSEntity.R'
     'CEDSFacility.R'
