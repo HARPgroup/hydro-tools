@@ -849,3 +849,29 @@ HydroImpoundment <- R6Class(
     }
   )
 )
+
+# Note: use this for special PHP serialized things like the matrix property of flowbys and DataMatrix objects
+php_unserialize <- function(string){
+  # from: https://stackoverflow.com/questions/38820191/how-to-read-php-serialize-data-in-r
+  first <- unlist(strsplit(string, "\\{|\\}", fixed=F))
+  inside_array <- unlist(strsplit(first[-1], ";", fixed=T))
+  infomation_type <- substr(inside_array, 1,1)
+  
+  if(any(nchar(gsub("s|i", "", unique(infomation_type) )) != 0)){
+    stop("unknow datatype in serilize data")
+  }
+  inside_array_s <- rep(NA, length(inside_array))
+  
+  pos <- infomation_type == "s"
+  string_length <- as.numeric(sapply(strsplit(inside_array, ":", fixed=T), function(x) x[2]))[pos]
+  inside_array_s[pos] <- substr(inside_array[pos], nchar(string_length)+4, nchar(inside_array[pos]))
+  
+  pos <- infomation_type == "i"
+  inside_array_s[pos] <- substr(inside_array[pos],3,nchar(inside_array[pos]))
+  
+  # create key and value for each elment
+  key <- inside_array_s[seq(1,length(inside_array_s),2)]
+  value <- inside_array_s[seq(2,length(inside_array_s),2)]  
+  
+  return(cbind(key, value))
+}
