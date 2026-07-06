@@ -341,7 +341,9 @@ ModelElementBase <- R6Class(
             rxp[[rstr$name[[1]]]] <- rstr
           } else {
             rxp[[n]] <- rstr
-          }        }
+          }
+          # todo: use php_unserialize() defined below to handle matrixes
+        }
         exp = rxp
       } else {
         trim_xml = raw_xml[['elem_xml']]
