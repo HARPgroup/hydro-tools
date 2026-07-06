@@ -336,8 +336,12 @@ ModelElementBase <- R6Class(
               rstr <- substr(rstr, 1, rsl - 3)
             }
           }
-          rxp[n] <- rstr
-        }
+          rstr <- rstr[[1]]
+          if ("name" %in% names(rstr)) {
+            rxp[rstr$name[[1]]] = rstr
+          } else {
+            rxp[n] <- rstr
+          }        }
         exp = rxp
       } else {
         trim_xml = raw_xml[['elem_xml']]
