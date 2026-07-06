@@ -308,14 +308,44 @@ ModelElementBase <- R6Class(
       #If user only wants operators, get those only
       if (oborops == 'operators') {
         rxx = as.character(raw_xml[['elemoperators']])
-        trim_xml = substr(rxx, 3,stringr::str_length(rxx) -2)
-        #Add an arbitrary wrapper element to ensure proper reading
-        expdoc <- xml2::read_xml(paste0("<container>",trim_xml,"</container>"))
+        rxx = stringi::stri_unescape_unicode(rxx)
+        # doing this we get an entry for each inside a wrapper
+        exp <- xml2::as_list(xml2::read_xml(paste0("<container>",rxx,"</container>")))
+        # now extract from wrapper
+        exp <- exp[[1]]
+        if (exp[[1]] == "{\"") {
+          exp <- exp[2:length(exp)]
+        }
+        if (exp[[length(exp)]] == "\"}") {
+          exp <- exp[1:(length(exp) - 1)]
+        }
+        # the first and last elements could be the curly braces
+        rxp <- list()
+        n = 0
+        for (i in 1:length(exp)) {
+          rstr <- exp[i]
+          if (rstr == "\",\"") {
+            next 
+          }
+          n = n + 1
+          rsl = stringr::str_length(rstr)
+          # strip quotes from beginning and end of string
+          if (i == length(exp)) {
+            # strip ending "}" from the last element
+            if (substr(rstr, rsl - 3, rsl) == "}") {
+              rstr <- substr(rstr, 1, rsl - 3)
+            }
+          }
+          rxp[n] <- rstr
+        }
+        exp = rxp
       } else {
         trim_xml = raw_xml[['elem_xml']]
-        expdoc <- xml2::read_xml(trim_xml)
+        exp <- xml2::read_xml(trim_xml)
       }
-      exp <- xml2::as_list(expdoc)
+      if (!is.list(exp)) {
+        exp <- xml2::as_list(exp)
+      }
       return(exp)
     },
     #' @description Returns all model elementids that are upstream and
