@@ -338,9 +338,9 @@ ModelElementBase <- R6Class(
           }
           rstr <- rstr[[1]]
           if ("name" %in% names(rstr)) {
-            rxp[rstr$name[[1]]] = rstr
+            rxp[[rstr$name[[1]]]] <- rstr
           } else {
-            rxp[n] <- rstr
+            rxp[[n]] <- rstr
           }        }
         exp = rxp
       } else {
