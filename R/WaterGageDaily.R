@@ -525,11 +525,9 @@ WaterGageDaily <- R6::R6Class(
         ggplot2::geom_line(data = all_forecasts[[1]],
                            ggplot2::aes(x = .data$Date, y = .data$obs_flow), col = "black") + 
         ggplot2::scale_y_log10() + 
-        ggplot2::ylab("Flow") + 
-        ggplot2::xlab(element_blank()) + 
+        ggplot2::labs(x = NULL, y = "Flow", color = NULL,
+                      title = paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id))
         ggplot2::theme_bw() +
-        ggplot2::labs(color = ggplot2::element_blank()) + 
-        ggplot2::ggtitle(paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id)) + 
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       
       plotName <- paste0("baseflow_forecasts_", start_date)
@@ -719,9 +717,8 @@ WaterGageDaily <- R6::R6Class(
           ggplot2::geom_line(ggplot2::aes(x = AY, y = value, color = name)) + 
           ggplot2::scale_y_log10() + 
           ggplot2::theme_minimal() +
-          ggplot2::xlab(ggplot2::element_blank()) + ggplot2::ylab("Mean/Daily Flow (cfs)") +
-          ggplot2::labs(color = ggplot2::element_blank()) + 
-          ggplot2::ggtitle(paste("Annual Low Flows\nUSGS",self$gage_id)) + 
+          ggplot2::labs(color = NULL, x = NULL, y = "Mean/Daily Flow (cfs)",
+                        title = paste("Annual Low Flows\nUSGS",self$gage_id)) + 
           ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       }else if(plot_type == "boxplot"){
         #Create a boxplot of annual low flows separated by metrix
@@ -730,8 +727,9 @@ WaterGageDaily <- R6::R6Class(
                                              group = name)) + 
           ggplot2::scale_y_log10() + 
           ggplot2::theme_minimal() +
-          ggplot2::xlab(ggplot2::element_blank()) + ggplot2::ylab("Mean/Daily Flow (cfs)") +
-          ggplot2::ggtitle(paste("Low Flows\nUSGS",self$gage_id)) + 
+          ggplot2::labs(x = NULL, y = "Mean/Daily Flow (cfs)",
+                        title = paste("Low Flows\nUSGS",self$gage_id)
+                        ) +
           ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       }
       

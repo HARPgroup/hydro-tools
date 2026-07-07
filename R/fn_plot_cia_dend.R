@@ -70,9 +70,8 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
     scale_size_continuous(range = c(0.2, 3), name = "PC Magnitude") +
     scale_colour_gradientn(colours = c("blue", "grey"), values = c(-1, 1), name = "PC Sign", breaks = c(-1, 1)) +
     theme_bw() +
-    ggtitle(paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2)) +
-    xlab('River Mile [Mi]') +
-    ylab('Flow [cfs]')
+    ggplot::labels(x = 'River Mile [Mi]', y = 'Flow [cfs]', 
+                   title = paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2))
   
   return(p)
 }

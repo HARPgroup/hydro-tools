@@ -235,9 +235,7 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
   #as point data to highlight this year's trends
   p <- ggplot() + 
     geom_boxplot(data = plotData, aes(group = .data$month, x = .data$month, y = .data$aggregateValue)) +
-    ggplot2::labs(color = element_blank()) + 
-    ggplot2::xlab(element_blank()) + 
-    ggplot2::ylab(ylab) + 
+    ggplot2::labs(color = NULL, x = NULL, y = ylab) + 
     theme_minimal()
   #If the user wishes to use a log scale on the y-axis
   if(use_y_log){
@@ -256,12 +254,12 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
                  pch = 12) +
       #Color and label the point values
       ggplot2::scale_color_manual(values = "blue") + 
-      ggplot2::ggtitle(paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",gage_id)) + 
+      ggplot2::labs(title = paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",gage_id)) + 
       theme(plot.title = element_text(hjust = 0.5)) 
     #Add the year to the plot object name
   }else{
     p <- p + 
-      ggplot2::ggtitle(paste("Hist. Monthly",metric_name,"\nUSGS",gage_id)) +
+      ggplot2::labs(title = paste("Hist. Monthly",metric_name,"\nUSGS",gage_id)) +
       theme(plot.title = element_text(hjust = 0.5))
   }
   
