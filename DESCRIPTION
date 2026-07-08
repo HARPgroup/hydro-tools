@@ -1,6 +1,6 @@
 Package: hydrotools
 Title: Data processing and accessors for VAHydro
-Version: 1.1.2
+Version: 1.1.3
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Roxygen: list(markdown = TRUE)
@@ -15,13 +15,13 @@ Imports:
     getPass,
     utils,
     jsonlite,
-    ggplot2,
     httr,
     RCurl,
     graphics,
     flextable,
     caTools,
     gsubfn,
+    ggplot2,
     lubridate,
     plyr,
     dplyr,
@@ -74,7 +74,6 @@ Collate:
     'fac_utils.R'
     'fn_plot_cia_dend.R'
     'imp_utils.R'
-    'lm_analysis_test_args.R'
     'model_handlers.R'
     'odbc_utils.R'
     'om_auth_read.R'

@@ -256,10 +256,9 @@ WaterGageBase <- R6::R6Class(
         ggplot2::geom_point(data = event_summary_df, 
                            ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC)) + 
         ggplot2::geom_function(fun = function(Q){(log(Q) * self$agwrc_lm_m) + self$agwrc_lm_b}) + 
-        ggplot2::ylab("Event AGWRC") + 
-        ggplot2::xlab("Median Event Flow") + 
+        ggplot2::labs(x = "Median Event Flow", y = "Event AGWRC",
+                      title = paste("AGWRC vs Flow","\nUSGS",self$gage_id)) + 
         ggplot2::theme_bw() +
-        ggplot2::ggtitle(paste("AGWRC vs Flow","\nUSGS",self$gage_id)) + 
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       
       return(p)

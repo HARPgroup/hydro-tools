@@ -20,20 +20,16 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
   riv_seg_i <- riv_seg
   
   #Calculates Upstream River Segments
-  upstream <- data.frame((fn_ALL.upstream(riv_seg, AllSegList)))
+  upstream <- data.frame((fn_ALL.upstream(AllSegList, riv_seg)))
   names(upstream)[names(upstream) == colnames(upstream)[1]] <- "riv_seg"
   
   #While loop that runs the function for every upstream segment
   a <- 1
-  p <- ggplot(NULL)
+  p <- ggplot2::ggplot(NULL)
   while(a <= nrow(upstream)){
-    if(upstream == 'NA'){
-      riv_seg <- riv_seg
-    }else{
-      riv_seg <- upstream[a,]
-    }
+    riv_seg <- upstream[a,]
     #only runs code if river segment is headwater
-    if(fn_ALL.upstream(riv_seg,AllSegList) == 'NA'){
+    if(all(fn_ALL.upstream(AllSegList, riv_seg) == riv_seg)){
       #determines all downstream segments
       downstream <- data.frame(fn_ALL.downstream(riv_seg, AllSegList))
       names(downstream)[names(downstream) == colnames(downstream)[1]] <- "riv_seg"
@@ -48,8 +44,8 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
       
       #plot graph
       p <- p +
-        geom_line(data = cia_data_loop,
-                  aes(x = .data$rmile, y = .data$Metric_1,
+        ggplot2::geom_line(data = cia_data_loop,
+                           ggplot2::aes(x = .data$rmile, y = .data$Metric_1,
                       colour = .data$Metric_change, size = .data$metric_pc))
       
     }
@@ -58,21 +54,23 @@ fn_plot_cia_dend <- function(riv_seg, AllSegList, runid1, runid2, flow_metric, c
   }
   
   # Reversing scale for correct river mile orientation
-  p <- p + scale_x_reverse()
+  p <- p + ggplot2::scale_x_reverse()
   
   
   #Creating data frame with just original inputed river segment to graph point
   riv_seg_og <- cia_data_frame[cia_data_frame$riverseg == riv_seg_i,]
   
   p <- p +
-    geom_point(data = riv_seg_og, aes(x = .data$rmile, y = .data$Metric_1)) +
-    geom_text(data = cia_data_frame, aes(x = .data$rmile, y = .data$Metric_1, label = .data$seglist, vjust = 1.0)) + 
-    scale_size_continuous(range = c(0.2, 3), name = "PC Magnitude") +
-    scale_colour_gradientn(colours = c("blue", "grey"), values = c(-1, 1), name = "PC Sign", breaks = c(-1, 1)) +
-    theme_bw() +
-    ggtitle(paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2)) +
-    xlab('River Mile [Mi]') +
-    ylab('Flow [cfs]')
+    ggplot2::geom_point(data = riv_seg_og, 
+                        ggplot2::aes(x = .data$rmile, y = .data$Metric_1)) +
+    ggplot2::geom_text(data = cia_data_frame,
+                       ggplot2::aes(x = .data$rmile, y = .data$Metric_1,
+                                    label = .data$seglist, vjust = 1.0)) + 
+    ggplot2::scale_size_continuous(range = c(0.2, 3), name = "PC Magnitude") +
+    ggplot2::scale_colour_gradientn(colours = c("blue", "grey"), values = c(-1, 1), name = "PC Sign", breaks = c(-1, 1)) +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = 'River Mile [Mi]', y = 'Flow [cfs]', 
+                   title = paste0("Percent Change in ", flow_metric, " Flow between runid", runid1, " and runid", runid2))
   
   return(p)
 }

@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.3 07/08/2026
+1. Updated package for R4.5.3 and ggplot updates.
+2. Added a funciton to more easily let users get a data.frame of all river
+segments from the datasource.
+
 ### 1.1.2 07/01/2026
 1. Added baseflow forecasting methods to `WaterGageBase` and `WaterGageDaily` to
 interface with the new HARP agws package (added as suggests due to circular

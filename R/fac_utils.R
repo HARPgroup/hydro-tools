@@ -233,16 +233,16 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
   
   #Create a boxplot of the month-year mean flows and include the targetData
   #as point data to highlight this year's trends
-  p <- ggplot() + 
-    geom_boxplot(data = plotData, aes(group = .data$month, x = .data$month, y = .data$aggregateValue)) +
-    ggplot2::labs(color = element_blank()) + 
-    ggplot2::xlab(element_blank()) + 
-    ggplot2::ylab(ylab) + 
-    theme_minimal()
+  p <- ggplot2::ggplot() + 
+    ggplot2::geom_boxplot(data = plotData, 
+                          ggplot2::aes(group = .data$month, 
+                                       x = .data$month, y = .data$aggregateValue)) +
+    ggplot2::labs(color = NULL, x = NULL, y = ylab) + 
+    ggplot2::theme_minimal()
   #If the user wishes to use a log scale on the y-axis
   if(use_y_log){
     #Use a semi-log (y) plot
-    p <- p + scale_y_log10()
+    p <- p + ggplot2::scale_y_log10()
   }
   
   if(!is.null(targetYear)){
@@ -251,18 +251,19 @@ plot_boxplot_context = function(targetYear = as.numeric(format(Sys.Date(),"%Y"))
     targetData <- plotData[plotData$analysis_year == targetYear,]
     
     p <- p + 
-      geom_point(data = targetData, aes(x = .data$month, y = .data$aggregateValue,
-                                        col = as.character(targetYear)),
-                 pch = 12) +
+      ggplot2::geom_point(data = targetData, 
+                          ggplot2::aes(x = .data$month, y = .data$aggregateValue,
+                                       col = as.character(targetYear)),
+                          pch = 12) +
       #Color and label the point values
       ggplot2::scale_color_manual(values = "blue") + 
-      ggplot2::ggtitle(paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",gage_id)) + 
-      theme(plot.title = element_text(hjust = 0.5)) 
+      ggplot2::labs(title = paste(metric_name,value_col,targetYear,"\nvs. Hist. Monthly",metric_name,"\nUSGS",gage_id)) + 
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
     #Add the year to the plot object name
   }else{
     p <- p + 
-      ggplot2::ggtitle(paste("Hist. Monthly",metric_name,"\nUSGS",gage_id)) +
-      theme(plot.title = element_text(hjust = 0.5))
+      ggplot2::labs(title = paste("Hist. Monthly",metric_name,"\nUSGS",gage_id)) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   }
   
   return(p)
