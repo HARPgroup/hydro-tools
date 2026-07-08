@@ -308,14 +308,50 @@ ModelElementBase <- R6Class(
       #If user only wants operators, get those only
       if (oborops == 'operators') {
         rxx = as.character(raw_xml[['elemoperators']])
-        trim_xml = substr(rxx, 3,stringr::str_length(rxx) -2)
-        #Add an arbitrary wrapper element to ensure proper reading
-        expdoc <- xml2::read_xml(paste0("<container>",trim_xml,"</container>"))
+        rxx = stringi::stri_unescape_unicode(rxx)
+        # doing this we get an entry for each inside a wrapper
+        exp <- xml2::as_list(xml2::read_xml(paste0("<container>",rxx,"</container>")))
+        # now extract from wrapper
+        exp <- exp[[1]]
+        if (exp[[1]] == "{\"") {
+          exp <- exp[2:length(exp)]
+        }
+        if (exp[[length(exp)]] == "\"}") {
+          exp <- exp[1:(length(exp) - 1)]
+        }
+        # the first and last elements could be the curly braces
+        rxp <- list()
+        n = 0
+        for (i in 1:length(exp)) {
+          rstr <- exp[i]
+          if (rstr == "\",\"") {
+            next 
+          }
+          n = n + 1
+          rsl = stringr::str_length(rstr)
+          # strip quotes from beginning and end of string
+          if (i == length(exp)) {
+            # strip ending "}" from the last element
+            if (substr(rstr, rsl - 3, rsl) == "}") {
+              rstr <- substr(rstr, 1, rsl - 3)
+            }
+          }
+          rstr <- rstr[[1]]
+          if ("name" %in% names(rstr)) {
+            rxp[[rstr$name[[1]]]] <- rstr
+          } else {
+            rxp[[n]] <- rstr
+          }
+          # todo: use php_unserialize() defined below to handle matrixes
+        }
+        exp = rxp
       } else {
         trim_xml = raw_xml[['elem_xml']]
-        expdoc <- xml2::read_xml(trim_xml)
+        exp <- xml2::read_xml(trim_xml)
       }
-      exp <- xml2::as_list(expdoc)
+      if (!is.list(exp)) {
+        exp <- xml2::as_list(exp)
+      }
       return(exp)
     },
     #' @description Returns all model elementids that are upstream and
@@ -815,3 +851,29 @@ HydroImpoundment <- R6Class(
     }
   )
 )
+
+# Note: use this for special PHP serialized things like the matrix property of flowbys and DataMatrix objects
+php_unserialize <- function(string){
+  # from: https://stackoverflow.com/questions/38820191/how-to-read-php-serialize-data-in-r
+  first <- unlist(strsplit(string, "\\{|\\}", fixed=F))
+  inside_array <- unlist(strsplit(first[-1], ";", fixed=T))
+  infomation_type <- substr(inside_array, 1,1)
+  
+  if(any(nchar(gsub("s|i", "", unique(infomation_type) )) != 0)){
+    stop("unknow datatype in serilize data")
+  }
+  inside_array_s <- rep(NA, length(inside_array))
+  
+  pos <- infomation_type == "s"
+  string_length <- as.numeric(sapply(strsplit(inside_array, ":", fixed=T), function(x) x[2]))[pos]
+  inside_array_s[pos] <- substr(inside_array[pos], nchar(string_length)+4, nchar(inside_array[pos]))
+  
+  pos <- infomation_type == "i"
+  inside_array_s[pos] <- substr(inside_array[pos],3,nchar(inside_array[pos]))
+  
+  # create key and value for each elment
+  key <- inside_array_s[seq(1,length(inside_array_s),2)]
+  value <- inside_array_s[seq(2,length(inside_array_s),2)]  
+  
+  return(cbind(key, value))
+}
