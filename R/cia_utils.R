@@ -1,6 +1,27 @@
 # cia_utils.R
 # Supporting functions for the CIA static and Shiny dashboards.
 
+#' Get data frame of all dbase river segments
+#' @description Query datasource for all river segments
+#' @details A simple query that extracts river segment IDs from dh_feature based
+#'   on bundle = 'watershed', ftype = 'vahydro', and hydrocode ilike
+#'   'vahydrosw_wshed_%'
+#' @param ds A RomDataSource to allow for querying of additional
+#'   information. May be provided by OWS config files.
+#' @return data frame with riverseg, hydroid, hydrocode, name from dh_feature
+#' @export get_all_riversegs
+get_all_riversegs <- function(ds){
+  out <- DBI::dbGetQuery(conn = ds$connection,"
+                              SELECT SUBSTR(hydrocode, 17, LENGTH(hydrocode)) as riverseg,
+                              hydroid,hydrocode,name
+                              FROM dh_feature
+                              WHERE bundle = 'watershed'
+                              AND ftype = 'vahydro'
+                              AND hydrocode ilike 'vahydrosw_wshed_%'
+                          ")
+  return(out)
+}
+
 #' Model element finder
 #' @description Finds the model, and its parent feature or prop given an OM elementid
 #' @param elid Desired elementid
