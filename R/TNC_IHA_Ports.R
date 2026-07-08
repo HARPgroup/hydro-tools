@@ -37,7 +37,7 @@ water.month <- function(x, label = FALSE, abbr = TRUE){
 #'@return Returns the month in the water year that would be that number away
 #from the beginning of the water year (October 1st). e.g. water.month(4, TRUE)
 #returns January
-#'@export water.month.numeric
+#'@export
 water.month.numeric <- function (
     #Month number of interest
   x,
@@ -73,7 +73,7 @@ water.month.numeric <- function (
 #'@return Returns the month in the water year that would be that number away
 #from the beginning of the water year (October 1st). e.g. water.month(4, TRUE)
 #returns January
-#'@export water.month.default
+#'@export 
 water.month.default <- function (
     #Date of interest
   x,
