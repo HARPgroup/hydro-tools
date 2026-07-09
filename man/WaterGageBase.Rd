@@ -89,6 +89,11 @@ recession coefficient AGWRC ~ log(Q). Stored in database.}
 
     \item{\code{agwrc_lm_b}}{The intercept of the linear model of active groundwater
 recession coefficient AGWRC ~ log(Q). Stored in database.}
+
+    \item{\code{agwrc_lm_limits}}{list. Where stored, the lower and upper limits of
+analysis for AGWRC are stored in a list with variables agwrc_reg_qlow
+(lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
+AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh}
   }
   \if{html}{\out{</div>}}
 }
@@ -100,7 +105,7 @@ recession coefficient AGWRC ~ log(Q). Stored in database.}
     \item \href{#method-WaterGageBase-handle_config_item}{\code{WaterGageBase$handle_config_item()}}
     \item \href{#method-WaterGageBase-load_sf_da}{\code{WaterGageBase$load_sf_da()}}
     \item \href{#method-WaterGageBase-load_wshd_feat}{\code{WaterGageBase$load_wshd_feat()}}
-    \item \href{#method-WaterGageBase-get_model_scenario_props}{\code{WaterGageBase$get_model_scenario_props()}}
+    \item \href{#method-WaterGageBase-get_model_or_scenario_props}{\code{WaterGageBase$get_model_or_scenario_props()}}
     \item \href{#method-WaterGageBase-read_om_file}{\code{WaterGageBase$read_om_file()}}
     \item \href{#method-WaterGageBase-baseflow_workflow_data}{\code{WaterGageBase$baseflow_workflow_data()}}
     \item \href{#method-WaterGageBase-plot_baseflow_agwrc}{\code{WaterGageBase$plot_baseflow_agwrc()}}
@@ -219,14 +224,14 @@ set, query the ds field for the corresponding USGS watershed feature
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-WaterGageBase-get_model_scenario_props"></a>}}
-\if{latex}{\out{\hypertarget{method-WaterGageBase-get_model_scenario_props}{}}}
-\subsection{\code{WaterGageBase$get_model_scenario_props()}}{
+\if{html}{\out{<a id="method-WaterGageBase-get_model_or_scenario_props"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageBase-get_model_or_scenario_props}{}}}
+\subsection{\code{WaterGageBase$get_model_or_scenario_props()}}{
   Read all scenario properties of a model on this object
 RomEntity
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageBase$get_model_scenario_props(
+    \preformatted{WaterGageBase$get_model_or_scenario_props(
   target_entity = self$gage_feature,
   model_prop_code,
   scenario_prop_code
@@ -280,7 +285,7 @@ https://deq1.bse.vt.edu:443}
   Get relevant baseflow workflow data frames from web server
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageBase$baseflow_workflow_data(omsite = omsite)}
+    \preformatted{WaterGageBase$baseflow_workflow_data(omsite)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -304,7 +309,17 @@ webserver defined by omsite
   Scatterplot of AGWRC vs Median Flow
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageBase$plot_baseflow_agwrc()}
+    \preformatted{WaterGageBase$plot_baseflow_agwrc(CI = FALSE, omsite = NA)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{CI}}{logical. Should a confidence interval be calculated to add to
+plot?}
+      \item{\code{omsite}}{The URL of the base VT Apache webserver, often defined in
+/var/www/R/config.R}
+    }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{

@@ -65,6 +65,11 @@ WaterGageBase <- R6::R6Class(
     #'@field agwrc_lm_b The intercept of the linear model of active groundwater
     #'  recession coefficient AGWRC ~ log(Q). Stored in database.
     agwrc_lm_b = NA,
+    #'@field agwrc_lm_limits list. Where stored, the lower and upper limits of
+    #'  analysis for AGWRC are stored in a list with variables agwrc_reg_qlow
+    #'  (lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
+    #'  AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh
+    agwrc_lm_limits = list(),
     #' @description
     #' Initialize a WaterGageBase() instance populating all fields passed to
     #' object by the named list config. Only valid public fields are populated.
@@ -161,7 +166,9 @@ WaterGageBase <- R6::R6Class(
     #'@param model_prop_code The propcode of the model on the feature
     #'@param scenario_prop_code The scenario propcode on the model property
     #'@return A data frame of all properties on the model scenario
-    get_model_scenario_props = function(target_entity = self$gage_feature, model_prop_code, scenario_prop_code){
+    get_model_or_scenario_props = function(target_entity = self$gage_feature,
+                                        model_prop_code,
+                                        scenario_prop_code){
       #Read data in from data base
       if(!inherits(target_entity,"RomFeature") && !inherits(target_entity,"RomProperty")){
         warning("target_entity must be a RomFeature or RomProperty")
@@ -170,11 +177,16 @@ WaterGageBase <- R6::R6Class(
       if(is.na(model_prop$pid)){
        warning("No model with propcode ", model_prop_code," found") 
       }
-      scen_prop <- model_prop$get_prop(propcode = scenario_prop_code)
-      if(is.na(model_prop$pid)){
-        warning("No model scenario with propcode ", scenario_prop_code," found") 
+      if(is.null(scenario_prop_code)){
+        all_props <- model_prop$propvalues()
+      }else{
+        scen_prop <- model_prop$get_prop(propcode = scenario_prop_code)
+        if(is.na(model_prop$pid)){
+          warning("No model scenario with propcode ", scenario_prop_code," found") 
+        }
+        all_props <- scen_prop$propvalues()
       }
-      all_props <- scen_prop$propvalues()
+      
       return(all_props)
     },
     #'@description Reads in JSON or csv file from a webserver
@@ -214,7 +226,7 @@ WaterGageBase <- R6::R6Class(
     #'  /var/www/R/config.R
     #'@return A list that returns different data frames from files from the
     #'  webserver defined by omsite
-    baseflow_workflow_data = function(omsite = omsite){
+    baseflow_workflow_data = function(omsite){
       events_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_stats_",self$gage_id,".csv"))
       trimmed_events_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_trimmed_stats_",self$gage_id,".csv"))
       event_summary_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
@@ -232,9 +244,14 @@ WaterGageBase <- R6::R6Class(
     #'@description Scatterplot of AGWRC vs Median Flow
     #'@details Loads data from the 2025-2027 HARP project to draw a scatter plot
     #'  of AGWRC vs Flow and plots the workflow regression
+    #'@param CI logical. Should a confidence interval be calculated to add to
+    #'  plot?
+    #'@param omsite The URL of the base VT Apache webserver, often defined in
+    #'  /var/www/R/config.R
     #'@return A ggplot scatterplot of median flow vs AGWRC
-    plot_baseflow_agwrc = function(){
-      event_summary_df <- self$read_om_file(omsite,paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
+    plot_baseflow_agwrc = function(CI = FALSE, omsite = NA){
+      event_summary_df <- self$read_om_file(omsite, 
+                                            paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
       
       if((is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
         #Load feature if not yet loaded
@@ -243,12 +260,18 @@ WaterGageBase <- R6::R6Class(
         }
         #Get all AGWRC simple_lm properties for this gage and store the
         #regression coefficients
-        lm_props <- self$get_model_scenario_props(
+        lm_props <- self$get_model_or_scenario_props(
           target_entity = self$gage_feature,
           model_prop_code = "AGWRC-1.0",
           scenario_prop_code = "simple_lm")
         self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
         self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
+        self$agwrc_lm_limit <- list(
+          agwrc_reg_qlow = lm_props$propvalue[lm_props$propname == "agwrc_reg_qlow"],
+          agwrc_reg_clow = lm_props$propvalue[lm_props$propname == "agwrc_reg_clow"],
+          agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
+          agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
+        )
       }
       #Plot the scatterplot of AGWRC vs Flow and include a line for the
       #regression calculated from the AGWRC workflow
@@ -260,6 +283,19 @@ WaterGageBase <- R6::R6Class(
                       title = paste("AGWRC vs Flow","\nUSGS",self$gage_id)) + 
         ggplot2::theme_bw() +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
+      #Should confidence interval be included on plot?
+      if(CI){
+        reg_lm <- lm(formula = event_summary_df$event_AGWRC ~ log(event_summary_df$median_flow))
+        if(all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))){
+          cint <- as.data.frame(predict(reg_lm, interval = "confidence"))
+          p <- p + ggplot2::geom_ribbon(ggplot2::aes(x = event_summary_df$median_flow,
+                                                     ymin = cint$lwr, ymax = cint$upr),
+                                        alpha = 0.1, fill = "steelblue1", color = 'steelblue4')
+        }else{
+          message("Linear model calculated is different from that in data
+          source. No confidence interval computed.")
+        }
+      }
       
       return(p)
       
@@ -286,12 +322,18 @@ WaterGageBase <- R6::R6Class(
         }
         #Get all AGWRC simple_lm properties for this gage and store the
         #regression coefficients
-        lm_props <- self$get_model_scenario_props(
+        lm_props <- self$get_model_or_scenario_props(
           target_entity = self$gage_feature,
           model_prop_code = "AGWRC-1.0",
           scenario_prop_code = "simple_lm")
         self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
         self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
+        self$agwrc_lm_limit <- list(
+          agwrc_reg_qlow = lm_props$propvalue[lm_props$propname == "agwrc_reg_qlow"],
+          agwrc_reg_clow = lm_props$propvalue[lm_props$propname == "agwrc_reg_clow"],
+          agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
+          agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
+        )
       }
       #Return a function to calc AGWRC ~ log(Q)
       if(return_fun){
@@ -307,7 +349,16 @@ WaterGageBase <- R6::R6Class(
       is defined in the parent environment (e.g. self$agwrc_fun()). Use at
       your own risk.")
         calc_agwrc <- function(Q){
-          out <- self$agwrc_lm_b + (log(Q) * self$agwrc_lm_m)
+          if(!is.null(self$agwrc_lm_limit$agwrc_reg_qlow) &&
+             Q < self$agwrc_lm_limit$agwrc_reg_qlow){
+            out <- self$agwrc_lm_limit$agwrc_reg_clow
+          }else if(!is.null(self$agwrc_lm_limit$agwrc_reg_qhigh) &&
+             Q > self$agwrc_lm_limit$agwrc_reg_qhigh){
+            out <- self$agwrc_lm_limit$agwrc_reg_chigh
+          }else{
+            out <- self$agwrc_lm_b + (log(Q) * self$agwrc_lm_m)
+          }
+          
           return(out)
         }
         return(calc_agwrc)
