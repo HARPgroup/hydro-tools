@@ -90,7 +90,7 @@ recession coefficient AGWRC ~ log(Q). Stored in database.}
     \item{\code{agwrc_lm_b}}{The intercept of the linear model of active groundwater
 recession coefficient AGWRC ~ log(Q). Stored in database.}
 
-    \item{\code{agwrc_lm_limits}}{list. Where stored, the lower and upper limits of
+    \item{\code{agwrc_lm_limit}}{list. Where stored, the lower and upper limits of
 analysis for AGWRC are stored in a list with variables agwrc_reg_qlow
 (lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
 AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh}
@@ -234,7 +234,7 @@ RomEntity
     \preformatted{WaterGageBase$get_model_or_scenario_props(
   target_entity = self$gage_feature,
   model_prop_code,
-  scenario_prop_code
+  scenario_prop_code = NULL
 )}
     \if{html}{\out{</div>}}
   }
@@ -309,7 +309,7 @@ webserver defined by omsite
   Scatterplot of AGWRC vs Median Flow
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageBase$plot_baseflow_agwrc(CI = FALSE, omsite = NA)}
+    \preformatted{WaterGageBase$plot_baseflow_agwrc(CI = FALSE, omsite)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{

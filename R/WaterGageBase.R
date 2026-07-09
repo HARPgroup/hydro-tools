@@ -65,11 +65,11 @@ WaterGageBase <- R6::R6Class(
     #'@field agwrc_lm_b The intercept of the linear model of active groundwater
     #'  recession coefficient AGWRC ~ log(Q). Stored in database.
     agwrc_lm_b = NA,
-    #'@field agwrc_lm_limits list. Where stored, the lower and upper limits of
+    #'@field agwrc_lm_limit list. Where stored, the lower and upper limits of
     #'  analysis for AGWRC are stored in a list with variables agwrc_reg_qlow
     #'  (lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
     #'  AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh
-    agwrc_lm_limits = list(),
+    agwrc_lm_limit = list(),
     #' @description
     #' Initialize a WaterGageBase() instance populating all fields passed to
     #' object by the named list config. Only valid public fields are populated.
@@ -168,7 +168,7 @@ WaterGageBase <- R6::R6Class(
     #'@return A data frame of all properties on the model scenario
     get_model_or_scenario_props = function(target_entity = self$gage_feature,
                                         model_prop_code,
-                                        scenario_prop_code){
+                                        scenario_prop_code = NULL){
       #Read data in from data base
       if(!inherits(target_entity,"RomFeature") && !inherits(target_entity,"RomProperty")){
         warning("target_entity must be a RomFeature or RomProperty")
@@ -249,7 +249,7 @@ WaterGageBase <- R6::R6Class(
     #'@param omsite The URL of the base VT Apache webserver, often defined in
     #'  /var/www/R/config.R
     #'@return A ggplot scatterplot of median flow vs AGWRC
-    plot_baseflow_agwrc = function(CI = FALSE, omsite = NA){
+    plot_baseflow_agwrc = function(CI = FALSE, omsite){
       event_summary_df <- self$read_om_file(omsite, 
                                             paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
       
@@ -324,8 +324,7 @@ WaterGageBase <- R6::R6Class(
         #regression coefficients
         lm_props <- self$get_model_or_scenario_props(
           target_entity = self$gage_feature,
-          model_prop_code = "AGWRC-1.0",
-          scenario_prop_code = "simple_lm")
+          model_prop_code = "AGWRC-1.0")
         self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
         self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
         self$agwrc_lm_limit <- list(

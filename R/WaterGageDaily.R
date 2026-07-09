@@ -579,7 +579,7 @@ WaterGageDaily <- R6::R6Class(
     #'@param omsite The URL of the base VT Apache webserver, often defined in
     #'  /var/www/R/config.R
     #'@return A ggplot scatterplot of median flow vs AGWRC
-    plot_baseflow_agwrc = function(return_plotly = FALSE, CI = FALSE, omsite = NA){
+    plot_baseflow_agwrc = function(return_plotly = FALSE, CI = FALSE, omsite){
       p <- super$plot_baseflow_agwrc(CI = CI, omsite = omsite)
       
       plotName <- "agwrc_medianflow_scatterplot"

@@ -2,13 +2,15 @@
 #'
 #' @param model_info model json list
 #' @param runid.list list of runids of interest 
+#' @param fac_model_info model information
 #' @return demands.df dataframe of scenario demands
 #' @seealso NA
 #' @export om_demand_table
 #' @examples NA
 om_demand_table <- function (
   model_info = FALSE,
-  runid.list = c('runid_6011','runid_6012')
+  runid.list = c('runid_400','runid_600'), 
+  fac_model_info
 ) {
   
   if (is.logical(model_info)){
@@ -19,29 +21,28 @@ om_demand_table <- function (
   # FORMAT STATS
   ################################################################################################
   model_summary <- data.frame()
-  scenario_short_name_list <- data.frame()
   scenario_short_name_list <- FALSE
   
-  #i <- 1
   for (i in 1:length(runid.list)){
     runid.i <- runid.list[i]
     run.i <- sub("runid_", "", runid.i)
     
     # RETRIEVE SCENARIO "SHORT NAME"
-    run_info.fac <- find_name(model_info,runid.i)
-    if (is.null(run_info.fac$reports)) {
+    run_info <- find_name(model_info, runid.i)
+    if (is.null(run_info$reports)) {
       scenario_short_name.i <- runid.i
     } else {
-      ri <- run_info.fac$reports
+      ri <- run_info$reports
       scenario_short_name.i <- as.character(ri$scenario_short_name$value)
     }
+    
     if (is.logical(scenario_short_name_list)) {
+      #THis should run only on the first loop iteration
       scenario_short_name_list <- data.frame(scenario = scenario_short_name.i)
     } else {
       scenario_short_name_list <- rbind(scenario_short_name_list, data.frame(scenario = scenario_short_name.i))
     }
 
-    run_info <- find_name(model_info,runid.i)
     summary.i <- list()
       
       if (startsWith(run.i,"2")){

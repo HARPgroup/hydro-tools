@@ -561,11 +561,7 @@ input
   Scatterplot of AGWRC vs Median Flow
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageDaily$plot_baseflow_agwrc(
-  return_plotly = FALSE,
-  CI = FALSE,
-  omsite = NA
-)}
+    \preformatted{WaterGageDaily$plot_baseflow_agwrc(return_plotly = FALSE, CI = FALSE, omsite)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{

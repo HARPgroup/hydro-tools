@@ -4,12 +4,18 @@
 \alias{om_demand_table}
 \title{Generate a table of model demand inputs, comparing across scenarios}
 \usage{
-om_demand_table(model_info = FALSE, runid.list = c("runid_6011", "runid_6012"))
+om_demand_table(
+  model_info = FALSE,
+  runid.list = c("runid_400", "runid_600"),
+  fac_model_info
+)
 }
 \arguments{
 \item{model_info}{model json list}
 
 \item{runid.list}{list of runids of interest}
+
+\item{fac_model_info}{model information}
 }
 \value{
 demands.df dataframe of scenario demands
