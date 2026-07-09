@@ -82,14 +82,14 @@ om_vahydro_metric_grid <- function (
     # warn that this is deprecated.
     message("om_vahydro_metric_grid() called without RomDataSource ")
     message("Global token is deprecated, please call with parameter ds = [RomDataSource]")
-    params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
-    url <- paste(base_url,params,sep="/")
-    rawdat <- httr::GET(
-      url,
-      httr::add_headers(HTTP_X_CSRF_TOKEN = token),
-      encode = "xml", httr::content_type("text/csv")
-    )
-    dat <- httr::content(rawdat)
+    # params <- paste(featureid,entity_type,bundle,ftype,model_version, runid, metric,sep="/")
+    # url <- paste(base_url,params,sep="/")
+    # rawdat <- httr::GET(
+    #   url,
+    #   httr::add_headers(HTTP_X_CSRF_TOKEN = token),
+    #   encode = "xml", httr::content_type("text/csv")
+    # )
+    # dat <- httr::content(rawdat)
   } else {
     if (ds$connection_type == 'odbc') {
       #If odbc, devleop SQL query to send to data base

@@ -315,10 +315,13 @@ WaterGageDaily <- R6::R6Class(
     #'  forecast but must be of length days. Otherwise, may be "lm_constant" to
     #'  calculate a constant value from m and b or "lm_variable" to have a
     #'  variable value
+    #'@param use_limits logical. Should the regression be limited using data in
+    #'  the agwrc_lm_limit field?
     #'@returns A data.frame of date, AGWRC, forecasted flow, and observed flow
     baseflow_forecast = function(start_date,
                                  forecast_days = 0:90,
-                                 AGWRC = "lm_constant"){
+                                 AGWRC = "lm_constant",
+                                 use_limits = TRUE){
       #If the user has not provided a numeric vector of AGWRCs, ensure
       #regression values have been loaded in from the database
       if(!is.numeric(AGWRC)){
@@ -331,11 +334,25 @@ WaterGageDaily <- R6::R6Class(
         stop("No Q0 found for date ",start_date)
       }
       
-      #Forecast out the days of the user request using the agws package
-      bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
-                                           AGWRC = AGWRC, 
-                                           m = self$agwrc_lm_m, 
-                                           b = self$agwrc_lm_b)
+      if(use_limits){
+        #Forecast out the days of the user request using the agws package
+        bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
+                                             AGWRC = AGWRC, 
+                                             m = self$agwrc_lm_m, 
+                                             b = self$agwrc_lm_b,
+                                             low_flow_limit = self$agwrc_lm_limit$agwrc_reg_qlow, 
+                                             low_agwrc_limit = self$agwrc_lm_limit$agwrc_reg_clow,
+                                             high_flow_limit = self$agwrc_lm_limit$agwrc_reg_qhigh, 
+                                             high_agwrc_limit = self$agwrc_lm_limit$agwrc_reg_chigh
+        )
+      }else{
+        #Forecast out the days of the user request using the agws package
+        bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
+                                             AGWRC = AGWRC, 
+                                             m = self$agwrc_lm_m, 
+                                             b = self$agwrc_lm_b)
+      }
+
       #Join back in the observed flow, when possible, to allow for easier
       #historic lookback comparisons
       bf_forecast$Date <- as.Date(start_date) + bf_forecast$Day
@@ -488,13 +505,19 @@ WaterGageDaily <- R6::R6Class(
     #'  plot legend
     #'@param return_plotly logical, default to FALSE. If TRUE, a plotly object
     #'  is returned. Otherwise, a ggplot is returned
+    #'@param include_days_before numeric, defaults to 30. How many days prior to
+    #'  start_date should be included on the plot?
+    #'@param use_limits logical. Should the regression be limited using data in
+    #'  the agwrc_lm_limit field?
     #'@return either a ggplot or plotly object of forecasts, depending on user
     #'  input
     plot_baseflow_forecast = function(
     start_date,
     forecast_days = 0:90,
     AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
-    return_plotly = FALSE
+    return_plotly = FALSE,
+    include_days_before = 30,
+    use_limits = TRUE
     ){
       #Run the baseflow_forecast method using each AGWRC style defined by user.
       #all_forecasts will be a list with data frames for each baseflow_forecast
@@ -502,7 +525,8 @@ WaterGageDaily <- R6::R6Class(
                               SIMPLIFY = FALSE,
                               AGWRC = AGWRC,
                               MoreArgs = list(forecast_days = forecast_days,
-                                              start_date = start_date))
+                                              start_date = start_date,
+                                              use_limits = use_limits))
       #Assign names to each dataframe in all_forecasts based on the names in the
       #user provided list or an arbitrary name
       if(!is.null(names(AGWRC)) && length(names(AGWRC)) == length(all_forecasts)){
@@ -518,15 +542,19 @@ WaterGageDaily <- R6::R6Class(
       #Combine all data together, going from a list of data frames to one large
       #data frame
       plot_data <- do.call(rbind, all_forecasts)
+      
       #Plot the data
-      p <- ggplot2::ggplot() + 
+      p <- ggplot2::ggplot() +
+        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] >= (as.Date(start_date) - include_days_before) &
+                                                   self$gage_data[,self$date_col] <= (as.Date(start_date) + max(forecast_days)),],
+                           ggplot2::aes(x = !!ggplot2::sym(self$date_col),
+                                        y = !!ggplot2::sym(self$flow_col)),
+                           col = "black") + 
         ggplot2::geom_line(data = plot_data, 
                            ggplot2::aes(x = .data$Date, y = .data$Forecast, col = .data$name)) + 
-        ggplot2::geom_line(data = all_forecasts[[1]],
-                           ggplot2::aes(x = .data$Date, y = .data$obs_flow), col = "black") + 
         ggplot2::scale_y_log10() + 
         ggplot2::labs(x = NULL, y = "Flow", color = NULL,
-                      title = paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id))
+                      title = paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id)) + 
         ggplot2::theme_bw() +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       
@@ -546,9 +574,13 @@ WaterGageDaily <- R6::R6Class(
     #'  of AGWRC vs Flow and plots the workflow regression
     #'@param return_plotly logical, default to FALSE. If TRUE, a plotly object
     #'  is returned. Otherwise, a ggplot is returned
+    #'@param CI logical. Should a confidence interval be calculated to add to
+    #'  plot?
+    #'@param omsite The URL of the base VT Apache webserver, often defined in
+    #'  /var/www/R/config.R
     #'@return A ggplot scatterplot of median flow vs AGWRC
-    plot_baseflow_agwrc = function(return_plotly = FALSE){
-      p <- super$plot_baseflow_agwrc()
+    plot_baseflow_agwrc = function(return_plotly = FALSE, CI = FALSE, omsite = NA){
+      p <- super$plot_baseflow_agwrc(CI = CI, omsite = omsite)
       
       plotName <- "agwrc_medianflow_scatterplot"
       #Store in the list of plots on this object

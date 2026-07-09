@@ -124,7 +124,7 @@ monthly, yearly, and day-of-year statistics on the gage flow}
 <ul>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="agwrc_fun"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-agwrc_fun'><code>WaterGageBase$agwrc_fun()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="baseflow_workflow_data"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-baseflow_workflow_data'><code>WaterGageBase$baseflow_workflow_data()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="get_model_scenario_props"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-get_model_scenario_props'><code>WaterGageBase$get_model_scenario_props()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="get_model_or_scenario_props"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-get_model_or_scenario_props'><code>WaterGageBase$get_model_or_scenario_props()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config'><code>WaterGageBase$handle_config()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="handle_config_item"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-handle_config_item'><code>WaterGageBase$handle_config_item()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="WaterGageBase" data-id="load_sf_da"><a href='../../hydrotools/html/WaterGageBase.html#method-WaterGageBase-load_sf_da'><code>WaterGageBase$load_sf_da()</code></a></span></li>
@@ -339,7 +339,8 @@ of the year using \code{hydrotools::om_flow_table()}
     \preformatted{WaterGageDaily$baseflow_forecast(
   start_date,
   forecast_days = 0:90,
-  AGWRC = "lm_constant"
+  AGWRC = "lm_constant",
+  use_limits = TRUE
 )}
     \if{html}{\out{</div>}}
   }
@@ -357,6 +358,8 @@ constant forecast or a vector of numeric values to allow for a variable
 forecast but must be of length days. Otherwise, may be "lm_constant" to
 calculate a constant value from m and b or "lm_variable" to have a
 variable value}
+      \item{\code{use_limits}}{logical. Should the regression be limited using data in
+the agwrc_lm_limit field?}
     }
     \if{html}{\out{</div>}}
   }
@@ -515,7 +518,9 @@ on. Also set in the precip_data field on this object.
   start_date,
   forecast_days = 0:90,
   AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
-  return_plotly = FALSE
+  return_plotly = FALSE,
+  include_days_before = 30,
+  use_limits = TRUE
 )}
     \if{html}{\out{</div>}}
   }
@@ -536,6 +541,10 @@ b or "lm_variable" to have a variable value. The names are used for the
 plot legend}
       \item{\code{return_plotly}}{logical, default to FALSE. If TRUE, a plotly object
 is returned. Otherwise, a ggplot is returned}
+      \item{\code{include_days_before}}{numeric, defaults to 30. How many days prior to
+start_date should be included on the plot?}
+      \item{\code{use_limits}}{logical. Should the regression be limited using data in
+the agwrc_lm_limit field?}
     }
     \if{html}{\out{</div>}}
   }
@@ -552,7 +561,11 @@ input
   Scatterplot of AGWRC vs Median Flow
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageDaily$plot_baseflow_agwrc(return_plotly = FALSE)}
+    \preformatted{WaterGageDaily$plot_baseflow_agwrc(
+  return_plotly = FALSE,
+  CI = FALSE,
+  omsite = NA
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -560,6 +573,10 @@ input
     \describe{
       \item{\code{return_plotly}}{logical, default to FALSE. If TRUE, a plotly object
 is returned. Otherwise, a ggplot is returned}
+      \item{\code{CI}}{logical. Should a confidence interval be calculated to add to
+plot?}
+      \item{\code{omsite}}{The URL of the base VT Apache webserver, often defined in
+/var/www/R/config.R}
     }
     \if{html}{\out{</div>}}
   }
