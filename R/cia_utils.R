@@ -834,7 +834,7 @@ is.empty <- function (x, ...)
       return(TRUE)
     return(FALSE)
   }
-  else sapply(x, is.empty, trim = trim, ...)
+  else sapply(x, is.empty, ...)
 }
 
 

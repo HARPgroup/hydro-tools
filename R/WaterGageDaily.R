@@ -10,21 +10,26 @@
 #'   to provide basic drought forecasting capabilities.
 #' @importFrom R6 R6Class
 #' @importFrom agws forwardForecast
-#' @param data_source "USGS", a file path, or a data frame of stream gage data that
-#'   has columns as named in \code{flow_col} and \code{date_col}. If using USGS,
-#'   \code{flow_col} and \code{date_col} are not used as data will be pulled
-#'   directly from USGS.
-#' @param gage_id The gage ID. This should be a USGS site number if \code{data_source}
-#'   is "USGS" such as 01671020
+#' @param data_source "USGS", a file path, or a data frame of stream gage data
+#'   that has columns as named in \code{flow_col} and \code{date_col}. If using
+#'   USGS, \code{flow_col} and \code{date_col} are not used as data will be
+#'   pulled directly from USGS.
+#' @param gage_id The gage ID. This should be a USGS site number if
+#'   \code{data_source} is "USGS" such as 01671020
 #' @param flow_col The column identifying the data of interest in the gage data.
 #'   Only required if \code{data_source} is a file path or a data frame
 #' @param date_col The column identifying the dates in the gage data. Only
 #'   required if \code{data_source} is a file path or a data frame
 #' @param start_date Optional. The first date to include in data get
 #' @param end_date Optional. The last date to include in data get
-#' @param approval_status 'all', 'approved', or 'provisional'. What kind of
-#'   data should be used from USGS? Defaults to that set in the field on
-#'   this object, which itself defaults to 'all'   
+#' @param approval_status 'all', 'approved', or 'provisional'. What kind of data
+#'   should be used from USGS? Defaults to that set in the field on this object,
+#'   which itself defaults to 'all'
+#' @param dataRetrieval_version Character. If data_source is "USGS", should the
+#'   legacy or modern API be used? If set to "auto", this object will use the
+#'   most appropriate API based on the installed version of dataRetrieval.
+#'   Otherwise, the user may use "legacy" or "modern" to control which API to
+#'   retrieve data from.
 #' @param ds_in An optional RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageDaily
@@ -95,6 +100,11 @@ WaterGageDaily <- R6::R6Class(
     #' @param approval_status 'all', 'approved', or 'provisional'. What kind of
     #'   data should be used from USGS? Defaults to that set in the field on
     #'   this object, which itself defaults to 'all'
+    #' @param dataRetrieval_version Character. If data_source is "USGS", should
+    #'   the legacy or modern API be used? If set to "auto", this object will
+    #'   use the most appropriate API based on the installed version of
+    #'   dataRetrieval. Otherwise, the user may use "legacy" or "modern" to
+    #'   control which API to retrieve data from.
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
@@ -102,6 +112,7 @@ WaterGageDaily <- R6::R6Class(
                           flow_col, date_col,
                           start_date = self$start_date, end_date = self$end_date,
                           approval_status = self$approval_status,
+                          dataRetrieval_version = "auto",
                           ds_in = NA){
       #Set basic fields by calling the parent initialize
       super$initialize(
@@ -118,7 +129,8 @@ WaterGageDaily <- R6::R6Class(
       if(inherits(data_source, "character") && data_source == "USGS"){
         #Use either the new dataRetrieval functions or those slated for
         #deprecation based on version number
-        if(packageVersion("dataRetrieval") >= "2.7.23") {
+        if(dataRetrieval_version == "modern" |
+          (dataRetrieval_version == "auto" & packageVersion("dataRetrieval") >= "2.7.23")) {
           self$get_gage_data(start_date = start_date, end_date = end_date,
                              approval_status = approval_status)
         }else{

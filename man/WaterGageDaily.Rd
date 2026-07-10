@@ -150,6 +150,7 @@ to analyze USGS gage data
   start_date = self$start_date,
   end_date = self$end_date,
   approval_status = self$approval_status,
+  dataRetrieval_version = "auto",
   ds_in = NA
 )}
     \if{html}{\out{</div>}}
@@ -172,6 +173,11 @@ required if \code{data_source} is a file path or a data frame}
       \item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
 data should be used from USGS? Defaults to that set in the field on
 this object, which itself defaults to 'all'}
+      \item{\code{dataRetrieval_version}}{Character. If data_source is "USGS", should
+the legacy or modern API be used? If set to "auto", this object will
+use the most appropriate API based on the installed version of
+dataRetrieval. Otherwise, the user may use "legacy" or "modern" to
+control which API to retrieve data from.}
       \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
     }

@@ -111,8 +111,10 @@ This package is in active development.
 ## Release notes
 ### 1.1.3 07/08/2026
 1. Updated package for R4.5.3 and ggplot updates.
-2. Added a funciton to more easily let users get a data.frame of all river
+2. Added a function to more easily let users get a data.frame of all river
 segments from the datasource.
+3. Added a switch to `WaterGageDaily` to allow users to use old dataRetrieval
+APIs due to the bugs encountered at several gages using the new API.
 
 ### 1.1.2 07/01/2026
 1. Added baseflow forecasting methods to `WaterGageBase` and `WaterGageDaily` to
