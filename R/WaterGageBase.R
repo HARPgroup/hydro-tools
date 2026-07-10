@@ -285,8 +285,9 @@ WaterGageBase <- R6::R6Class(
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       #Should confidence interval be included on plot?
       if(CI){
-        reg_lm <- lm(formula = event_summary_df$event_AGWRC ~ log(event_summary_df$median_flow))
-        if(all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))){
+        reg_lm <- agws::fit_agwrc_regression(event_summary_df)
+        if(is.logical(all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))) && 
+          all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))){
           cint <- as.data.frame(predict(reg_lm, interval = "confidence"))
           p <- p + ggplot2::geom_ribbon(ggplot2::aes(x = event_summary_df$median_flow,
                                                      ymin = cint$lwr, ymax = cint$upr),
