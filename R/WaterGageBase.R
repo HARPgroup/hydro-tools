@@ -169,20 +169,24 @@ WaterGageBase <- R6::R6Class(
     get_model_or_scenario_props = function(target_entity = self$gage_feature,
                                         model_prop_code,
                                         scenario_prop_code = NULL){
+      
       #Read data in from data base
       if(!inherits(target_entity,"RomFeature") && !inherits(target_entity,"RomProperty")){
-        warning("target_entity must be a RomFeature or RomProperty")
+        message("target_entity must be a RomFeature or RomProperty")
+        return(NULL)
       }
       model_prop <- target_entity$get_prop(propcode = model_prop_code)
       if(is.na(model_prop$pid)){
-       warning("No model with propcode ", model_prop_code," found") 
+        message("No model with propcode ", model_prop_code," found") 
+        return(NULL)
       }
       if(is.null(scenario_prop_code)){
         all_props <- model_prop$propvalues()
       }else{
         scen_prop <- model_prop$get_prop(propcode = scenario_prop_code)
         if(is.na(model_prop$pid)){
-          warning("No model scenario with propcode ", scenario_prop_code," found") 
+          message("No model scenario with propcode ", scenario_prop_code," found") 
+          return(NULL)
         }
         all_props <- scen_prop$propvalues()
       }
@@ -273,14 +277,37 @@ WaterGageBase <- R6::R6Class(
           agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
         )
       }
+      #Data for regression line for plot
+      flow_seq <- seq(min(event_summary_df$median_flow, na.rm = TRUE),
+                      max(event_summary_df$median_flow, na.rm = TRUE),
+                      length.out = 1000)
+      
+      pred_df_workflow <- data.frame(
+        median_flow = flow_seq,
+        event_AGWRC = (self$agwrc_lm_m * log(flow_seq) + self$agwrc_lm_b),
+        datagrp = "all"
+      )
       #Plot the scatterplot of AGWRC vs Flow and include a line for the
       #regression calculated from the AGWRC workflow
       p <- ggplot2::ggplot() + 
-        ggplot2::geom_point(data = event_summary_df, 
-                           ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC)) + 
-        ggplot2::geom_function(fun = function(Q){(log(Q) * self$agwrc_lm_m) + self$agwrc_lm_b}) + 
+        ggplot2::geom_point(data = event_summary_df, color = "black",
+                           ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC,
+                                        text = paste0(
+                                          "GroupID: ", .data$GroupID,"<br>",
+                                          "Median flow: ", round(.data$median_flow,1)," cfs<br>",
+                                          "Event AGWRC: ", round(.data$event_AGWRC,3))
+                           )
+        ) + 
+        ggplot2::geom_line(data = pred_df_workflow, color = "steelblue2",
+                           ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC,
+                                        group = .data$datagrp,
+                                        text = paste0(
+                                          "Median flow: ", round(.data$median_flow,2)," cfs<br>",
+                                          "Event AGWRC: ", round(.data$event_AGWRC,5)
+                                        ))
+        ) + 
         ggplot2::labs(x = "Median Event Flow", y = "Event AGWRC",
-                      title = paste("AGWRC vs Flow","\nUSGS",self$gage_id)) + 
+                      title = paste("AGWRC vs Flow (event-level)","\nUSGS",self$gage_id)) + 
         ggplot2::theme_bw() +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       #Should confidence interval be included on plot?
@@ -289,9 +316,36 @@ WaterGageBase <- R6::R6Class(
         if(is.logical(all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))) && 
           all.equal(as.numeric(coef(reg_lm)), c(self$agwrc_lm_b, self$agwrc_lm_m))){
           cint <- as.data.frame(predict(reg_lm, interval = "confidence"))
-          p <- p + ggplot2::geom_ribbon(ggplot2::aes(x = event_summary_df$median_flow,
-                                                     ymin = cint$lwr, ymax = cint$upr),
-                                        alpha = 0.1, fill = "steelblue1", color = 'steelblue4')
+          cint$median_flow <- event_summary_df$median_flow
+          cint$hoverText <- paste0(
+            "Median flow: ", round(cint$median_flow,2)," cfs<br>",
+            "Lower AGWRC: ", round(cint$lwr,5),"<br>",
+            "Upper AGWRC: ", round(cint$upr,5)
+          )
+          cint$grp <- "all"
+          p <- p + 
+            ggplot2::geom_ribbon(data = cint,
+                                        ggplot2::aes(x = .data$median_flow,
+                                                     ymin = .data$lwr,
+                                                     ymax = .data$upr),
+                                 alpha = 0.1, fill = "lightsteelblue3",
+                                 color = 'steelblue4') + 
+            ggplot2::geom_line(data = cint,col = "steelblue4",
+                               ggplot2::aes(x = .data$median_flow, y = .data$lwr,
+                                            group = .data$grp, 
+                                            text = paste0(
+                                              "Median flow: ", round(.data$median_flow,2)," cfs<br>",
+                                              "Lower Bound AGWRC: ", round(.data$lwr,5)
+                                            ))
+            ) + 
+            ggplot2::geom_line(data = cint,col = "steelblue4",
+                               ggplot2::aes(x = .data$median_flow, y = .data$upr,
+                                            group = .data$grp,
+                                            text = paste0(
+                                              "Median flow: ", round(.data$median_flow,2)," cfs<br>",
+                                              "Upper Bound AGWRC: ", round(.data$lwr,5)
+                                            ))
+            )
         }else{
           message("Linear model calculated is different from that in data
           source. No confidence interval computed.")
@@ -321,19 +375,28 @@ WaterGageBase <- R6::R6Class(
         if(!inherits(self$gage_feature, "RomFeature")){
           self$load_wshd_feat()
         }
-        #Get all AGWRC simple_lm properties for this gage and store the
-        #regression coefficients
-        lm_props <- self$get_model_or_scenario_props(
-          target_entity = self$gage_feature,
-          model_prop_code = "AGWRC-1.0")
-        self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
-        self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
-        self$agwrc_lm_limit <- list(
-          agwrc_reg_qlow = lm_props$propvalue[lm_props$propname == "agwrc_reg_qlow"],
-          agwrc_reg_clow = lm_props$propvalue[lm_props$propname == "agwrc_reg_clow"],
-          agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
-          agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
-        )
+        #If no feature found, do not proceed
+        if(!inherits(self$gage_feature, "RomFeature")){
+          message("No watershed feature found.")
+          return(NULL)
+        }else{
+          #Get all AGWRC simple_lm properties for this gage and store the
+          #regression coefficients
+          lm_props <- self$get_model_or_scenario_props(
+            target_entity = self$gage_feature,
+            model_prop_code = "AGWRC-1.0")
+          self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
+          self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
+          self$agwrc_lm_limit <- list(
+            agwrc_reg_qlow = lm_props$propvalue[lm_props$propname == "agwrc_reg_qlow"],
+            agwrc_reg_clow = lm_props$propvalue[lm_props$propname == "agwrc_reg_clow"],
+            agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
+            agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
+          )
+          if(!return_fun){
+            return(lm_props)
+          }
+        }
       }
       #Return a function to calc AGWRC ~ log(Q)
       if(return_fun){

@@ -600,7 +600,7 @@ WaterGageDaily <- R6::R6Class(
       
       #Return ggplot or plotly
       if(return_plotly){
-        p <- plotly::ggplotly(p)
+        p <- plotly::ggplotly(p, tooltip = "text")
       }
       return(p)
     },
