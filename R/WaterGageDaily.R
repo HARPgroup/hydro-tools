@@ -120,7 +120,7 @@ WaterGageDaily <- R6::R6Class(
           data_source = data_source,
           gage_id = gage_id,
           start_date = start_date,
-          end_date = end_date, 
+          end_date =   end_date, 
           approval_status = approval_status
         )
       )
@@ -184,7 +184,7 @@ WaterGageDaily <- R6::R6Class(
     #'   \code{gage_data} fields on object
     get_gage_data = function(start_date, end_date, approval_status){
       #Get start and end date in vector
-      time_limit <- c(start_date, end_date)
+      time_limit <- c(as.character(start_date), as.character(end_date))
       #Replace empty character with datetime due to USGS dataretrieval bug
       time_limit[time_limit != ""] <- paste0(time_limit[time_limit != ""],"T00:00:00Z")
       #Half bounded intervals use .. to indicate all data
