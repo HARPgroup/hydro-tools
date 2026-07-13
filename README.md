@@ -109,6 +109,10 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.4 07/13/2026
+1. Fixed a bug caused when `WaterGageDaily` was initialized using the new USGS
+API and given a date format start/end
+
 ### 1.1.3 07/08/2026
 1. Updated package for R4.5.3 and ggplot updates.
 2. Added a function to more easily let users get a data.frame of all river
