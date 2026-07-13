@@ -298,9 +298,10 @@ WaterGageBase <- R6::R6Class(
                                           "Event AGWRC: ", round(.data$event_AGWRC,3))
                            )
         ) + 
-        ggplot2::geom_line(data = pred_df_workflow, color = "steelblue2",
+        ggplot2::geom_line(data = pred_df_workflow, 
                            ggplot2::aes(x = .data$median_flow, y = .data$event_AGWRC,
                                         group = .data$datagrp,
+                                        color = "WSPA Regression",
                                         text = paste0(
                                           "Median flow: ", round(.data$median_flow,2)," cfs<br>",
                                           "Event AGWRC: ", round(.data$event_AGWRC,5)
