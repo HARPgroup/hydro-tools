@@ -87,6 +87,7 @@ openmi.om.matrix <- R6Class(
     #' @param ixtype what kind of lookup to perform?
     #' @return matching value (with interpolation if ixtype allows it)
     findMatch = function (dm, ixval, ixcol, ixtype = 0) {
+      ixtype = as.character(ixtype)
       foundmatch = switch(
         ixtype,
         '0' = self$exactMatch(dm, ixval, ixcol),

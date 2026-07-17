@@ -819,12 +819,22 @@ HydroImpoundment <- R6Class(
       # Will return a lookup based on the first matching non-FALSE argument
       svals = FALSE
       json = self$get_json_model()
-      if ( !("storage_stage_area" %in% names(json)) ){
-        message("Cannot locate storage_stage_area property on", self$feature$name)
-        return(FALSE)
+      if ( ("storage_stage_area" %in% names(json)) ){
+        # TODO: migrate this into the dHDataMatrix plugin?
+        raw_table = self$json$storage_stage_area$matrix$value
+      } else {
+        if ( ("impoundment" %in% names(json)) ){
+          raw_table = self$json$impoundment$matrix$value
+        } else {
+          if ( ("local_impoundment" %in% names(json)) ){
+            raw_table = self$json$local_impoundment$matrix$value
+          } else {
+            message("Cannot locate storage_stage_area or impoundment property on", self$feature$name)
+            return(FALSE)
+          }
+        }
       }
-      # TODO: migrate this into the dHDataMatrix plugin?
-      raw_table = self$json$storage_stage_area$matrix$value
+      # allow for old convention with column headers as first row
       if (as.character(raw_table[1,1]) == "storage") {
         raw_table = raw_table[-1,]
       }
