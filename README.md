@@ -109,6 +109,12 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.5 07/21/2026
+1. Added a station_name field to `WaterGageBase()` that is populated via
+`load_sf_da()`. This is now called automatically on initialize of
+`WaterGageDaily` for USGS objects when the new input `get_station_attr` is TRUE
+(default).
+
 ### 1.1.4 07/13/2026
 1. Fixed a bug caused when `WaterGageDaily` was initialized using the new USGS
 API and given a date format start/end

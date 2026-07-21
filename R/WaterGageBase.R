@@ -52,6 +52,9 @@ WaterGageBase <- R6::R6Class(
     start_date = "",
     #'@field end_date The last date to include in the data
     end_date = "",
+    #'@field station_name The name of the monitoring station at which the flow
+    #'  data was collected.
+    station_name = NA, 
     #'@field parameter_code Which USGS paramter to analyze? Defaults to 00060
     #'  for discharge
     parameter_code = "00060",
@@ -128,6 +131,7 @@ WaterGageBase <- R6::R6Class(
           #for separate field
           self$gage_data_sf <- dataRetrieval::read_waterdata_monitoring_location(paste0("USGS-",self$gage_id))
           self$drainage_area <- self$gage_data_sf$drainage_area
+          self$station_name <- self$monitoring_location_name
         }else{
           #NWIS functions return a data frame, so convert to SF using
           #appropriate coordinate fields
@@ -135,6 +139,7 @@ WaterGageBase <- R6::R6Class(
           self$gage_data_sf <-  sf::st_as_sf(site_info, crs = 4326, 
                                              coords = c("dec_long_va", "dec_lat_va"))
           self$drainage_area <- site_info$drain_area_va
+          self$station_name <- site_info$station_nm
         }
       }else{
         message("Please set the gage_id field with a valid USGS site number to use automatic geometries.")

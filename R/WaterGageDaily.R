@@ -30,6 +30,10 @@
 #'   most appropriate API based on the installed version of dataRetrieval.
 #'   Otherwise, the user may use "legacy" or "modern" to control which API to
 #'   retrieve data from.
+#' @param get_station_attr Logical, default to TRUE. If TRUE,
+#'   \code{load_sf_da()} will be run to provide the station sf data frame,
+#'   drainage area, and station name. If FALSE, the method will not be run
+#'   automatically.
 #' @param ds_in An optional RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageDaily
@@ -105,6 +109,10 @@ WaterGageDaily <- R6::R6Class(
     #'   use the most appropriate API based on the installed version of
     #'   dataRetrieval. Otherwise, the user may use "legacy" or "modern" to
     #'   control which API to retrieve data from.
+    #' @param get_station_attr Logical, default to TRUE. If TRUE,
+    #'   \code{load_sf_da()} will be run to provide the station sf data frame,
+    #'   drainage area, and station name. If FALSE, the method will not be run
+    #'   automatically.
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
@@ -113,6 +121,7 @@ WaterGageDaily <- R6::R6Class(
                           start_date = self$start_date, end_date = self$end_date,
                           approval_status = self$approval_status,
                           dataRetrieval_version = "auto",
+                          get_station_attr = TRUE,
                           ds_in = NA){
       #Set basic fields by calling the parent initialize
       super$initialize(
@@ -137,6 +146,9 @@ WaterGageDaily <- R6::R6Class(
           #Deprecated with new dataRetrieval
           self$get_gage_data_old(start_date = start_date, end_date = end_date,
                                  approval_status = approval_status)
+        }
+        if(get_station_attr){
+          self$load_sf_da()
         }
       }else if (inherits(data_source, "character")){
         #if the user has set data_source to a single character vector, assume a
@@ -524,12 +536,12 @@ WaterGageDaily <- R6::R6Class(
     #'@return either a ggplot or plotly object of forecasts, depending on user
     #'  input
     plot_baseflow_forecast = function(
-    start_date,
-    forecast_days = 0:90,
-    AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
-    return_plotly = FALSE,
-    include_days_before = 30,
-    use_limits = TRUE
+      start_date,
+      forecast_days = 0:90,
+      AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
+      return_plotly = FALSE,
+      include_days_before = 30,
+      use_limits = TRUE
     ){
       #Run the baseflow_forecast method using each AGWRC style defined by user.
       #all_forecasts will be a list with data frames for each baseflow_forecast
@@ -558,11 +570,17 @@ WaterGageDaily <- R6::R6Class(
       #Plot the data
       p <- ggplot2::ggplot() +
         ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] >= (as.Date(start_date) - include_days_before) &
-                                                   self$gage_data[,self$date_col] <= (as.Date(start_date) + max(forecast_days)),],
+                                                   self$gage_data[,self$date_col] <= as.Date(start_date),],
                            ggplot2::aes(x = !!ggplot2::sym(self$date_col),
                                         y = !!ggplot2::sym(self$flow_col)),
                            col = "black") + 
-        ggplot2::geom_line(data = plot_data, 
+        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] > as.Date(start_date) &
+                                                   self$gage_data[,self$date_col] <= (as.Date(start_date) + max(forecast_days)),],
+                           ggplot2::aes(x = !!ggplot2::sym(self$date_col),
+                                        y = !!ggplot2::sym(self$flow_col)),
+                           lwd = 3, 
+                           col = "black") + 
+        ggplot2::geom_line(data = plot_data, lwd = 3, 
                            ggplot2::aes(x = .data$Date, y = .data$Forecast, col = .data$name)) + 
         ggplot2::scale_y_log10() + 
         ggplot2::labs(x = NULL, y = "Flow", color = NULL,

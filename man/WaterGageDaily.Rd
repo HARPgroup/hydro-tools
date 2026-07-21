@@ -151,6 +151,7 @@ to analyze USGS gage data
   end_date = self$end_date,
   approval_status = self$approval_status,
   dataRetrieval_version = "auto",
+  get_station_attr = TRUE,
   ds_in = NA
 )}
     \if{html}{\out{</div>}}
@@ -178,6 +179,10 @@ the legacy or modern API be used? If set to "auto", this object will
 use the most appropriate API based on the installed version of
 dataRetrieval. Otherwise, the user may use "legacy" or "modern" to
 control which API to retrieve data from.}
+      \item{\code{get_station_attr}}{Logical, default to TRUE. If TRUE,
+\code{load_sf_da()} will be run to provide the station sf data frame,
+drainage area, and station name. If FALSE, the method will not be run
+automatically.}
       \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
     }

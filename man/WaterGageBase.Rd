@@ -77,6 +77,9 @@ initialize if possible}
 
     \item{\code{end_date}}{The last date to include in the data}
 
+    \item{\code{station_name}}{The name of the monitoring station at which the flow
+data was collected.}
+
     \item{\code{parameter_code}}{Which USGS paramter to analyze? Defaults to 00060
 for discharge}
 
