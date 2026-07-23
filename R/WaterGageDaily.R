@@ -578,9 +578,9 @@ WaterGageDaily <- R6::R6Class(
                                                    self$gage_data[,self$date_col] <= (as.Date(start_date) + max(forecast_days)),],
                            ggplot2::aes(x = !!ggplot2::sym(self$date_col),
                                         y = !!ggplot2::sym(self$flow_col)),
-                           lwd = 3, 
+                           lty = 2, 
                            col = "black") + 
-        ggplot2::geom_line(data = plot_data, lwd = 3, 
+        ggplot2::geom_line(data = plot_data, 
                            ggplot2::aes(x = .data$Date, y = .data$Forecast, col = .data$name)) + 
         ggplot2::scale_y_log10() + 
         ggplot2::labs(x = NULL, y = "Flow", color = NULL,
