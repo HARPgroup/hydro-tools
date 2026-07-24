@@ -124,37 +124,14 @@ om_vahydro_metric_grid <- function (
   #this case, we need to rename the appropriate columns with the user provided
   #value
   if(is.data.frame((runids)) && !is.null(runlabel)){
-    #Create a data frame with the runids and metrics from the names of alldata. 
-    #This preserves the order of the data and ensures proper name replacement
-    df_runid <- gsub(".*_(runid.*)","\\1",names(alldata))
-    df_metric <- gsub("(.*)_runid.*","\\1",names(alldata))
-    df_data <- data.frame(dataname = names(alldata), datarunid = df_runid,
-                          datametric = df_metric)
-    #Join on the user provided runlabels by joining in the runids data frame by
-    #runid and metric
-    join_data <- sqldf::sqldf(
-      "SELECT *
-      FROM df_data as d
-      LEFT JOIN runids as r
-      ON r.runid = d.datarunid
-      AND r.metric = d.datametric"
-    )
-    #Columns like pid and propname will not have a run label, so just set these
-    #equivalent to the base column name stored in dataname
-    join_data$runlabel[is.na(join_data$runlabel)] <- join_data$dataname[is.na(join_data$runlabel)]
-    #Replace all the appropriate column names in order with the user provided
-    #label
-    names(alldata)[match(join_data$dataname, names(alldata))] <- 
-      join_data$runlabel[match(names(alldata), join_data$dataname)]
-    
-    #To ensure consistent performance with legacy form of this function, add
-    #empty columns for any unused runlabels e.g. any metric that is NA for all
-    #features such as a non-existant or not-run metric
-    if(!all(unique(runlabel) %in% names(alldata))){
-      missingCols <- unique(runlabel)[!(unique(runlabel) %in% names(alldata))]
-      message("The following columns returned no metrics from the database: ",paste(missingCols, collapse = ", "))
-      alldata[,missingCols] <- NA_real_
+    # Propose that the following lines 128-133 can replace 
+    named_data <- alldata
+    name_key <- paste(metric, runid, sep="_")
+    for (i in 1:length(name_key)) {
+      named_data[,runlabel[i]] <- named_data[,name_key[i]]
+      named_data[,name_key[i]] <- NULL
     }
+    alldata = named_data
   }
   
   #Return the long-style data frame
