@@ -204,7 +204,7 @@ WaterGageBase <- R6::R6Class(
     #'@param url_resource The remaining path to the file e.g. "/path/to/my.csv"
     #'@return A data frame of the resource read using \code{read.csv()} or
     #'  \code{jsonlite::read_json()}
-    read_om_file = function(omsite = omsite, url_resource){
+    read_om_file = function(omsite, url_resource){
       if(grepl("\\.json$",url_resource)){
         out <- jsonlite::read_json(paste0(omsite,url_resource))
       }else{

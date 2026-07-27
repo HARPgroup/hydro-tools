@@ -109,6 +109,10 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.6 07/27/2026
+1. Fixed a bug in the defaults for the `nearest_gage()` method on the model handlers
+and in the `read_om_site()` method on `WaterGageBase` and inheritees..
+
 ### 1.1.5 07/21/2026
 1. Added a station_name field to `WaterGageBase()` that is populated via
 `load_sf_da()`. This is now called automatically on initialize of

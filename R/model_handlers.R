@@ -563,7 +563,9 @@ WatershedModelNode <- R6Class(
     #' drainage area
     #' @return data frame with the closest gage
     nearest_gage = function() {
-      usgs_nearest_gage(self$feature, self$get_json_model())
+      usgs_nearest_gage(watershed_feature = self$feature,
+                        watershed_json = self$get_json_model(),
+                        ds = self$ds)
     },
     #' @description Coming Soon!!!
     #'   Render the detailed CIA R markdown with basic parameters set
@@ -717,7 +719,9 @@ WaterSupplyElement <- R6Class(
     #' area
     #' @return data frame with the closest gage
     nearest_gage = function() {
-      usgs_nearest_gage(self$feature, self$get_json_model())
+      usgs_nearest_gage(watershed_feature = self$feature,
+                        watershed_json = self$get_json_model(),
+                        ds = self$ds)
     },
     #' @description Coming Soon!!!
     #'   Render the detailed CIA R markdown with basic parameters set
