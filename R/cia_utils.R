@@ -1293,6 +1293,12 @@ renameNHD <- function(get_nhdplus_df, returnPlotName = FALSE){
 #' @export fn_handletimestamp
 fn_handletimestamp <- function(tslike, format="epoch") {
   # don't do date_received as this is a field and is handled there
+  if (is.null(tslike)) {
+    return(tslike)
+  }
+  if (is.na(tslike)) {
+    return(tslike)
+  }
   if ( (tslike != '') & !is.null(tslike)) {
     orig = tslike;
     # if a valid unix epoch style timestamp has been submitted 
@@ -1301,15 +1307,21 @@ fn_handletimestamp <- function(tslike, format="epoch") {
       # must be a formatted date, not a timestamp integer/float
       # not a valid unix timestamp, so try to convert from some date format
       if (!is.na(ymd(tslike))) {
-        tslike=ymd(tslike)
+        tslike=as.Date(ymd(tslike))
       } else if (!is.na(mdy(tslike))) {
         tslike=mdy(tslike)
       } else {
-        message(paste("Error: Cannot find way to interpret", tslike, "as date/time-like."))
+        message(paste("Warning: Cannot find way to interpret", tslike, "as date/time-like."))
         return(FALSE)
       }
-      message(paste("Converted orig to Epoch:", tslike))
+    } else {
+      # this came in looking like a proper timestamp, so, insure it is numeric for later handling
+      tslike = as.numeric(tslike)
     }
+  }
+  if (format == "epoch") {
+    tslike = as.integer(as.POSIXct(tslike))
+    message(paste("Converted orig to Epoch:", tslike))
   }
   return(tslike)
 }
