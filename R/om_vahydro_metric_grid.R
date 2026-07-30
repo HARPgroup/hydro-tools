@@ -124,14 +124,18 @@ om_vahydro_metric_grid <- function (
   #this case, we need to rename the appropriate columns with the user provided
   #value
   if(is.data.frame((runids)) && !is.null(runlabel)){
-    # Propose that the following lines 128-133 can replace 
+    #Develop a name_key from the runids matrix. This name key will be identical
+    #to columns returned above from the query and will be in the same order as
+    #the user input runlabels
     named_data <- alldata
-    name_key <- paste(metric, runid, sep="_")
+    name_key <- paste(runids$metric, runids$runid, sep="_")
     for (i in 1:length(name_key)) {
+      #Create a column named by runlabel with the name_key data. Then delete the
+      #name_key field by settting it to NULL
       named_data[,runlabel[i]] <- named_data[,name_key[i]]
       named_data[,name_key[i]] <- NULL
     }
-    alldata = named_data
+    alldata <- named_data
   }
   
   #Return the long-style data frame

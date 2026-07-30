@@ -263,7 +263,7 @@ contains the model of interest}
   Reads in JSON or csv file from a webserver
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{WaterGageBase$read_om_file(omsite = omsite, url_resource)}
+    \preformatted{WaterGageBase$read_om_file(omsite, url_resource)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{

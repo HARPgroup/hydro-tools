@@ -109,9 +109,14 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.7 07/30/2026
+1. Fixed a bug in `RomProperty` so that the object can finally handle and
+interpret property start and end dates
+2. Fixed a bug in `om_vahydro_metric_grid()` with legacy run labels.
+
 ### 1.1.6 07/27/2026
 1. Fixed a bug in the defaults for the `nearest_gage()` method on the model handlers
-and in the `read_om_site()` method on `WaterGageBase` and inheritees..
+and in the `read_om_site()` method on `WaterGageBase` and inheritees.
 
 ### 1.1.5 07/21/2026
 1. Added a station_name field to `WaterGageBase()` that is populated via
