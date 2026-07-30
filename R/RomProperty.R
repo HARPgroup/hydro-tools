@@ -254,6 +254,8 @@ RomProperty <- R6Class(
       if (push_remote) {
         pl <- self$to_list(self$base_only)
         pl$modified = as.integer(lubridate::now())
+        pl$startdate = fn_handletimestamp(pl$startdate)
+        pl$enddate = fn_handletimestamp(pl$enddate)
         if (!lubridate::is.Date(pl$startdate) & !is.integer(pl$startdate)) {
           # remove 
           pl[[which(names(pl) == 'startdate')]] <- NULL
