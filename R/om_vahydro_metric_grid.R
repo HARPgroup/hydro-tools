@@ -129,14 +129,12 @@ om_vahydro_metric_grid <- function (
     #the user input runlabels
     named_data <- alldata
     name_key <- paste(runids$metric, runids$runid, sep="_")
-    for (i in 1:length(name_key)) {
-      #Create a column named by runlabel with the name_key data. Then delete the
-      #name_key field by settting it to NULL
-      if(runlabel[i] != name_key[i]){
-        named_data[,runlabel[i]] <- named_data[,name_key[i]]
-        named_data[,name_key[i]] <- NULL
-      }
-    }
+    
+    #Create a column named by runlabel with the name_key data. Then delete the
+    #name_key field by settting it to NULL
+    named_data[,runlabel] <- named_data[,name_key]
+    named_data[,name_key[!(name_key %in% runlabel)]] <- NULL
+    
     alldata <- named_data
   }
   
