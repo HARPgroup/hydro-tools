@@ -170,10 +170,13 @@ WaterGageBase <- R6::R6Class(
     #'  contains the model of interest
     #'@param model_prop_code The propcode of the model on the feature
     #'@param scenario_prop_code The scenario propcode on the model property
+    #'@param include_proptext Logical, default FALSE. Should property text be
+    #'  joined to results?
     #'@return A data frame of all properties on the model scenario
     get_model_or_scenario_props = function(target_entity = self$gage_feature,
                                         model_prop_code,
-                                        scenario_prop_code = NULL){
+                                        scenario_prop_code = NULL,
+                                        include_proptext = FALSE){
       
       #Read data in from data base
       if(!inherits(target_entity,"RomFeature") && !inherits(target_entity,"RomProperty")){
@@ -189,11 +192,28 @@ WaterGageBase <- R6::R6Class(
         all_props <- model_prop$propvalues()
       }else{
         scen_prop <- model_prop$get_prop(propcode = scenario_prop_code)
-        if(is.na(model_prop$pid)){
+        if(is.na(scen_prop$pid)){
           message("No model scenario with propcode ", scenario_prop_code," found") 
           return(NULL)
         }
         all_props <- scen_prop$propvalues()
+        
+        if(is.logical(all_props)){
+          message("No scenario properties on ", scenario_prop_code," found") 
+          return(NULL)
+        }
+      }
+      #If user wishes to join property text, query it and join:
+      if(include_proptext){
+        #Get text
+        all_proptext <- DBI::dbGetQuery(conn = ds$connection,
+                                  paste0("SELECT pid, proptext
+                                        FROM dh_properties_fielded
+                                        WHERE pid in (",paste(all_props$pid,collapse = ","),")")
+        )
+        #Join text
+        all_props <- all_props |> 
+          dplyr::left_join(all_proptext, by = "pid")
       }
       
       return(all_props)

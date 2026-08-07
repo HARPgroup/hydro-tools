@@ -237,7 +237,8 @@ RomEntity
     \preformatted{WaterGageBase$get_model_or_scenario_props(
   target_entity = self$gage_feature,
   model_prop_code,
-  scenario_prop_code = NULL
+  scenario_prop_code = NULL,
+  include_proptext = FALSE
 )}
     \if{html}{\out{</div>}}
   }
@@ -248,6 +249,8 @@ RomEntity
 contains the model of interest}
       \item{\code{model_prop_code}}{The propcode of the model on the feature}
       \item{\code{scenario_prop_code}}{The scenario propcode on the model property}
+      \item{\code{include_proptext}}{Logical, default FALSE. Should property text be
+joined to results?}
     }
     \if{html}{\out{</div>}}
   }
