@@ -109,11 +109,19 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.1.9 08/12/2026
+1. Updated ODBC utils to only use `DBI::dbGetQuery()` or `sqldf::sqldf(envir =
+environmnet())` for db connections to further sanitize our code from dbPreexist
+errors often thrown by `sqldf`
+
 ### 1.1.8 08/06/2026
 1. Fixed a bug in `WaterGageBase$get_model_or_scenario_props()` when a scenario propety was not in the dbase.
 2. Added a new statement in `WaterGageBase$get_model_or_scenario_props()` as
 an empty `RomProperty$propvalues()` evidently returned FALSE, not NULL
 3. Added the ability to get proptext via `WaterGageBase$get_model_or_scenario_props()`
+4. Switched query call to `DBI::dbGetQuery()` rather than `sqldf::sqldf()` in
+`get_weather_raster_data()` due to POSTGIS `&&` syntax throwing errors in
+`sqldf`
 
 ### 1.1.7 07/30/2026
 1. Fixed a bug in `RomProperty` so that the object can finally handle and

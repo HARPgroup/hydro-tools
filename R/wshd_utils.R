@@ -566,7 +566,7 @@ WITH
   from met
   order by met.tsendtime")
   
-  rasterData <- sqldf::sqldf(connection = ds$connection, sql)
+  rasterData <- DBI::dbGetQuery(conn = ds$connection, sql)
   
   return(rasterData)
 }
