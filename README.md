@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.0 08/18/2026
+1. Removed `sqldf` from `fn_odbc_post()` and `fn_odbc_get()` to prevent bad data
+frame scraping when calling `RomProperty$save_field()` on proptext and for
+preventive purposes (for `fn_odbc_get()`)
+
 ### 1.1.9 08/12/2026
 1. Updated ODBC utils to only use `DBI::dbGetQuery()` or `sqldf::sqldf(envir =
 environmnet())` for db connections to further sanitize our code from dbPreexist

@@ -58,8 +58,8 @@ fn_post_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug = FALSE)
   }
   # temporarily use DBI until we understand more fully what sqldf might be doing
   # see also: 
-  pkid <- sqldf::sqldf(as.character(odbc_sql), connection = con, envir = environment())
-  # pkid <- DBI::dbGetQuery(con, as.character(odbc_sql))
+  # pkid <- sqldf::sqldf(as.character(odbc_sql), connection = con, envir = environment())
+  pkid <- DBI::dbGetQuery(conn = con, statement = as.character(odbc_sql))
   if (nrow(pkid) > 0) {
     pkid <- pkid[1,pk]
   } else {
@@ -174,7 +174,7 @@ fn_get_odbc <- function(entity_type, pk, inputs, con, obj=FALSE, debug=FALSE){
   }
   #GET the query from the database, sending the SQL directly to the database via
   #the ODBC connection
-  entities <- sqldf::sqldf(get_sql, connection = con, method = "raw", envir = environment())
+  entities <- DBI::dbGetQuery(conn = con, statement = get_sql)
   #If nothing is returned, a logical is returned.
   if (is.logical(entities) || nrow(entities) == 0) {
     message("----- This entity does not exist")
