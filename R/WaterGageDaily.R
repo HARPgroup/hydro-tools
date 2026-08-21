@@ -753,30 +753,27 @@ WaterGageDaily <- R6::R6Class(
         message("Calculating default low flows with self$comp_xQy()")
         self$comp_xQy()
       }
-      #Store the annual minimums
-      annualLows <- self$low_flows$annualMinimums
+      
+      #Get all annual low flows in a long style data frame with reabable names
+      #for a legend
+      annualLows <- rbind(
+        cbind(self$low_flows$nxQy_annDate,type = "x-day"),
+        cbind(self$low_flows$n1Q10_annDate,type = "1-day"),
+        cbind(self$low_flows$n7Q10_annDate,type = "7-day"),
+        cbind(self$low_flows$n30Q10_annDate,type = "30-day"),
+        cbind(self$low_flows$n90Q10_annDate,type = "90-day")
+      ) 
+      
       #If the user hasn't calculated a custom xQy, it will be identical to the
       #7Q10 so remove from data.frame
       if(all(annualLows$nxQy_ann == annualLows$n7Q10_ann,na.rm = TRUE)){
-        annualLows <- annualLows[,names(annualLows) != "nxQy_ann"]
+        annualLows <- annualLows[annualLows$type != "x-day",]
       }
-      
-      #Add more readable names for the legend:
-      newDFNames <- data.frame(
-        oldName = c("nxQy_ann", "n1Q10_ann", "n7Q10_ann", "n30Q10_ann", "n90Q10_ann"),
-        newName = c("x-day", "1-day", "7-day", "30-day", "90-day")
-      )
-      
-      #Pivot the data longer to have a names column populated by flow metric
-      #name and a value field with the xQy flow values
-      annualLows <- self$low_flows$annualMinimums |> 
-        tidyr::pivot_longer(nxQy_ann:n90Q10_ann ) |> 
-        dplyr::mutate(name = newDFNames$newName[match(name,newDFNames$oldName)])
       
       if(plot_type == "lineplot"){
         #Create a plot of annual low flows
         p <- ggplot2::ggplot(data = annualLows) + 
-          ggplot2::geom_line(ggplot2::aes(x = AY, y = value, color = name)) + 
+          ggplot2::geom_line(ggplot2::aes(x = Date, y = minFlow, color = type)) + 
           ggplot2::scale_y_log10() + 
           ggplot2::theme_minimal() +
           ggplot2::labs(color = NULL, x = NULL, y = "Mean/Daily Flow (cfs)",
@@ -785,8 +782,8 @@ WaterGageDaily <- R6::R6Class(
       }else if(plot_type == "boxplot"){
         #Create a boxplot of annual low flows separated by metrix
         p <- ggplot2::ggplot(data = annualLows) + 
-          ggplot2::geom_boxplot(ggplot2::aes(x = name, y = value,
-                                             group = name)) + 
+          ggplot2::geom_boxplot(ggplot2::aes(x = type, y = minFlow,
+                                             group = type)) + 
           ggplot2::scale_y_log10() + 
           ggplot2::theme_minimal() +
           ggplot2::labs(x = NULL, y = "Mean/Daily Flow (cfs)",

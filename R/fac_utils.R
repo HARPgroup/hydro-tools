@@ -137,6 +137,8 @@ om_cu_table_data <- function(pr_data,
 #'   column names of rundata_df
 #' @param quantiles Which quantiles to calculate?
 #' @param rdigits Number of Digits to round column values.
+#' @param na.rm Logical, default TRUE. Should NA values be removed prior to
+#'   calculating quantiles of each metric?
 #' @return A data frame that if has one row per variable with quantiles in columns
 #' @export om_quantile_table
 om_quantile_table <- function(

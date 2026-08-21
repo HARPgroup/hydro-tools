@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.1 08/21/2026
+1. `WaterGageDaily$plot_low_flows()` now plots based on low flow date so that
+plotly can be used to more easily display the date of a low flow to user
+2. Added an NA removal option to `om_quantile_table()`
+
 ### 1.2.0 08/18/2026
 1. Removed `sqldf` from `fn_odbc_post()` and `fn_odbc_get()` to prevent bad data
 frame scraping when calling `RomProperty$save_field()` on proptext and for

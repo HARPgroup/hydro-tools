@@ -8,7 +8,8 @@ om_quantile_table(
   rundata_df,
   metrics = c("Qintake", "Runit"),
   quantiles = c(0, 0.1, 0.25, 0.5, 0.75, 0.9, 1),
-  rdigits = 2
+  rdigits = 2,
+  na.rm = TRUE
 )
 }
 \arguments{
@@ -20,6 +21,9 @@ column names of rundata_df}
 \item{quantiles}{Which quantiles to calculate?}
 
 \item{rdigits}{Number of Digits to round column values.}
+
+\item{na.rm}{Logical, default TRUE. Should NA values be removed prior to
+calculating quantiles of each metric?}
 }
 \value{
 A data frame that if has one row per variable with quantiles in columns
