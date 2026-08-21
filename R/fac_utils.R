@@ -143,7 +143,8 @@ om_quantile_table <- function(
     rundata_df, 
     metrics = c("Qintake","Runit"), 
     quantiles = c(0,0.1,0.25,0.5,0.75,0.9,1.0), 
-    rdigits = 2
+    rdigits = 2,
+    na.rm=TRUE
   ) {
   quantile_df <- data.frame(matrix(ncol = length(quantiles), nrow = 0))
   colnames(quantile_df) <- paste0(quantiles*100, "%")
@@ -155,7 +156,7 @@ om_quantile_table <- function(
       colnames(quantile) <- paste0(quantiles*100, "%")
       quantile_df <- rbind(quantile_df, quantile)
     } else {
-      quantile <- data.frame(quantile(rundata_df[,metrics[i]], probs=quantiles))
+      quantile <- data.frame(quantile(rundata_df[,metrics[i]], probs=quantiles,na.rm=na.rm))
       colnames(quantile) <- metrics[i]
       quantile_df <- rbind(quantile_df, t(quantile))
     }

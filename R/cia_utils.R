@@ -1299,24 +1299,26 @@ fn_handletimestamp <- function(tslike, format="epoch") {
   if (is.na(tslike)) {
     return(tslike)
   }
-  if ( (tslike != '') & !is.null(tslike)) {
-    orig = tslike;
-    # if a valid unix epoch style timestamp has been submitted 
-    # this next will try to convert a string
-    if (is.na(as.numeric(tslike))) {
-      # must be a formatted date, not a timestamp integer/float
-      # not a valid unix timestamp, so try to convert from some date format
-      if (!is.na(ymd(tslike))) {
-        tslike=as.Date(ymd(tslike))
-      } else if (!is.na(mdy(tslike))) {
-        tslike=mdy(tslike)
+  if (!is.POSIXct(tslike)) {
+    if ( (tslike != '') & !is.null(tslike)) {
+      orig = tslike;
+      # if a valid unix epoch style timestamp has been submitted 
+      # this next will try to convert a string
+      if (is.na(as.numeric(tslike))) {
+        # must be a formatted date, not a timestamp integer/float
+        # not a valid unix timestamp, so try to convert from some date format
+        if (!is.na(ymd(tslike))) {
+          tslike=as.Date(ymd(tslike))
+        } else if (!is.na(mdy(tslike))) {
+          tslike=mdy(tslike)
+        } else {
+          message(paste("Warning: Cannot find way to interpret", tslike, "as date/time-like."))
+          return(FALSE)
+        }
       } else {
-        message(paste("Warning: Cannot find way to interpret", tslike, "as date/time-like."))
-        return(FALSE)
+        # this came in looking like a proper timestamp, so, insure it is numeric for later handling
+        tslike = as.numeric(tslike)
       }
-    } else {
-      # this came in looking like a proper timestamp, so, insure it is numeric for later handling
-      tslike = as.numeric(tslike)
     }
   }
   if (format == "epoch") {
