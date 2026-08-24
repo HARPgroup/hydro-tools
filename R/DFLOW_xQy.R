@@ -187,7 +187,7 @@ xQyComp <- function(xQy_ann, y){
 #'   averaging period most commonly occur, a numeric timecheck that indicates
 #'   the number of days in each analysis year on a non-leap year
 #' @export xQy
-#' @examples
+#' @examples \dontrun{
 #' gageDat <- dataRetrieval::readNWISdv("01631000","00060")
 #' gageDat <- dataRetrieval::renameNWISColumns(gageDat)
 #' gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
@@ -198,6 +198,7 @@ xQyComp <- function(xQy_ann, y){
 #'    x = 7, y = 10,
 #'    IncludeSummerFlow = FALSE)
 #' low_flows$Flows
+#' }
 xQy <- function(gageDataIn, flowColumn = "Flow", dateColumn = "Date",
                 AYS = "04-01", AYE = "03-31",
                 startYear = NULL, endYear = NULL,

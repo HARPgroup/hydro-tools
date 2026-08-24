@@ -14,8 +14,7 @@
 #' @param debug optional show query pieces
 #' @seealso fn_get_odbc, fn_post_rest
 #' @export fn_post_odbc
-#' @examples 
-#' \dontrun{
+#' @examples \dontrun{
 #' fn_post_odbc('dh_properties','pid',
 #' inputs = list(pid = NA,bundle = NA, featureid = NA, etc.),
 #' con = datasource$connection, obj = FALSE)

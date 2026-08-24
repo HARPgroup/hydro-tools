@@ -83,6 +83,7 @@ very important.\cr
 This is functionally equivalent to the VPDES' DFLOW R Shiny application.
 }
 \examples{
+\dontrun{
 gageDat <- dataRetrieval::readNWISdv("01631000","00060")
 gageDat <- dataRetrieval::renameNWISColumns(gageDat)
 gageDat <- gageDat[!grepl("P",gageDat$Flow_cd),]
@@ -93,4 +94,5 @@ low_flows <- xQy(gageDataIn = gageDat,
    x = 7, y = 10,
    IncludeSummerFlow = FALSE)
 low_flows$Flows
+}
 }

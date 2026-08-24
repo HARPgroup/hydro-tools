@@ -34,7 +34,8 @@ finds the range, base index, and days of zero flow of each year, with base
 index defined as the minimum 7-day flow divided by the average flow
 }
 \examples{
-#Get data for NF Shenandoah Mount Jackson
+\dontrun{
+#' #Get data for NF Shenandoah Mount Jackson
 flows <- dataRetrieval::readNWISdv("01633000",parameterCd = "00060")
 flows <- dataRetrieval::renameNWISColumns(flows)
 #Convert flows to zoo
@@ -42,6 +43,7 @@ flows_zoo <- zoo::as.zoo(x = flows$Flow)
 zoo::index(flows_zoo) <- flows$Date
 #Use group 2 to get critical period flows and stats:
 group2(flows_zoo,"water",mimic.tnc = TRUE)
+}
 }
 \references{
 \url{http://www.conservationgateway.org/Files/Pages/indicators-hydrologic-altaspx47.aspx}

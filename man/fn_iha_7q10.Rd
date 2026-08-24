@@ -32,12 +32,14 @@ in a data frame or zoo timeseries and outputs the 7Q10 as a single value
 numeric.
 }
 \examples{
+\dontrun{
 flows <- dataRetrieval::readNWISdv("01631000","00060")
 flows <- dataRetrieval::renameNWISColumns(flows)
 #Convert flows to zoo
 flows_zoo <- zoo::as.zoo(x = flows$Flow)
 zoo::index(flows_zoo) <- flows$Date
 fn_iha_7q10(flows_zoo)
+}
 }
 \seealso{
 xQy

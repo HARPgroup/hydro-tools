@@ -151,31 +151,32 @@ usgs_bankfull_properties <- function(prov, da) {
 #'  
 #'@return A list with the bank full stage (h), bank full width (bf), base width
 #'  (b), side slope (z), and mannings roughness (n)
-#'@examples 
-#'#wshdHydroid <- 67704
-#'#pointSF <- data.frame(
-#'#  lat = c(37.771666667,37.76781),
-#'#  long = c(-79.465555556,-79.38390),
-#'#  label = c("Lexington Golf Club","Outlet")
+#'@examples \dontrun{
+#'wshdHydroid <- 67704
+#'pointSF <- data.frame(
+#'  lat = c(37.771666667,37.76781),
+#'  long = c(-79.465555556,-79.38390),
+#'  label = c("Lexington Golf Club","Outlet")
+#')
+#'pointSF <- sf::st_as_sf(pointSF,coords = c('long','lat'),
+#'                        crs = 4326)
+#'outFile <- 'lgMap.PNG'
+#'
+#'
+#'simple_wshed_map(ds, wshdHydroid, findUpstream = TRUE,
+#'       pointSF,
+#'       outFile,config = list(
+#'         zoomNHDPlusTools = 10,
+#'         textSize = 0.4,
+#'         wshdBuffer = data.frame(
+#'           latbuffer = c(-0.03,-0.06,0),
+#'           lngbuffer = c(-0.03,-0.07,-0.02)
+#'         ),
+#'         pointBuffer = c(0.24,0),
+#'         tileProvider = "Esri.WorldTopoMap"
+#'       )
 #'#)
-#'#pointSF <- sf::st_as_sf(pointSF,coords = c('long','lat'),
-#'#                        crs = 4326)
-#'#outFile <- 'lgMap.PNG'
-#'#
-#'#
-#'#simple_wshed_map(ds, wshdHydroid, findUpstream = TRUE,
-#'#       pointSF,
-#'#       outFile,config = list(
-#'#         zoomNHDPlusTools = 10,
-#'#         textSize = 0.4,
-#'#         wshdBuffer = data.frame(
-#'#           latbuffer = c(-0.03,-0.06,0),
-#'#           lngbuffer = c(-0.03,-0.07,-0.02)
-#'#         ),
-#'#         pointBuffer = c(0.24,0),
-#'#         tileProvider = "Esri.WorldTopoMap"
-#'#       )
-#'#)
+#'}
 #'@export
 simple_wshed_map <- function(ds,wshdHydroid, findUpstream = FALSE,
                    #May include a label and buffer column

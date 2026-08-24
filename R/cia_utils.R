@@ -726,13 +726,14 @@ om_ts_diff <- function(df1, df2, col1, col2, op = "<>") {
 #'   provided
 #' @return single numeric value for 7Q10
 #' @export fn_iha_7q10
-#' @examples
+#' @examples \dontrun{
 #' flows <- dataRetrieval::readNWISdv("01631000","00060")
 #' flows <- dataRetrieval::renameNWISColumns(flows)
 #' #Convert flows to zoo
 #' flows_zoo <- zoo::as.zoo(x = flows$Flow)
 #' zoo::index(flows_zoo) <- flows$Date
 #' fn_iha_7q10(flows_zoo)
+#' }
 #' @seealso xQy
 fn_iha_7q10 <- function(zoots, flowColumnIn = "Flow", dateColumnIn = "Date") {
   #Calculate critical low flows from the zoo time series
