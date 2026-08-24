@@ -282,25 +282,15 @@ WaterGageBase <- R6::R6Class(
       event_summary_df <- self$read_om_file(omsite, 
                                             paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
       
-      if((is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
+      if((is.null(self$agwrc_lm_m) | is.null(self$agwrc_lm_b)) ||
+         (is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
         #Load feature if not yet loaded
         if(!inherits(self$gage_feature, "RomFeature")){
           self$load_wshd_feat()
         }
         #Get all AGWRC simple_lm properties for this gage and store the
         #regression coefficients
-        lm_props <- self$get_model_or_scenario_props(
-          target_entity = self$gage_feature,
-          model_prop_code = "AGWRC-1.0",
-          scenario_prop_code = "simple_lm")
-        self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
-        self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
-        self$agwrc_lm_limit <- list(
-          agwrc_reg_qlow = lm_props$propvalue[lm_props$propname == "agwrc_reg_qlow"],
-          agwrc_reg_clow = lm_props$propvalue[lm_props$propname == "agwrc_reg_clow"],
-          agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
-          agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
-        )
+        lm_props <- self$agwrc_fun()
       }
       #Data for regression line for plot
       flow_seq <- seq(min(event_summary_df$median_flow, na.rm = TRUE),
