@@ -33,7 +33,9 @@ Calculates the IHA parameter group 2: Magnitude of montly water
 conditions see \code{hydrotools::group2()}
 
 Use \code{self$baseflow_forecast()} iteratively over a list of
-provided AGWRC options to create a plot of current potential forecasts
+provided AGWRC options to create a plot of current potential forecasts.
+Can return either a plot or a list with the forecast results in a data
+frame and a plot as a separate object in the list
 
 Loads data from the 2025-2027 HARP project to draw a scatter plot
 of AGWRC vs Flow and plots the workflow regression
@@ -531,7 +533,8 @@ on. Also set in the precip_data field on this object.
   AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
   return_plotly = FALSE,
   include_days_before = 30,
-  use_limits = TRUE
+  use_limits = TRUE,
+  return_data = FALSE
 )}
     \if{html}{\out{</div>}}
   }
@@ -556,12 +559,15 @@ is returned. Otherwise, a ggplot is returned}
 start_date should be included on the plot?}
       \item{\code{use_limits}}{logical. Should the regression be limited using data in
 the agwrc_lm_limit field?}
+      \item{\code{return_data}}{logical, default to FALSE. Should results be returned
+in a list, with the plot in one object and the raw data in another?}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    either a ggplot or plotly object of forecasts, depending on user
-input
+    either a ggplot or plotly object of forecasts or a list with a
+ggplot or plotly object and a dataframe of forecast results, depending
+on user input
   }
 }
 

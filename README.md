@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.2 08/21/2026
+1. Added an input, `return_data`, to `WaterGageDaily$plot_baseflow_forecast()`
+to allow the method to return either a plot or a list with plot and forecast
+data
+
 ### 1.2.1 08/21/2026
 1. `WaterGageDaily$plot_low_flows()` now plots based on low flow date so that
 plotly can be used to more easily display the date of a low flow to user

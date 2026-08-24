@@ -514,7 +514,9 @@ WaterGageDaily <- R6::R6Class(
     },
     #'@description plot current flow forecasts
     #'@details Use \code{self$baseflow_forecast()} iteratively over a list of
-    #'  provided AGWRC options to create a plot of current potential forecasts
+    #'  provided AGWRC options to create a plot of current potential forecasts.
+    #'  Can return either a plot or a list with the forecast results in a data
+    #'  frame and a plot as a separate object in the list
     #'@param start_date Character. The date to begin the forecast, i.e. the flow
     #'  on this day will be used to run forecast calculations
     #'@param forecast_days numeric vector, defaults to 0:90. Days where forcast
@@ -533,15 +535,19 @@ WaterGageDaily <- R6::R6Class(
     #'  start_date should be included on the plot?
     #'@param use_limits logical. Should the regression be limited using data in
     #'  the agwrc_lm_limit field?
-    #'@return either a ggplot or plotly object of forecasts, depending on user
-    #'  input
+    #'@param return_data logical, default to FALSE. Should results be returned
+    #'  in a list, with the plot in one object and the raw data in another?
+    #'@return either a ggplot or plotly object of forecasts or a list with a
+    #'  ggplot or plotly object and a dataframe of forecast results, depending
+    #'  on user input
     plot_baseflow_forecast = function(
       start_date,
       forecast_days = 0:90,
       AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
       return_plotly = FALSE,
       include_days_before = 30,
-      use_limits = TRUE
+      use_limits = TRUE,
+      return_data = FALSE
     ){
       #Run the baseflow_forecast method using each AGWRC style defined by user.
       #all_forecasts will be a list with data frames for each baseflow_forecast
@@ -597,7 +603,13 @@ WaterGageDaily <- R6::R6Class(
       if(return_plotly){
         p <- plotly::ggplotly(p)
       }
-      return(p)
+      
+      if(return_data){
+        return(list(plot = p, forecast = plot_data))
+      }else{
+        return(p)
+      }
+      
     },
     #'@description Scatterplot of AGWRC vs Median Flow
     #'@details Loads data from the 2025-2027 HARP project to draw a scatter plot
