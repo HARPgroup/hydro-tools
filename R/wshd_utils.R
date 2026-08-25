@@ -572,3 +572,104 @@ WITH
   return(rasterData)
 }
 
+
+#'@name bf_forecast_start_date
+#'@title bf_forecast_start_date
+#'@description Find appropriate start dates for baseflow forecasting
+#'@details This function assists users in finding an appropriate start date to
+#'  conduct a baseflow forecast using the methods on \code{WaterGageDaily()}.
+#'  Such forecasts are recommended to start from a low point in the season of
+#'  interest where ET is constant and no recharge is occurring. This function
+#'  allows users to enter a start date and then find an appropriate start in the
+#'  prior x-days or between two dates by identifying valid minimum flow.
+#'@param start_date A character or date vector of length 1 identifying the
+#'  starting point of the user analysis that will be adjusted by
+#'  adjust_start_date
+#'@param adjust_start_date Either an integer vector of length 1 or a
+#'  character/Date vector of length 2. If a integer is entered, an appropriate
+#'  start date will be searched for in the prior adjust_start_date days before
+#'  start_date. Otherwise, if a character/Date vector is input, an appropriate
+#'  starting date will be searched between the input dates
+#'@param gage_data A data frame containing flow and date field identified by
+#'  flow_col and date_col, often derived via \code{WaterGageDaily()}
+#'@param flow_col The field containing flow values that will be searched for
+#'  minimum values in the user dates of interest
+#'@param date_col The field containing date values that contain the date
+#'  indexing
+#'@return A Date representing the adjusted start date, which may be identical to
+#'  start_date
+#'@examples \dontrun{
+#'gage_obj <- WaterGageDaily$new(
+#'  gage_id = '02069700', ds_in = ds,
+#'  start_date = "2002-01-01",end_date = "2002-12-31"
+#')
+#'bf_forecast_start_date(start_date = "2002-08-01",
+#'                       adjust_start_date = 30,
+#'                       gage_data = gage_obj$gage_data,
+#'                       flow_col = gage_obj$flow_col,
+#'                       date_col = gage_obj$date_col)
+#'bf_forecast_start_date(start_date = "2002-08-01",
+#'                       adjust_start_date = c("2002-05-01","2002-07-01"),
+#'                       gage_data = gage_obj$gage_data,
+#'                       flow_col = gage_obj$flow_col,
+#'                       date_col = gage_obj$date_col)
+#'}
+#'@export bf_forecast_start_date
+bf_forecast_start_date <- function(start_date,
+                                   adjust_start_date,
+                                   gage_data,
+                                   flow_col = "value", date_col = "time"){
+  #Default value is to keep user input start date
+  new_start_date <- start_date
+  adjust_error <- FALSE
+  
+  #adjust_start_date is either a single length numeric or a character/date
+  #vector of length 2
+  if(is.numeric(adjust_start_date) & length(adjust_start_date) == 1){
+    #Identify the lowest flow within the past 30 rows of data and begin forecast
+    #from that low point
+    date_range <- seq.Date(as.Date(start_date) - adjust_start_date, start_date)
+    gage_date_range <- gage_data[gage_data[,date_col] <= max(date_range) &
+                                   gage_data[,date_col] >= min(date_range),]
+    if(nrow(gage_date_range) > 0){
+      #Minimum flow during period
+      Q0 <- min(gage_date_range[,flow_col], na.rm = TRUE)
+      #Adjusted start date
+      new_start_date <- max(gage_date_range[gage_date_range[,flow_col] == Q0, date_col])
+    }
+    
+    
+  }else if( (lubridate::is.Date(adjust_start_date) | is.character(adjust_start_date)) &&
+            length(adjust_start_date) == 2){
+    #Find a start date in the range provided by the user assuming a date
+    #vector provided
+    date_range <- tryCatch(as.Date(adjust_start_date),error = function(e) NULL)
+    if(is.null(date_range) || any(is.na(date_range))){
+      adjust_error <- TRUE
+    }else{
+      #Identify the lowest flow within the provided range
+      gage_date_range <- gage_data[gage_data[,date_col] <= max(date_range) &
+                                     gage_data[,date_col] >= min(date_range),]
+      if(nrow(gage_date_range) > 0){
+        #Minimum flow during period
+        Q0 <- min(gage_date_range[,flow_col], na.rm = TRUE)
+        #Adjusted start date
+        new_start_date <- max(gage_date_range[gage_date_range[,flow_col] == Q0, date_col])
+      }
+      
+    }
+    
+  }else{
+    #Non-standard inputs
+    adjust_error <- TRUE
+  }
+  #If a non-standard adjustment was use, return a message warning user and
+  #simply keep the start date
+  if(adjust_error){
+    message("Non-standard date adjustment. Start date was kept as ",
+            start_date,". Please see help menu for more options")
+  }
+  
+  return(new_start_date)
+}
+

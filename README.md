@@ -109,7 +109,15 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
-### 1.2.2 08/21/2026
+### 1.2.3 08/25/2026
+1. Added an input, `return_data`, to `WaterGageDaily$baseflow_forecast()` and
+`WaterGageDaily$plot_baseflow_forecast()` to allow the method to help users
+find an appropriate start date using the new `bf_forecast_start_date()`.
+2. Moved the `mapply()` from `WaterGageDaily$plot_baseflow_forecast()` to
+the base `WaterGageDaily$baseflow_forecast()` method so that the forecast can be
+called for multiple methods of AGWRC without needing to plot
+
+### 1.2.2 08/23/2026
 1. Added an input, `return_data`, to `WaterGageDaily$plot_baseflow_forecast()`
 to allow the method to return either a plot or a list with plot and forecast
 data
