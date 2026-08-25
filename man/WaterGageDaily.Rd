@@ -35,7 +35,9 @@ conditions see \code{hydrotools::group2()}
 Use \code{self$baseflow_forecast()} iteratively over a list of
 provided AGWRC options to create a plot of current potential forecasts.
 Can return either a plot or a list with the forecast results in a data
-frame and a plot as a separate object in the list
+frame and a plot as a separate object in the list. There are arguments
+to allow additional days prior to the forecast to be plotted and to
+assist the user in determining a forecast start date
 
 Loads data from the 2025-2027 HARP project to draw a scatter plot
 of AGWRC vs Flow and plots the workflow regression
@@ -352,8 +354,9 @@ of the year using \code{hydrotools::om_flow_table()}
     \preformatted{WaterGageDaily$baseflow_forecast(
   start_date,
   forecast_days = 0:90,
-  AGWRC = "lm_constant",
-  use_limits = TRUE
+  AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
+  use_limits = TRUE,
+  adjust_start_date = NULL
 )}
     \if{html}{\out{</div>}}
   }
@@ -365,14 +368,21 @@ on this day will be used to run forecast calculations}
       \item{\code{forecast_days}}{numeric vector, defaults to 0:90. Days where forcast
 should be calculated and will use corresponding AGWRC if provided
 vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"}
-      \item{\code{AGWRC}}{numeric or character. The decay coefficient to regress the
-flow on start_date for forecast. May be a single numeric to allow for a
-constant forecast or a vector of numeric values to allow for a variable
-forecast but must be of length days. Otherwise, may be "lm_constant" to
-calculate a constant value from m and b or "lm_variable" to have a
-variable value}
+      \item{\code{AGWRC}}{A named list of numeric or character. Each named entry is the
+decay coefficient to regress the flow on start_date for forecast. May be
+a single numeric to allow for a constant forecast or a vector of numeric
+values to allow for a variable forecast but must be of length days.
+Otherwise, may be "lm_constant" to calculate a constant value from m and
+b or "lm_variable" to have a variable value. The names are used for the
+plot legend}
       \item{\code{use_limits}}{logical. Should the regression be limited using data in
 the agwrc_lm_limit field?}
+      \item{\code{adjust_start_date}}{NULL, an integer vector of length 1, or a
+character/Date vector of length 2. If NULL, start_date is used for the
+forecast. If a integer is entered, an appropriate start date will be
+searched for in the prior adjust_start_date days before start_date.
+Otherwise, if a character/Date vector is input, an appropriate starting
+date will be searched between the input dates}
     }
     \if{html}{\out{</div>}}
   }
@@ -534,7 +544,8 @@ on. Also set in the precip_data field on this object.
   return_plotly = FALSE,
   include_days_before = 30,
   use_limits = TRUE,
-  return_data = FALSE
+  return_data = FALSE,
+  adjust_start_date = NULL
 )}
     \if{html}{\out{</div>}}
   }
@@ -561,6 +572,12 @@ start_date should be included on the plot?}
 the agwrc_lm_limit field?}
       \item{\code{return_data}}{logical, default to FALSE. Should results be returned
 in a list, with the plot in one object and the raw data in another?}
+      \item{\code{adjust_start_date}}{NULL, an integer vector of length 1, or a
+character/Date vector of length 2. If NULL, start_date is used for the
+forecast. If a integer is entered, an appropriate start date will be
+searched for in the prior adjust_start_date days before start_date.
+Otherwise, if a character/Date vector is input, an appropriate starting
+date will be searched between the input dates}
     }
     \if{html}{\out{</div>}}
   }

@@ -333,12 +333,13 @@ WaterGageDaily <- R6::R6Class(
     #'@param forecast_days numeric vector, defaults to 0:90. Days where forcast
     #'  should be calculated and will use corresponding AGWRC if provided
     #'  vector. Will use a variable calculated AGWRC if AGWRC = "lm_variable"
-    #'@param AGWRC numeric or character. The decay coefficient to regress the
-    #'  flow on start_date for forecast. May be a single numeric to allow for a
-    #'  constant forecast or a vector of numeric values to allow for a variable
-    #'  forecast but must be of length days. Otherwise, may be "lm_constant" to
-    #'  calculate a constant value from m and b or "lm_variable" to have a
-    #'  variable value
+    #'@param AGWRC A named list of numeric or character. Each named entry is the
+    #'  decay coefficient to regress the flow on start_date for forecast. May be
+    #'  a single numeric to allow for a constant forecast or a vector of numeric
+    #'  values to allow for a variable forecast but must be of length days.
+    #'  Otherwise, may be "lm_constant" to calculate a constant value from m and
+    #'  b or "lm_variable" to have a variable value. The names are used for the
+    #'  plot legend
     #'@param use_limits logical. Should the regression be limited using data in
     #'  the agwrc_lm_limit field?
     #'@param adjust_start_date NULL, an integer vector of length 1, or a
@@ -350,14 +351,19 @@ WaterGageDaily <- R6::R6Class(
     #'@returns A data.frame of date, AGWRC, forecasted flow, and observed flow
     baseflow_forecast = function(start_date,
                                  forecast_days = 0:90,
-                                 AGWRC = "lm_constant",
+                                 AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
                                  use_limits = TRUE,
                                  adjust_start_date = NULL
                                  ){
       #If the user has not provided a numeric vector of AGWRCs, ensure
       #regression values have been loaded in from the database
-      if(!is.numeric(AGWRC)){
+      if(any(!unlist(lapply(FUN = is.numeric, AGWRC)))){
         self$agwrc_fun(force_refresh = FALSE)
+      }
+      
+      #If the input AGWRC is not a list, convert to list
+      if(!is.list(AGWRC)){
+        AGWRC <- list(AGWRC)
       }
       
       #Start date adjustment using hydrotools
@@ -378,23 +384,46 @@ WaterGageDaily <- R6::R6Class(
       }
       
       if(use_limits){
-        #Forecast out the days of the user request using the agws package
-        bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
-                                             AGWRC = AGWRC, 
-                                             m = self$agwrc_lm_m, 
-                                             b = self$agwrc_lm_b,
-                                             low_flow_limit = self$agwrc_lm_limit$agwrc_reg_qlow, 
-                                             low_agwrc_limit = self$agwrc_lm_limit$agwrc_reg_clow,
-                                             high_flow_limit = self$agwrc_lm_limit$agwrc_reg_qhigh, 
-                                             high_agwrc_limit = self$agwrc_lm_limit$agwrc_reg_chigh
-        )
+        low_flow_limit <- self$agwrc_lm_limit$agwrc_reg_qlow 
+        low_agwrc_limit <- self$agwrc_lm_limit$agwrc_reg_clow
+        high_flow_limit <- self$agwrc_lm_limit$agwrc_reg_qhigh
+        high_agwrc_limit <- self$agwrc_lm_limit$agwrc_reg_chigh
       }else{
-        #Forecast out the days of the user request using the agws package
-        bf_forecast <- agws::forwardForecast(Q0 = Q0,days = forecast_days,
-                                             AGWRC = AGWRC, 
-                                             m = self$agwrc_lm_m, 
-                                             b = self$agwrc_lm_b)
+        low_flow_limit <- NULL
+        low_agwrc_limit <- NULL
+        high_flow_limit <- NULL
+        high_agwrc_limit <- NULL
       }
+      #Forecast out the days of the user request using the agws package
+      #Run the baseflow_forecast method using each AGWRC style defined by user.
+      #all_forecasts will be a list with data frames for each baseflow_forecast
+      all_forecasts <- mapply(FUN = agws::forwardForecast,
+                              SIMPLIFY = FALSE,
+                              AGWRC = AGWRC,
+                              MoreArgs = list(Q0 = Q0,
+                                              days = forecast_days,
+                                              m = self$agwrc_lm_m, b = self$agwrc_lm_b,
+                                              low_flow_limit = low_flow_limit,
+                                              low_agwrc_limit = low_agwrc_limit,
+                                              high_flow_limit = high_flow_limit,
+                                              high_agwrc_limit = high_agwrc_limit
+                              )
+      )
+      #Assign names to each dataframe in all_forecasts based on the names in the
+      #user provided list or an arbitrary name
+      if(!is.null(names(AGWRC)) && length(names(AGWRC)) == length(all_forecasts)){
+        names(all_forecasts) <- names(AGWRC)
+      }else{
+        names(all_forecasts) <- paste0("forecast_",1:length(all_forecasts))
+      }
+      #Create a "name" field in each data frame that is based on the list name
+      all_forecasts <- mapply(FUN = function(X,dataname){X$name <- dataname; return(X)},
+                              SIMPLIFY = FALSE,
+                              dataname = names(all_forecasts),
+                              X = all_forecasts)
+      #Combine all data together, going from a list of data frames to one large
+      #data frame
+      bf_forecast <- do.call(rbind, all_forecasts)
       
       #Join back in the observed flow, when possible, to allow for easier
       #historic lookback comparisons
@@ -535,7 +564,9 @@ WaterGageDaily <- R6::R6Class(
     #'@details Use \code{self$baseflow_forecast()} iteratively over a list of
     #'  provided AGWRC options to create a plot of current potential forecasts.
     #'  Can return either a plot or a list with the forecast results in a data
-    #'  frame and a plot as a separate object in the list
+    #'  frame and a plot as a separate object in the list. There are arguments
+    #'  to allow additional days prior to the forecast to be plotted and to
+    #'  assist the user in determining a forecast start date
     #'@param start_date Character. The date to begin the forecast, i.e. the flow
     #'  on this day will be used to run forecast calculations
     #'@param forecast_days numeric vector, defaults to 0:90. Days where forcast
@@ -556,6 +587,12 @@ WaterGageDaily <- R6::R6Class(
     #'  the agwrc_lm_limit field?
     #'@param return_data logical, default to FALSE. Should results be returned
     #'  in a list, with the plot in one object and the raw data in another?
+    #' @param adjust_start_date NULL, an integer vector of length 1, or a
+    #'  character/Date vector of length 2. If NULL, start_date is used for the
+    #'  forecast. If a integer is entered, an appropriate start date will be
+    #'  searched for in the prior adjust_start_date days before start_date.
+    #'  Otherwise, if a character/Date vector is input, an appropriate starting
+    #'  date will be searched between the input dates
     #'@return either a ggplot or plotly object of forecasts or a list with a
     #'  ggplot or plotly object and a dataframe of forecast results, depending
     #'  on user input
@@ -566,31 +603,18 @@ WaterGageDaily <- R6::R6Class(
       return_plotly = FALSE,
       include_days_before = 30,
       use_limits = TRUE,
-      return_data = FALSE
+      return_data = FALSE,
+      adjust_start_date = NULL
     ){
       #Run the baseflow_forecast method using each AGWRC style defined by user.
-      #all_forecasts will be a list with data frames for each baseflow_forecast
-      all_forecasts <- mapply(FUN = self$baseflow_forecast,
-                              SIMPLIFY = FALSE,
-                              AGWRC = AGWRC,
-                              MoreArgs = list(forecast_days = forecast_days,
-                                              start_date = start_date,
-                                              use_limits = use_limits))
-      #Assign names to each dataframe in all_forecasts based on the names in the
-      #user provided list or an arbitrary name
-      if(!is.null(names(AGWRC)) && length(names(AGWRC)) == length(all_forecasts)){
-        names(all_forecasts) <- names(AGWRC)
-      }else{
-        names(all_forecasts) <- paste0("forecast_",1:length(all_forecasts))
-      }
-      #Create a "name" field in each data frame that is based on the list name
-      all_forecasts <- mapply(FUN = function(X,dataname){X$name <- dataname; return(X)},
-                              SIMPLIFY = FALSE,
-                              dataname = names(all_forecasts),
-                              X = all_forecasts)
-      #Combine all data together, going from a list of data frames to one large
-      #data frame
-      plot_data <- do.call(rbind, all_forecasts)
+      #plot_data will be a long style data frame
+      plot_data <- self$baseflow_forecast(
+        AGWRC = AGWRC,
+        forecast_days = forecast_days,
+        start_date = start_date,
+        use_limits = use_limits,
+        adjust_start_date = adjust_start_date
+      )
       
       #Plot the data
       p <- ggplot2::ggplot() +
