@@ -341,18 +341,37 @@ WaterGageDaily <- R6::R6Class(
     #'  variable value
     #'@param use_limits logical. Should the regression be limited using data in
     #'  the agwrc_lm_limit field?
+    #'@param adjust_start_date NULL, an integer vector of length 1, or a
+    #'  character/Date vector of length 2. If NULL, start_date is used for the
+    #'  forecast. If a integer is entered, an appropriate start date will be
+    #'  searched for in the prior adjust_start_date days before start_date.
+    #'  Otherwise, if a character/Date vector is input, an appropriate starting
+    #'  date will be searched between the input dates
     #'@returns A data.frame of date, AGWRC, forecasted flow, and observed flow
     baseflow_forecast = function(start_date,
                                  forecast_days = 0:90,
                                  AGWRC = "lm_constant",
-                                 use_limits = TRUE){
+                                 use_limits = TRUE,
+                                 adjust_start_date = NULL
+                                 ){
       #If the user has not provided a numeric vector of AGWRCs, ensure
       #regression values have been loaded in from the database
       if(!is.numeric(AGWRC)){
         self$agwrc_fun(force_refresh = FALSE)
       }
+      
+      #Start date adjustment using hydrotools
+      if(!is.null(adjust_start_date)){
+        start_date <- bf_forecast_start_date(
+          start_date = start_date,
+          adjust_start_date = adjust_start_date,
+          gage_data = self$gage_data,
+          flow_col = self$flow_col, date_col = self$date_col
+        )
+      }
+      
       #Get the starting flow based on the user input date
-      Q0 <- self$gage_data[self$gage_data[,self$date_col] == start_date,self$flow_col]
+      Q0 <- self$gage_data[self$gage_data[,self$date_col] == start_date, self$flow_col]
       
       if(length(Q0) == 0){
         stop("No Q0 found for date ",start_date)
@@ -376,7 +395,7 @@ WaterGageDaily <- R6::R6Class(
                                              m = self$agwrc_lm_m, 
                                              b = self$agwrc_lm_b)
       }
-
+      
       #Join back in the observed flow, when possible, to allow for easier
       #historic lookback comparisons
       bf_forecast$Date <- as.Date(start_date) + bf_forecast$Day
