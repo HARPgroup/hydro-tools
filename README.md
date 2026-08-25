@@ -117,7 +117,7 @@ find an appropriate start date using the new `bf_forecast_start_date()`.
 the base `WaterGageDaily$baseflow_forecast()` method so that the forecast can be
 called for multiple methods of AGWRC without needing to plot
 
-### 1.2.2 08/21/2026
+### 1.2.2 08/23/2026
 1. Added an input, `return_data`, to `WaterGageDaily$plot_baseflow_forecast()`
 to allow the method to return either a plot or a list with plot and forecast
 data

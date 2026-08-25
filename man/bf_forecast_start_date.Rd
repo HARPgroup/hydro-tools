@@ -47,3 +47,21 @@ interest where ET is constant and no recharge is occurring. This function
 allows users to enter a start date and then find an appropriate start in the
 prior x-days or between two dates by identifying valid minimum flow.
 }
+\examples{
+\dontrun{
+gage_obj <- WaterGageDaily$new(
+ gage_id = '02069700', ds_in = ds,
+ start_date = "2002-01-01",end_date = "2002-12-31"
+)
+bf_forecast_start_date(start_date = "2002-08-01",
+                      adjust_start_date = 30,
+                      gage_data = gage_obj$gage_data,
+                      flow_col = gage_obj$flow_col,
+                      date_col = gage_obj$date_col)
+bf_forecast_start_date(start_date = "2002-08-01",
+                      adjust_start_date = c("2002-05-01","2002-07-01"),
+                      gage_data = gage_obj$gage_data,
+                      flow_col = gage_obj$flow_col,
+                      date_col = gage_obj$date_col)
+}
+}
