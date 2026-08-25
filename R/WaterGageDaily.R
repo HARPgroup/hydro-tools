@@ -618,13 +618,13 @@ WaterGageDaily <- R6::R6Class(
       
       #Plot the data
       p <- ggplot2::ggplot() +
-        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] >= (as.Date(start_date) - include_days_before) &
-                                                   self$gage_data[,self$date_col] <= as.Date(start_date),],
+        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] >= (min(plot_data$Date) - include_days_before) &
+                                                   self$gage_data[,self$date_col] <= min(plot_data$Date),],
                            ggplot2::aes(x = !!ggplot2::sym(self$date_col),
                                         y = !!ggplot2::sym(self$flow_col)),
                            col = "black") + 
-        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] > as.Date(start_date) &
-                                                   self$gage_data[,self$date_col] <= (as.Date(start_date) + max(forecast_days)),],
+        ggplot2::geom_line(data = self$gage_data[self$gage_data[,self$date_col] > min(plot_data$Date) &
+                                                   self$gage_data[,self$date_col] <= max(plot_data$Date),],
                            ggplot2::aes(x = !!ggplot2::sym(self$date_col),
                                         y = !!ggplot2::sym(self$flow_col)),
                            lty = 2, 
@@ -633,11 +633,11 @@ WaterGageDaily <- R6::R6Class(
                            ggplot2::aes(x = .data$Date, y = .data$Forecast, col = .data$name)) + 
         ggplot2::scale_y_log10() + 
         ggplot2::labs(x = NULL, y = "Flow", color = NULL,
-                      title = paste("Baseflow Forecast",start_date,"\nUSGS",self$gage_id)) + 
+                      title = paste("Baseflow Forecast",min(plot_data$Date),"\nUSGS",self$gage_id)) + 
         ggplot2::theme_bw() +
         ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) 
       
-      plotName <- paste0("baseflow_forecasts_", start_date)
+      plotName <- paste0("baseflow_forecasts_", min(plot_data$Date))
       
       #Store in the list of plots on this object
       self$plots[[plotName]] <- p
