@@ -634,11 +634,11 @@ WaterGageDaily <- R6::R6Class(
           !is.empty(study_context)
       }
       #Case 3 data requires a BPJ agwrc to be input
-      if(study_agwrc_method == 3 & is.empty(agwrc_bpj)){
+      if(QC && study_agwrc_method == 3 && is.empty(agwrc_bpj)){
         QC <- FALSE
         warning("No data was saved. study_agwrc_method study method 3 requires
                 an agwrc_bpj to be set to serve as a constant value for forecasts.")
-      }else if( study_agwrc_method == 4 ){
+      }else if( QC && study_agwrc_method == 4 ){
         #Get all user modified elements in a named list
         save_config <- list(
           "agwrc_reg_qlow" = agwrc_qlow,
@@ -657,6 +657,28 @@ WaterGageDaily <- R6::R6Class(
           QC <- FALSE
           warning("No data was saved. study_agwrc_method study method 4 
           requires at least one custom regresison component to be set.")
+        }
+        #Ensure regression bounds are set correctly such that the lower bound is
+        #lower than proposed or existing higher bound and vice versa. Otherwise,
+        #set QC to FALSE and warn user
+        if(all(c("agwrc_reg_qhigh", "agwrc_reg_qlow") %in% names(save_config))){
+          if(save_config["agwrc_reg_qlow"] >= save_config["agwrc_reg_qhigh"]){
+            QC <- FALSE
+            warning("agwrc_reg_qlow must be less than agwrc_reg_qhigh")
+          }
+        }else if(any(c("agwrc_reg_qhigh", "agwrc_reg_qlow") %in% names(save_config))){
+          ex_props <- agwrc_model$propvalues()
+          ex_qlow <- ex_props$propvalue[ex_props$propname == "agwrc_reg_qlow"]
+          ex_qhigh <- ex_props$propvalue[ex_props$propname == "agwrc_reg_qhigh"]
+          if(
+            (any(names(save_config) == "agwrc_reg_qhigh") && 
+                 save_config["agwrc_reg_qhigh"] <= ex_qlow) ||
+            (any(names(save_config) == "agwrc_reg_qlow") && 
+             save_config["agwrc_reg_qlow"] <= ex_qhigh)
+          ){
+            QC <- FALSE
+            warning("agwrc_reg_qlow must be less than agwrc_reg_qhigh")
+          }
         }
       }
       
