@@ -109,6 +109,12 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.4 08/27/2026
+1. Modified and exported `is.empty()` so that it no longer qualifies 0 as empty
+and checks for try errors
+2. Added `save_baseflow_context()` method to the gage object to allow users to
+more easily save case study data regarding a baseflow forecast
+
 ### 1.2.3 08/25/2026
 1. Added an input, `return_data`, to `WaterGageDaily$baseflow_forecast()` and
 `WaterGageDaily$plot_baseflow_forecast()` to allow the method to help users

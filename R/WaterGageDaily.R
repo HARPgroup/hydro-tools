@@ -560,6 +560,194 @@ WaterGageDaily <- R6::R6Class(
       self$precip_data <- join_data
       return(join_data)
     },
+    #'@description POST/Save baseflow forecasting notes and conclusion
+    #'@details POST baseflow forecasting notes and conclusions to the datasrouce
+    #'following the forecast data model laid out in the HARP AGWS project. Users
+    #'can save data as the following types:
+    #'
+    #' * "valid, log-linear (limited)" = 0
+    #' * "valid, log-linear (no limits)" = 1
+    #' * "valid, constant, derived from regression" = 2
+    #' * "valid, constant, BPJ" = 3
+    #' * "valid, variable, custom regression" = 4
+    #' * "Not valid, regulated stream" = 5
+    #' * "Not valid, insufficient data" = 6
+    #' * "Not valid, other" = 7
+    #'@param data_type Character, either "case_study" or "gage_conclusions"
+    #'  depending on what user wishes to POST
+    #'@param study_agwrc_method Numeric, length 1. See details for which value.
+    #'@param study_context Character, proptext to POST on rating_class property.
+    #'  These are often the conclusions the user wishes to save.
+    #'@param start_date Date. Used for "case_study" only and represents the
+    #'  start of the case study forecast
+    #'@param end_date Date. Used for "case_study" only and represents the end of
+    #'  the case study forecast
+    #'@param agwrc_bpj Numeric. Used for study_agwrc_method = 3 only and
+    #'  represents the best professional judgement AGWRC that should be used
+    #'  instead of the regression
+    #'@param agwrc_qlow Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement lowest valid flow for
+    #'  regression. May be left NULL to preserve previous values.
+    #'@param agwrc_qhigh Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement highest valid flow for
+    #'  regression. May be left NULL to preserve previous values.
+    #'@param agwrc_clow Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement AGWRC to use when flow is
+    #'  below qlow. May be left NULL to preserve previous values.
+    #'@param agwrc_chigh Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement AGWRC to use when flow is
+    #'  above qhigh. May be left NULL to preserve previous values.
+    #'@param regression_m Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement regression slope of AGWRC =
+    #'  f(log(Q)). May be left NULL to preserve previous values.
+    #'@param regression_b Numeric. Used for study_agwrc_method = 4 only and
+    #'  represents the best professional judgement regression intercept of AGWRC
+    #'  = f(log(Q)). May be left NULL to preserve previous values.
+    #'@return Nothing, only posts data to the database
+    save_baseflow_context = function(
+      data_type,
+      study_agwrc_method,
+      study_context,
+      start_date,
+      end_date,
+      agwrc_bpj,
+      agwrc_qlow,
+      agwrc_qhigh,
+      agwrc_clow,
+      agwrc_chigh,
+      regression_m,
+      regression_b
+    ){
+      if(!inherits(self$gage_feature, "RomDataSource")){
+        self$load_wshd_feat()
+      }
+      
+      if(data_type == "case_study"){
+        #Make sure all mandatory case study data exists/isTruthy
+        QC <- !is.empty(study_agwrc_method) & 
+          !is.empty(study_context) & 
+          (!is.empty(start_date) & !is.empty(end_date))
+      }else{
+        #For gage conclusions, text and rating are required
+        QC <- !is.empty(study_agwrc_method) & 
+          !is.empty(study_context)
+      }
+      #Case 3 data requires a BPJ agwrc to be input
+      if(study_agwrc_method == 3 & is.empty(agwrc_bpj)){
+        QC <- FALSE
+        warning("No data was saved. study_agwrc_method study method 3 requires
+                an agwrc_bpj to be set to serve as a constant value for forecasts.")
+      }else if( study_agwrc_method == 4 ){
+        #Get all user modified elements in a named list
+        save_config <- list(
+          "agwrc_qlow" = agwrc_qlow,
+          "agwrc_qhigh" = agwrc_qhigh,
+          "agwrc_clow" = agwrc_clow,
+          "agwrc_chigh" = agwrc_chigh,
+          "regression_m" = regression_m,
+          "regression_b" = regression_b
+        )
+        #Remove NA or NULL values so that these are not updated
+        save_config <- save_config[!is.empty(save_config)]
+        
+        if(length(save_config) == 0){
+          #Case 4 data (for gage conclusions) requires at least one custom
+          #regression component to be set
+          QC <- FALSE
+          warning("No data was saved. study_agwrc_method study method 4 
+          requires at least one custom regresison component to be set.")
+        }
+      }
+      
+      if(!QC){
+        #If QC fails, statements above do nothing. Warn user.
+        warning("No data was saved. Critical information missing.
+          Please check inputs.")
+      }else{
+        #If QC passes, find/create the AGWRC-1.0 model and case study
+        #scenario as needed
+        agwrc_model <- hydrotools::om_model_object(ds, self$gage_feature,
+                                                   model_version = "AGWRC-1.0",
+                                                   model_name = paste(self$gage_feature$hydrocode, "AGWRC-1.0"))
+        
+        if(data_type == "case_study"){
+        cs_scenario <- hydrotools::om_get_model_scenario(ds, model = agwrc_model, 
+                                                         scenario_name = "case_studies")
+        
+          #Check for existing case study of the same time period
+          cs_rating <- RomProperty$new(
+            datasource = ds,
+            config = list(
+              featureid = cs_scenario$pid,
+              propname = "rating_class",
+              startdate = as.numeric(as.POSIXct(input$start_date)),
+              enddate = as.numeric(as.POSIXct(input$end_date)),
+              entity_type = "dh_properties",
+              bundle = "dh_properties"
+            ),
+            load_remote = TRUE
+          )
+          #Store/overwrite rating and proptext
+          cs_rating$propvalue <- input$study_agwrc_method
+          cs_rating$proptext <- input$study_context
+          #Store as alphanumeric constant for now
+          cs_rating$varid <- 1385
+          
+          #For BPJ ratings, store the relevant data as propcode or otherwise
+          #overwrite as NA
+          if(input$study_agwrc_method == 3){
+            cs_rating$propcode <- agwrc_bpj
+          }else if(input$study_agwrc_method == 4){
+            #Placeholder for now, in case we need to store additional
+            #information regarding the custom regression
+            cs_rating$propcode <- NA
+          }else{
+            cs_rating$propcode <- NA
+          }
+          
+          #Save the property and remove the modal
+          cs_rating$save(TRUE)
+        }else{
+          #Check for existing rating property
+          gage_rating <- RomProperty$new(
+            datasource = ds,
+            config = list(
+              featureid = agwrc_model$pid,
+              propname = "rating_class",
+              entity_type = "dh_properties",
+              bundle = "dh_properties"
+            ),
+            load_remote = TRUE
+          )
+          
+          #Store/overwrite rating and proptext
+          gage_rating$propvalue <- study_agwrc_method
+          gage_rating$proptext <- study_context
+          #Store as alphanumeric constant for now
+          gage_rating$varid <- 1385
+          
+          #For BPJ ratings, store the relevant data as propcode or otherwise
+          #overwrite as NA
+          if(input$study_agwrc_method == 3){
+            #For case 3, store the AGWRC in the rating_class propcode and
+            #store in agwrc_low property
+            gage_rating$propcode <- agwrc_bpj
+            agwrc_model$set_prop("agwrc_low",propvalue = agwrc_bpj)
+          }else if(input$study_agwrc_method == 4){
+            gage_rating$propcode <- NA
+            #Save each remaining property since empty values have been removed:
+            for(i in 1:length(save_config)){
+              agwrc_model$set_prop(names(save_config)[i],
+                                   propvalue = save_config[[i]])
+            }
+          }else{
+            gage_rating$propcode <- NA
+          }
+          #Save the gage rating_class property
+          gage_rating$save(TRUE)
+        }
+      }
+    },
     #'@description plot current flow forecasts
     #'@details Use \code{self$baseflow_forecast()} iteratively over a list of
     #'  provided AGWRC options to create a plot of current potential forecasts.

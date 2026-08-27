@@ -32,6 +32,20 @@ conditions see \code{hydrotools::group1()}
 Calculates the IHA parameter group 2: Magnitude of montly water
 conditions see \code{hydrotools::group2()}
 
+POST baseflow forecasting notes and conclusions to the datasrouce
+following the forecast data model laid out in the HARP AGWS project. Users
+can save data as the following types:
+\itemize{
+\item "valid, log-linear (limited)" = 0
+\item "valid, log-linear (no limits)" = 1
+\item "valid, constant, derived from regression" = 2
+\item "valid, constant, BPJ" = 3
+\item "valid, variable, custom regression" = 4
+\item "Not valid, regulated stream" = 5
+\item "Not valid, insufficient data" = 6
+\item "Not valid, other" = 7
+}
+
 Use \code{self$baseflow_forecast()} iteratively over a list of
 provided AGWRC options to create a plot of current potential forecasts.
 Can return either a plot or a list with the forecast results in a data
@@ -113,6 +127,7 @@ monthly, yearly, and day-of-year statistics on the gage flow}
     \item \href{#method-WaterGageDaily-group2}{\code{WaterGageDaily$group2()}}
     \item \href{#method-WaterGageDaily-as.zoo}{\code{WaterGageDaily$as.zoo()}}
     \item \href{#method-WaterGageDaily-join_precip_data}{\code{WaterGageDaily$join_precip_data()}}
+    \item \href{#method-WaterGageDaily-save_baseflow_context}{\code{WaterGageDaily$save_baseflow_context()}}
     \item \href{#method-WaterGageDaily-plot_baseflow_forecast}{\code{WaterGageDaily$plot_baseflow_forecast()}}
     \item \href{#method-WaterGageDaily-plot_baseflow_agwrc}{\code{WaterGageDaily$plot_baseflow_agwrc()}}
     \item \href{#method-WaterGageDaily-plot_rechare_context}{\code{WaterGageDaily$plot_rechare_context()}}
@@ -527,6 +542,70 @@ considered?}
   \subsection{Returns}{
     The gage_data data frame now with a column of precip_mm joined
 on. Also set in the precip_data field on this object.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-save_baseflow_context"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-save_baseflow_context}{}}}
+\subsection{\code{WaterGageDaily$save_baseflow_context()}}{
+  POST/Save baseflow forecasting notes and conclusion
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$save_baseflow_context(
+  data_type,
+  study_agwrc_method,
+  study_context,
+  start_date,
+  end_date,
+  agwrc_bpj,
+  agwrc_qlow,
+  agwrc_qhigh,
+  agwrc_clow,
+  agwrc_chigh,
+  regression_m,
+  regression_b
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data_type}}{Character, either "case_study" or "gage_conclusions"
+depending on what user wishes to POST}
+      \item{\code{study_agwrc_method}}{Numeric, length 1. See details for which value.}
+      \item{\code{study_context}}{Character, proptext to POST on rating_class property.
+These are often the conclusions the user wishes to save.}
+      \item{\code{start_date}}{Date. Used for "case_study" only and represents the
+start of the case study forecast}
+      \item{\code{end_date}}{Date. Used for "case_study" only and represents the end of
+the case study forecast}
+      \item{\code{agwrc_bpj}}{Numeric. Used for study_agwrc_method = 3 only and
+represents the best professional judgement AGWRC that should be used
+instead of the regression}
+      \item{\code{agwrc_qlow}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement lowest valid flow for
+regression. May be left NULL to preserve previous values.}
+      \item{\code{agwrc_qhigh}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement highest valid flow for
+regression. May be left NULL to preserve previous values.}
+      \item{\code{agwrc_clow}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement AGWRC to use when flow is
+below qlow. May be left NULL to preserve previous values.}
+      \item{\code{agwrc_chigh}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement AGWRC to use when flow is
+above qhigh. May be left NULL to preserve previous values.}
+      \item{\code{regression_m}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement regression slope of AGWRC =
+f(log(Q)). May be left NULL to preserve previous values.}
+      \item{\code{regression_b}}{Numeric. Used for study_agwrc_method = 4 only and
+represents the best professional judgement regression intercept of AGWRC
+= f(log(Q)). May be left NULL to preserve previous values.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, only posts data to the database
   }
 }
 

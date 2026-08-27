@@ -810,14 +810,19 @@ fn_iha_flow_extreme <- function(flows, metric, stat='min', wyear_type='calendar'
 #' @title is.empty
 #' @description Checks common NULL, NA, length cases for empty values
 #' @details
-#' Imported from rapportools and should be used sparingly as explicit length,
-#' NA, and NULL checks are better for ensuring consistent data strucutre. From
-#' rapportools: "Rails-inspired helper that checks if vector values are "empty",
-#' i.e. if it's: NULL, zero-length, NA, NaN, FALSE, an empty string or 0. Note
-#' that unlike its native R is.<something> sibling functions, is.empty is
-#' vectorised (hence the "values")."
+#' Modified from rapportools as the check for a numeric value of 0 was removed.
+#' From rapportools: "Rails-inspired helper that checks if vector values are
+#' "empty", i.e. if it's: NULL, zero-length, NA, NaN, FALSE, an empty string ...
+#' Note that unlike its native R is.<something> sibling functions, is.empty
+#' is vectorised (hence the "values")."
 #' @param x an object to check its emptiness. 
 #' @param ... additional arguments for sapply
+#' @examples
+#' is.empty(data.frame())
+#' is.empty(data.frame(1:2,c(3, NA)))
+#' is.empty(c("",NA, 1, 2,3, "Im Not Empty!", 4))
+#' is.empty(c(TRUE, FALSE, TRUE))
+#' @export
 is.empty <- function (x, ...) 
 {
   if (length(x) <= 1) {
@@ -827,12 +832,12 @@ is.empty <- function (x, ...)
       return(TRUE)
     if (is.na(x) || is.nan(x)) 
       return(TRUE)
-    if (is.character(x) && nchar(x) == 0) 
+    if (is.character(x) && !nzchar(x)) 
       return(TRUE)
-    if (is.logical(x) && !isTRUE(x)) 
+    if (is.logical(x) && isFALSE(x)) 
       return(TRUE)
-    if (is.numeric(x) && x == 0) 
-      return(TRUE)
+    if (inherits(x, "try-error")) 
+      return(FALSE)
     return(FALSE)
   }
   else sapply(x, is.empty, ...)
