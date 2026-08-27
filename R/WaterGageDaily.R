@@ -662,7 +662,7 @@ WaterGageDaily <- R6::R6Class(
         #lower than proposed or existing higher bound and vice versa. Otherwise,
         #set QC to FALSE and warn user
         if(all(c("agwrc_reg_qhigh", "agwrc_reg_qlow") %in% names(save_config))){
-          if(save_config["agwrc_reg_qlow"] >= save_config["agwrc_reg_qhigh"]){
+          if(save_config[["agwrc_reg_qlow"]] >= save_config[["agwrc_reg_qhigh"]]){
             QC <- FALSE
             warning("agwrc_reg_qlow must be less than agwrc_reg_qhigh")
           }
@@ -672,9 +672,9 @@ WaterGageDaily <- R6::R6Class(
           ex_qhigh <- ex_props$propvalue[ex_props$propname == "agwrc_reg_qhigh"]
           if(
             (any(names(save_config) == "agwrc_reg_qhigh") && 
-                 save_config["agwrc_reg_qhigh"] <= ex_qlow) ||
+                 save_config[["agwrc_reg_qhigh"]] <= ex_qlow) ||
             (any(names(save_config) == "agwrc_reg_qlow") && 
-             save_config["agwrc_reg_qlow"] <= ex_qhigh)
+             save_config[["agwrc_reg_qlow"]] <= ex_qhigh)
           ){
             QC <- FALSE
             warning("agwrc_reg_qlow must be less than agwrc_reg_qhigh")
