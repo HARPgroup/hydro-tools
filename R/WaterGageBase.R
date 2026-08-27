@@ -282,8 +282,7 @@ WaterGageBase <- R6::R6Class(
       event_summary_df <- self$read_om_file(omsite, 
                                             paste0("/usgs/agws/baseflow_summary_df_",self$gage_id,".csv"))
       
-      if((is.null(self$agwrc_lm_m) | is.null(self$agwrc_lm_b)) ||
-         (is.na(self$agwrc_lm_m) | is.na(self$agwrc_lm_b))){
+      if(is.empty(self$agwrc_lm_m) | is.empty(self$agwrc_lm_b)){
         #Load feature if not yet loaded
         if(!inherits(self$gage_feature, "RomFeature")){
           self$load_wshd_feat()
@@ -302,6 +301,15 @@ WaterGageBase <- R6::R6Class(
         event_AGWRC = (self$agwrc_lm_m * log(flow_seq) + self$agwrc_lm_b),
         datagrp = "all"
       )
+      low_q <- self$agwrc_lm_limit$agwrc_reg_qlow
+      low_c <- self$agwrc_lm_limit$agwrc_reg_clow
+      high_q <- self$agwrc_lm_limit$agwrc_reg_qhigh
+      high_c <- self$agwrc_lm_limit$agwrc_reg_chigh
+      
+      #Adjust for limits
+      pred_df_workflow$event_AGWRC[pred_df_workflow$median_flow <= low_q] <- low_c
+      pred_df_workflow$event_AGWRC[pred_df_workflow$median_flow >= high_q] <- high_c
+      
       #Plot the scatterplot of AGWRC vs Flow and include a line for the
       #regression calculated from the AGWRC workflow
       p <- ggplot2::ggplot() + 
