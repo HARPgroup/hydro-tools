@@ -603,7 +603,8 @@ WaterGageDaily <- R6::R6Class(
     #'@param regression_b Numeric. Used for study_agwrc_method = 4 only and
     #'  represents the best professional judgement regression intercept of AGWRC
     #'  = f(log(Q)). May be left NULL to preserve previous values.
-    #'@return Nothing, only posts data to the database
+    #'@return Logical, with FALSE indicating QC failed and TRUE indicating QC
+    #'  passed and properties were attempted to be posted
     save_baseflow_context = function(
       data_type,
       study_agwrc_method,
@@ -671,9 +672,9 @@ WaterGageDaily <- R6::R6Class(
                                                    model_name = paste(self$gage_feature$hydrocode, "AGWRC-1.0"))
         
         if(data_type == "case_study"){
-        cs_scenario <- hydrotools::om_get_model_scenario(ds, model = agwrc_model, 
-                                                         scenario_name = "case_studies")
-        
+          cs_scenario <- hydrotools::om_get_model_scenario(ds, model = agwrc_model, 
+                                                           scenario_name = "case_studies")
+          
           #Check for existing case study of the same time period
           cs_rating <- RomProperty$new(
             datasource = ds,
@@ -747,6 +748,8 @@ WaterGageDaily <- R6::R6Class(
           gage_rating$save(TRUE)
         }
       }
+      #Return QC to indicate if script operated
+      return(QC)
     },
     #'@description plot current flow forecasts
     #'@details Use \code{self$baseflow_forecast()} iteratively over a list of

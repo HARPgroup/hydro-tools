@@ -605,7 +605,8 @@ represents the best professional judgement regression intercept of AGWRC
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    Nothing, only posts data to the database
+    Logical, with FALSE indicating QC failed and TRUE indicating QC
+passed and properties were attempted to be posted
   }
 }
 
