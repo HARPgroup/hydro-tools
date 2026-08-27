@@ -641,10 +641,10 @@ WaterGageDaily <- R6::R6Class(
       }else if( study_agwrc_method == 4 ){
         #Get all user modified elements in a named list
         save_config <- list(
-          "agwrc_qlow" = agwrc_qlow,
-          "agwrc_qhigh" = agwrc_qhigh,
-          "agwrc_clow" = agwrc_clow,
-          "agwrc_chigh" = agwrc_chigh,
+          "agwrc_reg_qlow" = agwrc_qlow,
+          "agwrc_reg_qhigh" = agwrc_qhigh,
+          "agwrc_reg_clow" = agwrc_clow,
+          "agwrc_reg_chigh" = agwrc_chigh,
           "regression_m" = regression_m,
           "regression_b" = regression_b
         )
@@ -681,24 +681,24 @@ WaterGageDaily <- R6::R6Class(
             config = list(
               featureid = cs_scenario$pid,
               propname = "rating_class",
-              startdate = as.numeric(as.POSIXct(input$start_date)),
-              enddate = as.numeric(as.POSIXct(input$end_date)),
+              startdate = as.numeric(as.POSIXct(start_date)),
+              enddate = as.numeric(as.POSIXct(end_date)),
               entity_type = "dh_properties",
               bundle = "dh_properties"
             ),
             load_remote = TRUE
           )
           #Store/overwrite rating and proptext
-          cs_rating$propvalue <- input$study_agwrc_method
-          cs_rating$proptext <- input$study_context
+          cs_rating$propvalue <- study_agwrc_method
+          cs_rating$proptext <- study_context
           #Store as alphanumeric constant for now
           cs_rating$varid <- 1385
           
           #For BPJ ratings, store the relevant data as propcode or otherwise
           #overwrite as NA
-          if(input$study_agwrc_method == 3){
+          if(study_agwrc_method == 3){
             cs_rating$propcode <- agwrc_bpj
-          }else if(input$study_agwrc_method == 4){
+          }else if(study_agwrc_method == 4){
             #Placeholder for now, in case we need to store additional
             #information regarding the custom regression
             cs_rating$propcode <- NA
@@ -729,17 +729,21 @@ WaterGageDaily <- R6::R6Class(
           
           #For BPJ ratings, store the relevant data as propcode or otherwise
           #overwrite as NA
-          if(input$study_agwrc_method == 3){
+          if(study_agwrc_method == 3){
             #For case 3, store the AGWRC in the rating_class propcode and
             #store in agwrc_low property
             gage_rating$propcode <- agwrc_bpj
             agwrc_model$set_prop("agwrc_low",propvalue = agwrc_bpj)
-          }else if(input$study_agwrc_method == 4){
+          }else if(study_agwrc_method == 4){
             gage_rating$propcode <- NA
             #Save each remaining property since empty values have been removed:
             for(i in 1:length(save_config)){
               agwrc_model$set_prop(names(save_config)[i],
                                    propvalue = save_config[[i]])
+              #Set lowest valid AGWRC is reg clow is altered
+              if(names(save_config)[i] == "agwrc_reg_clow"){
+                agwrc_model$set_prop("agwrc_low",propvalue = save_config[[i]])
+              }
             }
           }else{
             gage_rating$propcode <- NA
