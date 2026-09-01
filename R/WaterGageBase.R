@@ -408,7 +408,8 @@ WaterGageBase <- R6::R6Class(
           #regression coefficients
           lm_props <- self$get_model_or_scenario_props(
             target_entity = self$gage_feature,
-            model_prop_code = "AGWRC-1.0")
+            model_prop_code = "AGWRC-1.0",
+            include_proptext = TRUE)
           self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
           self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
           self$agwrc_lm_limit <- list(

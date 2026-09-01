@@ -111,9 +111,11 @@ This package is in active development.
 ## Release notes
 ### 1.2.4 08/27/2026
 1. Modified and exported `is.empty()` so that it no longer qualifies 0 as empty
-and checks for try errors
+and checks for try errors and now can operate on `data.frame(x = numeric())
 2. Added `save_baseflow_context()` method to the gage object to allow users to
 more easily save case study data regarding a baseflow forecast
+3. Made `plot_baseflow_agwrc()` more dynamic to user defined endpoints
+4. `agwrc_func()` method on `WaterGageBase` now returns proptext
 
 ### 1.2.3 08/25/2026
 1. Added an input, `return_data`, to `WaterGageDaily$baseflow_forecast()` and
