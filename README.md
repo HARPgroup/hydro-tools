@@ -109,6 +109,9 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.5 09/04/2026
+1. Debugged NA check in `bf_forecast_start_date()`
+
 ### 1.2.4 08/27/2026
 1. Modified and exported `is.empty()` so that it no longer qualifies 0 as empty
 and checks for try errors and now can operate on `data.frame(x = numeric())
