@@ -654,7 +654,7 @@ bf_forecast_start_date <- function(start_date,
         #Minimum flow during period
         Q0 <- min(gage_date_range[,flow_col], na.rm = TRUE)
         #Adjusted start date
-        new_start_date <- max(gage_date_range[gage_date_range[,flow_col] == Q0, date_col])
+        new_start_date <- max(gage_date_range[gage_date_range[,flow_col] == Q0, date_col], na.rm = TRUE)
       }
       
     }
