@@ -109,6 +109,9 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.6 09/16/2026
+1. Fixed a bug in the confidence interval upper label in `WaterGageBase$plot_baseflow_agwrc()`
+
 ### 1.2.5 09/04/2026
 1. Debugged NA check in `bf_forecast_start_date()`
 

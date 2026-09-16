@@ -367,7 +367,7 @@ WaterGageBase <- R6::R6Class(
                                             group = .data$grp,
                                             text = paste0(
                                               "Median flow: ", round(.data$median_flow,2)," cfs<br>",
-                                              "Upper Bound AGWRC: ", round(.data$lwr,5)
+                                              "Upper Bound AGWRC: ", round(.data$upr,5)
                                             ))
             )
         }else{
