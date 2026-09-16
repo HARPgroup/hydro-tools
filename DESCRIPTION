@@ -71,6 +71,7 @@ Collate:
     'ceds_utils.R'
     'cia_utils.R'
     'dHVariablePluginDefault.R'
+    'drought_utils.R'
     'fac_utils.R'
     'fn_plot_cia_dend.R'
     'imp_utils.R'
