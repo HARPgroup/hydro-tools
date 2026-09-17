@@ -133,7 +133,8 @@ only
   src_node_col = self$src_node_col,
   entity_type = self$entity_type,
   entity_id_col = self$entity_id_col,
-  force_unique_src = FALSE
+  force_unique_src = FALSE,
+  use_numeric_nodes = FALSE
 )}
     \if{html}{\out{</div>}}
   }
@@ -178,6 +179,11 @@ are found, should this object append these ids to force all nodes to be
 unique? In the instance of om river segments, all data should have unique
 IDs but model errors can, rarely, interfere with this and this setting may
 be useful.}
+      \item{\code{use_numeric_nodes}}{Logical, defaults to FALSE. If TRUE, the
+\code{self$set_numeric_nodes()} method is used to create the network map
+by converting all edge indexes to unique integer values. This is
+recommended if your IDs are long or you have a large network of character
+node IDs.}
     }
     \if{html}{\out{</div>}}
   }
@@ -263,15 +269,7 @@ network_graph to be numeric integers such that each unique node is given
 a unique integer value. Can optionally be run to force unique source IDs.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{RomMetricNetwork$set_numeric_nodes(force_unique_src_ids = FALSE)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{force_unique_src_ids}}{Logical, default FALSE. Should
-\code{force_unique_src_ids()} method be used to ensure unique IDs?}
-    }
+    \preformatted{RomMetricNetwork$set_numeric_nodes()}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{

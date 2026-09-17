@@ -160,6 +160,11 @@ RomMetricNetwork <- R6::R6Class(
     #'   unique? In the instance of om river segments, all data should have unique
     #'   IDs but model errors can, rarely, interfere with this and this setting may
     #'   be useful.
+    #' @param use_numeric_nodes Logical, defaults to FALSE. If TRUE, the 
+    #' \code{self$set_numeric_nodes()} method is used to create the network map
+    #' by converting all edge indexes to unique integer values. This is
+    #' recommended if your IDs are long or you have a large network of character
+    #' node IDs.
     #' @return object instance, with fields populated by user value and
     #'   network_data and network_graph populated
     initialize = function(
@@ -174,7 +179,8 @@ RomMetricNetwork <- R6::R6Class(
       src_node_col = self$src_node_col,
       entity_type = self$entity_type,
       entity_id_col = self$entity_id_col, 
-      force_unique_src = FALSE
+      force_unique_src = FALSE,
+      use_numeric_nodes = FALSE
     ){
       #Store data passed by user
       self$handle_config(
@@ -261,17 +267,22 @@ RomMetricNetwork <- R6::R6Class(
         non-unique src_ids, some cumulative calculations may be counter-inituitive")
       }
       
-      # Create igraph directed network where each element in the vector flows to
-      # the next element
-      edges <- c(
-        rbind(
-          self$network_data[,self$src_node_col],
-          self$network_data[,self$dest_node_col]
+      if(use_numeric_nodes){
+        self$set_numeric_nodes()
+      }else{
+        # Create igraph directed network where each element in the vector flows to
+        # the next element
+        edges <- c(
+          rbind(
+            self$network_data[,self$src_node_col],
+            self$network_data[,self$dest_node_col]
+          )
         )
-      )
-      #Create the directed graph from igraph
-      self$network_graph <- igraph::make_graph(edges, directed = TRUE)
-      
+        #Create the directed graph from igraph
+        self$network_graph <- igraph::make_graph(edges, directed = TRUE)
+        
+      }
+     
     },
     #' @description
     #' Take in data from \code{om_vahydro_metric_grid()} or some equivalent data
@@ -388,11 +399,9 @@ RomMetricNetwork <- R6::R6Class(
     #' Converts source and destination node columns in network_data and
     #' network_graph to be numeric integers such that each unique node is given
     #' a unique integer value. Can optionally be run to force unique source IDs.
-    #' @param force_unique_src_ids Logical, default FALSE. Should
-    #'   \code{force_unique_src_ids()} method be used to ensure unique IDs?
     #' @return Nothing, but sets network_data and network_graph to use the now
     #'   integer source IDs.
-    set_numeric_nodes = function(force_unique_src_ids = FALSE){
+    set_numeric_nodes = function(){
       #Convert src_node_col and dest_node_col to numeric fields
       allids <- factor(c(self$network_data[,self$src_node_col],self$network_data[,self$dest_node_col]))
       allids_numeric <- as.integer(allids)

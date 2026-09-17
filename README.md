@@ -113,6 +113,9 @@ This package is in active development.
 1. Fixed a bug in the confidence interval upper label in `WaterGageBase$plot_baseflow_agwrc()`
 2. Added an `auto_forecast_cs()` function to find potential start dates in a
 given year and test various forecast to find optimal start dates.
+3. Modified `RomMetricNetwork$new()` to allow for numeric column creation on
+initialize to work with nhdplus networks which have large IDs that cause slow
+network creation.
 
 ### 1.2.5 09/04/2026
 1. Debugged NA check in `bf_forecast_start_date()`
