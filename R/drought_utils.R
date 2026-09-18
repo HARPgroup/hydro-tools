@@ -50,6 +50,9 @@
 #'@param max_error Numeric, default 10. The high error bound in % on trough/minimum
 #'  flow prediction such that an acceptable forecast has an error of at most
 #'  \code{min_error} (i.e. overprediction by at most 10%)
+#'@param trough_min_width Numeric, default 15. The interval with which to decide
+#'  if a flow is a "trough", a local minimum worth evaluating as a potential
+#'  start point and/or forecast performance point
 #'@importFrom rlang .data
 #'@return A list with five entries:
 #' * beststart The start date of the best performing forecast
@@ -77,7 +80,8 @@
 #'   start_mmdd = "03-01",
 #'   end_mmdd = "09-30",
 #'   min_error = -20,
-#'   max_error = 20
+#'   max_error = 20,
+#'   trough_min_width = 15
 #')
 #'#Best forecast starts on:
 #'fc_cs$beststart
@@ -93,15 +97,20 @@ auto_forecast_cs <- function(
     start_mmdd = "03-01",
     end_mmdd = "10-01",
     min_error = -20,
-    max_error = 20
+    max_error = 20,
+    trough_min_width = 15
 ){
   #Filter to just target year and recreate R6 object
   gage_yr <- gage_obj$filter_data_by_date(start_date = paste0(yr,"-",start_mmdd),
                                           end_date = paste0(yr,"-",end_mmdd))
   # Initial trough selection - all local minimums
+  if(trough_min_width %% 2 == 0){
+    stop("trough_min_width must be an odd number such that a trough is
+    identified if the minimum flow is at the middle of this interval")
+  }
   gage_yr$gage_data$trough <- zoo::rollapply(gage_yr$gage_data[,gage_yr$flow_col],
-                                             width = 15, fill = FALSE,
-                                             function(x) x[8] <= min(x[-8]))
+                                             width = trough_min_width, fill = FALSE,
+                                             function(x) x[ceiling(trough_min_width / 2)] <= min(x[-ceiling(trough_min_width / 2)]))
   #Find appropriate troughs by identifying those that are lower than the previous
   #we can accomplish this the cummin() function, which finds the cumulative
   #minimum of each element up to each index of the vector
@@ -158,7 +167,7 @@ auto_forecast_cs <- function(
       dplyr::mutate(pcterror = 100 * (.data$Forecast - .data$obs_flow) / .data$obs_flow) |>
       #Create a logical field for whether or not the pcterror is considered within
       #range
-      dplyr::mutate(trough_hit = ( (.data$pcterror < .data$max_error) & (.data$pcterror > .data$min_error) ) )
+      dplyr::mutate(trough_hit = ( (.data$pcterror < max_error) & (.data$pcterror > min_error) ) )
     
     #Store forecast results
     all_data <- c(all_data, list(thisfc))

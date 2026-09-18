@@ -12,7 +12,8 @@ auto_forecast_cs(
   start_mmdd = "03-01",
   end_mmdd = "10-01",
   min_error = -20,
-  max_error = 20
+  max_error = 20,
+  trough_min_width = 15
 )
 }
 \arguments{
@@ -49,6 +50,10 @@ flow prediction such that an acceptable forecast has an error of at least
 \item{max_error}{Numeric, default 10. The high error bound in \% on trough/minimum
 flow prediction such that an acceptable forecast has an error of at most
 \code{min_error} (i.e. overprediction by at most 10\%)}
+
+\item{trough_min_width}{Numeric, default 15. The interval with which to decide
+if a flow is a "trough", a local minimum worth evaluating as a potential
+start point and/or forecast performance point}
 }
 \value{
 A list with five entries:
@@ -111,7 +116,8 @@ fc_cs <- auto_forecast_cs(
   start_mmdd = "03-01",
   end_mmdd = "09-30",
   min_error = -20,
-  max_error = 20
+  max_error = 20,
+  trough_min_width = 15
 )
 #Best forecast starts on:
 fc_cs$beststart
