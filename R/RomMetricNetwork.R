@@ -234,6 +234,12 @@ RomMetricNetwork <- R6::R6Class(
         self$src_node_col <- "src_node"
         
       }else if(inherits(self$datasource,"data.frame")){
+        #remove geometries:
+        if(inherits(self$datasrouce, "tbl_df")){
+          message("Converted network data to data.frame from tbl_df")
+          self$datasource <- as.data.frame(self$datasource)
+        }
+        
         #Store data frame
         om_data <- self$datasource
         #If src_node_col is riverseg, try standard riverseg node parsing
@@ -405,9 +411,18 @@ RomMetricNetwork <- R6::R6Class(
       #Convert src_node_col and dest_node_col to numeric fields
       allids <- factor(c(self$network_data[,self$src_node_col],self$network_data[,self$dest_node_col]))
       allids_numeric <- as.integer(allids)
+      
+      #Set new source and destination node col names
+      new_src_col <- paste0(self$src_node_col,"_numeric")
+      new_dest_col <- paste0(self$dest_node_col,"_numeric")
+      
       #Update source and destination node columns with integer ids
-      self$network_data[,self$src_node_col] <- allids_numeric[match(self$network_data[,self$src_node_col],allids)]
-      self$network_data[,self$dest_node_col] <- allids_numeric[match(self$network_data[,self$dest_node_col],allids)]
+      self$network_data[,new_src_col] <- allids_numeric[match(self$network_data[,self$src_node_col],allids)]
+      self$network_data[,new_dest_col] <- allids_numeric[match(self$network_data[,self$dest_node_col],allids)]
+      
+      #Use new source and destination columns:
+      self$src_node_col <- new_src_col
+      self$dest_node_col <- new_dest_col
       
       #Update the igraph with numeric ids
       edges <- c(
