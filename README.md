@@ -116,6 +116,9 @@ given year and test various forecast to find optimal start dates.
 3. Modified `RomMetricNetwork$new()` to allow for numeric column creation on
 initialize to work with nhdplus networks which have large IDs that cause slow
 network creation.
+4. Modified `RomMetricNetwork$get_node_relation()` to allow for faster and
+easier neighborhood searching with minimimum and maximum distances leveraging
+igraph
 
 ### 1.2.5 09/04/2026
 1. Debugged NA check in `bf_forecast_start_date()`

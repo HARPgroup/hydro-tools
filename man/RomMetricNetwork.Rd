@@ -289,7 +289,10 @@ and can optionally return aliases for node IDs
     \preformatted{RomMetricNetwork$get_node_relation(
   direction = "upstream",
   value = NA,
-  src_nodes = "all"
+  src_nodes = "all",
+  neighbor_search = FALSE,
+  max_dist = 1,
+  min_dist = 0
 )}
     \if{html}{\out{</div>}}
   }
@@ -307,6 +310,17 @@ JL3_6680_7280 instead of 6680)}
       \item{\code{src_nodes}}{Character, defaults to "all". Either "all" or a
 character vector of source node IDs. Related nodes will only be
 returned for these target source nodes.}
+      \item{\code{neighbor_search}}{Logical, default to FALSE. Should igraph search
+for neighbors to a maximum and minimnum distance or should rapid dfs
+(depth first search) provide an ordered output (recommended for full
+network searches). In other words, if TRUE, \code{igraph::dfs()} is
+used and if FALSE \code{igraph::neighborhood()} is used}
+      \item{\code{max_dist}}{Numeric, default 1 and only used if neighbor_search =
+TRUE. What is the maximum distance in direction nodes should be
+searched for? A negative value will assume an infinite order}
+      \item{\code{min_dist}}{Numeric, default 0 and only used if neighbor_search =
+TRUE. What is the minimum distance in direction nodes should be
+searched for? 0 includes src_node.}
     }
     \if{html}{\out{</div>}}
   }

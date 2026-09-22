@@ -448,9 +448,22 @@ RomMetricNetwork <- R6::R6Class(
     #' @param src_nodes Character, defaults to "all". Either "all" or a
     #'   character vector of source node IDs. Related nodes will only be
     #'   returned for these target source nodes.
+    #' @param neighbor_search Logical, default to FALSE. Should igraph search
+    #'   for neighbors to a maximum and minimnum distance or should rapid dfs
+    #'   (depth first search) provide an ordered output (recommended for full
+    #'   network searches). In other words, if TRUE, \code{igraph::dfs()} is
+    #'   used and if FALSE \code{igraph::neighborhood()} is used
+    #' @param max_dist Numeric, default 1 and only used if neighbor_search =
+    #'   TRUE. What is the maximum distance in direction nodes should be
+    #'   searched for? A negative value will assume an infinite order
+    #' @param min_dist Numeric, default 0 and only used if neighbor_search =
+    #'   TRUE. What is the minimum distance in direction nodes should be
+    #'   searched for? 0 includes src_node.
     #' @return A list of the nodes or value in target direction from all or
     #'   src_nodes
-    get_node_relation = function(direction = "upstream", value = NA, src_nodes = "all"){
+    get_node_relation = function(direction = "upstream", value = NA, 
+                                 src_nodes = "all", neighbor_search = FALSE,
+                                 max_dist = 1, min_dist = 0){
       #If user has provided a value and the value is a column name in the
       #network data, assign and attribute to the graph matching to ensure proper
       #order
@@ -475,24 +488,51 @@ RomMetricNetwork <- R6::R6Class(
       }else{
         target_node <- src_nodes
       }
-      #For each vertex, find all upstream and downstream vertex
-      allSearch <- mapply(
-        FUN = function(target_node, direction, inetwork, value){
-          #Find fastest way upstream
-          depths <- igraph::dfs(inetwork, root = target_node,
-                                mode = direction, unreachable = FALSE)
-          #If value is set, return the value attribute set of the vertices of
-          #the graph; otherwise, return the vertices
-          if(!is.na(value) && !is.null(igraph::vertex_attr(g,value))){
-            out <- igraph::vertex_attr(g,value)[depths$order]
-          }else{
-            out <- igraph::as_ids(depths$order)
-          }
-          return(out)
-        }, 
-        target_node = target_node,
-        MoreArgs = list(inetwork = g, direction = direction, value = value)
-      )
+      
+      if(neighbor_search){
+        message("Results may not be ordered, please review carefully for
+        larger graph searches.")
+        #For each vertex, find requested neighbors
+        depths <- igraph::neighborhood(graph = g, nodes = target_node,
+                                       mode = direction, order = max_dist,
+                                       mindist = min_dist)
+        
+        allSearch <- mapply(
+          SIMPLIFY = FALSE,
+          FUN = function(depths, inetwork, value){
+            #If value is set, return the value attribute set of the vertices of
+            #the graph; otherwise, return the vertices
+            if(!is.na(value) && !is.null(igraph::vertex_attr(g,value))){
+              out <- igraph::vertex_attr(g,value)[depths]
+            }else{
+              out <- igraph::as_ids(depths)
+            }
+            return(out)
+          }, 
+          depths = depths,
+          MoreArgs = list(inetwork = g, value = value)
+        )
+        
+      }else{
+        #For each vertex, find all upstream and downstream vertex
+        allSearch <- mapply(
+          FUN = function(target_node, direction, inetwork, value){
+            #Find fastest way upstream
+            depths <- igraph::dfs(inetwork, root = target_node,
+                                  mode = direction, unreachable = FALSE)
+            #If value is set, return the value attribute set of the vertices of
+            #the graph; otherwise, return the vertices
+            if(!is.na(value) && !is.null(igraph::vertex_attr(inetwork,value))){
+              out <- igraph::vertex_attr(inetwork,value)[depths$order]
+            }else{
+              out <- igraph::as_ids(depths$order)
+            }
+            return(out)
+          }, 
+          target_node = target_node,
+          MoreArgs = list(inetwork = g, direction = direction, value = value)
+        )
+      }
       #Return a list of nodes for each node in network_data
       return(allSearch)
     },
