@@ -119,6 +119,7 @@ network creation.
 4. Modified `RomMetricNetwork$get_node_relation()` to allow for faster and
 easier neighborhood searching with minimum and maximum distances leveraging
 igraph
+5. Fixed a typo in the `om_vahydro_metric_grid()` help menu
 
 ### 1.2.5 09/04/2026
 1. Debugged NA check in `bf_forecast_start_date()`

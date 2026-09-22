@@ -39,10 +39,10 @@
 #'source(paste(basepath,'config.R',sep='/'))
 #'m_version = c('vahydro-1.0')
 #'runids <- c('runid_600','runid_400')
-#'metrics <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg"
+#'metrics <- c("WA_90_mgd", "Qavailable_90_mgd","Smin_L90_mg")
 #'om_vahydro_metric_grid(
 #'  metric = metrics,
-#'  runids = runid,
+#'  runids = runids,
 #'  bundle = "watershed",
 #'  ftype = "vahydro",
 #'  ds = ds)
