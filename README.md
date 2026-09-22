@@ -109,7 +109,7 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
-### 1.2.6 09/16/2026
+### 1.2.6 09/22/2026
 1. Fixed a bug in the confidence interval upper label in `WaterGageBase$plot_baseflow_agwrc()`
 2. Added an `auto_forecast_cs()` function to find potential start dates in a
 given year and test various forecast to find optimal start dates.

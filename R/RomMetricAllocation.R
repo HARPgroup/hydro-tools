@@ -206,9 +206,9 @@ RomMetricAllocation <- R6::R6Class(
     #'   out_col_name for the cumulative sum of the values in value_col
     calc_cumulative = function(value_col = "allocation", out_col_name = "cumultive_sum"){
       #Join allocations onto network data
-      self$network_data[,value_col] <- self$allocation_df[match(self$network_data[,self$src_node_col], self$allocation_df[,self$src_node_col]), value_col]
+      self$network_data[,value_col] <- self$allocation_df[match(self$network_data[,self$src_node_col], self$allocation_df[,"src_node"]), value_col]
       #Run network allocation calculation
-      super$calc_cumulative(value_col = value_col, out_col_name = "cumulative_allocation")
+      super$calc_cumulative(value_col = value_col, out_col_name = out_col_name)
     }
   ) #End public fields/methods
 )#End R6Class()
