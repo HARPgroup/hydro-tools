@@ -36,6 +36,7 @@ NA
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-dHOMWaterSystemFlowBy-exportOpenMIBase}{\code{dHOMWaterSystemFlowBy$exportOpenMIBase()}}
+    \item \href{#method-dHOMWaterSystemFlowBy-exportOpenMIpost}{\code{dHOMWaterSystemFlowBy$exportOpenMIpost()}}
     \item \href{#method-dHOMWaterSystemFlowBy-om_valnames}{\code{dHOMWaterSystemFlowBy$om_valnames()}}
     \item \href{#method-dHOMWaterSystemFlowBy-om_codenames}{\code{dHOMWaterSystemFlowBy$om_codenames()}}
     \item \href{#method-dHOMWaterSystemFlowBy-clone}{\code{dHOMWaterSystemFlowBy$clone()}}
@@ -44,7 +45,6 @@ NA
 \if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMI"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMI'><code>dHVariablePluginDefault$exportOpenMI()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="exportOpenMIpost"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-exportOpenMIpost'><code>dHVariablePluginDefault$exportOpenMIpost()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOM"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOM'><code>dHVariablePluginDefault$fromOM()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="fromOpenMIBase"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-fromOpenMIBase'><code>dHVariablePluginDefault$fromOpenMIBase()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="dHVariablePluginDefault" data-id="param_info"><a href='../../hydrotools/html/dHVariablePluginDefault.html#method-dHVariablePluginDefault-param_info'><code>dHVariablePluginDefault$param_info()</code></a></span></li>
@@ -70,6 +70,28 @@ NA
   }
   \subsection{Returns}{
     an updated config if necessary or FALSE if it fails
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-dHOMWaterSystemFlowBy-exportOpenMIpost"></a>}}
+\if{latex}{\out{\hypertarget{method-dHOMWaterSystemFlowBy-exportOpenMIpost}{}}}
+\subsection{\code{dHOMWaterSystemFlowBy$exportOpenMIpost()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{dHOMWaterSystemFlowBy$exportOpenMIpost(entity, export = list())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{entity}}{the local object to work on}
+      \item{\code{export}}{current export object}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Returns a modified list of property and children
   }
 }
 

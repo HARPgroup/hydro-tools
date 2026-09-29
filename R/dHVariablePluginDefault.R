@@ -753,6 +753,26 @@ dHOMWaterSystemFlowBy <- R6Class(
       
       return(export)
     },
+    #' @param entity the local object to work on 
+    #' @param export current export object
+    #' @return Returns a modified list of property and children
+    exportOpenMIpost = function(entity, export = list()) {
+      #Copy the storage_stage_area matrix and properties over to a new list
+      #matrix that is expected in the php import to OM
+      message("Converting to primitive equation and data matrix")
+      #Create a data matrix that has the equation above or below the variable
+      #depending on the condition and the keys are controlled by the threshold
+      #in cfb_var
+      #Lookup type should be standard interpolate
+      #Also export the equation as an equation
+      # export[['matrix']] <- export[['storage_stage_area']][['matrix']]
+      #Remove the original list
+      export[['enable_cfb']] <- NULL
+      export[['cfb_var']] <- NULL
+      export[['cfb_condition']] <- NULL
+      export[['flowby_eqn']] <- dHOMEquation$new()$exportOpenMIbase(entity$get_prop("flowby_eqn"))
+      return(export)
+    },
     #' @return names that come from json as string values
     om_valnames = function() {
       nms = unique(

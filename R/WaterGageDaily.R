@@ -405,7 +405,12 @@ WaterGageDaily <- R6::R6Class(
         #not populated
         if(is.na(self$agwrc_default$method)){
           #Remove default from list:
+          low_flow_limit <- low_flow_limit[AGWRC != "default"]
+          low_agwrc_limit <- low_agwrc_limit[AGWRC != "default"]
+          high_flow_limit <- high_flow_limit[AGWRC != "default"]
+          high_agwrc_limit <- high_agwrc_limit[AGWRC != "default"]
           AGWRC <- AGWRC[AGWRC != "default"]
+          
           message("No default method has been set for this gage or the default
           forecast is deemed invalid. Default removed from results.")
           
