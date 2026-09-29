@@ -73,6 +73,11 @@ WaterGageBase <- R6::R6Class(
     #'  (lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
     #'  AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh
     agwrc_lm_limit = list(),
+    #'@field agwrc_default list. Where stored, any parameters to be used in
+    #'  baseflow forecasts by default. These values are set based on the
+    #'  *rating_class* property set via manual review of historic baseflow
+    #'  forecast performance
+    agwrc_default = list(),
     #' @description
     #' Initialize a WaterGageBase() instance populating all fields passed to
     #' object by the named list config. Only valid public fields are populated.
@@ -410,6 +415,40 @@ WaterGageBase <- R6::R6Class(
             target_entity = self$gage_feature,
             model_prop_code = "AGWRC-1.0",
             include_proptext = TRUE)
+          
+          #If a rating class is set, determine if limits should be used and any
+          #relevant AGWRC BPJs so that WaterGage will automatically use value 
+          #as noted by user. Warn user if a rating has been set that would
+          #prohibit default forecasts
+          rating_class <- lm_props[lm_props$propname == "rating_class",]
+          #Transalte rating to attributes:
+          if(nrow(rating_class) == 0){
+            #No rating set
+            self$agwrc_default$method <- NA
+            self$agwrc_default$use_limits <- NA
+          }else if(rating_class$propvalue %in% c(0, 4)){
+            #Variably calculated AGWRC without extrapolation or custom
+            #regression
+            self$agwrc_default$method <- "lm_variable"
+            self$agwrc_default$use_limits <- TRUE
+          }else if(rating_class$propvalue == 1){
+            #Variably calculated AGWRC with extrapolation
+            self$agwrc_default$method <- "lm_variable"
+            self$agwrc_default$use_limits <- FALSE
+          }else if(rating_class$propvalue == 2){
+            #Calculate AGWRC at start of event
+            self$agwrc_default$method <- "lm_constant"
+            self$agwrc_default$use_limits <- TRUE
+          }else if(rating_class$propvalue == 3){
+            #Use a BPJ value
+            self$agwrc_default$method <- as.numeric(lm_props$propcode[lm_props$propname == "rating_class"])
+            self$agwrc_default$use_limits <- NA
+          }else if(rating_class$propvalue %in% 5:7){
+            #No valid method found
+            self$agwrc_default$method <- NA
+            self$agwrc_default$use_limits <- NA
+          }
+          
           self$agwrc_lm_m <- lm_props$propvalue[lm_props$propname == "regression_m"]
           self$agwrc_lm_b <- lm_props$propvalue[lm_props$propname == "regression_b"]
           self$agwrc_lm_limit <- list(
@@ -418,6 +457,13 @@ WaterGageBase <- R6::R6Class(
             agwrc_reg_qhigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_qhigh"],
             agwrc_reg_chigh = lm_props$propvalue[lm_props$propname == "agwrc_reg_chigh"]
           )
+          #Set empty numerics (where this data has not been set) to NA
+          self$agwrc_lm_limit[lengths(self$agwrc_lm_limit) == 0] <- NA
+          if(length(self$agwrc_lm_b) == 0 || length(self$agwrc_lm_m) == 0){
+            self$agwrc_lm_m <- NA
+            self$agwrc_lm_b <- NA
+          }
+          
           if(!return_fun){
             return(lm_props)
           }

@@ -97,6 +97,11 @@ recession coefficient AGWRC ~ log(Q). Stored in database.}
 analysis for AGWRC are stored in a list with variables agwrc_reg_qlow
 (lowest valid flow for regression), agwrc_reg_clow (corresponding lowest
 AGWRC for regresison), agwrc_reg_qhigh, and agwrc_reg_chigh}
+
+    \item{\code{agwrc_default}}{list. Where stored, any parameters to be used in
+baseflow forecasts by default. These values are set based on the
+\emph{rating_class} property set via manual review of historic baseflow
+forecast performance}
   }
   \if{html}{\out{</div>}}
 }

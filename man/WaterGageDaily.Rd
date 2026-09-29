@@ -369,7 +369,8 @@ of the year using \code{hydrotools::om_flow_table()}
     \preformatted{WaterGageDaily$baseflow_forecast(
   start_date,
   forecast_days = 0:90,
-  AGWRC = list(lm_constant = "lm_constant", lm_variable = "lm_variable"),
+  AGWRC = list(default = "default", lm_constant = "lm_constant", lm_variable =
+    "lm_variable"),
   use_limits = TRUE,
   adjust_start_date = NULL
 )}

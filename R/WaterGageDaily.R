@@ -351,7 +351,11 @@ WaterGageDaily <- R6::R6Class(
     #'@returns A data.frame of date, AGWRC, forecasted flow, and observed flow
     baseflow_forecast = function(start_date,
                                  forecast_days = 0:90,
-                                 AGWRC = list("lm_constant" = "lm_constant","lm_variable" = "lm_variable"),
+                                 AGWRC = list(
+                                   "default" = "default",
+                                   "lm_constant" = "lm_constant",
+                                   "lm_variable" = "lm_variable"
+                                 ),
                                  use_limits = TRUE,
                                  adjust_start_date = NULL
                                  ){
@@ -384,29 +388,67 @@ WaterGageDaily <- R6::R6Class(
       }
       
       if(use_limits){
-        low_flow_limit <- self$agwrc_lm_limit$agwrc_reg_qlow 
-        low_agwrc_limit <- self$agwrc_lm_limit$agwrc_reg_clow
-        high_flow_limit <- self$agwrc_lm_limit$agwrc_reg_qhigh
-        high_agwrc_limit <- self$agwrc_lm_limit$agwrc_reg_chigh
+        low_flow_limit <-   rep(self$agwrc_lm_limit$agwrc_reg_qlow, length(AGWRC))
+        low_agwrc_limit <-  rep(self$agwrc_lm_limit$agwrc_reg_clow, length(AGWRC))
+        high_flow_limit <-  rep(self$agwrc_lm_limit$agwrc_reg_qhigh, length(AGWRC))
+        high_agwrc_limit <- rep(self$agwrc_lm_limit$agwrc_reg_chigh, length(AGWRC))
       }else{
-        low_flow_limit <- NULL
-        low_agwrc_limit <- NULL
-        high_flow_limit <- NULL
-        high_agwrc_limit <- NULL
+        low_flow_limit <-   rep(NA, length(AGWRC))
+        low_agwrc_limit <-  rep(NA, length(AGWRC))
+        high_flow_limit <-  rep(NA, length(AGWRC))
+        high_agwrc_limit <- rep(NA, length(AGWRC))
       }
+      
+      #Set how to calculate default method, if any:
+      if("default" %in% AGWRC){
+        #AGWRC cannot be NA. This could be bad user input or the default method is
+        #not populated
+        if(is.na(self$agwrc_default$method)){
+          #Remove default from list:
+          AGWRC <- AGWRC[AGWRC != "default"]
+          message("No default method has been set for this gage or the default
+          forecast is deemed invalid. Default removed from results.")
+          
+        }else{
+          if(!is.na(self$agwrc_default$use_limits) && self$agwrc_default$use_limits){
+            low_flow_limit[AGWRC == "default"] <- self$agwrc_lm_limit$agwrc_reg_qlow
+            low_agwrc_limit[AGWRC == "default"] <- self$agwrc_lm_limit$agwrc_reg_clow
+            high_flow_limit[AGWRC == "default"] <- self$agwrc_lm_limit$agwrc_reg_qhigh
+            high_agwrc_limit[AGWRC == "default"] <- self$agwrc_lm_limit$agwrc_reg_chigh
+          }else{
+            low_flow_limit[AGWRC == "default"] <- NA
+            low_agwrc_limit[AGWRC == "default"] <- NA
+            high_flow_limit[AGWRC == "default"] <- NA
+            high_agwrc_limit[AGWRC == "default"] <- NA
+          }
+          
+          #Populate default AGWRC and limits:
+          AGWRC[AGWRC == "default"] <- self$agwrc_default$method
+        }
+      }
+      
+      #Do not proceed if no AGWRC's remain, which can only occur if default
+      #method is only used and was not set
+      if(length(AGWRC) == 0){
+        stop("Default method has not been set for this gage or default
+        baseflow forecasts were deemed inappropriate. Please consult the rating
+        class for this gage based on appropriate case studies or use other
+        AGWRC methods of entry")
+      }
+      
       #Forecast out the days of the user request using the agws package
       #Run the baseflow_forecast method using each AGWRC style defined by user.
       #all_forecasts will be a list with data frames for each baseflow_forecast
       all_forecasts <- mapply(FUN = agws::forwardForecast,
                               SIMPLIFY = FALSE,
                               AGWRC = AGWRC,
+                              low_flow_limit = low_flow_limit,
+                              low_agwrc_limit = low_agwrc_limit,
+                              high_flow_limit = high_flow_limit,
+                              high_agwrc_limit = high_agwrc_limit,
                               MoreArgs = list(Q0 = Q0,
                                               days = forecast_days,
-                                              m = self$agwrc_lm_m, b = self$agwrc_lm_b,
-                                              low_flow_limit = low_flow_limit,
-                                              low_agwrc_limit = low_agwrc_limit,
-                                              high_flow_limit = high_flow_limit,
-                                              high_agwrc_limit = high_agwrc_limit
+                                              m = self$agwrc_lm_m, b = self$agwrc_lm_b
                               )
       )
       #Assign names to each dataframe in all_forecasts based on the names in the

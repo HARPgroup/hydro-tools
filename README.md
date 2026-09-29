@@ -109,6 +109,16 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.6 09/29/2026
+1. `WaterGageBase` now sets agwrc limits to NA, rather than NULL, if they are
+not populated, making it easier to track in larger apply statements
+2. `WaterGageBase` now populates `default_agwrc` field as a list() containing
+`method` and `use_limits` as appropriate based on the rating class property, if
+set
+3. `WaterGageDaily$baseflow_forecast()` and `WaterGageDaily$plot_baseflow_forecast()`
+can now take AGWRC = "default" to use the `agwrc_default` method selected by the
+rating class property, if set
+
 ### 1.2.6 09/22/2026
 1. Fixed a bug in the confidence interval upper label in `WaterGageBase$plot_baseflow_agwrc()`
 2. Added an `auto_forecast_cs()` function to find potential start dates in a
