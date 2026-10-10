@@ -76,6 +76,7 @@ Collate:
     'fn_plot_cia_dend.R'
     'imp_utils.R'
     'model_handlers.R'
+    'nhdPlusNetwork.R'
     'odbc_utils.R'
     'om_auth_read.R'
     'om_cia_table.R'
