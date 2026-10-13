@@ -90,8 +90,8 @@
 #'  shenandoah_wkt$render_leaflet(value_col = "StreamOrde")
 #'  
 #'  #Or with user provided colors:
-#'  col_vec <- sample(x = colors()[!grepl("gr(e|a)y",colors())],
-#'  size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
+#'  col_options <- colors()[!grepl("gr(e|a)y",colors())]
+#'  col_vec <- sample(x = col_options, size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
 #'  col_vec <- rgb(t(col2rgb(col_vec)),maxColorValue = 255)
 #'  shenandoah_wkt$render_leaflet(color_vector = col_vec)
 #' }
@@ -414,20 +414,19 @@ nhdPlusNetwork <- R6::R6Class(
           ) |> 
           as.data.frame()
         
-        all_nhd <- rbind(
-         self$nhd_df[,names(self$nhd_df) %in% names(potential_missing)],
+        nhd_df <- rbind(
+         nhd_df[,names(nhd_df) %in% names(potential_missing)],
           potential_missing
         )
-        
-        ## Update fields ####
-        ### SF version ####
-        all_nhd_sf <- sf::st_as_sf(all_nhd[!is.na(all_nhd$geometry),],
-                                   wkt = "geometry", crs = 4326)
-        
-        ### Set on Self ####
-        self$nhd_df <- all_nhd
-        self$nhd_sf <- all_nhd_sf
       }
+      ## Update fields ####
+      ### SF version ####
+      all_nhd_sf <- sf::st_as_sf(nhd_df[!is.na(nhd_df$geometry),],
+                                 wkt = "geometry", crs = 4326)
+      
+      ### Set on Self ####
+      self$nhd_df <- nhd_df
+      self$nhd_sf <- all_nhd_sf
       
       # Network Creation ####
       #Create a subnetwork object

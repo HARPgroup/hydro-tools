@@ -60,7 +60,8 @@ catchments and to create a leaflet to visualize the queries catchments.
  shenandoah_wkt$render_leaflet(value_col = "StreamOrde")
  
  #Or with user provided colors:
- col_vec <- sample(x = colors()[!grepl("gr(e|a)y",colors())],size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
+ col_options <- colors()[!grepl("gr(e|a)y",colors())]
+ col_vec <- sample(x = col_options, size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
  col_vec <- rgb(t(col2rgb(col_vec)),maxColorValue = 255)
  shenandoah_wkt$render_leaflet(color_vector = col_vec)
 }

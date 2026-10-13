@@ -79,6 +79,7 @@ Collate:
     'imp_utils.R'
     'model_handlers.R'
     'nhdPlusNetwork.R'
+    'nhdPlusRouting.R'
     'odbc_utils.R'
     'om_auth_read.R'
     'om_cia_table.R'
