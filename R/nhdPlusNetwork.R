@@ -1,15 +1,4 @@
 # Steps for NHDPlus object:
-#I. Initialize
-#   1. Read OM data -> Intersection with nhdplus + properties
-#     a. Option to find all in basin if rseg provided?
-#     b. Option to do recursive PSQL query to find all upstream nhdplus segments?
-#II. Create network
-#   1. Read NHDPlus ATTR to fill in network
-#III. Accumulation over user defined column
-#IV. Leaflet creation
-#   1. Includes base feature(s) selected by user in initialize and queried nhdplus segments
-#   2. Optional display of accumulation
-
 # Steps for NHDPlus allocations:
 #I. Initialize base object
 #II. Get downscaled metric for each segment (area weighted if rseg)
@@ -37,6 +26,8 @@
 #'   data related to NHDPlus catchment network with VAA attributes. On
 #'   initialize, the object finds intersecting NHDPlus catchments with a user
 #'   input feature or POINT and can optionally find upstream catchments as well.
+#'   There are methods to create \code{RomMetricNetwork} objects of the
+#'   catchments and to create a leaflet to visualize the queries catchments.
 #' @importFrom R6 R6Class
 #' @param ds RomDataSource often provided in DEQ config files and features a
 #'   local data storage or a connection to a database/RESTful service
@@ -71,18 +62,37 @@
 #'  shenandoah_nhd <- nhdPlusNetwork$new(ds, rseg_outlet,find_rseg_upstream = TRUE,
 #'                                       maximum_divergence = 2)
 #'  nrow(shenandoah_nhd$nhd_df)
-#'  plot(shenandoah_nhd$nhd_sf$geometry[1:10])
 #'  
 #'  #Create the RomMetricNetwork
 #'  shenandoah_network <- shenandoah_nhd$create_network()
 #'  #View network
 #'  shenandoah_network$render_force_diagram()
-#'  View(shenandoah_network$network_data)
 #'  #Verify network routing
-#'  accumulate_area <- shenandoah_network$calc_cumulative("AreaSqKM","CumulativeAreaSqKM")
+#'  accumulate_area <- shenandoah_feat$calc_cumulative("AreaSqKM","CumulativeAreaSqKM")
 #'  #Some small error anticipated if network is missing some boundary segments
 #'  max(accumulate_area$CumulativeAreaSqKM)
 #'  shenandoah_nhd$nhd_df$TotDASqKM[which.max(shenandoah_nhd$nhd_df$TotDASqKM)]
+#'  
+#'  #Equivalent point query
+#'   #All NHDPlus in the Shenandoah basin
+#'  outlet_point <- sf::st_as_sfc("POINT (-77.78 39.27)",crs = 4326)
+#'  shenandoah_wkt <- nhdPlusNetwork$new(ds, src_feature = outlet_point,
+#'                                       maximum_divergence = 2)
+#'  
+#'  #Verify network routing
+#'  accumulate_area <- shenandoah_wkt$calc_cumulative("AreaSqKM","CumulativeAreaSqKM")
+#'  
+#'  #Map by area:
+#'  shenandoah_wkt$render_leaflet(value_col = "CumulativeAreaSqKM")
+#'  #Can also color by character data:
+#'  shenandoah_wkt$nhd_sf$StreamOrde <- as.character(shenandoah_wkt$nhd_sf$StreamOrde)
+#'  class(shenandoah_wkt$nhd_sf$StreamOrde)
+#'  shenandoah_wkt$render_leaflet(value_col = "StreamOrde")
+#'  
+#'  #Or with user provided colors:
+#'  col_vec <- sample(x = colors()[!grepl("gr(e|a)y",colors())],size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
+#'  col_vec <- rgb(t(col2rgb(col_vec)),maxColorValue = 255)
+#'  shenandoah_wkt$render_leaflet(color_vector = col_vec)
 #' }
 nhdPlusNetwork <- R6::R6Class(
   "nhdPlusNetwork",
@@ -90,6 +100,10 @@ nhdPlusNetwork <- R6::R6Class(
     #' @field ds RomDataSource often provided in DEQ config files and features a
     #'   local data storage or a connection to a database/RESTful service
     ds = NA,
+    #'@field src_feature sf or sfc. The spatial object that represents the
+    #'  feature or point the user used to initiate the object and intersect with
+    #'  the nhdplus network. This includes upstream river segments if requested
+    #'  by user.
     src_feature = NA,
     #'@field max_divergence Integer. The highest divergence number allowed in
     #'  the network. Divergences can assist with network connectivity, but be
@@ -99,7 +113,7 @@ nhdPlusNetwork <- R6::R6Class(
     #'attributes. Will include catchments with zero area that serve to
     #'artifically connect the network.
     nhd_df = NA,
-    #'@field nhd_df sf of intersecting NHDPlus V2 catchments with VAA attributes
+    #'@field nhd_sf sf of intersecting NHDPlus V2 catchments with VAA attributes
     #'Does not include catchments with zero area that serve to artifically
     #'connect the network.
     nhd_sf = NA,
@@ -168,8 +182,6 @@ nhdPlusNetwork <- R6::R6Class(
         }else{
           src_hydroid <- src_feature$hydroid
         }
-        ## Update src_feature ####
-        self$src_feature <- src_hydroid
         
         ## Intersect NHDPlus ####
         #Get the nhdplusv2 catchments that intersect with our basin
@@ -181,9 +193,10 @@ nhdPlusNetwork <- R6::R6Class(
                    ,user_feat.hydrocode as feat_hydrocode
                    ,user_feat.hydroid as feat_hydroid
                    ,user_feat.feat_area
+                   ,user_feat.dh_geofield as feat_geometry
              FROM dh_feature_fielded as nhd
              LEFT JOIN (
-               SELECT hydroid, hydrocode, dh_geofield_geom,
+               SELECT hydroid, hydrocode, dh_geofield_geom, dh_geofield,
                       ST_Area(dh_geofield_geom) as feat_area
                FROM dh_feature_fielded
                WHERE hydroid IN (",paste0(src_hydroid, collapse = ","),")
@@ -204,8 +217,20 @@ nhdPlusNetwork <- R6::R6Class(
           all_nhd_geom <- all_nhd_geom[order(all_nhd_geom$feat_area, decreasing = FALSE),]
           all_nhd_geom <- all_nhd_geom[!duplicated(all_nhd_geom$nhd_hydrocode),]
         }
+        
+        ## Update src_feature ####
+        src_feature_df <- all_nhd_geom[,c("feat_hydroid", "feat_hydrocode", "feat_geometry")]
+        src_feature_df <- src_feature_df[!duplicated(src_feature_df$feat_hydroid),]
+        
+        self$src_feature <- sf::st_as_sf(src_feature_df[!is.na(src_feature_df$feat_geometry),],
+                                         crs = 4326,
+                                         wkt = "feat_geometry")
+        self$src_feature$map_popup <- paste0("Hydroid: ", self$src_feature$feat_hydroid,"<br>",
+                                         "Hydrocode: ", self$src_feature$feat_hydrocode)
+        
         #Remove now uneeded column to prevent confusion
         all_nhd_geom$feat_area <- NULL
+        all_nhd_geom$feat_geometry <- NULL
         
       }else if(
         inherits(src_feature, "sfc_POINT") |
@@ -220,8 +245,9 @@ nhdPlusNetwork <- R6::R6Class(
         }
         #Convert point to WKT to make it easier to paste to postgis
         src_wkt <- sf::st_as_text(src_feature)
+        
         ## Update src_feature ####
-        self$src_feature <- src_wkt
+        self$src_feature <- src_feature
         
         ## Intersect NHDPlus Recursively ####
         #Find all nhdplus segments
@@ -302,7 +328,11 @@ nhdPlusNetwork <- R6::R6Class(
       self$max_divergence <- maximum_divergence
       
       # SF version ####
-      all_nhd_sf <- sf::st_as_sf(all_nhd, wkt = "geometry", crs = 4326)
+      #Remove NA geometries that may be introduced in the point initialization
+      #as dbase has the VAA artificial catchments with no geometry
+      all_nhd_sf <- sf::st_as_sf(all_nhd[!is.na(all_nhd$geometry),],
+                                 wkt = "geometry", crs = 4326)
+      
       
       # Set on Self ####
       self$nhd_df <- all_nhd
@@ -359,7 +389,7 @@ nhdPlusNetwork <- R6::R6Class(
         missing_nhd_props <- DBI::dbGetQuery(
           self$ds$connection,
           paste0(
-            "SELECT f.hydroid, p.propname, p.propvalue 
+            "SELECT f.hydroid,f.hydrocode as nhd_hydrocode, p.propname, p.propvalue 
              FROM dh_feature_fielded as f
              LEFT JOIN dh_properties as p
                ON p.featureid = f.hydroid
@@ -372,7 +402,7 @@ nhdPlusNetwork <- R6::R6Class(
         #Pivot properties wider to have them each in separate columns and
         #prepare data frame for merging with the rest of the nhd data
         potential_missing <- missing_nhd_props |> 
-          tidyr::pivot_wider(id_cols = hydroid,
+          tidyr::pivot_wider(id_cols = hydroid:nhd_hydrocode,
                              names_from = propname,
                              values_from = propvalue) |> 
           #Create the other fields needed for merge
@@ -411,6 +441,154 @@ nhdPlusNetwork <- R6::R6Class(
       
       # Return ####
       return(self$network)
+    },
+    #' @description
+    #' Calculate the cumulative sum of a value defined by value_col from all
+    #' upstream nodes of each node (defined by \code{get_node_relation()}).
+    #' Inherited from \code{RomMetricNetwork}
+    #' @param value_col Character. The value in network_data to sum across
+    #'   upstream nodes
+    #' @param out_col_name Character. Default "cumulative_sum" and represents
+    #'   where output network cumulative sum should be stored.
+    #' @return A data frame of network_data now containing a field named by
+    #'   out_col_name for the cumulative sum of the values in value_col. Also
+    #'   updates nhd_df and nhd_sf on this object.
+    #' @seealso [RomMetricNetwork()]
+    calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
+      if(!inherits(self$network, "RomMetricNetwork")){
+        self$create_network(nhd_df = self$nhd_df)
+      }
+      out <- self$network$calc_cumulative(value_col = value_col,
+                                          out_col_name = out_col_name)
+      
+      # SF version ####
+      #Remove NA geometries that may be introduced in the point initialization
+      #as dbase has the VAA artificial catchments with no geometry
+      out_sf <- sf::st_as_sf(out[!is.na(out$geometry),],
+                             wkt = "geometry", crs = 4326)
+      
+      
+      # Set on Self ####
+      self$nhd_df <- out
+      self$nhd_sf <- out_sf
+      
+      return(out)
+    },
+    #'@description Create a leaftlet of the returned nhdplus data. The user may
+    #'  optionally color the data by a field in the nhd_sf field on this object
+    #'  instance or may provide a vector of colors. The source features used to
+    #'  initialize this instance may optionally be included on the leaflet.
+    #'@param value_col Character, default NA. Optional. If provided, the nhdplus
+    #'  polygons will be colored by the numeric or character data in value_col.
+    #'  This will not be used if color_vector is also provided.
+    #'@param color_vector Character, default NA. Optional. If provided, the
+    #'  nhdplus polygons will be colored by the colors in color_vector. These
+    #'  should be provided as color names or hexcolors.
+    #'@param include_src_feature Logical. Defaults to TRUE. Should the source
+    #'  feature used to initialize this object instance and identify relevant
+    #'  nhdplus catchments be included on the leaflet?
+    #'@return A leaflet map object
+    render_leaflet = function(value_col = NA, 
+                              color_vector = NA,
+                              include_src_feature = TRUE){
+      if(!require(leaflet)){
+        warning("Leaflet is required for render_leaflet.")
+      }
+      ## Base map ####
+      #Base leaflet map following WSPA app
+      leaf_out <- leaflet::leaflet() |> 
+        leaflet::addProviderTiles(providers$Esri.WorldTopoMap,group = "Esri Topo") |>
+        leaflet::addProviderTiles(providers$USGS.USTopo,group = "USGS Topo") |>
+        leaflet::addProviderTiles(providers$Esri.WorldImagery, group = "Esri World Imagery") |>
+        leaflet::addProviderTiles(providers$OpenStreetMap,group='Open Street Map') 
+      
+      # Colors ####
+      #No colors provided or no user input found
+      leaf_col <- "#03F"
+      value_popup <- NULL
+      
+      #Check if user wishes to color polygons
+      if(inherits(color_vector,"character") && 
+         (length(color_vector) == 1 || length(color_vector) == nrow(self$nhd_sf))
+      ){
+        #If users has provided a vector of colors, use directly
+        leaf_col <- color_vector
+      }else if(!is.na(value_col)){
+        if(value_col %in% names(self$nhd_sf)){
+          #If user has provided value, is it numeric or character?
+          value_data <- sf::st_drop_geometry(self$nhd_sf[,value_col])[,value_col]
+          if(all(is.numeric(value_data))){
+            ### Continuous color data####
+            col_fun <- leaflet::colorNumeric("RdYlBu",
+                                             domain = value_data)
+            
+          }else{
+            ### Factor colored data####
+            col_fun <- leaflet::colorFactor("Dark2",
+                                            domain = factor(value_data))
+          }
+          #Color using function
+          leaf_col <- col_fun(value_data)
+          value_popup <- paste0("value_col: ", value_data,"<br>")
+        }else{
+          message("No value_col ", value_col," found in self$nhd_sf
+          data.frame. Leaflet polygons will not be colored.")
+        }
+      }
+      
+      ## Add src polygons ####
+      mapGroups <- "NHDPlusV2"
+      if(include_src_feature){
+        mapGroups <- c("Source Feature", mapGroups)
+        #Check the geometry type to ensure the data is properly added to leaflet
+        if(sf::st_geometry_type(self$src_feature, by_geometry = FALSE) == "POINT"){
+          #Point data
+          leaf_out <- leaf_out |> 
+            leaflet::addCircleMarkers(
+              data = self$src_feature, 
+              group = "Source Feature", weight = 2, color = "black",
+              fillColor = "grey20") 
+        }else if(all(sf::st_geometry_type(self$src_feature) %in% c("POLYGON","MULTIPOLYGON"))){
+          #Polygon data
+          leaf_out <- leaf_out |> 
+            leaflet::addPolygons(
+              data = self$src_feature, 
+              popup = self$src_feature$map_popup,
+              group = "Source Feature", weight = 2,
+              fillColor = "#777B7E",
+              color = "#48494B") 
+        }
+      }
+      
+      ## Add nhd polygons ####
+      leaf_out <- leaf_out |> 
+        leaflet::addPolygons(
+          data = self$nhd_sf, 
+          popup = paste0("Hydroid:", self$nhd_sf$hydroid,"<br>",
+                         "Hydrocode: ", self$nhd_sf$nhd_hydrocode,"<br> ",
+                         "Hydroseq: ", self$nhd_sf$Hydroseq," -> ", self$nhd_sf$DnHydroseq,"<br>",
+                         value_popup,
+                         "Local D.A. -> Total D.A.:<br>",
+                         round(self$nhd_sf$AreaSqKM * 100000^2 / 2.54^2 / 12^2 / 5280^2,2)," sq mi -> ",
+                         round(self$nhd_sf$TotDASqKM * 100000^2 / 2.54^2 / 12^2 / 5280^2,2)," sq mi"),
+          group = "NHDPlusV2", weight = 2, fillColor = leaf_col) 
+      
+      ## Controls ####
+      leaf_out <- leaf_out |> 
+        addLayersControl(baseGroups = c(
+                           'Esri Topo',
+                           'USGS Topo',
+                           'Esri World Imagery',
+                           'Open Street Map'),
+                         overlayGroups = mapGroups,
+                         options = layersControlOptions(collapsed = FALSE),
+                         position = 'topleft')
+      if(require(leafem)){
+        leaf_out <- leaf_out |> 
+          leafem::addMouseCoordinates()
+      }
+    
+      return(leaf_out)
     }
     
   ) # End public list

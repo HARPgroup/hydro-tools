@@ -589,6 +589,11 @@ RomMetricNetwork <- R6::R6Class(
     calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
       #Store data frame with network data
       network_data <- self$network_data
+      
+      if(value_col %in% names(network_data)){
+        stop("No field of ",value_col," found in network_data data.frame.
+          Please check inputs.")
+      }
       #Create columns for a cumulative allocation and a new WA (in mgd)
       network_data[,out_col_name] <- 0
       

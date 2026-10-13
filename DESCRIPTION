@@ -45,7 +45,9 @@ Imports:
 Remotes:
   agws=github::HARPgroup/baseflow_storage
 Suggests:
-  plotly
+  plotly,
+  leaflet,
+  leafem
 Collate: 
     'CEDSEntity.R'
     'CEDSFacility.R'
