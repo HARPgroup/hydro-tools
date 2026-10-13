@@ -109,7 +109,16 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
-### 1.2.6 09/29/2026
+### 1.2.8 10/13/2026
+1. `nhdPlusNetwork` R6 object is now exported and allows users to query and
+navigate nhdplus catchments with ease after providing a WKT point or a
+RomFeature
+2. `RomMetricNetwork$calc_cumulative()` was updated to provide users with more
+meaningful warnings when `value_col` is not a column in `network_data`
+3. `get_all_riversegs()` can now return a `RomMetricNetwork` instance of all
+riversegments
+
+### 1.2.7 09/29/2026
 1. `WaterGageBase` now sets agwrc limits to NA, rather than NULL, if they are
 not populated, making it easier to track in larger apply statements
 2. `WaterGageBase` now populates `default_agwrc` field as a list() containing
