@@ -8,10 +8,13 @@
 #'   'vahydrosw_wshed_%'
 #' @param ds A RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
-#' @return data frame with riverseg, hydroid, hydrocode, name from dh_feature
+#' @param as_RomNetwork Logical, default to FALSE. Should results be returned as
+#'   a RomMetricNetwork object (TRUE) or a data.frame (FALSE)?
+#' @return data frame with riverseg, hydroid, hydrocode, name from dh_feature or
+#'   an instance of a RomMetricNetwork
 #' @export get_all_riversegs
-get_all_riversegs <- function(ds){
-  out <- DBI::dbGetQuery(conn = ds$connection,"
+get_all_riversegs <- function(ds, as_RomNetwork = FALSE){
+  rsegs <- DBI::dbGetQuery(conn = ds$connection,"
                               SELECT SUBSTR(hydrocode, 17, LENGTH(hydrocode)) as riverseg,
                               hydroid,hydrocode,name
                               FROM dh_feature
@@ -19,6 +22,17 @@ get_all_riversegs <- function(ds){
                               AND ftype = 'vahydro'
                               AND hydrocode ilike 'vahydrosw_wshed_%'
                           ")
+  if(as_RomNetwork){
+    names(rsegs) <- c("riverseg","featureid","hydrocode","propname")
+    out <- hydrotools::RomMetricNetwork$new(
+      ds = ds, datasource =  rsegs,
+      force_unique_src = TRUE,
+      src_node_col = "riverseg"
+    )
+  }else{
+    out <- rsegs
+  }
+  
   return(out)
 }
 

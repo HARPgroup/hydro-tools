@@ -4,14 +4,18 @@
 \alias{get_all_riversegs}
 \title{Get data frame of all dbase river segments}
 \usage{
-get_all_riversegs(ds)
+get_all_riversegs(ds, as_RomNetwork = FALSE)
 }
 \arguments{
 \item{ds}{A RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
+
+\item{as_RomNetwork}{Logical, default to FALSE. Should results be returned as
+a RomMetricNetwork object (TRUE) or a data.frame (FALSE)?}
 }
 \value{
-data frame with riverseg, hydroid, hydrocode, name from dh_feature
+data frame with riverseg, hydroid, hydrocode, name from dh_feature or
+an instance of a RomMetricNetwork
 }
 \description{
 Query datasource for all river segments
