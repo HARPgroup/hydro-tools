@@ -590,7 +590,7 @@ RomMetricNetwork <- R6::R6Class(
       #Store data frame with network data
       network_data <- self$network_data
       
-      if(value_col %in% names(network_data)){
+      if(!value_col %in% names(network_data)){
         stop("No field of ",value_col," found in network_data data.frame.
           Please check inputs.")
       }
