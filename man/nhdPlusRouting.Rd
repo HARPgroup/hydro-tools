@@ -4,7 +4,7 @@
 \alias{nhdPlusRouting}
 \title{nhdPlusRouting}
 \value{
-R6 Object of class nhdPlusNetwork
+R6 Object of class nhdPlusRouting
 }
 \description{
 Utility class for finding and navigating NHDPlus segments within
@@ -18,7 +18,7 @@ NHDPlus Query + Network + Flow Routing Class
 }
 }
 \section{Super class}{
-\code{\link[hydrotools:nhdPlusNetwork]{nhdPlusNetwork}} -> \code{nhdPlusNetwork}
+\code{\link[hydrotools:nhdPlusNetwork]{nhdPlusNetwork}} -> \code{nhdPlusRouting}
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
@@ -52,8 +52,8 @@ NHDPlus VAA to increase network connectivity}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-nhdPlusNetwork-initialize}{\code{nhdPlusNetwork$new()}}
-    \item \href{#method-nhdPlusNetwork-clone}{\code{nhdPlusNetwork$clone()}}
+    \item \href{#method-nhdPlusRouting-initialize}{\code{nhdPlusRouting$new()}}
+    \item \href{#method-nhdPlusRouting-clone}{\code{nhdPlusRouting$clone()}}
   }
 }
 \if{html}{\out{<details open><summary>Inherited methods</summary>
@@ -64,12 +64,12 @@ NHDPlus VAA to increase network connectivity}
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-nhdPlusNetwork-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-nhdPlusNetwork-initialize}{}}}
-\subsection{\code{nhdPlusNetwork$new()}}{
+\if{html}{\out{<a id="method-nhdPlusRouting-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-nhdPlusRouting-initialize}{}}}
+\subsection{\code{nhdPlusRouting$new()}}{
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{nhdPlusNetwork$new(
+    \preformatted{nhdPlusRouting$new(
   ds,
   src_feature,
   find_rseg_upstream = TRUE,
@@ -112,13 +112,13 @@ to integrate}
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-nhdPlusNetwork-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-nhdPlusNetwork-clone}{}}}
-\subsection{\code{nhdPlusNetwork$clone()}}{
+\if{html}{\out{<a id="method-nhdPlusRouting-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-nhdPlusRouting-clone}{}}}
+\subsection{\code{nhdPlusRouting$clone()}}{
   The objects of this class are cloneable with this method.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{nhdPlusNetwork$clone(deep = FALSE)}
+    \preformatted{nhdPlusRouting$clone(deep = FALSE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{

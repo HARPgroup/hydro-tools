@@ -58,16 +58,21 @@ nhdPlusRouting <- R6::R6Class(
     #'  catchments including artifical catchments of zero drainage area from
     #'  NHDPlus VAA to increase network connectivity
     network = NA,
-    #' @description
+    #' @description Initialize an instance of nhdPlusRouting to get a network of
+    #'   nhdPlus V2 catchments that intersect the user provided feature using
+    #'   the inherited methods of \code{nhdPlusNetwork}. These will initialize
+    #'   with a baseline metrics scaled by area (riverseg) or through unit area
+    #'   compilation (lrseg) and be provided in a separate field. 
     #' @param ds RomDataSource often provided in DEQ config files and features a
     #'   local data storage or a connection to a database/RESTful service
-    #' @param src_feature Either a RomFeature or a POINT simple feature collection
-    #'   (\code{SFC}) or a one-row simple feature (\code{SF}). This feature is
-    #'   used to intersect the NHDPlus network. If an SFC/SF POINT is provided,
-    #'   all upstream catchments of the intersected catchment are returned.
-    #' @param find_rseg_upstream Logical, default TRUE. If \code{src_feature} is a
-    #'   \code{RomFeature} of a river segment (as identifed via bundle and ftype),
-    #'   should the NHDPlus network consist of only those intersecting
+    #' @param src_feature Either a RomFeature or a POINT simple feature
+    #'   collection (\code{SFC}) or a one-row simple feature (\code{SF}). This
+    #'   feature is used to intersect the NHDPlus network. If an SFC/SF POINT is
+    #'   provided, all upstream catchments of the intersected catchment are
+    #'   returned.
+    #' @param find_rseg_upstream Logical, default TRUE. If \code{src_feature} is
+    #'   a \code{RomFeature} of a river segment (as identifed via bundle and
+    #'   ftype), should the NHDPlus network consist of only those intersecting
     #'   src_feature (FALSE) or those intersecting src_feature and all upstream
     #'   river segments (TRUE)?
     #' @param handle_overlap Character, default "smallest_area". If multiple
@@ -81,7 +86,7 @@ nhdPlusRouting <- R6::R6Class(
     #'   number allowed in the network. Divergences can assist with network
     #'   connectivity, but be aware that divergences with value 9 may be harder
     #'   to integrate
-    #' @return 
+    #' @return
     initialize = function(ds, src_feature,
                           find_rseg_upstream = TRUE,
                           handle_overlap = "smallest_area",
@@ -190,28 +195,31 @@ nhdPlusRouting <- R6::R6Class(
         rseg_data$incrementalFlow <- rseg_data$qbaseline - rseg_data$upstreamFlow
         rseg_data$incrementalArea <- rseg_data$coalesce_totalarea - rseg_data$upstreamArea
         
-        ## nhd_rseg ####
-        nhd_rseg <- self$nhd_df |> 
+        ## nhd_feat ####
+        nhd_feat <- self$nhd_df |> 
           dplyr::left_join(rseg_data, by = c("feat_hydroid" = "hydroid",
                                                 "feat_hydrocode" = "hydrocode"))
-        ## nhd_rseg ####
         ## Downscale Flow ####
-        nhd_rseg$nhd_Qbaseline <- 0 
-        nhd_rseg$incrementalArea[is.na(nhd_rseg$incrementalArea)] <- 0
-        nhd_rseg$nhd_Qbaseline[nhd_rseg$incrementalArea > 0] <- 
-          nhd_rseg$incrementalFlow[nhd_rseg$incrementalArea > 0] * (nhd_rseg$AreaSqKM[nhd_rseg$incrementalArea > 0] * 100000^2 / 2.54^2 / 12^2 / 5280^2) / nhd_rseg$incrementalArea[nhd_rseg$incrementalArea > 0]
+        nhd_feat$nhd_Qbaseline <- 0 
+        nhd_feat$incrementalArea[is.na(nhd_feat$incrementalArea)] <- 0
+        nhd_feat$nhd_Qbaseline[nhd_feat$incrementalArea > 0] <- 
+          nhd_feat$incrementalFlow[nhd_feat$incrementalArea > 0] * (nhd_feat$AreaSqKM[nhd_feat$incrementalArea > 0] * 100000^2 / 2.54^2 / 12^2 / 5280^2) / nhd_feat$incrementalArea[nhd_feat$incrementalArea > 0]
         
-      }else if(baseline_method == "landseg"){
+      }else if(baseline_method == "lrseg"){
         ## lseg ####
-        rseg_data <- DBI::dbGetQuery(
+        lrseg_data <- DBI::dbGetQuery(
           conn = ds$connection,
           paste0("SELECT nhd.hydroid as nhd_hydroid, nhd.hydrocode as nhd_hydrocode
             ,feat.hydroid as feat_hydroid, feat.hydrocode as feat_hydrocode
             , feat.name as feat_name, feat.ftype
-            ,model.pid, model.propcode 
-            ,runprop.propcode,runprop.propname
+            ,model.pid
             ,runprop.propvalue as runit_baseline
-            ,ST_Area(ST_Intersection(feat.dh_geofield_geom, nhd.dh_geofield_geom)) as intersectArea
+            ,ST_Area(
+              ST_Transform(
+                ST_Intersection(feat.dh_geofield_geom, nhd.dh_geofield_geom),
+                26918
+              )
+             ) * (10000 / 2.54 / 2.54 /12 /12 / 5280 / 5280) as intersectArea
             ,ST_AsText(feat.dh_geofield) as lseg_wkt
           FROM dh_feature_fielded as nhd
           LEFT JOIN (
@@ -238,13 +246,25 @@ nhdPlusRouting <- R6::R6Class(
         )
         #A lot of 532 lrsegs dont seem to have vahydro-1.0 models. Maybe they
         #only exist in the Southern rivers? Would need to test.
-        #What units is the intersection in?
+        ## Downscale Flow ####
+        #Calculate baseline flow as intersecting area of the lrseg and nhdplus
+        #catchment by unit area runoff
+        lrseg_data$lrseg_Qbaseline <- lrseg_data$intersectarea * lrseg_data$runit_baseline
+        #Total flow into this segment should then be the sum of the unit area
+        #runoff multiplied by the area of the nhdplus catchment. So, total unit
+        #area runoff is:
+        lrseg_runit <- lrseg_data |> 
+          dplyr::group_by(nhd_hydroid) |> 
+          dplyr::summarize(nhd_Qbaseline = sum(lrseg_Qbaseline, na.rm = TRUE))
+        
+        
+        ## nhd_feat ####
+        nhd_feat <- self$nhd_df |> 
+          dplyr::left_join(lrseg_runit, by = c("hydroid" = "nhd_hydroid"))
       }
-      browser()
+      
       # Set updated dfs and network on self ####
-      super$create_network(nhd_df = nhd_rseg)
-      
-      
+      super$create_network(nhd_df = nhd_feat)
     }
     
   ) # End public list
