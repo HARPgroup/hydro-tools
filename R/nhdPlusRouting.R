@@ -82,11 +82,18 @@ nhdPlusRouting <- R6::R6Class(
     #'   "smallest_area" keeping the intersection that occurred with the feature
     #'   with the smallest area (often a subwatershed in the case of river
     #'   segments)
+    #' @param baseline_method Character. Default "riverseg". Should the baseline
+    #'   for each nhdplus catchment be calculated by downscaling the incremental
+    #'   metric at each river segment ("riverseg") or by area aggregation in
+    #'   each land-river segment ("lrseg").
+    #' @param baseline_metric
+    #' @param baseline_runid
     #' @param maximum_divergence Integer, default 2. The highest divergence
     #'   number allowed in the network. Divergences can assist with network
     #'   connectivity, but be aware that divergences with value 9 may be harder
     #'   to integrate
-    #' @return
+    #' @return An instance of nhdPlusRouting with the data frame, SF, and
+    #'   network fields populated
     initialize = function(ds, src_feature,
                           find_rseg_upstream = TRUE,
                           handle_overlap = "smallest_area",
