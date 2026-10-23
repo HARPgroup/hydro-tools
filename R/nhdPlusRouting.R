@@ -123,6 +123,7 @@ nhdPlusRouting <- R6::R6Class(
                        handle_overlap = handle_overlap,
                        find_rseg_upstream = find_rseg_upstream,
                         maximum_divergence = maximum_divergence)
+      
       #Create the RomMetricNetwork and fill in artiical VAA Catchments
       super$create_network(nhd_df = self$nhd_df)
       

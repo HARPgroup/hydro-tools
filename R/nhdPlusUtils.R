@@ -194,8 +194,8 @@ make_network_df <- function(entity_df, entity_type = "wd",
         nhd_Qbaseline = 0,
         object_class = paste0("facility_",entity_type),
         hydroid = .data$MP_Hydroid,
-        Hydroseq = .data$Hydroseq_fac,
         DnHydroseq = .data$Hydroseq,
+        Hydroseq = .data$Hydroseq_fac,
         feat_hydroid = .data$hydroid, 
         consumption_frac = .data$max_frac
       )

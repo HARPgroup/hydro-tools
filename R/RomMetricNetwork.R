@@ -659,6 +659,7 @@ RomMetricNetwork <- R6::R6Class(
           
         }
       }
+      self$network_data <- network_data
       return(network_data)
     },
     #' @description
