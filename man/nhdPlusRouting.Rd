@@ -53,6 +53,7 @@ NHDPlus VAA to increase network connectivity}
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-nhdPlusRouting-initialize}{\code{nhdPlusRouting$new()}}
+    \item \href{#method-nhdPlusRouting-get_intake_wshd_df}{\code{nhdPlusRouting$get_intake_wshd_df()}}
     \item \href{#method-nhdPlusRouting-clone}{\code{nhdPlusRouting$clone()}}
   }
 }
@@ -67,6 +68,11 @@ NHDPlus VAA to increase network connectivity}
 \if{html}{\out{<a id="method-nhdPlusRouting-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-nhdPlusRouting-initialize}{}}}
 \subsection{\code{nhdPlusRouting$new()}}{
+  Initialize an instance of nhdPlusRouting to get a network of
+nhdPlus V2 catchments that intersect the user provided feature using
+the inherited methods of \code{nhdPlusNetwork}. These will initialize
+with a baseline metrics scaled by area (riverseg) or through unit area
+compilation (lrseg) and be provided in a separate field.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{nhdPlusRouting$new(
@@ -86,13 +92,14 @@ NHDPlus VAA to increase network connectivity}
     \describe{
       \item{\code{ds}}{RomDataSource often provided in DEQ config files and features a
 local data storage or a connection to a database/RESTful service}
-      \item{\code{src_feature}}{Either a RomFeature or a POINT simple feature collection
-(\code{SFC}) or a one-row simple feature (\code{SF}). This feature is
-used to intersect the NHDPlus network. If an SFC/SF POINT is provided,
-all upstream catchments of the intersected catchment are returned.}
-      \item{\code{find_rseg_upstream}}{Logical, default TRUE. If \code{src_feature} is a
-\code{RomFeature} of a river segment (as identifed via bundle and ftype),
-should the NHDPlus network consist of only those intersecting
+      \item{\code{src_feature}}{Either a RomFeature or a POINT simple feature
+collection (\code{SFC}) or a one-row simple feature (\code{SF}). This
+feature is used to intersect the NHDPlus network. If an SFC/SF POINT is
+provided, all upstream catchments of the intersected catchment are
+returned.}
+      \item{\code{find_rseg_upstream}}{Logical, default TRUE. If \code{src_feature} is
+a \code{RomFeature} of a river segment (as identifed via bundle and
+ftype), should the NHDPlus network consist of only those intersecting
 src_feature (FALSE) or those intersecting src_feature and all upstream
 river segments (TRUE)?}
       \item{\code{handle_overlap}}{Character, default "smallest_area". If multiple
@@ -106,8 +113,67 @@ segments)}
 number allowed in the network. Divergences can assist with network
 connectivity, but be aware that divergences with value 9 may be harder
 to integrate}
+      \item{\code{baseline_method}}{Character. Default "riverseg". Should the baseline
+for each nhdplus catchment be calculated by downscaling the incremental
+metric at each river segment ("riverseg") or by area aggregation in
+each land-river segment ("lrseg").}
+      \item{\code{baseline_metric}}{Character. The model metric to use to derive
+baseline metric. Default "l90_Qout" for baseline_method "riverseg". For
+"lrseg", a useful default is "Runit_l90"}
+      \item{\code{baseline_runid}}{Integer. Default 1000. The model scenario to derive
+the baseline_metric from.}
     }
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    An instance of nhdPlusRouting with the data frame, SF, and
+network fields populated
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-nhdPlusRouting-get_intake_wshd_df"></a>}}
+\if{latex}{\out{\hypertarget{method-nhdPlusRouting-get_intake_wshd_df}{}}}
+\subsection{\code{nhdPlusRouting$get_intake_wshd_df()}}{
+  Run a spatial intersection of the nhdplus watersheds
+initialized on object with all active intakes. Return data frames of
+(1) the intake, withdrawal, and nhdplus segment, (2) the intake,
+potential point source return based on assumed consumption, and
+estimated return flow nhdplus segment, and (3) a cleanup nhdplus data
+frame that can be binded to the other data frames to compile a full
+netowrk of facilities and watersheds. Each data frame will have three
+potential baseline flows based on facility five year averages, intake
+capacity, or pre-1989 values
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{nhdPlusRouting$get_intake_wshd_df(
+  onedrive_location,
+  conn_ODS,
+  default_ps_location = 1,
+  baseline_factor = 0.1
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{onedrive_location}}{Character. The location of the users Onedrive
+that should hold relevant foundation data}
+      \item{\code{conn_ODS}}{Pool database connection to the ODS data base.}
+      \item{\code{default_ps_location}}{Integer. Default 1 (next downstream segment).
+How many segments downstream should point sources be returned?}
+      \item{\code{baseline_factor}}{Numeric, default 0.1. How much of the baseline
+metric should be included in these scenarios?}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A list of four dataframes. full_network_df consists of watersheds,
+withdrawals, and point sources distinguished by object_class. Hydroseq
+and DnHydroseq may be used to navigate the network. nhdplus_df is a
+cleaned up version of the nhd_df field, facility_wd_df is a data frame of
+all withdrawals, facility_ps_df is a dataframe of all point sources based
+on estimated consumption and return location.
   }
 }
 

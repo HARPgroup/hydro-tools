@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.9 10/23/2026
+1. `nhdPlusRouting` R6 object is now exported and allows users to quickly find
+relevant baseline metrics and intakes in a given area to perform basic desktop
+water quantity analysis
+
 ### 1.2.8 10/13/2026
 1. `nhdPlusNetwork` R6 object is now exported and allows users to query and
 navigate nhdplus catchments with ease after providing a WKT point or a

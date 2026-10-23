@@ -351,18 +351,21 @@ nhdPlusNetwork <- R6::R6Class(
     #'@param nhd_df A dataframe of NHDPlus containing, at a minimum, hydroid and
     #'  hydrocode of the NHDPlus segments. This dataframe will be converted to a
     #'  \code{RomMetricNetwork} object.
+    #'@param fill_network Logical, default TRUE. Should this method attempt to
+    #'  fill network routing via VAA virtual catchments?
     #'@return A \code{RomMetricNetwork} object populated by the NHDPlus network
     #'provided by user or initialized in this instance.
-    create_network = function(nhd_df = self$nhd_df){
-      # Missing Catchments ####
-      #Find potentially missing catchments - those with no drainage area that
-      #assist in network connection. We do this by querying for segments below the
-      #diversion threshol that have sequences in the up or down columns but not
-      #in the hydrosequence column itself
-      potential_missing <- DBI::dbGetQuery(
-        self$ds$connection,
-        paste0(
-          "SELECT nhd.hydroid as nhd_hydroid, nhd.hydrocode as nhd_hydrocode
+    create_network = function(nhd_df = self$nhd_df, fill_network = TRUE){
+      if(fill_network){
+        # Missing Catchments ####
+        #Find potentially missing catchments - those with no drainage area that
+        #assist in network connection. We do this by querying for segments below the
+        #diversion threshol that have sequences in the up or down columns but not
+        #in the hydrosequence column itself
+        potential_missing <- DBI::dbGetQuery(
+          self$ds$connection,
+          paste0(
+            "SELECT nhd.hydroid as nhd_hydroid, nhd.hydrocode as nhd_hydrocode
            FROM dh_feature as nhd
            LEFT JOIN dh_properties as hseq
              ON hseq.featureid = nhd.hydroid
@@ -377,48 +380,50 @@ nhdPlusNetwork <- R6::R6Class(
                (hseq.propvalue NOT IN (",paste0(nhd_df$Hydroseq, collapse = ","),")
                  AND
                    (hseq.propvalue IN (",
-                     paste0(nhd_df$DnHydroseq[nhd_df$TotDASqKM != max(nhd_df$TotDASqKM, na.rm = TRUE)],collapse = ","),")
+            paste0(nhd_df$DnHydroseq[nhd_df$TotDASqKM != max(nhd_df$TotDASqKM, na.rm = TRUE)],collapse = ","),")
                     OR hseq.propvalue IN (",
-                    paste0(nhd_df$UpHydroseq,collapse = ","),"))
+            paste0(nhd_df$UpHydroseq,collapse = ","),"))
             )"
+          )
         )
-      )
-      
-      #Get nhdplus properties if any missing segments were identified
-      if(nrow(potential_missing) > 0){
-        ## Missing Hydroids ####
-        missing_nhd_props <- DBI::dbGetQuery(
-          self$ds$connection,
-          paste0(
-            "SELECT f.hydroid,f.hydrocode as nhd_hydrocode, p.propname, p.propvalue 
+        
+        #Get nhdplus properties if any missing segments were identified
+        if(nrow(potential_missing) > 0){
+          ## Missing Hydroids ####
+          missing_nhd_props <- DBI::dbGetQuery(
+            self$ds$connection,
+            paste0(
+              "SELECT f.hydroid,f.hydrocode as nhd_hydrocode, p.propname, p.propvalue 
              FROM dh_feature_fielded as f
              LEFT JOIN dh_properties as p
                ON p.featureid = f.hydroid
              WHERE f.hydroid IN (",
-            paste0(potential_missing$nhd_hydroid,collapse = ","),")"
+              paste0(potential_missing$nhd_hydroid,collapse = ","),")"
+            )
           )
-        )
-        
-        ## Missing Properties ####
-        #Pivot properties wider to have them each in separate columns and
-        #prepare data frame for merging with the rest of the nhd data
-        potential_missing <- missing_nhd_props |> 
-          tidyr::pivot_wider(id_cols = hydroid:nhd_hydrocode,
-                             names_from = propname,
-                             values_from = propvalue) |> 
-          #Create the other fields needed for merge
-          dplyr::mutate(
-            feat_hydroid = NA_integer_,
-            feat_hydrocode = NA_character_,    
-            geometry = NA_character_
-          ) |> 
-          as.data.frame()
-        
-        nhd_df <- rbind(
-         nhd_df[,names(nhd_df) %in% names(potential_missing)],
-          potential_missing
-        )
+          
+          ## Missing Properties ####
+          #Pivot properties wider to have them each in separate columns and
+          #prepare data frame for merging with the rest of the nhd data
+          potential_missing <- missing_nhd_props |> 
+            tidyr::pivot_wider(id_cols = hydroid:nhd_hydrocode,
+                               names_from = propname,
+                               values_from = propvalue) |> 
+            #Create the other fields needed for merge
+            dplyr::mutate(
+              feat_hydroid = NA_integer_,
+              feat_hydrocode = NA_character_,    
+              geometry = NA_character_
+            ) |> 
+            as.data.frame()
+          
+          nhd_df <- rbind(
+            nhd_df[,names(nhd_df) %in% names(potential_missing)],
+            potential_missing
+          )
+        }
       }
+      
       ## Update fields ####
       ### SF version ####
       all_nhd_sf <- sf::st_as_sf(nhd_df[!is.na(nhd_df$geometry),],

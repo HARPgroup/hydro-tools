@@ -178,7 +178,7 @@ drainage area that have hydroseq codes referenced by other catchments in
 netowrk.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{nhdPlusNetwork$create_network(nhd_df = self$nhd_df)}
+    \preformatted{nhdPlusNetwork$create_network(nhd_df = self$nhd_df, fill_network = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -187,6 +187,8 @@ netowrk.
       \item{\code{nhd_df}}{A dataframe of NHDPlus containing, at a minimum, hydroid and
 hydrocode of the NHDPlus segments. This dataframe will be converted to a
 \code{RomMetricNetwork} object.}
+      \item{\code{fill_network}}{Logical, default TRUE. Should this method attempt to
+fill network routing via VAA virtual catchments?}
     }
     \if{html}{\out{</div>}}
   }

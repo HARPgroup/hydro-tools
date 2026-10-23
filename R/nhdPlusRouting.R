@@ -4,27 +4,40 @@
 #' @description Utility class for finding and navigating NHDPlus segments within
 #' a particular POINT or feature and further routing flow across scenarios
 #' @details 
-#' @importFrom R6 R6Class
+#' @importFrom R6 R6Class 
+#' @importFrom rlang .data
 #' @param ds RomDataSource often provided in DEQ config files and features a
 #'   local data storage or a connection to a database/RESTful service
-#' @param src_feature Either a RomFeature or a POINT simple feature collection
-#'   (\code{SFC}) or a one-row simple feature (\code{SF}). This feature is used
-#'   to intersect the NHDPlus network. If an SFC/SF POINT is provided, all
-#'   upstream catchments of the intersected catchment are returned.
-#' @param find_rseg_upstream Logical, default TRUE. If \code{src_feature} is a
-#'   \code{RomFeature} of a river segment (as identifed via bundle and ftype),
-#'   should the NHDPlus network consist of only those intersecting src_feature
-#'   (FALSE) or those intersecting src_feature and all upstream river segments
-#'   (TRUE)?
+#' @param src_feature Either a RomFeature or a POINT simple feature
+#'   collection (\code{SFC}) or a one-row simple feature (\code{SF}). This
+#'   feature is used to intersect the NHDPlus network. If an SFC/SF POINT is
+#'   provided, all upstream catchments of the intersected catchment are
+#'   returned.
+#' @param find_rseg_upstream Logical, default TRUE. If \code{src_feature} is
+#'   a \code{RomFeature} of a river segment (as identifed via bundle and
+#'   ftype), should the NHDPlus network consist of only those intersecting
+#'   src_feature (FALSE) or those intersecting src_feature and all upstream
+#'   river segments (TRUE)?
 #' @param handle_overlap Character, default "smallest_area". If multiple
-#'   features of src_feature (when \code{find_rseg_upstream} is TRUE) intersect
-#'   a single NHDPlus segment, it will be duplicated in the results.
-#'   \code{handle_overlap} is to address these duplicates, with "smallest_area"
-#'   keeping the intersection that occurred with the feature with the smallest
-#'   area (often a subwatershed in the case of river segments)
-#' @param maximum_divergence Integer, default 2. The highest divergence number
-#'   allowed in the network. Divergences can assist with network connectivity,
-#'   but be aware that divergences with value 9 may be harder to integrate
+#'   features of src_feature (when \code{find_rseg_upstream} is TRUE)
+#'   intersect a single NHDPlus segment, it will be duplicated in the
+#'   results. \code{handle_overlap} is to address these duplicates, with
+#'   "smallest_area" keeping the intersection that occurred with the feature
+#'   with the smallest area (often a subwatershed in the case of river
+#'   segments)
+#' @param baseline_method Character. Default "riverseg". Should the baseline
+#'   for each nhdplus catchment be calculated by downscaling the incremental
+#'   metric at each river segment ("riverseg") or by area aggregation in
+#'   each land-river segment ("lrseg").
+#' @param baseline_metric Character. The model metric to use to derive
+#'   baseline metric. Default "l90_Qout" for baseline_method "riverseg". For
+#'   "lrseg", a useful default is "Runit_l90"
+#' @param baseline_runid Integer. Default 1000. The model scenario to derive
+#'   the baseline_metric from.
+#' @param maximum_divergence Integer, default 2. The highest divergence
+#'   number allowed in the network. Divergences can assist with network
+#'   connectivity, but be aware that divergences with value 9 may be harder
+#'   to integrate
 #' @return R6 Object of class nhdPlusRouting
 #' @export nhdPlusRouting
 #' @examples \dontrun{
@@ -86,8 +99,11 @@ nhdPlusRouting <- R6::R6Class(
     #'   for each nhdplus catchment be calculated by downscaling the incremental
     #'   metric at each river segment ("riverseg") or by area aggregation in
     #'   each land-river segment ("lrseg").
-    #' @param baseline_metric
-    #' @param baseline_runid
+    #' @param baseline_metric Character. The model metric to use to derive
+    #'   baseline metric. Default "l90_Qout" for baseline_method "riverseg". For
+    #'   "lrseg", a useful default is "Runit_l90"
+    #' @param baseline_runid Integer. Default 1000. The model scenario to derive
+    #'   the baseline_metric from.
     #' @param maximum_divergence Integer, default 2. The highest divergence
     #'   number allowed in the network. Divergences can assist with network
     #'   connectivity, but be aware that divergences with value 9 may be harder
@@ -272,8 +288,95 @@ nhdPlusRouting <- R6::R6Class(
       
       # Set updated dfs and network on self ####
       super$create_network(nhd_df = nhd_feat)
+    },
+    #' @description Run a spatial intersection of the nhdplus watersheds
+    #'   initialized on object with all active intakes. Return data frames of
+    #'   (1) the intake, withdrawal, and nhdplus segment, (2) the intake,
+    #'   potential point source return based on assumed consumption, and
+    #'   estimated return flow nhdplus segment, and (3) a cleanup nhdplus data
+    #'   frame that can be binded to the other data frames to compile a full
+    #'   netowrk of facilities and watersheds. Each data frame will have three
+    #'   potential baseline flows based on facility five year averages, intake
+    #'   capacity, or pre-1989 values
+    #' @param onedrive_location Character. The location of the users Onedrive
+    #'   that should hold relevant foundation data
+    #' @param conn_ODS Pool database connection to the ODS data base.
+    #' @param default_ps_location Integer. Default 1 (next downstream segment).
+    #'   How many segments downstream should point sources be returned?
+    #' @param baseline_factor Numeric, default 0.1. How much of the baseline
+    #'   metric should be included in these scenarios?
+    #' @return A list of four dataframes. full_network_df consists of watersheds,
+    #' withdrawals, and point sources distinguished by object_class. Hydroseq
+    #' and DnHydroseq may be used to navigate the network. nhdplus_df is a
+    #' cleaned up version of the nhd_df field, facility_wd_df is a data frame of
+    #' all withdrawals, facility_ps_df is a dataframe of all point sources based
+    #' on estimated consumption and return location.
+    get_intake_wshd_df = function(onedrive_location, conn_ODS, 
+                                  default_ps_location = 1,
+                                  baseline_factor = 0.1){
+      ## nhdplus DF ####
+      nhdplus_df <- make_network_df(entity_df = self$nhd_df,
+                                    entity_type = "nhdplus",
+                                    consumption_df = NULL,
+                                    baseline_factor = baseline_factor)
+      
+      ## Foundation data ####
+      found_sf <- process_foundation(onedrive_location, conn_ODS)
+      
+      ## Intakes ####
+      #Find intakes within the NF Shenandoah
+      all_intakes <- sf::st_join(self$nhd_sf, 
+                                found_sf,
+                                left = FALSE)
+      
+      ### WD Return DF ####
+      facility_wd_df <- make_network_df(entity_df = all_intakes,
+                                        entity_type = "wd",
+                                        consumption_df = NULL,
+                                        baseline_factor = NULL)
+      
+      ## PS ####
+      ### Consumption ####
+      #Find point source consumption info:
+      consumption <- get_consumption(
+        ds = ds, 
+        hydroids = all_intakes$facility_hydroid[!is.na(all_intakes$facility_hydroid)]
+      )
+        
+      ### PS Return DF ####
+      facility_ps_df <- make_network_df(entity_df = all_intakes,
+                                        entity_type = "ps",
+                                        consumption_df = consumption,
+                                        baseline_factor = NULL)
+      
+      ### PS Location ####
+      #We can adjust where the point source is returned using the DNHydroseq
+      ds_seg <- self$network_data
+      ds_seg$ds_seg <- self$network$get_node_relation(neighbor_search = TRUE,
+                                              value = "Hydroseq",
+                                              min_dist = default_ps_location,
+                                              max_dist = default_ps_location,
+                                              direction = "downstream")
+      #Set point sources to return to next nhdplus segment
+      facility_ps_df$NextDnHydroseq <- ds_seg$ds_seg[match(facility_ps_df$DnHydroseq, ds_seg$Hydroseq)]
+      #Remove list col if only one downstream seg exists for every seg
+      if(all(lengths(facility_ps_df$NextDnHydroseq) == 1)){
+        facility_ps_df$DnHydroseq <- unlist(facility_ps_df$NextDnHydroseq)
+      }
+      #Clean-up
+      facility_ps_df$NextDnHydroseq <- NULL
+      
+      #Return all data frames, and the rbind of the three to return a full
+      #network ready for routing
+      return(
+        list(
+          full_network_df = rbind(nhdplus_df, facility_wd_df, facility_ps_df),
+          nhdplus_df = nhdplus_df,
+          facility_wd_df = facility_wd_df,
+          facility_ps_df = facility_ps_df
+        )
+      )
     }
     
   ) # End public list
 ) # End R6
-

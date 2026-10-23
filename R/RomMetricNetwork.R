@@ -637,7 +637,8 @@ RomMetricNetwork <- R6::R6Class(
                 all(
                   thisBasin$calculations_completed[match(thisBasin$upstream_nodes[[k]], thisBasin[,self$src_node_col])] |
                   thisBasin$upstream_nodes[[k]] == thisBasin[k, self$src_node_col]
-                )
+                ) & 
+                !thisBasin$calculations_completed[k]
               ){
                 #Otherwise, only run a basin if all the segments in
                 #upstream_nodes has either been mark completed already or is
