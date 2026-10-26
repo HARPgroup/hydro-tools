@@ -134,6 +134,7 @@ monthly, yearly, and day-of-year statistics on the gage flow}
     \item \href{#method-WaterGageDaily-plot_precip_data}{\code{WaterGageDaily$plot_precip_data()}}
     \item \href{#method-WaterGageDaily-plot_low_flows}{\code{WaterGageDaily$plot_low_flows()}}
     \item \href{#method-WaterGageDaily-get_doy_percentiles}{\code{WaterGageDaily$get_doy_percentiles()}}
+    \item \href{#method-WaterGageDaily-calculate_value_percentile}{\code{WaterGageDaily$calculate_value_percentile()}}
     \item \href{#method-WaterGageDaily-plot_percentiles}{\code{WaterGageDaily$plot_percentiles()}}
     \item \href{#method-WaterGageDaily-plot_all}{\code{WaterGageDaily$plot_all()}}
     \item \href{#method-WaterGageDaily-clone}{\code{WaterGageDaily$clone()}}
@@ -824,6 +825,29 @@ year. Will set in the plots list as well.
   }
   \subsection{Returns}{
     A \code{WaterGageStats} object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-calculate_value_percentile"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-calculate_value_percentile}{}}}
+\subsection{\code{WaterGageDaily$calculate_value_percentile()}}{
+  Calculate flow percentile based on daily, monthly, or annual
+data by either using a continous function based on the flow_col in
+gage_data or by interpolating between the tabular percentiles provided
+by USGS (requires a parameter code)
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$calculate_value_percentile(
+  values_df = self$gage_data,
+  percentile_agg = "month",
+  percentile_calc = "continuous"
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A copy of gage_data from the object, now updated with the
+appropriate percentile
   }
 }
 
