@@ -20,8 +20,21 @@ be available to summarize existing daily stream data
 }
 \examples{
 \dontrun{
+#Additional tests in tests/WaterGageStats.R
  #Spatial Info:
-SA_Ashland <- WaterGageStats$new(gage_id = "01672500")
+SA_stats <- WaterGageStats$new(gage_id = "01672500")
+
+#Now initialize with a daily data frame using doy
+SA_stats_monthly <- WaterGageStats$new(
+  data_source = SA_stats$gage_data,
+  date_col = SA_stats$date_col, flow_col = SA_stats$flow_col,
+  statistic_type = "month",
+  computation_type = c("percentile","minimum","maximum")
+)
+
+#Get Stats from a  WaterGageDaily
+gage_obj$calculate_value_percentile(28, "2001-11-28","month","continuous")
+gage_obj$calculate_value_percentile(90,"2000-12-01","month","interpolate_USGS")
 }
 }
 \section{Super class}{

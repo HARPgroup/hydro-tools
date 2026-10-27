@@ -31,8 +31,21 @@
 #' @return R6 Object of class WaterGageBase
 #' @export WaterGageStats
 #' @examples \dontrun{
+#' #Additional tests in tests/WaterGageStats.R
 #'  #Spatial Info:
-#' SA_Ashland <- WaterGageStats$new(gage_id = "01672500")
+#' SA_stats <- WaterGageStats$new(gage_id = "01672500")
+#' 
+#' #Now initialize with a daily data frame using doy
+#' SA_stats_monthly <- WaterGageStats$new(
+#'   data_source = SA_stats$gage_data,
+#'   date_col = SA_stats$date_col, flow_col = SA_stats$flow_col,
+#'   statistic_type = "month",
+#'   computation_type = c("percentile","minimum","maximum")
+#' )
+#' 
+#' #Get Stats from a  WaterGageDaily
+#' gage_obj$calculate_value_percentile(28, "2001-11-28","month","continuous")
+#' gage_obj$calculate_value_percentile(90,"2000-12-01","month","interpolate_USGS")
 #' }
 WaterGageStats <- R6::R6Class(
   "WaterGageStats",
@@ -107,6 +120,7 @@ WaterGageStats <- R6::R6Class(
                           computation_type = self$computation_type,
                           statistic_type = "doy",
                           ds_in = NA){
+      ## Initialize ####
       #If the user has provided a RomDataSource ds, set the appropriate field
       if(inherits(ds_in, "RomDataSource")){
         self$ds <- ds_in
@@ -119,16 +133,18 @@ WaterGageStats <- R6::R6Class(
           start_date = start_date,
           end_date = end_date, 
           approval_status = approval_status,
-          statistics_type = statistic_type,
+          statistic_type = statistic_type,
           computation_type = computation_type
         )
       )
       
       #If user is using USGS, use dataRetrieval
       if(inherits(data_source, "character") && data_source == "USGS"){
+        ## USGS ####
         #Use either the new dataRetrieval functions or those slated for
         #deprecation based on version number
         if(packageVersion("dataRetrieval") >= "2.7.23") {
+          ### Newer USGS ####
           #If approval_status is all, set to NA for query
           if(tolower(self$approval_status) == "all"){
             approval_status <- NA_character_
@@ -159,8 +175,11 @@ WaterGageStats <- R6::R6Class(
             self$flow_col <- "value"
             self$date_col <- "end_date"
           }
+          ### percentiles ####
+          self$get_percentile_funcs(agg_type = self$statistic_type)
           
         }else{
+          ### Older USGS ####
           if(self$statistic_type == "doy"){
             #Get doy statistics
             #statType = c("Min", "Max", paste0("p",c("05",10,25,50,75,90,95)))
@@ -201,6 +220,10 @@ WaterGageStats <- R6::R6Class(
             self$gage_data <- stat_data_long
             self$flow_col <- "value"
             self$date_col <- "time_of_year"
+            
+            ### percentiles ####
+            self$get_percentile_funcs(agg_type = self$statistic_type)
+            
           }else{
             #To populate later: old dataRetrieval monthly or yearly statistics
             message("Previous versions of dataRetrieval could not get monthly 
@@ -210,6 +233,7 @@ WaterGageStats <- R6::R6Class(
         
         
       }else if(inherits(self$data_source, "data.frame")){
+        ## data.frame ####
         #Set date and value cols:
         self$flow_col <- flow_col
         self$date_col <- date_col
@@ -229,40 +253,12 @@ WaterGageStats <- R6::R6Class(
         }else{
           gage_data[,self$statistic_type] <- as.numeric(format(gage_data[,self$date_col], format_date))
         }
+        ### Percentiles ####
+        self$gage_data <- gage_data
+        self$get_percentile_funcs(agg_type = self$statistic_type)
+        gage_data <- self$gage_data
         
-        #Unique aggregate values
-        agg_over <- unique(gage_data[,self$statistic_type])
-        
-        #Percentile calculations
-        if("percentile" %in% self$computation_type){
-          #Get a continuous function for each agg_over value (julian day, month,
-          #year)
-          value_ecdf <- lapply(
-            X = as.list(agg_over),
-            gage_data = gage_data,
-            FUN = function(X, gage_data){
-              thisi <- gage_data[gage_data[,self$statistic_type] == X,]
-              out <- ecdf(thisi[,self$flow_col])
-              return(out)
-            }
-          )
-          #Give logical names for easier indexing
-          names(value_ecdf) <- paste0("percentile_", agg_over)
-          #Find the appropriate percentil function for each row in gage_data
-          percentile_func <- value_ecdf[match(paste0("percentile_", gage_data[,self$statistic_type]), names(value_ecdf))]
-          #Find the percentile of each value in flow_col based on the appropriate
-          #ecdf function
-          gage_data[,paste0(self$statistic_type, "_percentile")] <- mapply(
-            f = percentile_func,
-            x = gage_data[,self$flow_col],
-            FUN = function(f, x){f(x) * 100}
-          )
-          
-          #Store the percentile functions
-          self$percentile_funcs <- value_ecdf
-        }
-        
-        #Other metrics
+        ### Summary metrics ####
         if(any(c("arithmetic_mean", "maximum", "median", "minimum") %in% self$computation_type)){
           #Decide how to calculate the aggregate column
           user_funcs <- list(arithmetic_mean = function(x) mean(x, na.rm = TRUE), 
@@ -285,9 +281,10 @@ WaterGageStats <- R6::R6Class(
             dplyr::left_join(
               summary_metrics, by = self$statistic_type
             )
+          
+          self$gage_data <- gage_data
         }
-        #Store results with updated fields
-        self$gage_data <- gage_data
+        
         
       }else{
         message("This datasource has not been implemented. Try to supply
@@ -304,6 +301,7 @@ WaterGageStats <- R6::R6Class(
     #'@return Nothing, but sets percentile_funcs on object
     get_percentile_funcs = function(agg_type = self$statistic_type){
       if(inherits(self$data_source, "character") && self$data_source == "USGS"){
+        ## USGS ####
         #Get only the data of interest
         if(any(c("doy", "daterange") %in% agg_type)){
           gage_data <- self$gage_data[self$gage_data$time_of_year_type == "day_of_year",]
@@ -317,6 +315,7 @@ WaterGageStats <- R6::R6Class(
         #Unique aggregate values
         agg_over <- unique(gage_data$time_of_year)
         
+        ### Percentiles ####
         #Get a list with a modified approx function for each doy to linearly
         #interpolate between USGS statistics
         percentile_approx <- lapply(
@@ -345,6 +344,45 @@ WaterGageStats <- R6::R6Class(
         
         #Store the percentile functions
         self$percentile_funcs <- percentile_approx
+      }else if(inherits(self$data_source, "data.frame")){
+        ## data.frame ####
+        gage_data <- self$gage_data
+        #Unique aggregate values
+        agg_over <- unique(gage_data[,self$statistic_type])
+        
+        ## percentile_funcs ####
+        #Percentile calculations
+        if("percentile" %in% self$computation_type){
+          #Get a continuous function for each agg_over value (julian day, month,
+          #year)
+          value_ecdf <- lapply(
+            X = as.list(agg_over),
+            gage_data = gage_data,
+            FUN = function(X, gage_data){
+              thisi <- gage_data[gage_data[,self$statistic_type] == X,]
+              ecdfi <- ecdf(thisi[,self$flow_col])
+              out <- function(x) ecdfi(x) * 100
+              return(out)
+            }
+          )
+          #Give logical names for easier indexing
+          names(value_ecdf) <- paste0("percentile_", agg_over)
+          #Find the appropriate percentil function for each row in gage_data
+          percentile_func <- value_ecdf[match(paste0("percentile_", gage_data[,self$statistic_type]), names(value_ecdf))]
+          #Find the percentile of each value in flow_col based on the appropriate
+          #ecdf function
+          gage_data[,paste0(self$statistic_type, "_percentile")] <- mapply(
+            f = percentile_func,
+            x = gage_data[,self$flow_col],
+            FUN = function(f, x){f(x)}
+          )
+          
+          #Store the percentile functions
+          self$percentile_funcs <- value_ecdf
+        }
+        ### Update gage data ####
+        #Store results with updated fields
+        self$gage_data <- gage_data
       }
     },
     #'@description Calculate the percentile (as percentage) for valueIn on
@@ -355,10 +393,10 @@ WaterGageStats <- R6::R6Class(
     #'@return numeric vector of percentiles in percent
     get_percentile_from_value = function(valueIn, dateIn){
       dateIn <- as.Date(dateIn)
-      self$get_percentile_funcs()
+      
       #Decide how to calculate the aggregate column
       format_date <- list(doy = "%j", month = "%m", year = "%Y", daterange = "%j")[[self$statistic_type]]
-
+      
       #Find the appropriately converted date
       if(format_date == "%j"){
         #Correct julian day for leap years:
@@ -374,8 +412,16 @@ WaterGageStats <- R6::R6Class(
       
       #Find the relevant ecdf or approx function
       out_func <- self$percentile_funcs[[ paste0("percentile_", format_date) ]]
-      #Output the value
-      out <- out_func(valueIn)
+      
+      if(is.null(out_func)){
+        out <- NULL
+        warning("No percentile function found for ",format_date,". Is it
+        possible there is no gage data for this period?")
+      }else{
+        #Output the value
+        out <- out_func(valueIn)
+      }
+      
       return(out)
     }
   )# End Public

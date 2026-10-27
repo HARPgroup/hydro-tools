@@ -835,19 +835,40 @@ year. Will set in the plots list as well.
   Calculate flow percentile based on daily, monthly, or annual
 data by either using a continous function based on the flow_col in
 gage_data or by interpolating between the tabular percentiles provided
-by USGS (requires a parameter code)
+by USGS (requires a parameter code). This method uses
+\code{WaterGageStats} to provide all percentiles
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{WaterGageDaily$calculate_value_percentile(
-  values_df = self$gage_data,
+  valuesIn = self$gage_data[, self$flow_col],
+  dateIn = self$gage_data[, self$date_col],
   percentile_agg = "month",
   percentile_calc = "continuous"
 )}
     \if{html}{\out{</div>}}
   }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{valuesIn}}{numeric vector. The values to be converted to percentile
+based on the aggregation by percentile_agg and the dateIn}
+      \item{\code{dateIn}}{vector of class date. The dates that valueIn occurred on.}
+      \item{\code{percentile_agg}}{character. doy, month, or year (available for
+percentile_calc == "continuous" only). How should data be grouped to
+determine percentiles? For instance, "month" indicates a monthly
+percentile is returned. doy = "day of year" and will group percentiles
+to julian day}
+      \item{\code{percentile_calc}}{character. Either "continuous" or
+"interpolate_USGS". If continuous, all gage data will be aggregated by
+percentile_agg and \code{ecdf()} will be used to determine percentiles.
+If "interpolate_USGS", then \code{WaterGageStats} will pull tabular
+percentiles from USGS and interpolate linearly}
+    }
+    \if{html}{\out{</div>}}
+  }
   \subsection{Returns}{
-    A copy of gage_data from the object, now updated with the
-appropriate percentile
+    A numeric vector of percentiles that represent percentile_agg on
+dateIn
   }
 }
 

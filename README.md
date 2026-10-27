@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.9 10/27/2026
+1. `WaterGageStats` can now calculate daily, monthly, and yearly statistics for
+USGS queries or data.frame data sources and has methods to estimate percentiles.
+This can easily be accessed via `WaterGageDaily$calculate_value_percentile`
+
 ### 1.2.8 10/13/2026
 1. `nhdPlusNetwork` R6 object is now exported and allows users to query and
 navigate nhdplus catchments with ease after providing a WKT point or a

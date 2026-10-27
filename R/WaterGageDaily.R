@@ -1129,35 +1129,59 @@ WaterGageDaily <- R6::R6Class(
     #'@description Calculate flow percentile based on daily, monthly, or annual
     #'  data by either using a continous function based on the flow_col in
     #'  gage_data or by interpolating between the tabular percentiles provided
-    #'  by USGS (requires a parameter code)
-    #'@return A copy of gage_data from the object, now updated with the
-    #'  appropriate percentile
+    #'  by USGS (requires a parameter code). This method uses
+    #'  \code{WaterGageStats} to provide all percentiles
+    #'@param valuesIn numeric vector. The values to be converted to percentile
+    #'  based on the aggregation by percentile_agg and the dateIn
+    #'@param dateIn vector of class date. The dates that valueIn occurred on.
+    #'@param percentile_agg character. doy, month, or year (available for
+    #'  percentile_calc == "continuous" only). How should data be grouped to
+    #'  determine percentiles? For instance, "month" indicates a monthly
+    #'  percentile is returned. doy = "day of year" and will group percentiles
+    #'  to julian day
+    #'@param percentile_calc character. Either "continuous" or
+    #'  "interpolate_USGS". If continuous, all gage data will be aggregated by
+    #'  percentile_agg and \code{ecdf()} will be used to determine percentiles.
+    #'  If "interpolate_USGS", then \code{WaterGageStats} will pull tabular
+    #'  percentiles from USGS and interpolate linearly
+    #'@return A numeric vector of percentiles that represent percentile_agg on
+    #'  dateIn
     calculate_value_percentile = function(
       valuesIn = self$gage_data[,self$flow_col],
       dateIn = self$gage_data[,self$date_col],
       percentile_agg = "month",
       percentile_calc = "continuous"
     ){
-      gage_data <- values_df
       if(percentile_calc == "continuous"){
-        self$stats_obj <- WaterGageStats$new(gage_id = self$gage_data,
+        self$stats_obj <- WaterGageStats$new(data_source = self$gage_data,
+                                             flow_col = self$flow_col,
+                                             date_col = self$date_col,
                                              statistic_type = percentile_agg,
                                              computation_type = c("percentile","minimum","maximum"))
         
         
       }else if(percentile_calc == "interpolate_USGS"){
-        self$stats_obj <- WaterGageStats$new(gage_id = self$gage_id,
-                                             statistic_type = "doy",
-                                             computation_type = c("percentile","minimum","maximum"))
+        if(percentile_agg == "year"){
+          stop(percentile_agg, "is not available for USGS data queries. Use
+          continuous instead to estimate using ecdf from all gage data")
+        }
+        
+        if(!inherits(self$stats_obj, "WaterGageStats") ||
+           !inherits(self$stats_obj, "character") ||
+           (self$stats_obj$data_source == "USGS" &&  
+            self$stats_obj$statistic_type != percentile_agg)
+        ){
+          self$stats_obj <- WaterGageStats$new(gage_id = self$gage_id,
+                                               statistic_type = "doy",
+                                               computation_type = c("percentile","minimum","maximum"))
+          self$stats_obj$get_percentile_funcs(percentile_agg)
+        }
+        
       }
-      
       
       out <- self$stats_obj$get_percentile_from_value(valuesIn, dateIn)
       return(out)
     },
-    
-    
-    
     #' @description Creates a plot of the the daily historic flow percentiles,
     #'   in bands from 100, 95, 90, 75, 50, 25, 10, 5, and 0. Also plots the
     #'  daily flow, to show where the flow is in term sof historic flows of that
