@@ -34,6 +34,8 @@
 #'   \code{load_sf_da()} will be run to provide the station sf data frame,
 #'   drainage area, and station name. If FALSE, the method will not be run
 #'   automatically.
+#' @param parameter_code character, default "00060" parameter_code Which USGS
+#'  paramter to analyze? Defaults to 00060 for discharge
 #' @param ds_in An optional RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageDaily
@@ -69,7 +71,8 @@ WaterGageDaily <- R6::R6Class(
   public = list(
     #' @field gage_data The gage data from data_source
     gage_data = NA,
-    #' @field statistic_id The kind of stream data to pull
+    #' @field statistic_id character, default 00003. The aggregation of data to
+    #'   pull
     statistic_id = "00003",
     #' @field usgs_properties The fields to pull from USGS
     usgs_properties = c("monitoring_location_id", "parameter_code",
@@ -113,6 +116,10 @@ WaterGageDaily <- R6::R6Class(
     #'   \code{load_sf_da()} will be run to provide the station sf data frame,
     #'   drainage area, and station name. If FALSE, the method will not be run
     #'   automatically.
+    #'@param parameter_code character, default "00060" parameter_code Which USGS
+    #'  paramter to analyze? Defaults to 00060 for discharge
+    #'@param statistic_id character, default "00003" (mean). The aggregation of
+    #'  data to pull
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
@@ -122,6 +129,8 @@ WaterGageDaily <- R6::R6Class(
                           approval_status = self$approval_status,
                           dataRetrieval_version = "auto",
                           get_station_attr = TRUE,
+                          parameter_code = "00060",
+                          statistic_id = "00003",
                           ds_in = NA){
       #Set basic fields by calling the parent initialize
       super$initialize(
@@ -130,7 +139,9 @@ WaterGageDaily <- R6::R6Class(
           gage_id = gage_id,
           start_date = start_date,
           end_date =   end_date, 
-          approval_status = approval_status
+          approval_status = approval_status,
+          parameter_code = parameter_code,
+          statistic_id = statistic_id
         )
       )
       

@@ -96,7 +96,8 @@ SA_Ashland <- WaterGageDaily$new(gage_id = "01672500", ds_in = ds,
   \describe{
     \item{\code{gage_data}}{The gage data from data_source}
 
-    \item{\code{statistic_id}}{The kind of stream data to pull}
+    \item{\code{statistic_id}}{character, default 00003. The aggregation of data to
+pull}
 
     \item{\code{usgs_properties}}{The fields to pull from USGS}
 
@@ -172,6 +173,8 @@ to analyze USGS gage data
   approval_status = self$approval_status,
   dataRetrieval_version = "auto",
   get_station_attr = TRUE,
+  parameter_code = "00060",
+  statistic_id = "00003",
   ds_in = NA
 )}
     \if{html}{\out{</div>}}
@@ -203,6 +206,10 @@ control which API to retrieve data from.}
 \code{load_sf_da()} will be run to provide the station sf data frame,
 drainage area, and station name. If FALSE, the method will not be run
 automatically.}
+      \item{\code{parameter_code}}{character, default "00060" parameter_code Which USGS
+paramter to analyze? Defaults to 00060 for discharge}
+      \item{\code{statistic_id}}{character, default "00003" (mean). The aggregation of
+data to pull}
       \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
     }
