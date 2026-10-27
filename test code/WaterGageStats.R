@@ -87,7 +87,8 @@ ecdf(test4$gage_data$value[test4$gage_data$year == 2020])(300)
 test4$gage_data$year_percentile[54]
 test4$gage_data$value[54]
 test4$gage_data$year[54]
-test4$get_percentile_from_value(28,"1930-11-28")
+test4$get_percentile_from_value(28, "1930-11-28")
+test4$get_percentile_from_value(c(30,28), c("2007-11-28","2008-11-28"))
 
 #Are mins and maxes calculated correctly?
 max(test4$gage_data$value[test4$gage_data$year == 2020])
@@ -96,7 +97,9 @@ min(test4$gage_data$value[test4$gage_data$year == 2020])
 test4$gage_data$year_minimum[test4$gage_data$year == 2020]
 
 #Test water gage daily implementation
-gage_obj$calculate_value_percentile(28, "2001-11-28","month","continuous")
+gage_obj$calculate_value_percentile(c(30,28), c("2001-11-28","2001-11-28"),"month","continuous")
+gage_obj$stats_obj$get_percentile_funcs("month")
+
 gage_obj$calculate_value_percentile(90,"2000-12-01","month","interpolate_USGS")
 gage_obj$calculate_value_percentile(190,"2000-12-01","month","interpolate_USGS")
 gage_obj$calculate_value_percentile(90,"2000-12-01","doy","interpolate_USGS")
