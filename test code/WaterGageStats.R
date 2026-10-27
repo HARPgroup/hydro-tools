@@ -5,13 +5,6 @@ source(paste0(basepath,'/config.R'))
 #Load an arbitrary gage
 gage_obj <- hydrotools::WaterGageDaily$new(gage_id = "01672500", ds_in = ds)
 
-gage_obj <- hydrotools::WaterGageBase$new(config=list(gage_id = "363928076332901", ds_in = ds,parameter_code = "72019"))
-
-
-ecdf( gage_obj$gage_data$value[lubridate::month(gage_obj$gage_data$time) == 12] )(100)
-
-quantile(gage_obj$gage_data$value[lubridate::month(gage_obj$gage_data$time) == 12], probs = 0.1637993, na.rm = TRUE)
-
 
 #Test USGS data retrieval
 test1 <- WaterGageStats$new(gage_id = gage_obj$gage_id,
@@ -94,7 +87,7 @@ ecdf(test4$gage_data$value[test4$gage_data$year == 2020])(300)
 test4$gage_data$year_percentile[54]
 test4$gage_data$value[54]
 test4$gage_data$year[54]
-test4$get_percentile_from_value(28, "2008-11-28")
+test4$get_percentile_from_value(28, "1930-11-28")
 test4$get_percentile_from_value(c(30,28), c("2007-11-28","2008-11-28"))
 
 #Are mins and maxes calculated correctly?
