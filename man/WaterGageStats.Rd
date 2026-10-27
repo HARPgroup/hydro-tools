@@ -20,8 +20,21 @@ be available to summarize existing daily stream data
 }
 \examples{
 \dontrun{
+#Additional tests in tests/WaterGageStats.R
  #Spatial Info:
-SA_Ashland <- WaterGageStats$new(gage_id = "01672500")
+SA_stats <- WaterGageStats$new(gage_id = "01672500")
+
+#Now initialize with a daily data frame using doy
+SA_stats_monthly <- WaterGageStats$new(
+  data_source = SA_stats$gage_data,
+  date_col = SA_stats$date_col, flow_col = SA_stats$flow_col,
+  statistic_type = "month",
+  computation_type = c("percentile","minimum","maximum")
+)
+
+#Get Stats from a  WaterGageDaily
+gage_obj$calculate_value_percentile(28, "2001-11-28","month","continuous")
+gage_obj$calculate_value_percentile(90,"2000-12-01","month","interpolate_USGS")
 }
 }
 \section{Super class}{
@@ -32,11 +45,15 @@ SA_Ashland <- WaterGageStats$new(gage_id = "01672500")
   \describe{
     \item{\code{gage_data}}{The gage data from data_source}
 
-    \item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
-to retrieve day-of-year statistics or can be 'daterange' to retrieve
-monthly, yearly, and water year statistics}
+    \item{\code{statistic_type}}{The kind of statistic analysis to run. For USGS
+data source, Can by 'doy' to retrieve day-of-year statistics or can be
+'daterange' to retrieve monthly, yearly, and water year statistics.
+Otherwise May be 'doy' to calculate julian day statistics, 'month' to
+calculate monthly statistics, or 'year' to calculate annual statistics}
 
-    \item{\code{computation_type}}{The statistics to use when summarize data}
+    \item{\code{computation_type}}{The statistics to use when summarize data. For
+now, only may be c("arithmetic_mean", "maximum", "median", "minimum",
+"percentile") or some slice}
 
     \item{\code{start_date}}{The start of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
@@ -45,6 +62,11 @@ summary. This should be in the format mm-dd if computation_type =
     \item{\code{end_date}}{The end of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
+
+    \item{\code{percentile_funcs}}{A list of functions to use to convert values to
+percentile based on date and statistic_type. These are continuous
+functions when data_source is a data.frame or linear approximation of
+known percentiles if data_source is USGS}
   }
   \if{html}{\out{</div>}}
 }
@@ -52,6 +74,8 @@ summary. This should be in the format mm-dd if computation_type =
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-WaterGageStats-initialize}{\code{WaterGageStats$new()}}
+    \item \href{#method-WaterGageStats-get_percentile_funcs}{\code{WaterGageStats$get_percentile_funcs()}}
+    \item \href{#method-WaterGageStats-get_percentile_from_value}{\code{WaterGageStats$get_percentile_from_value()}}
     \item \href{#method-WaterGageStats-clone}{\code{WaterGageStats$clone()}}
   }
 }
@@ -82,6 +106,8 @@ methods to retrieve and analyze USGS gage statistics
   gage_id = NA,
   start_date = self$start_date,
   end_date = self$end_date,
+  flow_col,
+  date_col,
   approval_status = self$approval_status,
   computation_type = self$computation_type,
   statistic_type = "doy",
@@ -102,14 +128,26 @@ summary. This should be in the format mm-dd if computation_type =
       \item{\code{end_date}}{The end of the period to consider for statistical
 summary. This should be in the format mm-dd if computation_type =
 'doy'; otherwise, should be in format yyyy-mm-dd}
+      \item{\code{flow_col}}{character. A column in the data frame provided as
+data_source if not using a USGS gage. The data in this field should
+represent the values of interest on which to conduct statistic}
+      \item{\code{date_col}}{character. A column in the data frame provided as
+data_source if not using a USGS gage. The data in this field should
+represent Date class data that can be aggregated to the selected
+statistic_type}
       \item{\code{approval_status}}{'all', 'approved', or 'provisional'. What kind of
 data should be used from USGS? Defaults to that set in the field on
 this object, which itself defaults to 'all'. Please note USGS usually can
 only provide statistics for approved values.}
-      \item{\code{computation_type}}{The statistics to use when summarize data}
-      \item{\code{statistic_type}}{The kind of statistic analysis to run. Can by 'doy'
-to retrieve day-of-year statistics or can be 'daterange' to retrieve
-monthly, yearly, and water year statistics}
+      \item{\code{computation_type}}{The statistics to use when summarize data. For
+now, only may be c("arithmetic_mean", "maximum", "median", "minimum",
+"percentile") or some slice}
+      \item{\code{statistic_type}}{Character, default 'doy'. The kind of statistic
+analysis to run. For USGS data source, Can by 'doy' to retrieve
+day-of-year statistics or can be 'daterange' to retrieve monthly,
+yearly, and water year statistics. Otherwise May be 'doy' to calculate
+julian day statistics, 'month' to calculate monthly statistics, or
+'year' to calculate annual statistics}
       \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
     }
@@ -117,6 +155,57 @@ information. May be provided by OWS config files.}
   }
   \subsection{Returns}{
     object instance
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageStats-get_percentile_funcs"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageStats-get_percentile_funcs}{}}}
+\subsection{\code{WaterGageStats$get_percentile_funcs()}}{
+  Create and store functions to linearly approximate between
+table entries in USGS data. If data_source is a data.frame, this is
+completed in initialize and uses continuous distribution functions
+instead
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageStats$get_percentile_funcs(agg_type = self$statistic_type)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{agg_type}}{Character. May be 'doy' or 'month' to aggregate data,
+defaults to the object statistic_type. 'daterange' assumes 'doy'}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Nothing, but sets percentile_funcs on object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageStats-get_percentile_from_value"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageStats-get_percentile_from_value}{}}}
+\subsection{\code{WaterGageStats$get_percentile_from_value()}}{
+  Calculate the percentile (as percentage) for valueIn on
+dateIn using the percentile_funcs on object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageStats$get_percentile_from_value(valueIn, dateIn)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{valueIn}}{A vecotr of values to be converted to percentile}
+      \item{\code{dateIn}}{A vector of date class values to represent when valueIn
+occurred}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    numeric vector of percentiles in percent
   }
 }
 

@@ -34,6 +34,8 @@
 #'   \code{load_sf_da()} will be run to provide the station sf data frame,
 #'   drainage area, and station name. If FALSE, the method will not be run
 #'   automatically.
+#' @param parameter_code character, default "00060" parameter_code Which USGS
+#'  paramter to analyze? Defaults to 00060 for discharge
 #' @param ds_in An optional RomDataSource to allow for querying of additional
 #'   information. May be provided by OWS config files.
 #' @return R6 Object of class WaterGageDaily
@@ -69,7 +71,8 @@ WaterGageDaily <- R6::R6Class(
   public = list(
     #' @field gage_data The gage data from data_source
     gage_data = NA,
-    #' @field statistic_id The kind of stream data to pull
+    #' @field statistic_id character, default 00003. The aggregation of data to
+    #'   pull
     statistic_id = "00003",
     #' @field usgs_properties The fields to pull from USGS
     usgs_properties = c("monitoring_location_id", "parameter_code",
@@ -113,6 +116,10 @@ WaterGageDaily <- R6::R6Class(
     #'   \code{load_sf_da()} will be run to provide the station sf data frame,
     #'   drainage area, and station name. If FALSE, the method will not be run
     #'   automatically.
+    #'@param parameter_code character, default "00060" parameter_code Which USGS
+    #'  paramter to analyze? Defaults to 00060 for discharge
+    #'@param statistic_id character, default "00003" (mean). The aggregation of
+    #'  data to pull
     #' @param ds_in An optional RomDataSource to allow for querying of additional
     #'   information. May be provided by OWS config files.
     #' @return object instance
@@ -122,6 +129,8 @@ WaterGageDaily <- R6::R6Class(
                           approval_status = self$approval_status,
                           dataRetrieval_version = "auto",
                           get_station_attr = TRUE,
+                          parameter_code = "00060",
+                          statistic_id = "00003",
                           ds_in = NA){
       #Set basic fields by calling the parent initialize
       super$initialize(
@@ -130,7 +139,9 @@ WaterGageDaily <- R6::R6Class(
           gage_id = gage_id,
           start_date = start_date,
           end_date =   end_date, 
-          approval_status = approval_status
+          approval_status = approval_status,
+          parameter_code = parameter_code,
+          statistic_id = statistic_id
         )
       )
       
@@ -1125,6 +1136,62 @@ WaterGageDaily <- R6::R6Class(
                                            statistic_type = "doy",
                                            computation_type = c("percentile","minimum","maximum"))
       return(self$stats_obj)
+    },
+    #'@description Calculate flow percentile based on daily, monthly, or annual
+    #'  data by either using a continous function based on the flow_col in
+    #'  gage_data or by interpolating between the tabular percentiles provided
+    #'  by USGS (requires a parameter code). This method uses
+    #'  \code{WaterGageStats} to provide all percentiles
+    #'@param valuesIn numeric vector. The values to be converted to percentile
+    #'  based on the aggregation by percentile_agg and the dateIn
+    #'@param dateIn vector of class date. The dates that valueIn occurred on.
+    #'@param percentile_agg character. doy, month, or year (available for
+    #'  percentile_calc == "continuous" only). How should data be grouped to
+    #'  determine percentiles? For instance, "month" indicates a monthly
+    #'  percentile is returned. doy = "day of year" and will group percentiles
+    #'  to julian day
+    #'@param percentile_calc character. Either "continuous" or
+    #'  "interpolate_USGS". If continuous, all gage data will be aggregated by
+    #'  percentile_agg and \code{ecdf()} will be used to determine percentiles.
+    #'  If "interpolate_USGS", then \code{WaterGageStats} will pull tabular
+    #'  percentiles from USGS and interpolate linearly
+    #'@return A numeric vector of percentiles that represent percentile_agg on
+    #'  dateIn
+    calculate_value_percentile = function(
+      valuesIn = self$gage_data[,self$flow_col],
+      dateIn = self$gage_data[,self$date_col],
+      percentile_agg = "month",
+      percentile_calc = "continuous"
+    ){
+      if(percentile_calc == "continuous"){
+        self$stats_obj <- WaterGageStats$new(data_source = self$gage_data,
+                                             flow_col = self$flow_col,
+                                             date_col = self$date_col,
+                                             statistic_type = percentile_agg,
+                                             computation_type = c("percentile","minimum","maximum"))
+        
+        
+      }else if(percentile_calc == "interpolate_USGS"){
+        if(percentile_agg == "year"){
+          stop(percentile_agg, "is not available for USGS data queries. Use
+          continuous instead to estimate using ecdf from all gage data")
+        }
+        
+        if(!inherits(self$stats_obj, "WaterGageStats") ||
+           !inherits(self$stats_obj$data_source, "character") ||
+           (self$stats_obj$data_source == "USGS" &&  
+            self$stats_obj$statistic_type != percentile_agg)
+        ){
+          self$stats_obj <- WaterGageStats$new(gage_id = self$gage_id,
+                                               statistic_type = "doy",
+                                               computation_type = c("percentile","minimum","maximum"))
+          self$stats_obj$get_percentile_funcs(percentile_agg)
+        }
+        
+      }
+      
+      out <- self$stats_obj$get_percentile_from_value(valuesIn, dateIn)
+      return(out)
     },
     #' @description Creates a plot of the the daily historic flow percentiles,
     #'   in bands from 100, 95, 90, 75, 50, 25, 10, 5, and 0. Also plots the

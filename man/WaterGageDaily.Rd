@@ -96,7 +96,8 @@ SA_Ashland <- WaterGageDaily$new(gage_id = "01672500", ds_in = ds,
   \describe{
     \item{\code{gage_data}}{The gage data from data_source}
 
-    \item{\code{statistic_id}}{The kind of stream data to pull}
+    \item{\code{statistic_id}}{character, default 00003. The aggregation of data to
+pull}
 
     \item{\code{usgs_properties}}{The fields to pull from USGS}
 
@@ -134,6 +135,7 @@ monthly, yearly, and day-of-year statistics on the gage flow}
     \item \href{#method-WaterGageDaily-plot_precip_data}{\code{WaterGageDaily$plot_precip_data()}}
     \item \href{#method-WaterGageDaily-plot_low_flows}{\code{WaterGageDaily$plot_low_flows()}}
     \item \href{#method-WaterGageDaily-get_doy_percentiles}{\code{WaterGageDaily$get_doy_percentiles()}}
+    \item \href{#method-WaterGageDaily-calculate_value_percentile}{\code{WaterGageDaily$calculate_value_percentile()}}
     \item \href{#method-WaterGageDaily-plot_percentiles}{\code{WaterGageDaily$plot_percentiles()}}
     \item \href{#method-WaterGageDaily-plot_all}{\code{WaterGageDaily$plot_all()}}
     \item \href{#method-WaterGageDaily-clone}{\code{WaterGageDaily$clone()}}
@@ -171,6 +173,8 @@ to analyze USGS gage data
   approval_status = self$approval_status,
   dataRetrieval_version = "auto",
   get_station_attr = TRUE,
+  parameter_code = "00060",
+  statistic_id = "00003",
   ds_in = NA
 )}
     \if{html}{\out{</div>}}
@@ -202,6 +206,10 @@ control which API to retrieve data from.}
 \code{load_sf_da()} will be run to provide the station sf data frame,
 drainage area, and station name. If FALSE, the method will not be run
 automatically.}
+      \item{\code{parameter_code}}{character, default "00060" parameter_code Which USGS
+paramter to analyze? Defaults to 00060 for discharge}
+      \item{\code{statistic_id}}{character, default "00003" (mean). The aggregation of
+data to pull}
       \item{\code{ds_in}}{An optional RomDataSource to allow for querying of additional
 information. May be provided by OWS config files.}
     }
@@ -824,6 +832,50 @@ year. Will set in the plots list as well.
   }
   \subsection{Returns}{
     A \code{WaterGageStats} object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-WaterGageDaily-calculate_value_percentile"></a>}}
+\if{latex}{\out{\hypertarget{method-WaterGageDaily-calculate_value_percentile}{}}}
+\subsection{\code{WaterGageDaily$calculate_value_percentile()}}{
+  Calculate flow percentile based on daily, monthly, or annual
+data by either using a continous function based on the flow_col in
+gage_data or by interpolating between the tabular percentiles provided
+by USGS (requires a parameter code). This method uses
+\code{WaterGageStats} to provide all percentiles
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{WaterGageDaily$calculate_value_percentile(
+  valuesIn = self$gage_data[, self$flow_col],
+  dateIn = self$gage_data[, self$date_col],
+  percentile_agg = "month",
+  percentile_calc = "continuous"
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{valuesIn}}{numeric vector. The values to be converted to percentile
+based on the aggregation by percentile_agg and the dateIn}
+      \item{\code{dateIn}}{vector of class date. The dates that valueIn occurred on.}
+      \item{\code{percentile_agg}}{character. doy, month, or year (available for
+percentile_calc == "continuous" only). How should data be grouped to
+determine percentiles? For instance, "month" indicates a monthly
+percentile is returned. doy = "day of year" and will group percentiles
+to julian day}
+      \item{\code{percentile_calc}}{character. Either "continuous" or
+"interpolate_USGS". If continuous, all gage data will be aggregated by
+percentile_agg and \code{ecdf()} will be used to determine percentiles.
+If "interpolate_USGS", then \code{WaterGageStats} will pull tabular
+percentiles from USGS and interpolate linearly}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A numeric vector of percentiles that represent percentile_agg on
+dateIn
   }
 }
 
