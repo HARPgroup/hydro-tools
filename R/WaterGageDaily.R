@@ -1167,7 +1167,7 @@ WaterGageDaily <- R6::R6Class(
         }
         
         if(!inherits(self$stats_obj, "WaterGageStats") ||
-           !inherits(self$stats_obj, "character") ||
+           !inherits(self$stats_obj$data_source, "character") ||
            (self$stats_obj$data_source == "USGS" &&  
             self$stats_obj$statistic_type != percentile_agg)
         ){
