@@ -140,12 +140,9 @@ get_consumption <- function(ds, hydroids){
 #'  data frame type which determines processing
 #'@param consumption_df data.frame. Contains consumtpion factors from
 #'  \code{nhdPlusRouting$get_intake_wshd_dfs} for entity_type "ps" only
-#'@param baseline_factor Integer. The amount of baseline flow to use in
-#'  scenariosused for entity_type "nhdplus" only
 #'@return a processed data frame
 make_network_df <- function(entity_df, entity_type = "wd",
-                            consumption_df = NULL,
-                            baseline_factor = NULL){
+                            consumption_df = NULL){
   #Drop geometry if present
   entity_df <- sf::st_drop_geometry(entity_df)
   #If analyzing point source, join consumption if available
@@ -201,30 +198,11 @@ make_network_df <- function(entity_df, entity_type = "wd",
       )
   }
   
-  #Depending on facility type, either calculate the scenario baseflows as the
-  #withdrawal (negative) or the point source return (positive). if its a nhdplus
-  #watershed, allow users to take a fraction of baseline flow
+  #For withdrawals, set consumption_frac to NA
   if(entity_type == "wd"){
     out <- out |> 
       dplyr::mutate(
-        consumption_frac = NA,
-        qbase_fiveyravg = -(.data$fiveyr_avg_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400),
-        qbase_intakecap = -(.data$wd_intakecap_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400),
-        qbase_pre1989   = -(.data$wd_pre1989_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400)
-      )
-  }else if(entity_type == "ps"){
-    out <- out |> 
-      dplyr::mutate(
-        qbase_fiveyravg = (1 - .data$max_frac) * (.data$fiveyr_avg_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400),
-        qbase_intakecap = (1 - .data$max_frac) * (.data$wd_intakecap_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400),
-        qbase_pre1989   = (1 - .data$max_frac) * (.data$wd_pre1989_mgd * 1000000 * 231 / 12 / 12 / 12/ 86400)
-      )
-  }else if(entity_type == "nhdplus"){
-    out <- out |> 
-      dplyr::mutate(
-        qbase_fiveyravg = .data$nhd_Qbaseline * baseline_factor,
-        qbase_intakecap = .data$nhd_Qbaseline * baseline_factor,
-        qbase_pre1989   = .data$nhd_Qbaseline * baseline_factor
+        consumption_frac = NA
       )
   }
   #Select only the relevant fields to make data frame smaller
@@ -240,8 +218,7 @@ make_network_df <- function(entity_df, entity_type = "wd",
           "nhd_Qbaseline",
           "Facility_Status", "Permit_Classification",
           "consumption_frac",
-          "fiveyr_avg_mgd", "intake_capacity", "pre1989",
-          "qbase_fiveyravg", "qbase_pre1989", "qbase_intakecap"
+          "fiveyr_avg_mgd", "intake_capacity", "pre1989"
         )
       )
     )

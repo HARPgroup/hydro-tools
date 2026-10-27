@@ -304,8 +304,6 @@ nhdPlusRouting <- R6::R6Class(
     #' @param conn_ODS Pool database connection to the ODS data base.
     #' @param default_ps_location Integer. Default 1 (next downstream segment).
     #'   How many segments downstream should point sources be returned?
-    #' @param baseline_factor Numeric, default 0.1. How much of the baseline
-    #'   metric should be included in these scenarios?
     #' @return A list of four dataframes. full_network_df consists of watersheds,
     #' withdrawals, and point sources distinguished by object_class. Hydroseq
     #' and DnHydroseq may be used to navigate the network. nhdplus_df is a
@@ -313,13 +311,11 @@ nhdPlusRouting <- R6::R6Class(
     #' all withdrawals, facility_ps_df is a dataframe of all point sources based
     #' on estimated consumption and return location.
     get_intake_wshd_df = function(onedrive_location, conn_ODS, 
-                                  default_ps_location = 1,
-                                  baseline_factor = 0.1){
+                                  default_ps_location = 1){
       ## nhdplus DF ####
       nhdplus_df <- make_network_df(entity_df = self$nhd_df,
                                     entity_type = "nhdplus",
-                                    consumption_df = NULL,
-                                    baseline_factor = baseline_factor)
+                                    consumption_df = NULL)
       
       ## Foundation data ####
       found_sf <- process_foundation(onedrive_location, conn_ODS)
@@ -333,8 +329,7 @@ nhdPlusRouting <- R6::R6Class(
       ### WD Return DF ####
       facility_wd_df <- make_network_df(entity_df = all_intakes,
                                         entity_type = "wd",
-                                        consumption_df = NULL,
-                                        baseline_factor = NULL)
+                                        consumption_df = NULL)
       
       ## PS ####
       ### Consumption ####
@@ -347,8 +342,7 @@ nhdPlusRouting <- R6::R6Class(
       ### PS Return DF ####
       facility_ps_df <- make_network_df(entity_df = all_intakes,
                                         entity_type = "ps",
-                                        consumption_df = consumption,
-                                        baseline_factor = NULL)
+                                        consumption_df = consumption)
       
       ### PS Location ####
       #We can adjust where the point source is returned using the DNHydroseq
@@ -377,6 +371,47 @@ nhdPlusRouting <- R6::R6Class(
           facility_ps_df = facility_ps_df
         )
       )
+    },
+    #'@description Create a column that sums baseline flow, withdrawals, and
+    #'  discharges and routes the values through the network
+    #'@param nhd_baseline_col
+    #'@param wd_col
+    #'@param ps_col
+    #'@param consumption_col
+    #'@param route_col_name
+    #'@param cum_route_col_name
+    #'@return a data.frame containing cum_route_col_name that contains the
+    #'  cumulative values of the aggregate route_col_name across the network.
+    #'  Values updated to object on network and nhd_df/nhd_sf
+    calc_routing = function(
+      nhd_baseline_col = "nhd_Qbaseline",
+      wd_col = "fiveyr_avg_mgd",
+      ps_col = NULL,
+      consumption_col = NULL,
+      route_col_name = "nhd_routing",
+      cum_route_col_name = "cumulative_routing"
+    ){
+      #Base data
+      nhd_data <- self$nhd_df
+      
+      if(!all(c(nhd_baseline_col, wd_col, ps_col, consumption_col) %in% names(nhd_data))){
+        stop("One of the selected columns is not present in nhd_df, please check
+             inputs")
+      }
+      
+      #Depending on user inputs, either add point sources or calculate them as a
+      #fraction of withdrawal
+      if(is.null(ps_col)){
+        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + nhd_data[,ps_col] - nhd_data[,wd_col]
+      }else if(is.null(consumption_col)){
+        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + (nhd_data[,consumption_col] * nhd_data[,wd_col])
+      }else{
+        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + nhd_data[,wd_col]
+      }
+      #Calculate the cumulative routing and set on object
+      out <- super$calc_cumulative(route_col_name, out_col_name = cum_route_col_name)
+      
+      return(out)
     }
     
   ) # End public list
