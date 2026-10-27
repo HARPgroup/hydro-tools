@@ -347,8 +347,26 @@ WaterGageStats <- R6::R6Class(
       }else if(inherits(self$data_source, "data.frame")){
         ## data.frame ####
         gage_data <- self$gage_data
+        self$statistic_type <- agg_type
+        
+        #Decide how to calculate the aggregate column
+        format_date <- list(doy = "%j", month = "%m", year = "%Y")[[self$statistic_type]]
+        
+        #Set aggregate column using julian day, month, or year
+        if(format_date == "%j"){
+          #Correct julian day for leap years:
+          gage_data[,self$statistic_type] <- as.numeric(
+            format(
+              as.Date(format(gage_data[,self$date_col],"2004-%m-%d")),
+              format_date)
+          )
+        }else{
+          gage_data[,self$statistic_type] <- as.numeric(format(gage_data[,self$date_col], format_date))
+        }
+        
         #Unique aggregate values
         agg_over <- unique(gage_data[,self$statistic_type])
+        
         
         ## percentile_funcs ####
         #Percentile calculations
@@ -409,9 +427,8 @@ WaterGageStats <- R6::R6Class(
         #Format the input dates as values
         format_date <- as.numeric(format(dateIn, format_date))
       }
-      
       #Find the relevant ecdf or approx function
-      out_func <- self$percentile_funcs[[ paste0("percentile_", format_date) ]]
+      out_func <- self$percentile_funcs[ paste0("percentile_", format_date) ]
       
       if(is.null(out_func)){
         out <- NULL
@@ -419,7 +436,12 @@ WaterGageStats <- R6::R6Class(
         possible there is no gage data for this period?")
       }else{
         #Output the value
-        out <- out_func(valueIn)
+        out <- mapply(
+          f = out_func,
+          x = valueIn,
+          USE.NAMES = FALSE,
+          FUN = function(f,x) f(x)
+        )
       }
       
       return(out)
