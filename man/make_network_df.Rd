@@ -4,12 +4,7 @@
 \alias{make_network_df}
 \title{make_network_df}
 \usage{
-make_network_df(
-  entity_df,
-  entity_type = "wd",
-  consumption_df = NULL,
-  baseline_factor = NULL
-)
+make_network_df(entity_df, entity_type = "wd", consumption_df = NULL)
 }
 \arguments{
 \item{entity_df}{data.frame, contains info derived from
@@ -20,9 +15,6 @@ data frame type which determines processing}
 
 \item{consumption_df}{data.frame. Contains consumtpion factors from
 \code{nhdPlusRouting$get_intake_wshd_dfs} for entity_type "ps" only}
-
-\item{baseline_factor}{Integer. The amount of baseline flow to use in
-scenariosused for entity_type "nhdplus" only}
 }
 \value{
 a processed data frame

@@ -372,14 +372,18 @@ nhdPlusRouting <- R6::R6Class(
         )
       )
     },
-    #'@description Create a column that sums baseline flow, withdrawals, and
+    #'@description Create a field that sums baseline flow, withdrawals, and
     #'  discharges and routes the values through the network
-    #'@param nhd_baseline_col
-    #'@param wd_col
-    #'@param ps_col
-    #'@param consumption_col
-    #'@param route_col_name
-    #'@param cum_route_col_name
+    #'@param nhd_baseline_col The field in nhd_df that contains the baseline
+    #'  metric to be used to represent nhdplus catchments
+    #'@param wd_col The field in nhd_df that contains the withdrawals
+    #'  (typically negative) to represent intakes and water demand
+    #'@param ps_col The field in nhd_df that contains the point sources to
+    #'  represent discharges and return flows. This field is priorized over
+    #'  consumption_col if both are provided
+    #'@param route_col_name The field to create in nhd_df to represent the sum
+    #'@param cum_route_col_name The field to create in nhd_df to represent the
+    #'  cumulative sum of this analysis
     #'@return a data.frame containing cum_route_col_name that contains the
     #'  cumulative values of the aggregate route_col_name across the network.
     #'  Values updated to object on network and nhd_df/nhd_sf
@@ -387,29 +391,41 @@ nhdPlusRouting <- R6::R6Class(
       nhd_baseline_col = "nhd_Qbaseline",
       wd_col = "fiveyr_avg_mgd",
       ps_col = NULL,
-      consumption_col = NULL,
       route_col_name = "nhd_routing",
       cum_route_col_name = "cumulative_routing"
     ){
       #Base data
       nhd_data <- self$nhd_df
       
-      if(!all(c(nhd_baseline_col, wd_col, ps_col, consumption_col) %in% names(nhd_data))){
+      if(!all(c(nhd_baseline_col, wd_col, ps_col) %in% names(nhd_data))){
         stop("One of the selected columns is not present in nhd_df, please check
              inputs")
       }
       
       #Depending on user inputs, either add point sources or calculate them as a
       #fraction of withdrawal
-      if(is.null(ps_col)){
-        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + nhd_data[,ps_col] - nhd_data[,wd_col]
-      }else if(is.null(consumption_col)){
-        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + (nhd_data[,consumption_col] * nhd_data[,wd_col])
+      if(!is.null(ps_col)){
+        nhd_data[,route_col_name] <- rowSums(
+          na.rm = TRUE,
+          cbind( 
+            nhd_data[,nhd_baseline_col],
+            nhd_data[,ps_col],
+            nhd_data[,wd_col]
+          )
+        )
       }else{
-        nhd_data[,route_col_name] <- nhd_data[,nhd_baseline_col] + nhd_data[,wd_col]
+        nhd_data[,route_col_name] <- rowSums(
+          na.rm = TRUE,
+          cbind( 
+            nhd_data[,nhd_baseline_col],
+            nhd_data[,wd_col]
+          )
+        )
       }
+      self$nhd_df <- nhd_data
+      self$create_network(fill_network = FALSE)
       #Calculate the cumulative routing and set on object
-      out <- super$calc_cumulative(route_col_name, out_col_name = cum_route_col_name)
+      out <- self$calc_cumulative(route_col_name, out_col_name = cum_route_col_name)
       
       return(out)
     }

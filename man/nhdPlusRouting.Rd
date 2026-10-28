@@ -54,6 +54,7 @@ NHDPlus VAA to increase network connectivity}
   \itemize{
     \item \href{#method-nhdPlusRouting-initialize}{\code{nhdPlusRouting$new()}}
     \item \href{#method-nhdPlusRouting-get_intake_wshd_df}{\code{nhdPlusRouting$get_intake_wshd_df()}}
+    \item \href{#method-nhdPlusRouting-calc_routing}{\code{nhdPlusRouting$calc_routing()}}
     \item \href{#method-nhdPlusRouting-clone}{\code{nhdPlusRouting$clone()}}
   }
 }
@@ -149,8 +150,7 @@ capacity, or pre-1989 values
     \preformatted{nhdPlusRouting$get_intake_wshd_df(
   onedrive_location,
   conn_ODS,
-  default_ps_location = 1,
-  baseline_factor = 0.1
+  default_ps_location = 1
 )}
     \if{html}{\out{</div>}}
   }
@@ -162,8 +162,6 @@ that should hold relevant foundation data}
       \item{\code{conn_ODS}}{Pool database connection to the ODS data base.}
       \item{\code{default_ps_location}}{Integer. Default 1 (next downstream segment).
 How many segments downstream should point sources be returned?}
-      \item{\code{baseline_factor}}{Numeric, default 0.1. How much of the baseline
-metric should be included in these scenarios?}
     }
     \if{html}{\out{</div>}}
   }
@@ -174,6 +172,46 @@ and DnHydroseq may be used to navigate the network. nhdplus_df is a
 cleaned up version of the nhd_df field, facility_wd_df is a data frame of
 all withdrawals, facility_ps_df is a dataframe of all point sources based
 on estimated consumption and return location.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-nhdPlusRouting-calc_routing"></a>}}
+\if{latex}{\out{\hypertarget{method-nhdPlusRouting-calc_routing}{}}}
+\subsection{\code{nhdPlusRouting$calc_routing()}}{
+  Create a field that sums baseline flow, withdrawals, and
+discharges and routes the values through the network
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{nhdPlusRouting$calc_routing(
+  nhd_baseline_col = "nhd_Qbaseline",
+  wd_col = "fiveyr_avg_mgd",
+  ps_col = NULL,
+  route_col_name = "nhd_routing",
+  cum_route_col_name = "cumulative_routing"
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{nhd_baseline_col}}{The field in nhd_df that contains the baseline
+metric to be used to represent nhdplus catchments}
+      \item{\code{wd_col}}{The field in nhd_df that contains the withdrawals
+(typically negative) to represent intakes and water demand}
+      \item{\code{ps_col}}{The field in nhd_df that contains the point sources to
+represent discharges and return flows. This field is priorized over
+consumption_col if both are provided}
+      \item{\code{route_col_name}}{The field to create in nhd_df to represent the sum}
+      \item{\code{cum_route_col_name}}{The field to create in nhd_df to represent the
+cumulative sum of this analysis}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a data.frame containing cum_route_col_name that contains the
+cumulative values of the aggregate route_col_name across the network.
+Values updated to object on network and nhd_df/nhd_sf
   }
 }
 
