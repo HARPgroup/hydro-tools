@@ -584,9 +584,15 @@ RomMetricNetwork <- R6::R6Class(
     #'   upstream nodes
     #' @param out_col_name Character. Default "cumulative_sum" and represents
     #'   where output network cumulative sum should be stored.
+    #' @param allow_negative_sum Logical. Default TRUE. Can the cumulative sum
+    #'   be negative? if not, set to 0 and proceed downstream.
     #' @return A data frame of network_data now containing a field named by
     #'   out_col_name for the cumulative sum of the values in value_col
-    calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
+    calc_cumulative = function(
+    value_col, 
+    out_col_name = "cumultive_sum",
+    allow_negative_sum = TRUE
+    ){
       #Store data frame with network data
       network_data <- self$network_data
       
@@ -632,6 +638,10 @@ RomMetricNetwork <- R6::R6Class(
               #src_id, its a headwater and can be completed now
               if(identical(thisBasin$upstream_nodes[[k]],thisBasin[k,self$src_node_col])){
                 thisBasin[k,out_col_name] <- thisBasin[k,value_col]
+                #Don't allow a negative sum if user requests:
+                if(!allow_negative_sum && thisBasin[k,out_col_name] < 0){
+                  thisBasin[k,out_col_name] <- 0
+                }
                 thisBasin$calculations_completed[k] <- TRUE
               }else if(
                 all(
@@ -644,6 +654,11 @@ RomMetricNetwork <- R6::R6Class(
                 #upstream_nodes has either been mark completed already or is
                 #this segment
                 thisBasin[k,out_col_name] <- sum(thisBasin[thisBasin[,self$src_node_col] %in% thisBasin$upstream_nodes[[k]], value_col], na.rm = TRUE)
+                #Don't allow a negative sum if user requests:
+                if(!allow_negative_sum && thisBasin[k,out_col_name] < 0){
+                  thisBasin[k,out_col_name] <- 0
+                }
+                
                 thisBasin$calculations_completed[k] <- TRUE
               }
             }

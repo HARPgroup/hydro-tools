@@ -372,7 +372,11 @@ dest_node) in direction
 upstream nodes of each node (defined by \code{get_node_relation()})
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{RomMetricNetwork$calc_cumulative(value_col, out_col_name = "cumultive_sum")}
+    \preformatted{RomMetricNetwork$calc_cumulative(
+  value_col,
+  out_col_name = "cumultive_sum",
+  allow_negative_sum = TRUE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -382,6 +386,8 @@ upstream nodes of each node (defined by \code{get_node_relation()})
 upstream nodes}
       \item{\code{out_col_name}}{Character. Default "cumulative_sum" and represents
 where output network cumulative sum should be stored.}
+      \item{\code{allow_negative_sum}}{Logical. Default TRUE. Can the cumulative sum
+be negative? if not, set to 0 and proceed downstream.}
     }
     \if{html}{\out{</div>}}
   }

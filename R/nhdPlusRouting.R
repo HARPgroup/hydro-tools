@@ -41,7 +41,66 @@
 #' @return R6 Object of class nhdPlusRouting
 #' @export nhdPlusRouting
 #' @examples \dontrun{
-
+#'   library(hydrotools)
+#'   basepath <- '/var/www/R'
+#'   source(paste0(basepath,'/config.R'))
+#'   
+#'   #ods connect 
+#'   conn_DBI <- DEQmethods::databaseConnect("PROD")
+#'   
+#'   #Shenandoah Basin
+#'   rseg_outlet <- RomFeature$new(ds, config = list(hydroid = 68117), TRUE)
+#'   
+#'   #All NHDPlus in the Shenandoah basin
+#'   shen_nhd <- nhdPlusRouting$new(ds = ds, 
+#'      src_feature = rseg_outlet,
+#'      baseline_method = "riverseg",
+#'      baseline_metric = "l90_Qout",
+#'      baseline_runid = 1000,
+#'      find_rseg_upstream = TRUE,
+#'      maximum_divergence = 2)
+#'   
+#'   #Get intakes wds and ps
+#'   all_dfs <- shen_nhd$get_intake_wshd_df(
+#'      onedrive_location = onedrive_location,
+#'      default_ps_location = 1,
+#'      conn_ODS = conn_DBI)
+#'      
+#'   #Manually set a few PS to be realistic
+#'   #City of Winchester Percy D Miller plant sends water to Opequon Creek
+#'   nextID <- max(as.numeric(all_dfs$full_network_df$Hydroseq), na.rm = TRUE) + 1
+#'   all_dfs$full_network_df$DnHydroseq[all_dfs$full_network_df$hydroid == 59773 & all_dfs$full_network_df$object_class == "facility_ps"] <- nextID
+#'   #Frederick County Sanitation Authority - Utility Cr sends water to Opequon Creek
+#'   all_dfs$full_network_df$DnHydroseq[all_dfs$full_network_df$hydroid == 60602 & all_dfs$full_network_df$object_class == "facility_ps"] <- nextID
+#'   
+#'   #All data:
+#'   full_network_df <- all_dfs$full_network_df
+#'   
+#'   #Set up a scenario wd column:
+#'   full_network_df$wd_intake <- full_network_df$intake_capacity
+#'   full_network_df$wd_intake[is.na(full_network_df$wd_intake)] <- full_network_df$fiveyr_avg_mgd[is.na(full_network_df$wd_intake)]
+#'   full_network_df$wd_intake <- full_network_df$wd_intake * 1000000*231/12/12/12/86400
+#'   #Equivalent PS column
+#'   full_network_df$ps_intake <- full_network_df$wd_intake * (1 - full_network_df$consumption_frac)
+#'   
+#'   #Ensure no duplicate withdrawals and that withdrawals are subtracted
+#'   full_network_df$wd_intake <- -1  * full_network_df$wd_intake
+#'   full_network_df$wd_intake[full_network_df$object_class != "facility_wd"] <- NA
+#'   
+#'   #Set a percentage of baseline flow to serve as available flow
+#'   full_network_df$qavail_baseline <- 0.1 * full_network_df$nhd_Qbaseline
+#'   
+#'   #Update all network object fields
+#'   shen_nhd$create_network(full_network_df, fill_network = FALSE)
+#'   
+#'   shen_avail <- shen_nhd$calc_routing(
+  #'   nhd_baseline_col = "qavail_baseline",
+  #'   wd_col = "wd_intake",
+  #'   ps_col = "ps_intake",
+  #'   route_col_name = "nhd_routing",
+  #'   cum_route_col_name = "cumulative_routing"
+#'   )
+#'   shen_nhd$render_leaflet(value_col = "cumulative_routing")
 #' }
 nhdPlusRouting <- R6::R6Class(
   "nhdPlusRouting",
@@ -384,6 +443,8 @@ nhdPlusRouting <- R6::R6Class(
     #'@param route_col_name The field to create in nhd_df to represent the sum
     #'@param cum_route_col_name The field to create in nhd_df to represent the
     #'  cumulative sum of this analysis
+    #' @param allow_negative_sum Logical. Default TRUE. Can the cumulative sum
+    #'   be negative? if not, set to 0 and proceed downstream.
     #'@return a data.frame containing cum_route_col_name that contains the
     #'  cumulative values of the aggregate route_col_name across the network.
     #'  Values updated to object on network and nhd_df/nhd_sf
@@ -392,7 +453,8 @@ nhdPlusRouting <- R6::R6Class(
       wd_col = "fiveyr_avg_mgd",
       ps_col = NULL,
       route_col_name = "nhd_routing",
-      cum_route_col_name = "cumulative_routing"
+      cum_route_col_name = "cumulative_routing",
+      allow_negative_sum = TRUE
     ){
       #Base data
       nhd_data <- self$nhd_df
@@ -425,7 +487,8 @@ nhdPlusRouting <- R6::R6Class(
       self$nhd_df <- nhd_data
       self$create_network(fill_network = FALSE)
       #Calculate the cumulative routing and set on object
-      out <- self$calc_cumulative(route_col_name, out_col_name = cum_route_col_name)
+      out <- self$calc_cumulative(route_col_name, out_col_name = cum_route_col_name,
+                                  allow_negative_sum = allow_negative_sum)
       
       return(out)
     }

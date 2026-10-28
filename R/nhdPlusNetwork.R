@@ -458,13 +458,20 @@ nhdPlusNetwork <- R6::R6Class(
     #' @return A data frame of network_data now containing a field named by
     #'   out_col_name for the cumulative sum of the values in value_col. Also
     #'   updates nhd_df and nhd_sf on this object.
+    #' @param allow_negative_sum Logical. Default TRUE. Can the cumulative sum
+    #'   be negative? if not, set to 0 and proceed downstream.
     #' @seealso [RomMetricNetwork()]
-    calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
+    calc_cumulative = function(
+    value_col, 
+    out_col_name = "cumultive_sum",
+    allow_negative_sum = TRUE
+    ){
       if(!inherits(self$network, "RomMetricNetwork")){
         self$create_network(nhd_df = self$nhd_df)
       }
       out <- self$network$calc_cumulative(value_col = value_col,
-                                          out_col_name = out_col_name)
+                                          out_col_name = out_col_name,
+                                          allow_negative_sum = allow_negative_sum)
       
       # SF version ####
       #Remove NA geometries that may be introduced in the point initialization

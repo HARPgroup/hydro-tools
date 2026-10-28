@@ -5,6 +5,39 @@ source(paste0(basepath,'/config.R'))
 #Load an arbitrary gage
 gage_obj <- hydrotools::WaterGageDaily$new(gage_id = "01672500", ds_in = ds)
 
+gage_obj$calculate_value_percentile(84,"2000-12-01","doy","continuous")
+gage_obj$calculate_value_percentile(gage_obj$gage_data$value,
+                                    gage_obj$gage_data$time,
+                                    "month","continuous")
+gage_obj$calculate_value_percentile(84,"2000-12-01","year","continuous")
+
+
+gage_obj$calculate_value_percentile(84,"2000-12-01","doy","interpolate_USGS")
+
+View(gage_obj$stats_obj$gage_data)
+
+
+
+gage_obj$calculate_value_percentile(190,"2000-12-01","month","interpolate_USGS")
+
+
+
+gage_obj$calculate_value_percentile(90,"2000-12-01","doy","interpolate_USGS")
+gage_obj$calculate_value_percentile(84,"2000-12-01","month","continuous")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #Test USGS data retrieval
 test1 <- WaterGageStats$new(gage_id = gage_obj$gage_id,
