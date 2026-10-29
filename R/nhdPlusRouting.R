@@ -420,6 +420,18 @@ nhdPlusRouting <- R6::R6Class(
       #Clean-up
       facility_ps_df$NextDnHydroseq <- NULL
       
+      #Warn user if the ps data.frame is not of the same length as the wd
+      #data.frame This may occur when there are multiple models for a given
+      #facility with the same riversegment
+      if(nrow(facility_ps_df) != nrow(facility_wd_df)){
+        warning("The point source data frame is larger than the withdrawal
+        data frame. This is likely an error and may indicate one facility
+        matched to multiple models (via a join using riversegment and
+        hydroid). This can only occur when there are multiple models with the
+        same riverseg property for a given facility. Check data.frame for
+        unwanted duplicates.")
+      }
+      
       #Return all data frames, and the rbind of the three to return a full
       #network ready for routing
       return(
