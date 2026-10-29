@@ -381,9 +381,11 @@ nhdPlusRouting <- R6::R6Class(
       
       ## Intakes ####
       #Find intakes within the NF Shenandoah
-      all_intakes <- sf::st_join(self$nhd_sf, 
-                                found_sf,
-                                left = FALSE)
+      all_intakes <- sf::st_join(
+        found_sf,
+        self$nhd_sf, 
+        left = FALSE
+      )
       
       ### WD Return DF ####
       facility_wd_df <- make_network_df(entity_df = all_intakes,
@@ -439,7 +441,8 @@ nhdPlusRouting <- R6::R6Class(
           full_network_df = rbind(nhdplus_df, facility_wd_df, facility_ps_df),
           nhdplus_df = nhdplus_df,
           facility_wd_df = facility_wd_df,
-          facility_ps_df = facility_ps_df
+          facility_ps_df = facility_ps_df,
+          intakes_sf = all_intakes
         )
       )
     },

@@ -651,19 +651,20 @@ RomMetricNetwork <- R6::R6Class(
         #Find upstream neighbord
         parents <- igraph::neighbors(g, v, mode = "in")
         #If segments are upstream, sum them:
+        cumulative_sum <-  cumval[v_name]
         if (length(parents) > 0) {
           parent_names <- igraph::as_ids(parents)
           #Sum of upstream flow
           parent_sum <- sum(cumval[match(parents, names(cumval))], na.rm = TRUE)
           #Cumulative sum for this node
-          cumulative_sum <- sum(c(parent_sum, cumval[v_name]), na.rm = TRUE)
-          #Don't allow a negative sum if user requests
-          if(!allow_negative_sum && cumulative_sum < 0){
-            cumulative_sum <- 0
-          }
-          #Store value
-          cumval[v_name] <- cumulative_sum
+          cumulative_sum <- sum(c(parent_sum, cumulative_sum), na.rm = TRUE)
         }
+        #Don't allow a negative sum if user requests
+        if(!allow_negative_sum && cumulative_sum < 0){
+          cumulative_sum <- 0
+        }
+        #Store value
+        cumval[v_name] <- cumulative_sum
       }
       
       #Store results on network_data
