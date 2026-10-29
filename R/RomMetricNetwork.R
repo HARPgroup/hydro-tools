@@ -288,10 +288,10 @@ RomMetricNetwork <- R6::R6Class(
         self$network_graph <- igraph::make_graph(edges, directed = TRUE)
         
         #Ensure all nodes have connectivity, otherwise warn user:
-        no_connections <- igraph::degree(g, mode = "all") == 0
+        no_connections <- igraph::degree(self$network_graph, mode = "all") == 0
         if (any(no_connections)) {
           message("Unconnected nodes in network: ",
-                  paste(igraph::V(g)[no_connections], collapse = ", "))
+                  paste(igraph::V(self$network_graph)[no_connections], collapse = ", "))
         }
       }
      
