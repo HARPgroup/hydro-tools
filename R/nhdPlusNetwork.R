@@ -435,7 +435,7 @@ nhdPlusNetwork <- R6::R6Class(
       
       # Network Creation ####
       #Create a subnetwork object
-      nhdplus_network <- hydrotools::RomMetricNetwork$new(
+      nhdplus_network <- RomMetricNetwork$new(
         ds = ds, datasource =  self$nhd_df,
         dest_node_col = "DnHydroseq",
         src_node_col = "Hydroseq",

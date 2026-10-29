@@ -184,7 +184,7 @@ nhdPlusRouting <- R6::R6Class(
                         maximum_divergence = maximum_divergence)
       
       #Create the RomMetricNetwork and fill in artiical VAA Catchments
-      super$create_network(nhd_df = self$nhd_df)
+      self$create_network(nhd_df = self$nhd_df)
       
       #Calculate baseline metric
       if(baseline_method == "riverseg"){
@@ -347,7 +347,7 @@ nhdPlusRouting <- R6::R6Class(
       }
       
       # Set updated dfs and network on self ####
-      super$create_network(nhd_df = nhd_feat)
+      self$create_network(nhd_df = nhd_feat, fill_network = FALSE)
     },
     #' @description Run a spatial intersection of the nhdplus watersheds
     #'   initialized on object with all active intakes. Return data frames of
