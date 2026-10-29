@@ -498,8 +498,10 @@ nhdPlusRouting <- R6::R6Class(
       }
       self$nhd_df <- nhd_data
       self$create_network(fill_network = FALSE)
+      
       #Calculate the cumulative routing and set on object
-      out <- self$calc_cumulative(route_col_name, out_col_name = cum_route_col_name,
+      out <- self$calc_cumulative(value_col = route_col_name,
+                                  out_col_name = cum_route_col_name,
                                   allow_negative_sum = allow_negative_sum)
       
       return(out)

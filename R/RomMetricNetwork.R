@@ -595,6 +595,8 @@ RomMetricNetwork <- R6::R6Class(
     ){
       #Store data frame with network data
       network_data <- self$network_data
+      #Local copy of igraph
+      g <- self$network_graph
       
       if(!value_col %in% names(network_data)){
         stop("No field of ",value_col," found in network_data data.frame.
@@ -602,78 +604,50 @@ RomMetricNetwork <- R6::R6Class(
       }
       #Create columns for a cumulative allocation and a new WA (in mgd)
       network_data[,out_col_name] <- 0
-      
       # Find the upstream segments for each nod in network_data. Store as a list
-      # col on network_data
+      # col on network_data. Included for QC purposes.
       network_data$upstream_nodes <- self$get_node_relation()
-      #Create a column that indicates if a node is completed
-      network_data$calculations_completed <- FALSE
-      it <- 0
-      #Run a loop on each node that checks to see if that watershed has been
-      #mark completed and, if not, iterates through it's upstream nodes
-      #beginning at the top and moving downstream. This nested while loop within
-      #the broader for loop allows network_data to be completely disorganized
-      #and the network math will still be correct.
-      for (j in 1:nrow(network_data)) {
-        if(network_data$calculations_completed[j]){
-          next
-        }else{
-          #If not completed, find just this whole watershed in network_data
-          #incluing upstream segments. In case of non-unique source nodes, we
-          #check that the node is in the upstream nodes and its destination node
-          #is also in upstream nodes OR both the source and destination node are
-          #equal to this row
-          thisBasin <- network_data[(network_data[,self$src_node_col] %in% network_data$upstream_nodes[[j]] &
-                                      network_data[,self$dest_node_col] %in% network_data$upstream_nodes[[j]]) |
-                                      (network_data[,self$src_node_col] == network_data[j,self$src_node_col] &
-                                         network_data[,self$dest_node_col] == network_data[j,self$dest_node_col]),]
-          #While any row in thisBasin is not yet mark completed, run a for
-          #loop that iterates through thisBasin and totals the newAlloation
-          #and adjustedWA when all subwatersheds have been run. This will
-          #first run for headwaters, then the while loop will iterate and the
-          #for loop will effectively only run second order streams and so on
-          while(any(!thisBasin$calculations_completed)){
-            for (k in 1:nrow(thisBasin)) {
-              #if thisBasin$upstream_nodes is only one segment and identical to
-              #src_id, its a headwater and can be completed now
-              if(identical(thisBasin$upstream_nodes[[k]],thisBasin[k,self$src_node_col])){
-                thisBasin[k,out_col_name] <- thisBasin[k,value_col]
-                #Don't allow a negative sum if user requests:
-                if(!allow_negative_sum && thisBasin[k,out_col_name] < 0){
-                  thisBasin[k,out_col_name] <- 0
-                }
-                thisBasin$calculations_completed[k] <- TRUE
-              }else if(
-                all(
-                  thisBasin$calculations_completed[match(thisBasin$upstream_nodes[[k]], thisBasin[,self$src_node_col])] |
-                  thisBasin$upstream_nodes[[k]] == thisBasin[k, self$src_node_col]
-                ) & 
-                !thisBasin$calculations_completed[k]
-              ){
-                #Otherwise, only run a basin if all the segments in
-                #upstream_nodes has either been mark completed already or is
-                #this segment
-                thisBasin[k,out_col_name] <- sum(thisBasin[thisBasin[,self$src_node_col] %in% thisBasin$upstream_nodes[[k]], value_col], na.rm = TRUE)
-                #Don't allow a negative sum if user requests:
-                if(!allow_negative_sum && thisBasin[k,out_col_name] < 0){
-                  thisBasin[k,out_col_name] <- 0
-                }
-                
-                thisBasin$calculations_completed[k] <- TRUE
-              }
-            }
-            #Total number of while loop iterations, for record keeping
-            #purposes but not used
-            it <- it + 1
+      
+      # Get nodes in topological order to make sure all upstream nodes (starting
+      # with headwaters) appear first prior to the first downstream node that
+      # needs them. This allows us to more effectively sort through our network
+      # and proces the data frame from top to bottom to cumulatively sum
+      order <- igraph::topo_sort(g, mode = "out")
+      
+      # Start with zero for all nodes
+      cumval <- setNames(
+        rep(0, igraph::vcount(g)), 
+        igraph::as_ids(V(g))
+      )
+      
+      # Insert starting values for source nodes only
+      cumval[match(network_data[,self$src_node_col], names(cumval))] <- network_data[,value_col]
+      
+      # Process nodes in topological order
+      for (v in order) {
+        #Get index
+        v_name <- igraph::as_ids(igraph::V(g))[v]
+        #Find upstream neighbord
+        parents <- igraph::neighbors(g, v, mode = "in")
+        #If segments are upstream, sum them:
+        if (length(parents) > 0) {
+          parent_names <- igraph::as_ids(parents)
+          #Sum of upstream flow
+          parent_sum <- sum(cumval[match(parents, names(cumval))], na.rm = TRUE)
+          #Cumulative sum for this node
+          cumulative_sum <- sum(c(parent_sum, cumval[v_name]), na.rm = TRUE)
+          #Don't allow a negative sum if user requests
+          if(!allow_negative_sum && cumulative_sum < 0){
+            cumulative_sum <- 0
           }
-          #Find where source and destination match in both data frames
-          data_lookup <- match(paste0(thisBasin[,self$src_node_col], thisBasin[,self$dest_node_col]), paste0(network_data[,self$src_node_col],network_data[,self$dest_node_col]))
-          #Store data in network_data
-          network_data[data_lookup,out_col_name] <- thisBasin[,out_col_name]
-          network_data$calculations_completed[data_lookup] <- thisBasin$calculations_completed
-          
+          #Store value
+          cumval[v_name] <- cumulative_sum
         }
       }
+      
+      #Store results on network_data
+      network_data[,out_col_name] <- cumval[match(network_data[,self$src_node_col], names(cumval))]
+      
       self$network_data <- network_data
       return(network_data)
     },
