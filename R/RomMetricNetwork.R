@@ -287,6 +287,12 @@ RomMetricNetwork <- R6::R6Class(
         #Create the directed graph from igraph
         self$network_graph <- igraph::make_graph(edges, directed = TRUE)
         
+        #Ensure all nodes have connectivity, otherwise warn user:
+        no_connections <- igraph::degree(g, mode = "all") == 0
+        if (any(no_connections)) {
+          message("Unconnected nodes in network: ",
+                  paste(igraph::V(g)[no_connections], collapse = ", "))
+        }
       }
      
     },
@@ -602,6 +608,21 @@ RomMetricNetwork <- R6::R6Class(
         stop("No field of ",value_col," found in network_data data.frame.
           Please check inputs.")
       }
+      #Need a dendritic network, no branches, no diversion. 
+      if(!igraph::is_dag(g)){
+        stop("Network is not dendritic. Perhaps check
+        igraph::cycles(self$network_graph) for potential cycles. This method
+        requires a directred acyclic graph, which means no braiding or
+        significant diversions")
+      }
+      #Double check for downstream branching:
+      deg_out <- igraph::degree(g, mode = "out")
+      branching_nodes <- sum(deg_out > 1)
+      if (branching_nodes > 0) {
+        stop("Downstream branching detected at nodes: ",
+                paste(igraph::V(g)[deg_out > 1], collapse = ", "))
+      }
+      
       #Create columns for a cumulative allocation and a new WA (in mgd)
       network_data[,out_col_name] <- 0
       # Find the upstream segments for each nod in network_data. Store as a list
