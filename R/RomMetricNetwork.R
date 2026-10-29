@@ -638,7 +638,7 @@ RomMetricNetwork <- R6::R6Class(
       # Start with zero for all nodes
       cumval <- setNames(
         rep(0, igraph::vcount(g)), 
-        igraph::as_ids(V(g))
+        igraph::as_ids(igraph::V(g))
       )
       
       # Insert starting values for source nodes only
