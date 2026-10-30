@@ -454,8 +454,8 @@ nhdPlusRouting <- R6::R6Class(
         )
       )
     },
-    #'@description Create a field that sums baseline flow, withdrawals, and
-    #'  discharges and routes the values through the network
+    #'@description Creates field that track local and cumulative baseline flow,
+    #'  withdrawals, and discharges and routes the values through the network
     #'@param nhd_baseline_col The field in nhd_df that contains the baseline
     #'  metric to be used to represent nhdplus catchments
     #'@param wd_col The field in nhd_df that contains the withdrawals
@@ -463,57 +463,230 @@ nhdPlusRouting <- R6::R6Class(
     #'@param ps_col The field in nhd_df that contains the point sources to
     #'  represent discharges and return flows. This field is priorized over
     #'  consumption_col if both are provided
-    #'@param route_col_name The field to create in nhd_df to represent the sum
-    #'@param cum_route_col_name The field to create in nhd_df to represent the
-    #'  cumulative sum of this analysis
-    #' @param allow_negative_sum Logical. Default TRUE. Can the cumulative sum
-    #'   be negative? if not, set to 0 and proceed downstream.
-    #'@return a data.frame containing cum_route_col_name that contains the
-    #'  cumulative values of the aggregate route_col_name across the network.
-    #'  Values updated to object on network and nhd_df/nhd_sf
+    #'@param storage_col Character. The column that contains storage values that
+    #'  may be accessible to local withdrawals at that node depending on user
+    #'  input to use_storage_local_wd. Otherwise, is simply passed through for
+    #'  record keeping.
+    #'@param use_storage_local_wd Logical. Default FALSE. Should storage be used
+    #'  for local withdrawals prior to withdrawal from the nhdplus network?
+    #'@param allow_negative_sum Logical. Default TRUE. Can flow alteration
+    #'  (cumulative flow minus withdrawals and added discharges) be negative? if
+    #'  not, set to 0 and proceed downstream. Adjust point sources for
+    #'  withdrawals in this segment proportionally. e.g. if the local flow is 1
+    #'  cfs, upstream flow is 2 cfs, ps is 0 cfs, and wd is 10 cfs, then raw
+    #'  altered flow is -7 cfs. So, the point source for this withdrawal is
+    #'  reduced by 70%
+    #'@return a data.frame containing the following fields to track local and
+    #'  cumulative withdrawals and flows. Values updated to object on network
+    #'  and nhd_df/nhd_sf:
+    #'  wd_local = Withdrawals at this node (for watersheds, includes all
+    #'  facility nodes connected to it)
+    #'  ps_local = Point Sources at this node (for watersheds, includes all
+    #'  facility nodes connected to it)
+    #'  storage_local = Storage at this node, if provided
+    #'  flow_unaltered_local = Baseline incremental flow
+    #'  flow_altered_local = Incremental flow adjusted for wd + ps
+    #'  wd_cumulative = Cumulative wd throughout this watershed
+    #'  ps_cumulative = Cumulative ps throughout this watershed
+    #'  flow_unaltered_cumulative = Cumulative baseline flow
+    #'  flow_altered_cumulative = Cumulative altered flow, adjusted based on
+    #'  allow_negative_sum
     calc_routing = function(
       nhd_baseline_col = "nhd_Qbaseline",
       wd_col = "fiveyr_avg_mgd",
       ps_col = NULL,
-      route_col_name = "nhd_routing",
-      cum_route_col_name = "cumulative_routing",
-      allow_negative_sum = TRUE
+      storage_col = "nhd_routing",
+      use_storage_local_wd = FALSE,
+      allow_negative_sum = FALSE
     ){
+      #Initialize ####
       #Base data
       nhd_data <- self$nhd_df
+      #Store data frame with network data
+      network_data <-  self$network$network_data
+      #Local copy of igraph
+      g <- self$network$network_graph
+      #Source Node Column
+      src_node_col <- self$network$src_node_col
       
+      # QC ####
       if(!all(c(nhd_baseline_col, wd_col, ps_col) %in% names(nhd_data))){
         stop("One of the selected columns is not present in nhd_df, please check
              inputs")
       }
       
-      #Depending on user inputs, either add point sources or calculate them as a
-      #fraction of withdrawal
-      if(!is.null(ps_col)){
-        nhd_data[,route_col_name] <- rowSums(
-          na.rm = TRUE,
-          cbind( 
-            nhd_data[,nhd_baseline_col],
-            nhd_data[,ps_col],
-            nhd_data[,wd_col]
-          )
-        )
-      }else{
-        nhd_data[,route_col_name] <- rowSums(
-          na.rm = TRUE,
-          cbind( 
-            nhd_data[,nhd_baseline_col],
-            nhd_data[,wd_col]
-          )
-        )
-      }
-      self$nhd_df <- nhd_data
-      self$create_network(fill_network = FALSE)
+      out_cols <- c("wd_local", "ps_local",
+        "storage_local",
+        "flow_unaltered_local", "flow_altered_local",
+        "wd_cumulative", "ps_cumulative",
+        "flow_unaltered_cumulative", "flow_altered_cumulative"
+      )
       
-      #Calculate the cumulative routing and set on object
-      out <- self$calc_cumulative(value_col = route_col_name,
-                                  out_col_name = cum_route_col_name,
-                                  allow_negative_sum = allow_negative_sum)
+      if( any( out_cols %in% names(nhd_data) ) ){
+        message("The following columns were overwritten: ",
+                paste(out_cols[out_cols %in% names(nhd_data)], collapse = ", "))
+      }
+      
+      #Verify network passes QC for a directional acyclic graph
+      qc <- self$network$verify_dendritic_network()
+      if(!qc){
+        stop("Non-dendritic networks are not usable in this method.")
+      }
+      
+      # Topo ####
+      # Get nodes in topological order to make sure all upstream nodes (starting
+      # with headwaters) appear first prior to the first downstream node that
+      # needs them. This allows us to more effectively sort through our network
+      # and proces the data frame from top to bottom to cumulatively sum
+      order <- igraph::topo_sort(g, mode = "out")
+      
+      # init vectors ####
+      # Create vectors that contain the withdrawal, point source, and baseline
+      # flow for each node. We want separate tracking of local (node) and
+      # cumulative
+      node_vals <- setNames(
+        rep(0, igraph::vcount(g)), 
+        igraph::as_ids(igraph::V(g))
+      )
+      #local vectors:
+      wd_local <- node_vals
+      ps_local <- node_vals
+      storage_local <- node_vals
+      flow_unaltered_local <- node_vals
+      flow_altered_local <- node_vals
+      #Cumulative vectors:
+      wd_cumulative <- node_vals
+      ps_cumulative <- node_vals
+      flow_unaltered_cumulative <- node_vals
+      flow_altered_cumulative <- node_vals
+      ## Starting values ####
+      # Insert starting values for relevant local vectors
+      starting_indices <- match(network_data[,src_node_col], names(node_vals))
+      wd_local[starting_indices] <- network_data[,wd_col]
+      ps_local[starting_indices] <- network_data[,ps_col]
+      storage_local[starting_indices] <- network_data[,storage_col]
+      flow_unaltered_local[starting_indices] <- network_data[,nhd_baseline_col]
+      
+      # Loop ####
+      # Process nodes in topological order
+      for (v in order) {
+        #Get index
+        v_name <- igraph::as_ids(igraph::V(g))[v]
+        ## Locals ####
+        #Set local values:
+        wd_local[v_name] <- wd_local[match(v_name, names(wd_local))]
+        ps_local[v_name] <- ps_local[match(v_name, names(ps_local))]
+        storage_local[v_name] <- storage_local[match(v_name, names(storage_local))]
+        flow_unaltered_local[v_name] <- flow_unaltered_local[match(v_name, names(flow_unaltered_local))]
+        
+        #Find upstream neighbord
+        parents <- igraph::neighbors(g, v, mode = "in")
+        
+        #If segments are upstream, sum them:
+        if(length(parents) == 0){
+          ## No parents ####
+          is_nhdplus <- (network_data$object_class[match(v_name, network_data[,src_node_col])] == "nhdplus")
+          wd_cumulative[v_name] <- wd_local[v_name] * !is_nhdplus
+          ps_cumulative[v_name] <- ps_local[v_name] * !is_nhdplus
+          flow_unaltered_cumulative[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
+          flow_altered_local[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
+        }else{
+          ## parents ####
+          parent_names <- igraph::as_ids(parents)
+          parent_df <- network_data[match(parent_names, network_data[,src_node_col]),]
+          
+          ### unaltered flow ####
+          #Sum of upstream unaltered flow
+          parent_sum <- sum(flow_unaltered_cumulative[match(parents, names(flow_unaltered_cumulative))], na.rm = TRUE)
+          flow_unaltered_cumulative[v_name] <- sum(c(parent_sum, flow_unaltered_local[v_name]), na.rm = TRUE)
+          
+          ### wd + ps ####
+          #Update any withdrawals and discharges connected to this segment
+          wd_local[v_name] <- sum(
+            na.rm = TRUE,
+            wd_local[v_name],
+            wd_cumulative[match(parents, names(wd_cumulative))] *
+              (parent_df$object_class != "nhdplus")
+          )
+          ps_local[v_name] <- sum(
+            na.rm = TRUE,
+            ps_local[v_name],
+            ps_cumulative[match(parents, names(ps_cumulative))] *
+              (parent_df$object_class != "nhdplus")
+          )          
+          
+          #Find cumuative withdarawals and discharges by summing the newly
+          #updated local value with the cumulative upstream value on watersheds
+          #only
+          wd_cumulative[v_name] <- sum(
+            na.rm = TRUE,
+            wd_local[v_name],
+            wd_cumulative[match(parents, names(wd_cumulative))] *
+              (parent_df$object_class == "nhdplus")
+          )
+          ps_cumulative[v_name] <- sum(
+            na.rm = TRUE,
+            ps_local[v_name],
+            ps_cumulative[match(parents, names(ps_cumulative))] *
+              (parent_df$object_class == "nhdplus")
+          ) 
+          
+          ### Local Altered Flow ####
+          #Altered flow - Locally, this is incremental flow minus withdrawals,
+          #add in discharges:
+          #Calculate local altered flow
+          flow_altered_local[v_name] <- sum(
+            na.rm = TRUE,
+            flow_unaltered_local[v_name],
+            wd_local[v_name],
+            ps_local[v_name]
+          )
+          if(use_storage_local_wd){
+            flow_altered_local[v_name] <- sum(
+              na.rm = TRUE,
+              storage_local[v_name],
+              flow_altered_local[v_name]
+            )
+          }
+          
+          ### cumulative Altered Flow ####
+          #Sum of upstream altered flow
+          parent_sum <- sum(flow_altered_cumulative[match(parents, names(flow_altered_cumulative))], na.rm = TRUE)
+          flow_altered_cumulative[v_name] <- sum(c(parent_sum, flow_altered_local[v_name]), na.rm = TRUE)
+          
+          #Don't allow a negative sum if user requests
+          if(!allow_negative_sum && flow_altered_cumulative[v_name] < 0){
+            #### Adjust PS ####
+            ps_reduction_ratio <- 1 - (flow_altered_cumulative[v_name] / wd_local[v_name])
+            #Insufficient flow exists to meet withdrawals, modify corresponding
+            #point sources
+            wd_nodes <- parent_df$Hydroseq[parent_df$object_class == "facility_wd"]
+            ps_nodes <- network_data$Hydroseq_numeric[match(gsub("wd_","ps_",wd_nodes), network_data$Hydroseq)]
+            
+            #Reduce point source per demand
+            ps_local[ps_nodes] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
+            
+            #local altered flow capped at 0
+            flow_altered_cumulative[v_name] <- 0
+          }
+        }
+      }
+      
+      # Store values ####
+      #Store results on network_data
+      network_data[,"wd_local"] <- wd_local[match(network_data[,src_node_col], names(wd_local))]
+      network_data[,"ps_local"] <- ps_local[match(network_data[,src_node_col], names(ps_local))]
+      network_data[,"storage_local"] <- storage_local[match(network_data[,src_node_col], names(storage_local))]
+      network_data[,"flow_unaltered_local"] <- flow_unaltered_local[match(network_data[,src_node_col], names(flow_unaltered_local))]
+      network_data[,"flow_altered_local"] <- flow_altered_local[match(network_data[,src_node_col], names(flow_altered_local))]
+      network_data[,"wd_cumulative"] <- wd_cumulative[match(network_data[,src_node_col], names(wd_cumulative))]
+      network_data[,"ps_cumulative"] <- ps_cumulative[match(network_data[,src_node_col], names(ps_cumulative))]
+      network_data[,"flow_unaltered_cumulative"] <- flow_unaltered_cumulative[match(network_data[,src_node_col], names(flow_unaltered_cumulative))]
+      network_data[,"flow_altered_cumulative"] <- flow_altered_cumulative[match(network_data[,src_node_col], names(flow_altered_cumulative))]
+      
+      
+      # Recreate network ####
+      self$create_network(network_data, fill_network = FALSE)
       
       return(out)
     }

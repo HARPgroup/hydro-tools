@@ -101,6 +101,7 @@ in network_data as well as a list-col of upstream nodes from
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="handle_config_item"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-handle_config_item'><code>RomMetricNetwork$handle_config_item()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="render_force_diagram"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-render_force_diagram'><code>RomMetricNetwork$render_force_diagram()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="set_numeric_nodes"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-set_numeric_nodes'><code>RomMetricNetwork$set_numeric_nodes()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="hydrotools" data-topic="RomMetricNetwork" data-id="verify_dendritic_network"><a href='../../hydrotools/html/RomMetricNetwork.html#method-RomMetricNetwork-verify_dendritic_network'><code>RomMetricNetwork$verify_dendritic_network()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

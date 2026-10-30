@@ -584,6 +584,36 @@ RomMetricNetwork <- R6::R6Class(
       return(thisNetwork)
     },
     #' @description
+    #' Check to ensure the network can be reprsented by a directional acyclic
+    #' graph (DAG) (dendritic network) to allow for easy topological sorting and
+    #' accumulation
+    #' @param graph igraph, default self$network_graph. The graph to check for
+    #'   DAG validity
+    #' @return Logical, TRUE inidicates the network is a DAG and FALSE indicates
+    #'   it is not
+    verify_dendritic_network = function(graph = self$network_graph){
+      #Local copy of igraph
+      g <- self$network_graph
+      out <- TRUE
+      #Need a dendritic network, no branches, no diversion. 
+      if(!igraph::is_dag(g)){
+        message("Network is not dendritic. Perhaps check
+        igraph::cycles(self$network_graph) for potential cycles. This method
+        requires a directred acyclic graph, which means no braiding or
+        significant diversions")
+        out <- FALSE
+      }
+      #Double check for downstream branching:
+      deg_out <- igraph::degree(g, mode = "out")
+      branching_nodes <- sum(deg_out > 1)
+      if (branching_nodes > 0) {
+        message("Downstream branching detected at nodes: ",
+             paste(igraph::V(g)[deg_out > 1], collapse = ", "))
+        out <- FALSE
+      }
+      return(out)
+    },
+    #' @description
     #' Calculate the cumulative sum of a value defined by value_col from all
     #' upstream nodes of each node (defined by \code{get_node_relation()})
     #' @param value_col Character. The value in network_data to sum across
@@ -608,26 +638,15 @@ RomMetricNetwork <- R6::R6Class(
         stop("No field of ",value_col," found in network_data data.frame.
           Please check inputs.")
       }
-      #Need a dendritic network, no branches, no diversion. 
-      if(!igraph::is_dag(g)){
-        stop("Network is not dendritic. Perhaps check
-        igraph::cycles(self$network_graph) for potential cycles. This method
-        requires a directred acyclic graph, which means no braiding or
-        significant diversions")
-      }
-      #Double check for downstream branching:
-      deg_out <- igraph::degree(g, mode = "out")
-      branching_nodes <- sum(deg_out > 1)
-      if (branching_nodes > 0) {
-        stop("Downstream branching detected at nodes: ",
-                paste(igraph::V(g)[deg_out > 1], collapse = ", "))
+      #Verify network passes QC for a directional acyclic graph
+      qc <- self$verify_dendritic_network()
+      
+      if(!qc){
+        stop("Non-dendritic networks are not usable in self$calc_cumulative()")
       }
       
       #Create columns for a cumulative allocation and a new WA (in mgd)
       network_data[,out_col_name] <- 0
-      # Find the upstream segments for each nod in network_data. Store as a list
-      # col on network_data. Included for QC purposes.
-      # network_data$upstream_nodes <- self$get_node_relation()
       
       # Get nodes in topological order to make sure all upstream nodes (starting
       # with headwaters) appear first prior to the first downstream node that
