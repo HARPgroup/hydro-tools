@@ -407,17 +407,21 @@ nhdPlusRouting <- R6::R6Class(
       
       ### PS Location ####
       #We can adjust where the point source is returned using the DNHydroseq
-      ds_seg <- self$network_data
-      ds_seg$ds_seg <- self$network$get_node_relation(neighbor_search = TRUE,
-                                              value = "Hydroseq",
-                                              min_dist = default_ps_location,
-                                              max_dist = default_ps_location,
-                                              direction = "downstream")
+      ds_seg <- self$network$network_data
+      ds_seg$ds_seg <- self$network$get_node_relation(
+        neighbor_search = TRUE,
+        value = "Hydroseq",
+        min_dist = default_ps_location,
+        max_dist = default_ps_location,
+        direction = "downstream")
       #Set point sources to return to next nhdplus segment
       facility_ps_df$NextDnHydroseq <- ds_seg$ds_seg[match(facility_ps_df$DnHydroseq, ds_seg$Hydroseq)]
       #Remove list col if only one downstream seg exists for every seg
       if(all(lengths(facility_ps_df$NextDnHydroseq) == 1)){
         facility_ps_df$DnHydroseq <- unlist(facility_ps_df$NextDnHydroseq)
+      }else{
+        warning("Multiple PS locations found for at least one point source")
+        return(NULL)
       }
       #Clean-up
       facility_ps_df$NextDnHydroseq <- NULL

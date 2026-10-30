@@ -19,16 +19,20 @@ process_foundation <- function(onedrive_location, conn_ODS){
             ELSE 'NPNE'
           END as classification,
           sum(mp.GMP_I_INTAKE_CAPACITY) as intake_capacity,
-          sum(mp.GMP_I_PRE_1990_MAX) as pre1989
+          sum(mp.GMP_I_PRE_1990_MAX) as pre1989,
+          perms.Annual_Limit AS Permit_Limit_GPY
         FROM water.Measuring_Point_Vw as mp
+        LEFT JOIN water.Water_Withdrawal_Permits_Vw perms
+          ON perms.Permit_Id = mp.Permit_ID
         WHERE mp.MPS_DESCRIPTION = 'Surface Water'
-        GROUP BY mp.GMP_ID, mp.Gmp_VaHydro_Hydroid, mp.FACILITY_ID, mp.FACILITY_NAME, mp.PERMIT_NO")
+        GROUP BY mp.GMP_ID, mp.Gmp_VaHydro_Hydroid, mp.FACILITY_ID,
+          mp.FACILITY_NAME, mp.PERMIT_NO, perms.Annual_Limit")
   )
   
   foundation_monthly <- sqldf::sqldf(
     "SELECT f.MP_CEDSid, f.MP_Hydroid, f.Source_Type, f.MP_Name, f.facility_hydroid,
          f.Facility, f.facility_status, f.Permit_Classification,pdf.Classification,
-         f.fiveyr_avg_mgy, pdf.intake_capacity, pdf.pre1989,
+         f.fiveyr_avg_mgy, pdf.intake_capacity, pdf.pre1989, pdf.Permit_Limit_GPY,
          CONCAT('POINT (',f.Longitude,' ', f.Latitude,')') as wkt
          FROM found_data as f
          LEFT JOIN permit_classification_df as pdf
@@ -43,14 +47,7 @@ process_foundation <- function(onedrive_location, conn_ODS){
   foundation_monthly <- foundation_monthly |> 
     dplyr::mutate(
       fiveyr_avg_mgd = .data$fiveyr_avg_mgy / 365,
-      wd_intakecap_mgd = dplyr::case_when(
-        classification == "Exempt" & (!is.na(.data$intake_capacity) & .data$intake_capacity > 0) ~ .data$intake_capacity,
-        TRUE ~ fiveyr_avg_mgd
-      ),
-      wd_pre1989_mgd = dplyr::case_when(
-        classification == "Exempt" & (!is.na(.data$pre1989) & .data$pre1989 > 0) ~ (.data$pre1989 / 365),
-        TRUE ~ .data$fiveyr_avg_mgd
-      )
+      permit_limit_mgd = .data$Permit_Limit_GPY / 1000000 / 365
     )
   
   found_sf <- sf::st_as_sf(foundation_monthly, wkt = "wkt", crs = 4326)
@@ -177,7 +174,7 @@ make_network_df <- function(entity_df, entity_type = "wd",
       dplyr::mutate(
         Facility_Status = NA, Permit_Classification = NA,
         consumption_frac = NA,
-        fiveyr_avg_mgd = NA, intake_capacity = NA, pre1989 = NA,
+        fiveyr_avg_mgd = NA, intake_capacity = NA, pre1989 = NA, permit_limit_mgd = NA,
         object_class = "nhdplus"
       )
   }else{
@@ -218,7 +215,7 @@ make_network_df <- function(entity_df, entity_type = "wd",
           "nhd_Qbaseline",
           "Facility_Status", "Permit_Classification",
           "consumption_frac",
-          "fiveyr_avg_mgd", "intake_capacity", "pre1989"
+          "fiveyr_avg_mgd", "intake_capacity", "pre1989", "permit_limit_mgd"
         )
       )
     )

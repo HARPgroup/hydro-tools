@@ -1,22 +1,3 @@
-# Steps for NHDPlus object:
-# Steps for NHDPlus allocations:
-#I. Initialize base object
-#II. Get downscaled metric for each segment (area weighted if rseg)
-#   1. Via rseg incremental flow via user selected metric
-#   2. Via lseg l90_runit or some equivalent user selected metric
-#III. Method to identify intakes in the area from the foundation dataset and to
-#    create data frames of withdrawals and PS returns flows 
-#      -> Should this be its own function? We do this a fair amount, at least the intersection?
-#   1. Needs options to be based on 5 yr avg, intake capacity, pre 89 and PS to
-#   use avg, max, or that from a certain month?
-#IV. Full network compilation to incoporate withdrawals/PS data frames
-#V. Water availability accumulation with options for % of base metric to use
-
-
-
-
-
-
 # nhdPlusNetwork ####
 #' NHDPlus Query + Network Class
 #' @title nhdPlusNetwork

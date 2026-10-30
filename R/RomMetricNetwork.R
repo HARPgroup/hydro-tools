@@ -627,7 +627,7 @@ RomMetricNetwork <- R6::R6Class(
       network_data[,out_col_name] <- 0
       # Find the upstream segments for each nod in network_data. Store as a list
       # col on network_data. Included for QC purposes.
-      network_data$upstream_nodes <- self$get_node_relation()
+      # network_data$upstream_nodes <- self$get_node_relation()
       
       # Get nodes in topological order to make sure all upstream nodes (starting
       # with headwaters) appear first prior to the first downstream node that
@@ -658,10 +658,10 @@ RomMetricNetwork <- R6::R6Class(
           parent_sum <- sum(cumval[match(parents, names(cumval))], na.rm = TRUE)
           #Cumulative sum for this node
           cumulative_sum <- sum(c(parent_sum, cumulative_sum), na.rm = TRUE)
-        }
-        #Don't allow a negative sum if user requests
-        if(!allow_negative_sum && cumulative_sum < 0){
-          cumulative_sum <- 0
+          #Don't allow a negative sum if user requests
+          if(!allow_negative_sum && cumulative_sum < 0){
+            cumulative_sum <- 0
+          }
         }
         #Store value
         cumval[v_name] <- cumulative_sum
