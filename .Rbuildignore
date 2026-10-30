@@ -1,7 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
-^\test_code$
+^test_code$
 ^USGS$
 ^dfiles$
 ^sql$

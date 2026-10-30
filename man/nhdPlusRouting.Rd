@@ -43,29 +43,33 @@ NHDPlus Query + Network + Flow Routing Class
   #Manually set a few PS to be realistic
   #City of Winchester Percy D Miller plant sends water to Opequon Creek
   nextID <- max(as.numeric(all_dfs$full_network_df$Hydroseq), na.rm = TRUE) + 1
-  all_dfs$full_network_df$DnHydroseq[all_dfs$full_network_df$hydroid == 59773 & all_dfs$full_network_df$object_class == "facility_ps"] <- nextID
-  #Frederick County Sanitation Authority - Utility Cr sends water to Opequon Creek
-  all_dfs$full_network_df$DnHydroseq[all_dfs$full_network_df$hydroid == 60602 & all_dfs$full_network_df$object_class == "facility_ps"] <- nextID
   
   #All data:
-  full_network_df <- all_dfs$full_network_df
+  full_net <- all_dfs$full_network_df
+  full_net$DnHydroseq[full_net$hydroid == 59773 &
+   full_net$object_class == "facility_ps"] <- nextID
+  #Frederick County Sanitation Authority - Utility Cr sends water to Opequon Creek
+  full_net$DnHydroseq[full_net$hydroid == 60602 &
+   full_net$object_class == "facility_ps"] <- nextID
+  
   
   #Set up a scenario wd column:
-  full_network_df$wd_intake <- full_network_df$intake_capacity
-  full_network_df$wd_intake[is.na(full_network_df$wd_intake)] <- full_network_df$fiveyr_avg_mgd[is.na(full_network_df$wd_intake)]
-  full_network_df$wd_intake <- full_network_df$wd_intake * 1000000*231/12/12/12/86400
+  full_net$wd_intake <- full_net$intake_capacity
+  full_net$wd_intake[is.na(full_net$wd_intake)] <- 
+  full_net$fiveyr_avg_mgd[is.na(full_net$wd_intake)]
+  full_net$wd_intake <- full_net$wd_intake * 1000000*231/12/12/12/86400
   #Equivalent PS column
-  full_network_df$ps_intake <- full_network_df$wd_intake * (1 - full_network_df$consumption_frac)
+  full_net$ps_intake <- full_net$wd_intake * (1 - full_net$consumption_frac)
   
   #Ensure no duplicate withdrawals and that withdrawals are subtracted
-  full_network_df$wd_intake <- -1  * full_network_df$wd_intake
-  full_network_df$wd_intake[full_network_df$object_class != "facility_wd"] <- NA
+  full_net$wd_intake <- -1  * full_net$wd_intake
+  full_net$wd_intake[full_net$object_class != "facility_wd"] <- NA
   
   #Set a percentage of baseline flow to serve as available flow
-  full_network_df$qavail_baseline <- 0.1 * full_network_df$nhd_Qbaseline
+  full_net$qavail_baseline <- 0.1 * full_net$nhd_Qbaseline
   
   #Update all network object fields
-  shen_nhd$create_network(full_network_df, fill_network = FALSE)
+  shen_nhd$create_network(full_net, fill_network = FALSE)
   
   shen_avail <- shen_nhd$calc_routing(
   nhd_baseline_col = "qavail_baseline",
