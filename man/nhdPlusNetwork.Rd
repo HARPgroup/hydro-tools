@@ -60,8 +60,8 @@ catchments and to create a leaflet to visualize the queries catchments.
  shenandoah_wkt$render_leaflet(value_col = "StreamOrde")
  
  #Or with user provided colors:
- col_vec <- sample(x = colors()[!grepl("gr(e|a)y",colors())],
- size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
+ col_options <- colors()[!grepl("gr(e|a)y",colors())]
+ col_vec <- sample(x = col_options, size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
  col_vec <- rgb(t(col2rgb(col_vec)),maxColorValue = 255)
  shenandoah_wkt$render_leaflet(color_vector = col_vec)
 }
@@ -178,7 +178,7 @@ drainage area that have hydroseq codes referenced by other catchments in
 netowrk.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{nhdPlusNetwork$create_network(nhd_df = self$nhd_df)}
+    \preformatted{nhdPlusNetwork$create_network(nhd_df = self$nhd_df, fill_network = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -187,6 +187,8 @@ netowrk.
       \item{\code{nhd_df}}{A dataframe of NHDPlus containing, at a minimum, hydroid and
 hydrocode of the NHDPlus segments. This dataframe will be converted to a
 \code{RomMetricNetwork} object.}
+      \item{\code{fill_network}}{Logical, default TRUE. Should this method attempt to
+fill network routing via VAA virtual catchments?}
     }
     \if{html}{\out{</div>}}
   }
@@ -205,7 +207,11 @@ upstream nodes of each node (defined by \code{get_node_relation()}).
 Inherited from \code{RomMetricNetwork}
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{nhdPlusNetwork$calc_cumulative(value_col, out_col_name = "cumultive_sum")}
+    \preformatted{nhdPlusNetwork$calc_cumulative(
+  value_col,
+  out_col_name = "cumultive_sum",
+  allow_negative_sum = TRUE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -215,6 +221,8 @@ Inherited from \code{RomMetricNetwork}
 upstream nodes}
       \item{\code{out_col_name}}{Character. Default "cumulative_sum" and represents
 where output network cumulative sum should be stored.}
+      \item{\code{allow_negative_sum}}{Logical. Default TRUE. Can the cumulative sum
+be negative? if not, set to 0 and proceed downstream.}
     }
     \if{html}{\out{</div>}}
   }

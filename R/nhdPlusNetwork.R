@@ -1,22 +1,3 @@
-# Steps for NHDPlus object:
-# Steps for NHDPlus allocations:
-#I. Initialize base object
-#II. Get downscaled metric for each segment (area weighted if rseg)
-#   1. Via rseg incremental flow via user selected metric
-#   2. Via lseg l90_runit or some equivalent user selected metric
-#III. Method to identify intakes in the area from the foundation dataset and to
-#    create data frames of withdrawals and PS returns flows 
-#      -> Should this be its own function? We do this a fair amount, at least the intersection?
-#   1. Needs options to be based on 5 yr avg, intake capacity, pre 89 and PS to
-#   use avg, max, or that from a certain month?
-#IV. Full network compilation to incoporate withdrawals/PS data frames
-#V. Water availability accumulation with options for % of base metric to use
-
-
-
-
-
-
 # nhdPlusNetwork ####
 #' NHDPlus Query + Network Class
 #' @title nhdPlusNetwork
@@ -90,8 +71,8 @@
 #'  shenandoah_wkt$render_leaflet(value_col = "StreamOrde")
 #'  
 #'  #Or with user provided colors:
-#'  col_vec <- sample(x = colors()[!grepl("gr(e|a)y",colors())],
-#'  size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
+#'  col_options <- colors()[!grepl("gr(e|a)y",colors())]
+#'  col_vec <- sample(x = col_options, size = nrow(shenandoah_wkt$nhd_sf), replace = TRUE)
 #'  col_vec <- rgb(t(col2rgb(col_vec)),maxColorValue = 255)
 #'  shenandoah_wkt$render_leaflet(color_vector = col_vec)
 #' }
@@ -351,18 +332,21 @@ nhdPlusNetwork <- R6::R6Class(
     #'@param nhd_df A dataframe of NHDPlus containing, at a minimum, hydroid and
     #'  hydrocode of the NHDPlus segments. This dataframe will be converted to a
     #'  \code{RomMetricNetwork} object.
+    #'@param fill_network Logical, default TRUE. Should this method attempt to
+    #'  fill network routing via VAA virtual catchments?
     #'@return A \code{RomMetricNetwork} object populated by the NHDPlus network
     #'provided by user or initialized in this instance.
-    create_network = function(nhd_df = self$nhd_df){
-      # Missing Catchments ####
-      #Find potentially missing catchments - those with no drainage area that
-      #assist in network connection. We do this by querying for segments below the
-      #diversion threshol that have sequences in the up or down columns but not
-      #in the hydrosequence column itself
-      potential_missing <- DBI::dbGetQuery(
-        self$ds$connection,
-        paste0(
-          "SELECT nhd.hydroid as nhd_hydroid, nhd.hydrocode as nhd_hydrocode
+    create_network = function(nhd_df = self$nhd_df, fill_network = TRUE){
+      if(fill_network){
+        # Missing Catchments ####
+        #Find potentially missing catchments - those with no drainage area that
+        #assist in network connection. We do this by querying for segments below the
+        #diversion threshol that have sequences in the up or down columns but not
+        #in the hydrosequence column itself
+        potential_missing <- DBI::dbGetQuery(
+          self$ds$connection,
+          paste0(
+            "SELECT nhd.hydroid as nhd_hydroid, nhd.hydrocode as nhd_hydrocode
            FROM dh_feature as nhd
            LEFT JOIN dh_properties as hseq
              ON hseq.featureid = nhd.hydroid
@@ -377,61 +361,62 @@ nhdPlusNetwork <- R6::R6Class(
                (hseq.propvalue NOT IN (",paste0(nhd_df$Hydroseq, collapse = ","),")
                  AND
                    (hseq.propvalue IN (",
-                     paste0(nhd_df$DnHydroseq[nhd_df$TotDASqKM != max(nhd_df$TotDASqKM, na.rm = TRUE)],collapse = ","),")
+            paste0(nhd_df$DnHydroseq[nhd_df$TotDASqKM != max(nhd_df$TotDASqKM, na.rm = TRUE)],collapse = ","),")
                     OR hseq.propvalue IN (",
-                    paste0(nhd_df$UpHydroseq,collapse = ","),"))
+            paste0(nhd_df$UpHydroseq,collapse = ","),"))
             )"
+          )
         )
-      )
-      
-      #Get nhdplus properties if any missing segments were identified
-      if(nrow(potential_missing) > 0){
-        ## Missing Hydroids ####
-        missing_nhd_props <- DBI::dbGetQuery(
-          self$ds$connection,
-          paste0(
-            "SELECT f.hydroid,f.hydrocode as nhd_hydrocode, p.propname, p.propvalue 
+        
+        #Get nhdplus properties if any missing segments were identified
+        if(nrow(potential_missing) > 0){
+          ## Missing Hydroids ####
+          missing_nhd_props <- DBI::dbGetQuery(
+            self$ds$connection,
+            paste0(
+              "SELECT f.hydroid,f.hydrocode as nhd_hydrocode, p.propname, p.propvalue 
              FROM dh_feature_fielded as f
              LEFT JOIN dh_properties as p
                ON p.featureid = f.hydroid
              WHERE f.hydroid IN (",
-            paste0(potential_missing$nhd_hydroid,collapse = ","),")"
+              paste0(potential_missing$nhd_hydroid,collapse = ","),")"
+            )
           )
-        )
-        
-        ## Missing Properties ####
-        #Pivot properties wider to have them each in separate columns and
-        #prepare data frame for merging with the rest of the nhd data
-        potential_missing <- missing_nhd_props |> 
-          tidyr::pivot_wider(id_cols = hydroid:nhd_hydrocode,
-                             names_from = propname,
-                             values_from = propvalue) |> 
-          #Create the other fields needed for merge
-          dplyr::mutate(
-            feat_hydroid = NA_integer_,
-            feat_hydrocode = NA_character_,    
-            geometry = NA_character_
-          ) |> 
-          as.data.frame()
-        
-        all_nhd <- rbind(
-         self$nhd_df[,names(self$nhd_df) %in% names(potential_missing)],
-          potential_missing
-        )
-        
-        ## Update fields ####
-        ### SF version ####
-        all_nhd_sf <- sf::st_as_sf(all_nhd[!is.na(all_nhd$geometry),],
-                                   wkt = "geometry", crs = 4326)
-        
-        ### Set on Self ####
-        self$nhd_df <- all_nhd
-        self$nhd_sf <- all_nhd_sf
+          
+          ## Missing Properties ####
+          #Pivot properties wider to have them each in separate columns and
+          #prepare data frame for merging with the rest of the nhd data
+          potential_missing <- missing_nhd_props |> 
+            tidyr::pivot_wider(id_cols = hydroid:nhd_hydrocode,
+                               names_from = propname,
+                               values_from = propvalue) |> 
+            #Create the other fields needed for merge
+            dplyr::mutate(
+              feat_hydroid = NA_integer_,
+              feat_hydrocode = NA_character_,    
+              geometry = NA_character_
+            ) |> 
+            as.data.frame()
+          
+          nhd_df <- rbind(
+            nhd_df[,names(nhd_df) %in% names(potential_missing)],
+            potential_missing
+          )
+        }
       }
+      
+      ## Update fields ####
+      ### SF version ####
+      all_nhd_sf <- sf::st_as_sf(nhd_df[!is.na(nhd_df$geometry),],
+                                 wkt = "geometry", crs = 4326)
+      
+      ### Set on Self ####
+      self$nhd_df <- nhd_df
+      self$nhd_sf <- all_nhd_sf
       
       # Network Creation ####
       #Create a subnetwork object
-      nhdplus_network <- hydrotools::RomMetricNetwork$new(
+      nhdplus_network <- RomMetricNetwork$new(
         ds = ds, datasource =  self$nhd_df,
         dest_node_col = "DnHydroseq",
         src_node_col = "Hydroseq",
@@ -454,13 +439,20 @@ nhdPlusNetwork <- R6::R6Class(
     #' @return A data frame of network_data now containing a field named by
     #'   out_col_name for the cumulative sum of the values in value_col. Also
     #'   updates nhd_df and nhd_sf on this object.
+    #' @param allow_negative_sum Logical. Default TRUE. Can the cumulative sum
+    #'   be negative? if not, set to 0 and proceed downstream.
     #' @seealso [RomMetricNetwork()]
-    calc_cumulative = function(value_col, out_col_name = "cumultive_sum"){
+    calc_cumulative = function(
+    value_col, 
+    out_col_name = "cumultive_sum",
+    allow_negative_sum = TRUE
+    ){
       if(!inherits(self$network, "RomMetricNetwork")){
         self$create_network(nhd_df = self$nhd_df)
       }
       out <- self$network$calc_cumulative(value_col = value_col,
-                                          out_col_name = out_col_name)
+                                          out_col_name = out_col_name,
+                                          allow_negative_sum = allow_negative_sum)
       
       # SF version ####
       #Remove NA geometries that may be introduced in the point initialization

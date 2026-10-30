@@ -41,7 +41,8 @@ Imports:
     rlang,
     ggspatial,
     dataRetrieval,
-    agws
+    agws,
+    tidyselect
 Remotes:
   agws=github::HARPgroup/baseflow_storage
 Suggests:
@@ -79,6 +80,8 @@ Collate:
     'imp_utils.R'
     'model_handlers.R'
     'nhdPlusNetwork.R'
+    'nhdPlusRouting.R'
+    'nhdPlusUtils.R'
     'odbc_utils.R'
     'om_auth_read.R'
     'om_cia_table.R'

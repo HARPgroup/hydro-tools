@@ -109,6 +109,11 @@ Brendan Brogan ([brendan.brogan\@deq.virginia.gov](mailto:brendan.brogan@deq.vir
 This package is in active development.
 
 ## Release notes
+### 1.2.10 10/27/2026
+1. `nhdPlusRouting` R6 object is now exported and allows users to quickly find
+relevant baseline metrics and intakes in a given area to perform basic desktop
+water quantity analysis
+
 ### 1.2.9 10/27/2026
 1. `WaterGageStats` can now calculate daily, monthly, and yearly statistics for
 USGS queries or data.frame data sources and has methods to estimate percentiles.

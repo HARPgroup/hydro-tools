@@ -37,15 +37,20 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-library("dataRetrieval")
-library("zoo")
-library("hydrotools")
-library("flextable")
+library(dataRetrieval)
+library(zoo)
+library(hydrotools)
+library(flextable)
 library(lubridate)
+library(sqldf)
 
 basepath='/var/www/R'
 source('/var/www/R/config.R')
 source("https://raw.githubusercontent.com/HARPgroup/hydro-tools/master/R/fac_utils.R") #Used until fac_utils is packaged
+
+memo_readNWISsite <- memoise::memoise(dataRetrieval::readNWISsite)
+memo_readNWISdv <- memoise::memoise(dataRetrieval::readNWISdv)
+
 
 elid <- params$elid
 runid <- params$runid
