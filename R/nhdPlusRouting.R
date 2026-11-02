@@ -582,6 +582,7 @@ nhdPlusRouting <- R6::R6Class(
         #Find upstream neighbord
         parents <- igraph::neighbors(g, v, mode = "in")
         # if(v_name == 360) {message('360'); browser()}
+        # if(v_name == 1528) {message('1528 r hw'); browser()}
         #If segments are upstream, sum them:
         if(length(parents) == 0){
           ## No parents ####
@@ -590,7 +591,7 @@ nhdPlusRouting <- R6::R6Class(
           ps_cumulative[v_name] <- ps_local[v_name] * !is_nhdplus
           flow_unaltered_cumulative[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
           flow_altered_local[v_name] <- flow_unaltered_cumulative[v_name]
-          flow_unaltered_cumulative[v_name] <- flow_unaltered_cumulative[v_name]
+          flow_altered_cumulative[v_name] <- flow_unaltered_cumulative[v_name]
         }else{
           ## parents ####
           parent_names <- igraph::as_ids(parents)
