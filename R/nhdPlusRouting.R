@@ -581,7 +581,7 @@ nhdPlusRouting <- R6::R6Class(
         
         #Find upstream neighbord
         parents <- igraph::neighbors(g, v, mode = "in")
-        
+        # if(v_name == 360) {message('360'); browser()}
         #If segments are upstream, sum them:
         if(length(parents) == 0){
           ## No parents ####
@@ -589,7 +589,8 @@ nhdPlusRouting <- R6::R6Class(
           wd_cumulative[v_name] <- wd_local[v_name] * !is_nhdplus
           ps_cumulative[v_name] <- ps_local[v_name] * !is_nhdplus
           flow_unaltered_cumulative[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
-          flow_altered_local[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
+          flow_altered_local[v_name] <- flow_unaltered_cumulative[v_name]
+          flow_unaltered_cumulative[v_name] <- flow_unaltered_cumulative[v_name]
         }else{
           ## parents ####
           parent_names <- igraph::as_ids(parents)
@@ -605,17 +606,17 @@ nhdPlusRouting <- R6::R6Class(
           wd_local[v_name] <- sum(
             na.rm = TRUE,
             wd_local[v_name],
-            wd_cumulative[match(parents, names(wd_cumulative))] *
+            wd_local[match(parents, names(wd_local))] *
               (parent_df$object_class != "nhdplus")
           )
           ps_local[v_name] <- sum(
             na.rm = TRUE,
             ps_local[v_name],
-            ps_cumulative[match(parents, names(ps_cumulative))] *
+            ps_local[match(parents, names(ps_local))] *
               (parent_df$object_class != "nhdplus")
           )          
           
-          #Find cumuative withdarawals and discharges by summing the newly
+          #Find cumuative withdrawals and discharges by summing the newly
           #updated local value with the cumulative upstream value on watersheds
           #only
           wd_cumulative[v_name] <- sum(
@@ -653,7 +654,7 @@ nhdPlusRouting <- R6::R6Class(
           #Sum of upstream altered flow
           parent_sum <- sum(flow_altered_cumulative[match(parents, names(flow_altered_cumulative))], na.rm = TRUE)
           flow_altered_cumulative[v_name] <- sum(c(parent_sum, flow_altered_local[v_name]), na.rm = TRUE)
-          
+         
           #Don't allow a negative sum if user requests
           if(!allow_negative_sum && flow_altered_cumulative[v_name] < 0){
             #### Adjust PS ####
@@ -664,7 +665,8 @@ nhdPlusRouting <- R6::R6Class(
             ps_nodes <- network_data$Hydroseq_numeric[match(gsub("wd_","ps_",wd_nodes), network_data$Hydroseq)]
             
             #Reduce point source per demand
-            ps_local[ps_nodes] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
+            ps_local[match(ps_nodes, names(ps_local))] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
+            ps_cumulative[match(ps_nodes, names(ps_cumulative))] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
             
             #local altered flow capped at 0
             flow_altered_cumulative[v_name] <- 0
@@ -688,7 +690,7 @@ nhdPlusRouting <- R6::R6Class(
       # Recreate network ####
       self$create_network(network_data, fill_network = FALSE)
       
-      return(out)
+      return(network_data)
     }
     
   ) # End public list
