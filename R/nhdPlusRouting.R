@@ -554,6 +554,9 @@ nhdPlusRouting <- R6::R6Class(
       storage_local <- node_vals
       flow_unaltered_local <- node_vals
       flow_altered_local <- node_vals
+      us_unaltered_flow <- node_vals
+      us_altered_flow <- node_vals
+      wd_actual <- node_vals
       #Cumulative vectors:
       wd_cumulative <- node_vals
       ps_cumulative <- node_vals
@@ -581,8 +584,8 @@ nhdPlusRouting <- R6::R6Class(
         
         #Find upstream neighbord
         parents <- igraph::neighbors(g, v, mode = "in")
-        # if(v_name == 360) {message('360'); browser()}
-        # if(v_name == 1528) {message('1528 r hw'); browser()}
+        # if(v_name == 281) {message('us'); browser()}
+        # if(v_name == 277) {message('ds'); browser()}
         #If segments are upstream, sum them:
         if(length(parents) == 0){
           ## No parents ####
@@ -592,6 +595,7 @@ nhdPlusRouting <- R6::R6Class(
           flow_unaltered_cumulative[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
           flow_altered_local[v_name] <- flow_unaltered_cumulative[v_name]
           flow_altered_cumulative[v_name] <- flow_unaltered_cumulative[v_name]
+          
         }else{
           ## parents ####
           parent_names <- igraph::as_ids(parents)
@@ -601,6 +605,7 @@ nhdPlusRouting <- R6::R6Class(
           #Sum of upstream unaltered flow
           parent_sum <- sum(flow_unaltered_cumulative[match(parents, names(flow_unaltered_cumulative))], na.rm = TRUE)
           flow_unaltered_cumulative[v_name] <- sum(c(parent_sum, flow_unaltered_local[v_name]), na.rm = TRUE)
+          us_unaltered_flow[v_name] <- parent_sum
           
           ### wd + ps ####
           #Update any withdrawals and discharges connected to this segment
@@ -616,7 +621,9 @@ nhdPlusRouting <- R6::R6Class(
             ps_local[match(parents, names(ps_local))] *
               (parent_df$object_class != "nhdplus")
           )          
-          
+          #Achieved demand (based on available water) defaults to potential
+          #demand and is adjusted later
+          wd_actual[v_name] <- wd_local[v_name]
           #Find cumuative withdrawals and discharges by summing the newly
           #updated local value with the cumulative upstream value on watersheds
           #only
@@ -655,11 +662,12 @@ nhdPlusRouting <- R6::R6Class(
           #Sum of upstream altered flow
           parent_sum <- sum(flow_altered_cumulative[match(parents, names(flow_altered_cumulative))], na.rm = TRUE)
           flow_altered_cumulative[v_name] <- sum(c(parent_sum, flow_altered_local[v_name]), na.rm = TRUE)
-         
+          us_altered_flow[v_name] <- parent_sum
+          
           #Don't allow a negative sum if user requests
           if(!allow_negative_sum && flow_altered_cumulative[v_name] < 0){
             #### Adjust PS ####
-            ps_reduction_ratio <- 1 - (flow_altered_cumulative[v_name] / wd_local[v_name])
+            ps_reduction_ratio <- (flow_altered_cumulative[v_name] / wd_local[v_name])
             #Insufficient flow exists to meet withdrawals, modify corresponding
             #point sources
             wd_nodes <- parent_df$Hydroseq[parent_df$object_class == "facility_wd"]
@@ -669,6 +677,8 @@ nhdPlusRouting <- R6::R6Class(
             ps_local[match(ps_nodes, names(ps_local))] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
             ps_cumulative[match(ps_nodes, names(ps_cumulative))] <- ps_local[match(ps_nodes, names(ps_local))] * ps_reduction_ratio
             
+            #Actual demand based on available water
+            wd_actual[v_name] <- flow_altered_cumulative[v_name]
             #local altered flow capped at 0
             flow_altered_cumulative[v_name] <- 0
           }
@@ -686,7 +696,9 @@ nhdPlusRouting <- R6::R6Class(
       network_data[,"ps_cumulative"] <- ps_cumulative[match(network_data[,src_node_col], names(ps_cumulative))]
       network_data[,"flow_unaltered_cumulative"] <- flow_unaltered_cumulative[match(network_data[,src_node_col], names(flow_unaltered_cumulative))]
       network_data[,"flow_altered_cumulative"] <- flow_altered_cumulative[match(network_data[,src_node_col], names(flow_altered_cumulative))]
-      
+      network_data[,"wd_actual"] <- wd_actual[match(network_data[,src_node_col], names(wd_actual))]
+      network_data[,"us_unaltered_flow"] <- us_unaltered_flow[match(network_data[,src_node_col], names(us_unaltered_flow))]
+      network_data[,"us_altered_flow"] <- us_altered_flow[match(network_data[,src_node_col], names(us_altered_flow))]
       
       # Recreate network ####
       self$create_network(network_data, fill_network = FALSE)
