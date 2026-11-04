@@ -215,15 +215,19 @@ ModelElementBase <- R6Class(
     #'   download from OM server
     #' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
     #'   or as data frame if FALSE. Default is TRUE.
+    #' @param ds datasource for querying model databases
     #' @return timeseries of run file as either data frame or zoo depending on
     #'   user input
-    get_run_data = function(runid, cached = FALSE, hydrowarmup = TRUE, cleanup = FALSE, outaszoo = TRUE) {
+    get_run_data = function(
+      runid, cached = FALSE, hydrowarmup = TRUE, cleanup = FALSE, outaszoo = TRUE,
+      ds = FALSE
+      ) {
       if (!is.na(self$elementid)) {
         self$prop <- RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
       dat <- om_get_rundata(self$elementid, runid, site = self$site,
                            cached = cached, hydrowarmup = hydrowarmup,
-                           cleanup = cleanup,  outaszoo = outaszoo)
+                           cleanup = cleanup,  outaszoo = outaszoo, ds = ds)
       return(dat)
     },
     
