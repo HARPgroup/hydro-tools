@@ -26,11 +26,11 @@
 #' @examples #om_get_rundata(72446, 600, site=omsite)
 om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
                            cached=FALSE, hydrowarmup=TRUE,
-                           cleanup = FALSE,  outaszoo = TRUE) {
+                           cleanup = FALSE,  outaszoo = TRUE, ds = FALSE) {
   # replace this with a single function that grabs
   # a hydro model for summarization and slims it down
   dat <- fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup,
-                        outaszoo = outaszoo)
+                        outaszoo = outaszoo, ds)
   syear = as.integer(min(dat$year))
   eyear = as.integer(max(dat$year))
   if ((hydrowarmup == TRUE) & (syear < (eyear - 2))) {
