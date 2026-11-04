@@ -87,7 +87,7 @@ fn_remove_model_warmup <- function(dat) {
 #' @examples NA
 fn_get_runfile_info <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu"
+  site = "http://deq2.bse.vt.edu", ds = FALSE
 ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -98,16 +98,39 @@ fn_get_runfile_info <- function(
   # may be obsolete
   #setInternet2(TRUE)
   
-  # just get the run file
-  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
-  message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
-  filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
-  message(paste("From ", filename))
-  finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
-  if (inherits(finfo, 'try-error')) { 
-    # what to do if file empty 
-    message(paste("Error: retrieving ", filename))
-    return (FALSE);
+  if (!is.logical(ds)) {
+    finfo = sqldf(
+      fn$paste0(
+        "select remote_path, output_file, fullpath, remote_url,
+         run_date
+         from scen_model_run_elements where elementid = $elementid
+         and runid = $runid
+        "
+      ),
+      connection=fac$ds_om$connection
+    )
+    if (nrow(finfo) >= 1) {
+      finfo = finfo[1,]
+      ru = finfo$remote_url
+      ruext = substr(ru, nchar(ru) - 3, nchar(ru))
+      if (ruext == ".zip") {
+        finfo$compressed <- 1
+      }
+    } else {
+      return(FALSE)
+    }
+  } else {
+    # just get the run file using the old PHP facility
+    urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
+    message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
+    filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
+    message(paste("From ", filename))
+    finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
+    if (inherits(finfo, 'try-error')) { 
+      # what to do if file empty 
+      message(paste("Error: retrieving ", filename))
+      return (FALSE);
+    }
   }
   message("Returning file Info")
   return(finfo);
