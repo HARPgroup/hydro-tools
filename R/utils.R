@@ -81,6 +81,7 @@ fn_remove_model_warmup <- function(dat) {
 #' @param runid integer run id 
 #' @param scenid integer - model domain ID
 #' @param site URL of om server
+#' @param ds datasource for querying model databases
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export fn_get_runfile_info
@@ -150,6 +151,7 @@ fn_get_runfile_info <- function(
 #'   working directory (FALSE)? Note that the cached argument requires these log
 #'   files so setting cleanup to FALSE will prevent caching regardless of cached
 #'   argument
+#' @param ds datasource for querying model databases
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export fn_get_runfile
@@ -158,7 +160,7 @@ fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu", cached = TRUE, 
   outaszoo=TRUE, use_tz=FALSE,
-  cleanup = FALSE
+  cleanup = FALSE, ds = FALSE
   ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -169,7 +171,7 @@ fn_get_runfile <- function(
   # may be obsolete
   #setInternet2(TRUE)
   # just get the run file
-  finfo = fn_get_runfile_info(elementid, runid, scenid, site)
+  finfo = fn_get_runfile_info(elementid, runid, scenid, site, ds)
 
   if (!is.list(finfo)) {
     return(FALSE);
