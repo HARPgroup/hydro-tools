@@ -21,6 +21,7 @@
 #'   download from OM server
 #' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
 #'   or as data frame if FALSE. Default is TRUE.
+#' @param ds datasource for querying model databases
 #' @return data.frame of model results
 #' @export om_get_rundata
 #' @examples #om_get_rundata(72446, 600, site=omsite)
