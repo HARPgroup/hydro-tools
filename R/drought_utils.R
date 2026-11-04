@@ -378,7 +378,8 @@ bf_forecast_start_date <- function(start_date,
   if(is.numeric(adjust_start_date) & length(adjust_start_date) == 1){
     #Identify the lowest flow within the past 30 rows of data and begin forecast
     #from that low point
-    date_range <- seq.Date(as.Date(start_date) - adjust_start_date, start_date)
+    date_range <- seq.Date(as.Date(start_date) - adjust_start_date, start_date,
+                           by = 1)
     gage_date_range <- gage_data[gage_data[,date_col] <= max(date_range) &
                                    gage_data[,date_col] >= min(date_range),]
     if(nrow(gage_date_range) > 0){
