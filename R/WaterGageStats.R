@@ -427,10 +427,11 @@ WaterGageStats <- R6::R6Class(
         #Format the input dates as values
         format_date <- as.numeric(format(dateIn, format_date))
       }
+      
       #Find the relevant ecdf or approx function
       out_func <- self$percentile_funcs[ paste0("percentile_", format_date) ]
       
-      if(is.null(out_func)){
+      if(all(is.null(unlist(out_func)))){
         out <- NULL
         warning("No percentile function found for ",format_date,". Is it
         possible there is no gage data for this period?")

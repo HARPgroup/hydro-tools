@@ -9,7 +9,7 @@ gage_obj$calculate_value_percentile(84,"2000-12-01","doy","continuous")
 gage_obj$calculate_value_percentile(gage_obj$gage_data$value,
                                     gage_obj$gage_data$time,
                                     "month","continuous")
-gage_obj$calculate_value_percentile(84,"2000-12-01","year","continuous")
+gage_obj$calculate_value_percentile(84,"2008-12-01","year","continuous")
 
 
 gage_obj$calculate_value_percentile(84,"2000-12-01","doy","interpolate_USGS")
