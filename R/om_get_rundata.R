@@ -30,7 +30,7 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
                            cleanup = FALSE,  outaszoo = TRUE, ds = FALSE) {
   # replace this with a single function that grabs
   # a hydro model for summarization and slims it down
-  dat <- fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup,
+  dat <- hydrotools::fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup,
                         outaszoo = outaszoo, ds)
   syear = as.integer(min(dat$year))
   eyear = as.integer(max(dat$year))

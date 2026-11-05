@@ -227,7 +227,7 @@ ModelElementBase <- R6Class(
       }
       dat <- om_get_rundata(self$elementid, runid, site = self$site,
                            cached = cached, hydrowarmup = hydrowarmup,
-                           cleanup = cleanup,  outaszoo = outaszoo, ds = ds)
+                           cleanup = cleanup,  outaszoo = outaszoo, ds = self$ds_om)
       return(dat)
     },
     
