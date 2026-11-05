@@ -114,6 +114,7 @@ fn_get_runfile_info <- function(
       finfo = finfo[1,]
       ru = finfo$remote_url
       ruext = substr(ru, nchar(ru) - 3, nchar(ru))
+      finfo$compressed <- 0
       if (ruext == ".zip") {
         finfo$compressed <- 1
       }
