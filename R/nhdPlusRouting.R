@@ -476,28 +476,49 @@ nhdPlusRouting <- R6::R6Class(
     #'  cfs, upstream flow is 2 cfs, ps is 0 cfs, and wd is 10 cfs, then raw
     #'  altered flow is -7 cfs. So, the point source for this withdrawal is
     #'  reduced by 70%
+    #'@param scenario_name Character, defualt ''. A name to prefix output fields
+    #'  with to allow for multiple scenarios
+    #'@param include_all_cols Logical, default TRUE. If TRUE, all fields are
+    #'  included in output. If FALSE, only cumulative fields (cumulative flow
+    #'  and wd/ps) are included in output df
     #'@return a data.frame containing the following fields to track local and
     #'  cumulative withdrawals and flows. Values updated to object on network
     #'  and nhd_df/nhd_sf:
-    #'  wd_local = Withdrawals at this node (for watersheds, includes all
-    #'  facility nodes connected to it)
-    #'  ps_local = Point Sources at this node (for watersheds, includes all
-    #'  facility nodes connected to it)
-    #'  storage_local = Storage at this node, if provided
-    #'  flow_unaltered_local = Baseline incremental flow
-    #'  flow_altered_local = Incremental flow adjusted for wd + ps
-    #'  wd_cumulative = Cumulative wd throughout this watershed
-    #'  ps_cumulative = Cumulative ps throughout this watershed
-    #'  flow_unaltered_cumulative = Cumulative baseline flow
-    #'  flow_altered_cumulative = Cumulative altered flow, adjusted based on
-    #'  allow_negative_sum
+    #'  
+    #'  * us_unaltered_flow = Upstream baseline flow unaltered by withdrawals +
+    #'                        discharges
+    #'  * us_altered_flow = Upstream flow, after accounting for potential
+    #'                      withdrawals and discharges
+    #'  * unmet_wd = The portion of demand (cfs) that could now be met based on
+    #'               flow_altered_cumulative (local flow, upstream flow, and 
+    #'               withdrawals/point sources)
+    #'  * wd_local = Withdrawals at this node in cfs (for watersheds, includes 
+    #'               all facility nodes connected to it)
+    #'  * ps_local = Point Sources at this node in cfs, unadjusted for any
+    #'               potential unmet demand from the withdrawal segment (for 
+    #'               watersheds, includes all facility nodes connected to it)
+    #'  * ps_local_adjust = Point Sources at this node in cfs, now reduced based
+    #'                      on unment demand from the corresponding withdrawal 
+    #'                      if allow_negative_sum is TRUE (for watersheds, 
+    #'                      includes all facility nodes connected to it)
+    #'  * storage_local = Storage at this node in cubic feet
+    #'  * flow_unaltered_local = Baseline incremental flow in cfs
+    #'  * flow_altered_local = Incremental flow in cfs adjusted for wd + ps
+    #'  * wd_cumulative = Cumulative wd throughout this watershed in cfs
+    #'  * ps_cumulative = Cumulative adjusted ps throughout this watershed in cfs
+    #'  * flow_unaltered_cumulative = Cumulative baseline flow in cfs
+    #'  * flow_altered_cumulative = Cumulative altered flow in cfs, adjusted based
+    #'                              on allow_negative_sum
+    #'                              
     calc_routing = function(
       nhd_baseline_col = "nhd_Qbaseline",
       wd_col = "fiveyr_avg_mgd",
       ps_col = NULL,
       storage_col = "nhd_routing",
       use_storage_local_wd = FALSE,
-      allow_negative_sum = FALSE
+      allow_negative_sum = FALSE,
+      scenario_name = "",
+      include_all_cols = TRUE
     ){
       #Initialize ####
       #Base data
@@ -515,11 +536,14 @@ nhdPlusRouting <- R6::R6Class(
              inputs")
       }
       
-      out_cols <- c("wd_local", "ps_local",
-        "storage_local",
-        "flow_unaltered_local", "flow_altered_local",
-        "wd_cumulative", "ps_cumulative",
-        "flow_unaltered_cumulative", "flow_altered_cumulative"
+      out_cols <- paste0(
+        scenario_name,
+        c("wd_local", "ps_local",
+          "storage_local",
+          "flow_unaltered_local", "flow_altered_local",
+          "wd_cumulative", "ps_cumulative",
+          "flow_unaltered_cumulative", "flow_altered_cumulative"
+        )
       )
       
       if( any( out_cols %in% names(nhd_data) ) ){
@@ -556,8 +580,8 @@ nhdPlusRouting <- R6::R6Class(
       flow_altered_local <- node_vals
       us_unaltered_flow <- node_vals
       us_altered_flow <- node_vals
-      wd_actual <- node_vals
-      ps_adjust <- node_vals
+      unmet_wd <- node_vals
+      ps_local_adjust <- node_vals
       #Cumulative vectors:
       wd_cumulative <- node_vals
       ps_cumulative <- node_vals
@@ -572,7 +596,7 @@ nhdPlusRouting <- R6::R6Class(
       flow_unaltered_local[starting_indices] <- network_data[,nhd_baseline_col]
       #Adjusted Point source (based on water avialability) defaults to the
       #intial point source values
-      ps_adjust <- ps_local
+      ps_local_adjust <- ps_local
       # Loop ####
       # Process nodes in topological order
       for (v in order) {
@@ -594,12 +618,12 @@ nhdPlusRouting <- R6::R6Class(
           ## No parents ####
           is_nhdplus <- (network_data$object_class[match(v_name, network_data[,src_node_col])] == "nhdplus")
           wd_cumulative[v_name] <- wd_local[v_name] * !is_nhdplus
-          ps_cumulative[v_name] <- ps_adjust[v_name] * !is_nhdplus
+          ps_cumulative[v_name] <- ps_local_adjust[v_name] * !is_nhdplus
           #No parents indicate this has no local flows
           flow_unaltered_cumulative[v_name] <- flow_unaltered_local[v_name] * is_nhdplus
           flow_altered_local[v_name] <- flow_unaltered_cumulative[v_name]
           flow_altered_cumulative[v_name] <- flow_unaltered_cumulative[v_name]
-          wd_actual[v_name] <- wd_local[v_name]
+          unmet_wd[v_name] <- wd_local[v_name]
         }else{
           ## parents ####
           parent_names <- igraph::as_ids(parents)
@@ -620,10 +644,10 @@ nhdPlusRouting <- R6::R6Class(
               (parent_df$object_class != "nhdplus")
           )
           #Adjusted point source
-          ps_adjust[v_name] <- sum(
+          ps_local_adjust[v_name] <- sum(
             na.rm = TRUE,
-            ps_adjust[v_name],
-            ps_adjust[match(parents, names(ps_adjust))] *
+            ps_local_adjust[v_name],
+            ps_local_adjust[match(parents, names(ps_local_adjust))] *
               (parent_df$object_class != "nhdplus")
           ) 
           #Unadjusted point source
@@ -635,7 +659,7 @@ nhdPlusRouting <- R6::R6Class(
           )         
           #Achieved demand and PS (based on available water) defaults to
           #potential demand and is adjusted later
-          wd_actual[v_name] <- wd_local[v_name]
+          unmet_wd[v_name] <- wd_local[v_name]
           #Find cumuative withdrawals and discharges by summing the newly
           #updated local value with the cumulative upstream value on watersheds
           #only
@@ -647,7 +671,7 @@ nhdPlusRouting <- R6::R6Class(
           )
           ps_cumulative[v_name] <- sum(
             na.rm = TRUE,
-            ps_adjust[v_name],
+            ps_local_adjust[v_name],
             ps_cumulative[match(parents, names(ps_cumulative))] *
               (parent_df$object_class == "nhdplus")
           ) 
@@ -660,8 +684,9 @@ nhdPlusRouting <- R6::R6Class(
             na.rm = TRUE,
             flow_unaltered_local[v_name],
             wd_local[v_name],
-            ps_adjust[v_name]
+            ps_local_adjust[v_name]
           )
+          #### Storage Adjustment ####
           if(use_storage_local_wd){
             flow_altered_local[v_name] <- sum(
               na.rm = TRUE,
@@ -678,19 +703,20 @@ nhdPlusRouting <- R6::R6Class(
           
           #Don't allow a negative sum if user requests
           if(!allow_negative_sum && flow_altered_cumulative[v_name] < 0){
+            # if(v_name == 888) browser()
             #### Adjust PS ####
-            ps_reduction_ratio <- (flow_altered_cumulative[v_name] / wd_local[v_name])
+            ps_reduction_ratio <- 1 - (flow_altered_cumulative[v_name] / wd_local[v_name])
             #Insufficient flow exists to meet withdrawals, modify corresponding
             #point sources
             wd_nodes <- parent_df$Hydroseq[parent_df$object_class == "facility_wd"]
             ps_nodes <- network_data$Hydroseq_numeric[match(gsub("wd_","ps_",wd_nodes), network_data$Hydroseq)]
             
             #Reduce point source per demand
-            ps_adjust[match(ps_nodes, names(ps_adjust))] <- ps_adjust[match(ps_nodes, names(ps_adjust))] * ps_reduction_ratio
-            ps_cumulative[match(ps_nodes, names(ps_cumulative))] <- ps_adjust[match(ps_nodes, names(ps_adjust))] * ps_reduction_ratio
+            ps_local_adjust[match(ps_nodes, names(ps_local_adjust))] <- ps_local_adjust[match(ps_nodes, names(ps_local_adjust))] * ps_reduction_ratio
+            ps_cumulative[match(ps_nodes, names(ps_cumulative))] <- ps_local_adjust[match(ps_nodes, names(ps_local_adjust))] * ps_reduction_ratio
             
             #Actual demand based on available water
-            wd_actual[v_name] <- flow_altered_cumulative[v_name]
+            unmet_wd[v_name] <- flow_altered_cumulative[v_name]
             #local altered flow capped at 0
             flow_altered_cumulative[v_name] <- 0
           }
@@ -699,19 +725,22 @@ nhdPlusRouting <- R6::R6Class(
       
       # Store values ####
       #Store results on network_data
-      network_data[,"wd_local"] <- wd_local[match(network_data[,src_node_col], names(wd_local))]
-      network_data[,"ps_local"] <- ps_local[match(network_data[,src_node_col], names(ps_local))]
-      network_data[,"storage_local"] <- storage_local[match(network_data[,src_node_col], names(storage_local))]
-      network_data[,"flow_unaltered_local"] <- flow_unaltered_local[match(network_data[,src_node_col], names(flow_unaltered_local))]
-      network_data[,"flow_altered_local"] <- flow_altered_local[match(network_data[,src_node_col], names(flow_altered_local))]
-      network_data[,"wd_cumulative"] <- wd_cumulative[match(network_data[,src_node_col], names(wd_cumulative))]
-      network_data[,"ps_cumulative"] <- ps_cumulative[match(network_data[,src_node_col], names(ps_cumulative))]
-      network_data[,"flow_unaltered_cumulative"] <- flow_unaltered_cumulative[match(network_data[,src_node_col], names(flow_unaltered_cumulative))]
-      network_data[,"flow_altered_cumulative"] <- flow_altered_cumulative[match(network_data[,src_node_col], names(flow_altered_cumulative))]
-      network_data[,"wd_actual"] <- wd_actual[match(network_data[,src_node_col], names(wd_actual))]
-      network_data[,"ps_adjust"] <- ps_adjust[match(network_data[,src_node_col], names(ps_adjust))]
-      network_data[,"us_unaltered_flow"] <- us_unaltered_flow[match(network_data[,src_node_col], names(us_unaltered_flow))]
-      network_data[,"us_altered_flow"] <- us_altered_flow[match(network_data[,src_node_col], names(us_altered_flow))]
+      if(include_all_cols){
+        network_data[,paste0(scenario_name,"us_unaltered_flow")] <- us_unaltered_flow[match(network_data[,src_node_col], names(us_unaltered_flow))]
+        network_data[,paste0(scenario_name,"us_altered_flow")] <- us_altered_flow[match(network_data[,src_node_col], names(us_altered_flow))]
+        network_data[,paste0(scenario_name,"flow_unaltered_local")] <- flow_unaltered_local[match(network_data[,src_node_col], names(flow_unaltered_local))]
+        network_data[,paste0(scenario_name,"storage_local")] <- storage_local[match(network_data[,src_node_col], names(storage_local))]
+        network_data[,paste0(scenario_name,"wd_local")] <- wd_local[match(network_data[,src_node_col], names(wd_local))]
+        network_data[,paste0(scenario_name,"ps_local")] <- ps_local[match(network_data[,src_node_col], names(ps_local))]
+        network_data[,paste0(scenario_name,"ps_local_adjust")] <- ps_local_adjust[match(network_data[,src_node_col], names(ps_local_adjust))]
+        network_data[,paste0(scenario_name,"flow_altered_local")] <- flow_altered_local[match(network_data[,src_node_col], names(flow_altered_local))]
+        network_data[,paste0(scenario_name,"unmet_wd")] <- unmet_wd[match(network_data[,src_node_col], names(unmet_wd))]
+      }
+      network_data[,paste0(scenario_name,"wd_cumulative")] <- wd_cumulative[match(network_data[,src_node_col], names(wd_cumulative))]
+      network_data[,paste0(scenario_name,"ps_cumulative")] <- ps_cumulative[match(network_data[,src_node_col], names(ps_cumulative))]
+      network_data[,paste0(scenario_name,"flow_unaltered_cumulative")] <- flow_unaltered_cumulative[match(network_data[,src_node_col], names(flow_unaltered_cumulative))]
+      network_data[,paste0(scenario_name,"flow_altered_cumulative")] <- flow_altered_cumulative[match(network_data[,src_node_col], names(flow_altered_cumulative))]
+      
       
       # Recreate network ####
       self$create_network(network_data, fill_network = FALSE)

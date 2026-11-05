@@ -253,7 +253,9 @@ withdrawals, and discharges and routes the values through the network
   ps_col = NULL,
   storage_col = "nhd_routing",
   use_storage_local_wd = FALSE,
-  allow_negative_sum = FALSE
+  allow_negative_sum = FALSE,
+  scenario_name = "",
+  include_all_cols = TRUE
 )}
     \if{html}{\out{</div>}}
   }
@@ -280,6 +282,11 @@ withdrawals in this segment proportionally. e.g. if the local flow is 1
 cfs, upstream flow is 2 cfs, ps is 0 cfs, and wd is 10 cfs, then raw
 altered flow is -7 cfs. So, the point source for this withdrawal is
 reduced by 70\%}
+      \item{\code{scenario_name}}{Character, defualt ''. A name to prefix output fields
+with to allow for multiple scenarios}
+      \item{\code{include_all_cols}}{Logical, default TRUE. If TRUE, all fields are
+included in output. If FALSE, only cumulative fields (cumulative flow
+and wd/ps) are included in output df}
     }
     \if{html}{\out{</div>}}
   }
@@ -287,18 +294,32 @@ reduced by 70\%}
     a data.frame containing the following fields to track local and
 cumulative withdrawals and flows. Values updated to object on network
 and nhd_df/nhd_sf:
-wd_local = Withdrawals at this node (for watersheds, includes all
-facility nodes connected to it)
-ps_local = Point Sources at this node (for watersheds, includes all
-facility nodes connected to it)
-storage_local = Storage at this node, if provided
-flow_unaltered_local = Baseline incremental flow
-flow_altered_local = Incremental flow adjusted for wd + ps
-wd_cumulative = Cumulative wd throughout this watershed
-ps_cumulative = Cumulative ps throughout this watershed
-flow_unaltered_cumulative = Cumulative baseline flow
-flow_altered_cumulative = Cumulative altered flow, adjusted based on
-allow_negative_sum
+\itemize{
+\item us_unaltered_flow = Upstream baseline flow unaltered by withdrawals +
+discharges
+\item us_altered_flow = Upstream flow, after accounting for potential
+withdrawals and discharges
+\item unmet_wd = The portion of demand (cfs) that could now be met based on
+flow_altered_cumulative (local flow, upstream flow, and
+withdrawals/point sources)
+\item wd_local = Withdrawals at this node in cfs (for watersheds, includes
+all facility nodes connected to it)
+\item ps_local = Point Sources at this node in cfs, unadjusted for any
+potential unmet demand from the withdrawal segment (for
+watersheds, includes all facility nodes connected to it)
+\item ps_local_adjust = Point Sources at this node in cfs, now reduced based
+on unment demand from the corresponding withdrawal
+if allow_negative_sum is TRUE (for watersheds,
+includes all facility nodes connected to it)
+\item storage_local = Storage at this node in cubic feet
+\item flow_unaltered_local = Baseline incremental flow in cfs
+\item flow_altered_local = Incremental flow in cfs adjusted for wd + ps
+\item wd_cumulative = Cumulative wd throughout this watershed in cfs
+\item ps_cumulative = Cumulative adjusted ps throughout this watershed in cfs
+\item flow_unaltered_cumulative = Cumulative baseline flow in cfs
+\item flow_altered_cumulative = Cumulative altered flow in cfs, adjusted based
+on allow_negative_sum
+}
   }
 }
 

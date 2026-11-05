@@ -172,7 +172,7 @@ make_network_df <- function(entity_df, entity_type = "wd",
         )
       ) |> 
       dplyr::mutate(
-        Facility_Status = NA, Permit_Classification = NA,
+        classification = NA,
         consumption_frac = NA,
         fiveyr_avg_mgd = NA, intake_capacity = NA, pre1989 = NA, permit_limit_mgd = NA,
         object_class = "nhdplus"
@@ -213,7 +213,7 @@ make_network_df <- function(entity_df, entity_type = "wd",
           "AreaSqKM", "TotDASqKM", 
           "feat_hydroid", "feat_hydrocode",
           "nhd_Qbaseline",
-          "Facility_Status", "Permit_Classification",
+          "classification",
           "consumption_frac",
           "fiveyr_avg_mgd", "intake_capacity", "pre1989", "permit_limit_mgd"
         )
