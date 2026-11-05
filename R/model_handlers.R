@@ -225,7 +225,7 @@ ModelElementBase <- R6Class(
       if (!is.na(self$elementid)) {
         self$prop <- RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
-      dat <- om_get_rundata(self$elementid, runid, site = self$site,
+      dat <- hydrotools::om_get_rundata(self$elementid, runid, site = self$site,
                            cached = cached, hydrowarmup = hydrowarmup,
                            cleanup = cleanup,  outaszoo = outaszoo, ds = self$ds_om)
       return(dat)
