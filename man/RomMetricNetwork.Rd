@@ -97,6 +97,7 @@ the same name with vertices defined by the source node column}
     \item \href{#method-RomMetricNetwork-set_numeric_nodes}{\code{RomMetricNetwork$set_numeric_nodes()}}
     \item \href{#method-RomMetricNetwork-get_node_relation}{\code{RomMetricNetwork$get_node_relation()}}
     \item \href{#method-RomMetricNetwork-extact_node_network}{\code{RomMetricNetwork$extact_node_network()}}
+    \item \href{#method-RomMetricNetwork-verify_dendritic_network}{\code{RomMetricNetwork$verify_dendritic_network()}}
     \item \href{#method-RomMetricNetwork-calc_cumulative}{\code{RomMetricNetwork$calc_cumulative()}}
     \item \href{#method-RomMetricNetwork-get_spatial_network}{\code{RomMetricNetwork$get_spatial_network()}}
     \item \href{#method-RomMetricNetwork-render_force_diagram}{\code{RomMetricNetwork$render_force_diagram()}}
@@ -361,6 +362,32 @@ to search for related data.}
   \subsection{Returns}{
     A data frame of the extracted node network from src_node (with
 dest_node) in direction
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RomMetricNetwork-verify_dendritic_network"></a>}}
+\if{latex}{\out{\hypertarget{method-RomMetricNetwork-verify_dendritic_network}{}}}
+\subsection{\code{RomMetricNetwork$verify_dendritic_network()}}{
+  Check to ensure the network can be reprsented by a directional acyclic
+graph (DAG) (dendritic network) to allow for easy topological sorting and
+accumulation
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{RomMetricNetwork$verify_dendritic_network(graph = self$network_graph)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{graph}}{igraph, default self$network_graph. The graph to check for
+DAG validity}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Logical, TRUE inidicates the network is a DAG and FALSE indicates
+it is not
   }
 }
 

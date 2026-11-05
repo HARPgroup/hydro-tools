@@ -1,13 +1,13 @@
 Package: hydrotools
 Title: Data processing and accessors for VAHydro
-Version: 1.2.9
+Version: 1.2.10
 Authors@R: person("Robert", "Burgholzer", email = "rburghol@vt.edu", role = c("aut", "cre"))
 Description: Provides set of reference classes and functions to assemble a component based simulation for constructing time-based model simulations.
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 License: GPL
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 Encoding: UTF-8
 Imports: 
     stringr,

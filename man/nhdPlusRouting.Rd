@@ -243,17 +243,19 @@ on estimated consumption and return location.
 \if{html}{\out{<a id="method-nhdPlusRouting-calc_routing"></a>}}
 \if{latex}{\out{\hypertarget{method-nhdPlusRouting-calc_routing}{}}}
 \subsection{\code{nhdPlusRouting$calc_routing()}}{
-  Create a field that sums baseline flow, withdrawals, and
-discharges and routes the values through the network
+  Creates field that track local and cumulative baseline flow,
+withdrawals, and discharges and routes the values through the network
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{nhdPlusRouting$calc_routing(
   nhd_baseline_col = "nhd_Qbaseline",
   wd_col = "fiveyr_avg_mgd",
   ps_col = NULL,
-  route_col_name = "nhd_routing",
-  cum_route_col_name = "cumulative_routing",
-  allow_negative_sum = TRUE
+  storage_col = "nhd_routing",
+  use_storage_local_wd = FALSE,
+  allow_negative_sum = FALSE,
+  scenario_name = "",
+  include_all_cols = TRUE
 )}
     \if{html}{\out{</div>}}
   }
@@ -267,18 +269,57 @@ metric to be used to represent nhdplus catchments}
       \item{\code{ps_col}}{The field in nhd_df that contains the point sources to
 represent discharges and return flows. This field is priorized over
 consumption_col if both are provided}
-      \item{\code{route_col_name}}{The field to create in nhd_df to represent the sum}
-      \item{\code{cum_route_col_name}}{The field to create in nhd_df to represent the
-cumulative sum of this analysis}
-      \item{\code{allow_negative_sum}}{Logical. Default TRUE. Can the cumulative sum
-be negative? if not, set to 0 and proceed downstream.}
+      \item{\code{storage_col}}{Character. The column that contains storage values that
+may be accessible to local withdrawals at that node depending on user
+input to use_storage_local_wd. Otherwise, is simply passed through for
+record keeping.}
+      \item{\code{use_storage_local_wd}}{Logical. Default FALSE. Should storage be used
+for local withdrawals prior to withdrawal from the nhdplus network?}
+      \item{\code{allow_negative_sum}}{Logical. Default TRUE. Can flow alteration
+(cumulative flow minus withdrawals and added discharges) be negative? if
+not, set to 0 and proceed downstream. Adjust point sources for
+withdrawals in this segment proportionally. e.g. if the local flow is 1
+cfs, upstream flow is 2 cfs, ps is 0 cfs, and wd is 10 cfs, then raw
+altered flow is -7 cfs. So, the point source for this withdrawal is
+reduced by 70\%}
+      \item{\code{scenario_name}}{Character, defualt ''. A name to prefix output fields
+with to allow for multiple scenarios}
+      \item{\code{include_all_cols}}{Logical, default TRUE. If TRUE, all fields are
+included in output. If FALSE, only cumulative fields (cumulative flow
+and wd/ps) are included in output df}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a data.frame containing cum_route_col_name that contains the
-cumulative values of the aggregate route_col_name across the network.
-Values updated to object on network and nhd_df/nhd_sf
+    a data.frame containing the following fields to track local and
+cumulative withdrawals and flows. Values updated to object on network
+and nhd_df/nhd_sf:
+\itemize{
+\item us_unaltered_flow = Upstream baseline flow unaltered by withdrawals +
+discharges
+\item us_altered_flow = Upstream flow, after accounting for potential
+withdrawals and discharges
+\item unmet_wd = The portion of demand (cfs) that could now be met based on
+flow_altered_cumulative (local flow, upstream flow, and
+withdrawals/point sources)
+\item wd_local = Withdrawals at this node in cfs (for watersheds, includes
+all facility nodes connected to it)
+\item ps_local = Point Sources at this node in cfs, unadjusted for any
+potential unmet demand from the withdrawal segment (for
+watersheds, includes all facility nodes connected to it)
+\item ps_local_adjust = Point Sources at this node in cfs, now reduced based
+on unment demand from the corresponding withdrawal
+if allow_negative_sum is TRUE (for watersheds,
+includes all facility nodes connected to it)
+\item storage_local = Storage at this node in cubic feet
+\item flow_unaltered_local = Baseline incremental flow in cfs
+\item flow_altered_local = Incremental flow in cfs adjusted for wd + ps
+\item wd_cumulative = Cumulative wd throughout this watershed in cfs
+\item ps_cumulative = Cumulative adjusted ps throughout this watershed in cfs
+\item flow_unaltered_cumulative = Cumulative baseline flow in cfs
+\item flow_altered_cumulative = Cumulative altered flow in cfs, adjusted based
+on allow_negative_sum
+}
   }
 }
 
