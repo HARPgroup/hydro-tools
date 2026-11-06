@@ -7,11 +7,12 @@
 om_get_rundata(
   elid,
   runid,
-  site = "http://deq2.bse.vt.edu",
+  site = "https://deq1.bse.vt.edu:443",
   cached = FALSE,
   hydrowarmup = TRUE,
   cleanup = FALSE,
-  outaszoo = TRUE
+  outaszoo = TRUE,
+  ds_om = FALSE
 )
 }
 \arguments{
@@ -23,11 +24,12 @@ for more information}
 
 \item{site}{URL of OM server, typically established in WSPA config files}
 
-\item{cached}{boolean - if TRUE will use recently stored local copy}
+\item{cached}{Logical. Default FALSE. If TRUE will use recently stored local
+copy}
 
-\item{hydrowarmup}{boolean - if TRUE will trim beginning of model time frame
-to account for potential model warm up as water routes downstream from the
-headwaters and operational rules engage}
+\item{hydrowarmup}{Logical. Default TRUE. If TRUE will trim beginning of
+model time frame to account for potential model warm up as water routes
+downstream from the headwaters and operational rules engage}
 
 \item{cleanup}{Logical. Should the function delete the log file create for
 the cached argument? If this is TRUE, the .log files will be deleted after
@@ -35,6 +37,9 @@ download from OM server}
 
 \item{outaszoo}{boolean return as a zoo timeseries with numeric mode if TRUE,
 or as data frame if FALSE. Default is TRUE.}
+
+\item{ds_om}{Romdatasource. The datasource for querying model databases to
+find runfile information}
 }
 \value{
 data.frame of model results
@@ -52,5 +57,10 @@ that zoo's are matrices and cannot hold more than one data type such that
 character and date fields will be set to NA.
 }
 \examples{
-#om_get_rundata(72446, 600, site=omsite)
+\dontrun{
+#Get data for run 600 for the Town of Amherst
+basepath <- '/var/www/R'
+source(paste0(basepath,'/config.R'))
+om_get_rundata(220355, 600, site = omsite, ds_om = ds_model)
+}
 }

@@ -8,7 +8,8 @@ fn_get_runfile_info(
   elementid = -1,
   runid = -1,
   scenid = 37,
-  site = "http://deq2.bse.vt.edu"
+  site = "http://deq2.bse.vt.edu",
+  ds_om = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ fn_get_runfile_info(
 \item{scenid}{integer - model domain ID}
 
 \item{site}{URL of om server}
+
+\item{ds_om}{datasource for querying model databases}
 }
 \value{
 reference class of type openmi.om.equation

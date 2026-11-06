@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{find_name}
 \alias{find_name}
-\title{Find a name in a nested list. TODO: move to utils.R or in OM (where its used)}
+\title{Find a name in a nested list via recursion}
 \usage{
 find_name(haystack, needle)
 }
 \arguments{
-\item{haystack}{list}
+\item{haystack}{list to search}
 
 \item{needle}{object name to search for}
 }
@@ -15,8 +15,12 @@ find_name(haystack, needle)
 Object found in list
 }
 \description{
-Find a name in a nested list. TODO: move to utils.R or in OM (where its used)
+Find a name in a nested list via recursion
 }
 \examples{
-NA
+\dontrun{
+find_name(
+haystack = list(what = list(does = list(wefind = list(test = 1)))))),
+needle = "test"
+}
 }

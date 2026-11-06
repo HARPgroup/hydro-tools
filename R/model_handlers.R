@@ -178,7 +178,7 @@ ModelElementBase <- R6Class(
     get_model = function() {
       if (is.na(self$pid)) {
         # check for feature and version
-        if (typeof(self$feature)=="environment") {
+        if (inherits(self$feature, "RomFeature")) {
           if (!is.na(self$version)) {
             self$prop = self$feature$get_prop(propcode=self$version)
             self$pid = self$prop$pid

@@ -12,21 +12,24 @@ fn_get_runfile(
   cached = TRUE,
   outaszoo = TRUE,
   use_tz = FALSE,
-  cleanup = FALSE
+  cleanup = FALSE,
+  ds_om = FALSE
 )
 }
 \arguments{
-\item{elementid}{integer OM model element id}
+\item{elementid}{integer. OM model element id}
 
-\item{runid}{integer run id}
+\item{runid}{integer. Run id of the OM model scenario}
 
-\item{scenid}{integer - model domain ID}
+\item{scenid}{integer. Default 37. model domain ID}
 
-\item{site}{URL of om server}
+\item{site}{URL of om server, often as defined in config}
 
-\item{cached}{boolean - use local copy or force refresh}
+\item{cached}{Logical. Default FALSE. If TRUE, check for local files of the
+same name to load rather than querying the datasource or site}
 
-\item{outaszoo}{boolean return as a zoo timeseries if TRUE, or as data frame}
+\item{outaszoo}{Logical. Deafult TRUE. If TRUE, return a zoo timeseries
+object. If FALSE, return a data.frame}
 
 \item{use_tz}{character pass in a custom timezone for zoo}
 
@@ -34,6 +37,9 @@ fn_get_runfile(
 working directory (FALSE)? Note that the cached argument requires these log
 files so setting cleanup to FALSE will prevent caching regardless of cached
 argument}
+
+\item{ds_om}{RomdataSource. The datasource for querying model databases for run
+file info}
 }
 \value{
 reference class of type openmi.om.equation
@@ -41,9 +47,21 @@ reference class of type openmi.om.equation
 \description{
 Retrieve Entire Run Log File from Old OM model
 }
-\examples{
-NA
+\details{
+Get run data for a given model element and run id. If ds_om is
+provided, this function will query the om database to identify the URL of
+the model run log for this run and then download/read the file. Otherwise,
+a php call is made on site to get the server to process the request and
+idenfity/return the relevant run log.
 }
-\seealso{
-NA
+\examples{
+\dontrun{
+#Get data for run 600 for the Town of Amherst
+basepath <- '/var/www/R'
+source(paste0(basepath,'/config.R'))
+rundata_600 <- fn_get_runfile(
+   elementid = 220355, runid = 600, scenid = 37, 
+   site = "https://deq1.bse.vt.edu:443", outaszoo = FALSE,
+    cleanup = TRUE, ds_om = ds_model)
+}
 }

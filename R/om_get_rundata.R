@@ -12,26 +12,35 @@
 #'   for scenario IDs if you are unsure otherwise see the WSPA Shiny Dashboard
 #'   for more information
 #' @param site URL of OM server, typically established in WSPA config files
-#' @param cached boolean - if TRUE will use recently stored local copy
-#' @param hydrowarmup boolean - if TRUE will trim beginning of model time frame
-#'   to account for potential model warm up as water routes downstream from the
-#'   headwaters and operational rules engage
+#' @param cached Logical. Default FALSE. If TRUE will use recently stored local
+#'   copy
+#' @param hydrowarmup Logical. Default TRUE. If TRUE will trim beginning of
+#'   model time frame to account for potential model warm up as water routes
+#'   downstream from the headwaters and operational rules engage
 #' @param cleanup Logical. Should the function delete the log file create for
 #'   the cached argument? If this is TRUE, the .log files will be deleted after
 #'   download from OM server
 #' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
 #'   or as data frame if FALSE. Default is TRUE.
-#' @param ds datasource for querying model databases
+#' @param ds_om Romdatasource. The datasource for querying model databases to
+#'   find runfile information
 #' @return data.frame of model results
 #' @export om_get_rundata
-#' @examples #om_get_rundata(72446, 600, site=omsite)
-om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
+#' @examples \dontrun{
+#' #Get data for run 600 for the Town of Amherst
+#' basepath <- '/var/www/R'
+#' source(paste0(basepath,'/config.R'))
+#' om_get_rundata(220355, 600, site = omsite, ds_om = ds_model)
+#' }
+om_get_rundata <- function(elid, runid, site='https://deq1.bse.vt.edu:443',
                            cached=FALSE, hydrowarmup=TRUE,
                            cleanup = FALSE,  outaszoo = TRUE, ds_om = FALSE) {
   # replace this with a single function that grabs
   # a hydro model for summarization and slims it down
-  dat <- hydrotools::fn_get_runfile(elid, runid, 37, site,  cached = FALSE, cleanup = cleanup,
-                        outaszoo = outaszoo, ds = ds_om)
+  dat <- fn_get_runfile(
+    elid, runid, 37, site,
+    cached = FALSE, cleanup = cleanup,
+    outaszoo = outaszoo, ds_om = ds_om)
   syear = as.integer(min(dat$year))
   eyear = as.integer(max(dat$year))
   if ((hydrowarmup == TRUE) & (syear < (eyear - 2))) {
@@ -60,6 +69,6 @@ om_get_rundata <- function(elid, runid, site='http://deq2.bse.vt.edu',
   }else{
     dat <- dat[dat$timestamp >= sdate & dat$timestamp <= edate,]
   }
-
+  
   return(dat)
 }
