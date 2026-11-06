@@ -31,7 +31,7 @@
 #'   each land-river segment ("lrseg").
 #' @param baseline_metric Character. The model metric to use to derive
 #'   baseline metric. Default "l90_Qout" for baseline_method "riverseg". For
-#'   "lrseg", a useful default is "Runit_l90"
+#'   "lrseg", a useful default is "l90_RUnit"
 #' @param baseline_runid Integer. Default 1000. The model scenario to derive
 #'   the baseline_metric from.
 #' @param maximum_divergence Integer, default 2. The highest divergence
@@ -302,9 +302,9 @@ nhdPlusRouting <- R6::R6Class(
             ,model.pid
             ,runprop.propvalue as runit_baseline
             ,ST_Area(
-              ST_Transform(
-                ST_Intersection(feat.dh_geofield_geom, nhd.dh_geofield_geom),
-                26918
+              ST_Intersection(
+                ST_Transform(feat.dh_geofield_geom, 26918),
+                ST_Transform(nhd.dh_geofield_geom, 26918)
               )
              ) * (10000 / 2.54 / 2.54 /12 /12 / 5280 / 5280) as intersectArea
             ,ST_AsText(feat.dh_geofield) as lseg_wkt
@@ -343,7 +343,6 @@ nhdPlusRouting <- R6::R6Class(
         lrseg_runit <- lrseg_data |> 
           dplyr::group_by(nhd_hydroid) |> 
           dplyr::summarize(nhd_Qbaseline = sum(lrseg_Qbaseline, na.rm = TRUE))
-        
         
         ## nhd_feat ####
         nhd_feat <- self$nhd_df |> 

@@ -10,7 +10,7 @@ reference class of type openmi.om.base.
 Simple class to hold equation-based flow by values
 }
 \details{
-Tiered flowby meta-model object
+Simple flowby meta-model object
 
 Has standard methods for managing data and meta data
 }
