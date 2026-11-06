@@ -178,7 +178,7 @@ ModelElementBase <- R6Class(
     get_model = function() {
       if (is.na(self$pid)) {
         # check for feature and version
-        if (typeof(self$feature)=="environment") {
+        if (inherits(self$feature, "RomFeature")) {
           if (!is.na(self$version)) {
             self$prop = self$feature$get_prop(propcode=self$version)
             self$pid = self$prop$pid
@@ -215,15 +215,19 @@ ModelElementBase <- R6Class(
     #'   download from OM server
     #' @param outaszoo boolean return as a zoo timeseries with numeric mode if TRUE,
     #'   or as data frame if FALSE. Default is TRUE.
+    #' @param ds datasource for querying model databases
     #' @return timeseries of run file as either data frame or zoo depending on
     #'   user input
-    get_run_data = function(runid, cached = FALSE, hydrowarmup = TRUE, cleanup = FALSE, outaszoo = TRUE) {
+    get_run_data = function(
+      runid, cached = FALSE, hydrowarmup = TRUE, cleanup = FALSE, outaszoo = TRUE,
+      ds = FALSE
+      ) {
       if (!is.na(self$elementid)) {
         self$prop <- RomProperty$new(self$ds,list(pid=self$pid), TRUE)
       }
-      dat <- om_get_rundata(self$elementid, runid, site = self$site,
+      dat <- hydrotools::om_get_rundata(self$elementid, runid, site = self$site,
                            cached = cached, hydrowarmup = hydrowarmup,
-                           cleanup = cleanup,  outaszoo = outaszoo)
+                           cleanup = cleanup,  outaszoo = outaszoo, ds = self$ds_om)
       return(dat)
     },
     

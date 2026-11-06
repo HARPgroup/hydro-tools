@@ -1,4 +1,3 @@
-options(timeout=480); # set timeout to twice default level to avoid abort due to high traffic
 #' Retrieve Run summary data from Old OM model
 #'
 #' @param elementid integer OM model element id
@@ -81,13 +80,14 @@ fn_remove_model_warmup <- function(dat) {
 #' @param runid integer run id 
 #' @param scenid integer - model domain ID
 #' @param site URL of om server
+#' @param ds_om datasource for querying model databases
 #' @return reference class of type openmi.om.equation
 #' @seealso NA
 #' @export fn_get_runfile_info
 #' @examples NA
 fn_get_runfile_info <- function(
   elementid = -1, runid = -1, scenid = 37,
-  site = "http://deq2.bse.vt.edu"
+  site = "http://deq2.bse.vt.edu", ds_om = FALSE
 ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -98,16 +98,40 @@ fn_get_runfile_info <- function(
   # may be obsolete
   #setInternet2(TRUE)
   
-  # just get the run file
-  urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
-  message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
-  filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
-  message(paste("From ", filename))
-  finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
-  if (inherits(finfo, 'try-error')) { 
-    # what to do if file empty 
-    message(paste("Error: retrieving ", filename))
-    return (FALSE);
+  if (!is.logical(ds_om)) {
+    finfo <- sqldf::sqldf(
+      fn$paste0(
+        "select remote_path, output_file, fullpath, remote_url,
+         run_date
+         from scen_model_run_elements where elementid = $elementid
+         and runid = $runid
+        "
+      ),
+      connection = ds_om$connection
+    )
+    if (nrow(finfo) >= 1) {
+      finfo <- finfo[1,]
+      ru <- finfo$remote_url
+      ruext <- substr(ru, nchar(ru) - 3, nchar(ru))
+      finfo$compressed <- 0
+      if (ruext == ".zip") {
+        finfo$compressed <- 1
+      }
+    } else {
+      return(FALSE)
+    }
+  } else {
+    # just get the run file using the old PHP facility
+    urlbase<- paste(site, "om/remote/get_modelData.php?operation=11&delimiter=tab&elementid=", sep='/');
+    message(paste("Getting Info for run ", runid, " for element ", elementid))      # creates the whole url by pasting the element and run ids into it
+    filename<-paste(urlbase, elementid, "&runid=", runid, "&startdate=1984-10-01&enddate=2005-09-30", sep = "")
+    message(paste("From ", filename))
+    finfo = try(utils::read.csv(filename, header = TRUE, sep = "\t")) ;
+    if (inherits(finfo, 'try-error')) { 
+      # what to do if file empty 
+      message(paste("Error: retrieving ", filename))
+      return (FALSE);
+    }
   }
   message("Returning file Info")
   return(finfo);
@@ -115,27 +139,42 @@ fn_get_runfile_info <- function(
 }
 
 #' Retrieve Entire Run Log File from Old OM model
-#'
-#' @param elementid integer OM model element id
-#' @param runid integer run id 
-#' @param scenid integer - model domain ID
-#' @param site URL of om server
-#' @param cached boolean - use local copy or force refresh
-#' @param outaszoo boolean return as a zoo timeseries if TRUE, or as data frame
+#' @details Get run data for a given model element and run id. If ds_om is
+#'   provided, this function will query the om database to identify the URL of
+#'   the model run log for this run and then download/read the file. Otherwise,
+#'   a php call is made on site to get the server to process the request and
+#'   idenfity/return the relevant run log.
+#' @param elementid integer. OM model element id
+#' @param runid integer. Run id of the OM model scenario
+#' @param scenid integer. Default 37. model domain ID
+#' @param site URL of om server, often as defined in config
+#' @param cached Logical. Default FALSE. If TRUE, check for local files of the
+#'   same name to load rather than querying the datasource or site
+#' @param outaszoo Logical. Deafult TRUE. If TRUE, return a zoo timeseries
+#'   object. If FALSE, return a data.frame
 #' @param use_tz character pass in a custom timezone for zoo
 #' @param cleanup Logical - Should the log file be deleted (TRUE) or written to
 #'   working directory (FALSE)? Note that the cached argument requires these log
 #'   files so setting cleanup to FALSE will prevent caching regardless of cached
 #'   argument
+#' @param ds_om RomdataSource. The datasource for querying model databases for run
+#'   file info
 #' @return reference class of type openmi.om.equation
-#' @seealso NA
 #' @export fn_get_runfile
-#' @examples NA
+#' @examples \dontrun{
+#' #Get data for run 600 for the Town of Amherst
+#' basepath <- '/var/www/R'
+#' source(paste0(basepath,'/config.R'))
+#' rundata_600 <- fn_get_runfile(
+#'    elementid = 220355, runid = 600, scenid = 37, 
+#'    site = "https://deq1.bse.vt.edu:443", outaszoo = FALSE,
+#'     cleanup = TRUE, ds_om = ds_model)
+#' }
 fn_get_runfile <- function(
   elementid = -1, runid = -1, scenid = 37,
   site = "http://deq2.bse.vt.edu", cached = TRUE, 
   outaszoo=TRUE, use_tz=FALSE,
-  cleanup = FALSE
+  cleanup = FALSE, ds_om = FALSE
   ) {
   if (elementid == -1 ) {
     return(FALSE);
@@ -146,13 +185,14 @@ fn_get_runfile <- function(
   # may be obsolete
   #setInternet2(TRUE)
   # just get the run file
-  finfo = fn_get_runfile_info(elementid, runid, scenid, site)
+  finfo <- fn_get_runfile_info(
+    elementid, runid, scenid, site, ds_om)
 
   if (!is.list(finfo)) {
     return(FALSE);
   }
-  filename = as.character(finfo$remote_url);
-  localname = finfo$output_file
+  filename <- as.character(finfo$remote_url);
+  localname <- finfo$output_file
   
   if (cached & file.exists(localname)) {
     message(paste("Using Local File Storage", localname))
@@ -173,7 +213,7 @@ fn_get_runfile <- function(
     } else {
       # not new, so just use the local copy
       message(paste("Remote file date ", as.Date(finfo$run_date), " <= run date ", as.Date(linfo$mtime), "Using cached copy "));
-      filename = localname
+      filename <- localname
     }
   } else {
     url_parse <- httr::parse_url(filename)
@@ -206,7 +246,7 @@ fn_get_runfile <- function(
       filename <-  utils::unzip ('tempfile');
     }
   }
-  dat = try(utils::read.table( filename, header = TRUE, sep = ",")) 
+  dat <- try(utils::read.table( filename, header = TRUE, sep = ",")) 
   if (is.logical(dat) | inherits(dat, 'try-error')) { 
     # what to do if file empty 
     message(paste("Error: empty file ", filename))
@@ -899,13 +939,16 @@ vahydro_post_metric_to_scenprop <- function(pid, varkey, propcode, propname, pro
   metprop$save(TRUE)
 }
 
-#' Find a name in a nested list. TODO: move to utils.R or in OM (where its used)
-#' 
-#' @param haystack list
+#' Find a name in a nested list via recursion
+#' @param haystack list to search
 #' @param needle object name to search for
 #' @return Object found in list 
 #' @export find_name
-#' @examples NA
+#' @examples \dontrun{
+#' find_name(
+#' haystack = list(what = list(does = list(wefind = list(test = 1)))))),
+#' needle = "test"
+#' }
 find_name <- function(haystack, needle) {
   # this fn came from https://stackoverflow.com/questions/58400176/r-find-object-by-name-in-deeply-nested-list
   if (utils::hasName(haystack, needle)) {

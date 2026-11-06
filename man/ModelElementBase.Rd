@@ -238,7 +238,8 @@ data frame depending on user request
   cached = FALSE,
   hydrowarmup = TRUE,
   cleanup = FALSE,
-  outaszoo = TRUE
+  outaszoo = TRUE,
+  ds = FALSE
 )}
     \if{html}{\out{</div>}}
   }
@@ -257,6 +258,7 @@ the cached argument? If this is TRUE, the .log files will be deleted after
 download from OM server}
       \item{\code{outaszoo}}{boolean return as a zoo timeseries with numeric mode if TRUE,
 or as data frame if FALSE. Default is TRUE.}
+      \item{\code{ds}}{datasource for querying model databases}
     }
     \if{html}{\out{</div>}}
   }
